@@ -12,6 +12,7 @@
 
 #include <algorithm>
 #include <functional>
+#include <numeric>
 
 #include <limits>
 
