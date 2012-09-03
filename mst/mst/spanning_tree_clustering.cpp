@@ -3,6 +3,7 @@
 #include "djset.hpp"
 #include "opts.hpp"
 #include "vector.hpp"
+#include "index_cmp.hpp"
 
 #include <iostream>
 #include <iomanip>
@@ -37,32 +38,6 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/graph/depth_first_search.hpp>
 #include <boost/graph/dijkstra_shortest_paths.hpp>
-
-
-
-#include "index_cmp.hpp"
-
-#include <ext/hash_map>
-#include <ext/hash_set>
-
-namespace std {
-
-  template<typename K, typename V, typename H = __gnu_cxx::hash<K> >
-  class unordered_map : public __gnu_cxx::hash_map<K, V, H> {
-    typedef __gnu_cxx::hash_map<K, V, H> super;
-  public:
-    typedef typename super::data_type mapped_type;
-    unordered_map() : super() {}
-  };
-
-  template<typename K, typename H = __gnu_cxx::hash<K> >
-  class unordered_set : public __gnu_cxx::hash_set<K, H> {
-    typedef __gnu_cxx::hash_set<K, H> super;
-  public:
-    unordered_set() : super() {}
-  };
-
-}
 
 
 
