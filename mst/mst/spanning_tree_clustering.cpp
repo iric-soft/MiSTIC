@@ -775,18 +775,18 @@ template<typename map_t>
 void transformMatrix(const matrix_t &wm, matrix_t &dm, map_t map) {
   const size_t N = wm.size1();
 
-  matrix_t temp(N,N);
+  if (&wm != &dm) {
+    matrix_t temp(N,N);
+    dm.swap(temp);
+  }
 
-  temp(0,0) = 0.0;
 #pragma omp parallel for
   for (int i = 0; i < (int)N; ++i) {
     for (int j = 0; j < (int)N; ++j) {
-      temp(i,j) = map(wm(i,j));
+      dm(i,j) = map(wm(i,j));
     }
-    temp(i,i) = 0.0;
+    dm(i,i) = 0.0;
   }
-
-  dm.swap(temp);
 }
 
 
