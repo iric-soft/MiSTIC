@@ -1,1 +1,4 @@
 mst/build
+*.pyc
+*~
+data/*/transformed
