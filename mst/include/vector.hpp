@@ -1,5 +1,7 @@
 #pragma once
 
+#include <algorithm>
+
 #define EPSILON 1e-16
 
 namespace geom {
