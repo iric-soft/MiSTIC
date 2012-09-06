@@ -3,6 +3,7 @@ import sys
 import os
 import argparse
 import exceptions
+import logging
 
 cmd = 'transform'
 
@@ -24,6 +25,18 @@ class File(argparse.FileType):
 def filt(row, name):
   return numpy.median(row) > 0.0
 
+class DupFilterer(object):
+  def __init__(self):
+    self.seen = set()
+    self.n_dups = 0
+
+  def __call__(self, row, name):
+    if name in self.seen:
+      self.n_dups += 1
+      return False
+    self.seen.add(name)
+    return True
+
 def init_parser(parser):
   parser.add_argument('transform', choices = ('log', 'rank', 'anscombe', 'none'), help='dataset transformation')
   parser.add_argument('input', type = File('rbU'), help='input dataset')
@@ -42,6 +55,12 @@ def run(args):
     dataset.filter(filt)
   elif args.transform == 'none':
     dataset.filter(filt)
+
+  dup = DupFilterer()
+  dataset.filter(dup)
+
+  if dup.n_dups:
+    logging.warn('Dataset had %d duplicate IDs. Duplicates have been discarded.' % (dup.n_dups,))
 
   dataset.writeTSV(args.output)
 
