@@ -95,7 +95,6 @@
     };
 
     arcplot.prototype.updateLabels = function() {
-        console.log('updateLabels');
         var self = this;
         var l = this.label_g.selectAll('g').data(this.labels);
 
@@ -339,8 +338,8 @@
         var n_clusters = c_counts.length;
 
         for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
-            n.__pp = new Array(c_counts.length);
-            n.__pn = new Array(c_counts.length);
+            n.__pp = new Array(n_clusters);
+            n.__pn = new Array(n_clusters);
 
             for (i = 0; i < n_clusters; ++i) {
                 n.__pp[i] = n.__pn[i] = 0;
@@ -408,7 +407,6 @@
             n.__x_max = x_max;
             n.__x_max_i = x_max_i;
             n.__x_tab = x_tab;
-            console.log(x_max_i, x_max, JSON.stringify(x_tab));
 
             for (i = 0; i < n.children.length; ++i) {
                 var c = n.children[i];
