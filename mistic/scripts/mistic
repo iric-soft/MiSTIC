@@ -10,6 +10,8 @@ if __name__ == '__main__':
   subparsers = parser.add_subparsers(help='sub-command help')
 
   for name, module in [ (k,v) for k,v in mistic.scripts.__dict__.iteritems() if not k.startswith('__') ]:
+    if not hasattr(module, 'cmd'): continue
+
     p = subparsers.add_parser(module.cmd)
     module.init_parser(p)
     p.set_defaults(func=module.run)
