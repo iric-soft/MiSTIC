@@ -9,6 +9,7 @@ import ConfigParser
 import multiprocessing
 import subprocess
 from mistic.app.data import collectItems
+from mistic.scripts.helpers import *
 
 cmd = 'prepare'
 
@@ -223,21 +224,6 @@ def init_parser(parser):
   parser.add_argument('-j', '--jobs',      type=int, help='number of parallel jobs', default=1)
   parser.add_argument('-p', '--par-mst',   action='store_true', help='run mst jobs in parallel', default=False)
   parser.add_argument('config',            type=argparse.FileType('r'), help='config file')
-
-def read_config(config, section, defaults):
-  result = {}
-
-  p = ConfigParser.ConfigParser(defaults = defaults)
-  p.readfp(config)
-
-  if p.has_section(section):
-    for key, value in p.items(section):
-      if key.endswith('__eval__'):
-        result[key[:-len('__eval__')]] = eval(value)
-      else:
-        result[key] = value
-
-  return result
 
 def run(args):
   config = {}
