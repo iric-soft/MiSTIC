@@ -165,7 +165,10 @@ def main(global_config, **settings):
     
     data.load(settings)
 
-    mistic.app.views.pdffile.PDFData.rsvg_convert = settings['mistic.rsvg-convert']
+    if 'mistic.rsvg-convert' in settings:
+        mistic.app.views.pdffile.PDFData.rsvg_convert = settings['mistic.rsvg-convert']
+    if 'mistic.phantomjs' in settings:
+        mistic.app.views.pdffile.PDFData.phantomjs = settings['mistic.phantomjs']
 
     config.add_route('mistic.template.root',               '/')
 
