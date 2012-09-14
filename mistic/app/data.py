@@ -293,6 +293,8 @@ class Annotation(object):
 
 
 class DataSet(object):
+  VALID_TRANSFORMATIONS = set(('log', 'rank', 'none'))
+
   def __init__(self, **kw):
     self.id = kw.get('id', uuid.uuid4())
     self.name = kw.get('name', self.id)
@@ -305,7 +307,11 @@ class DataSet(object):
     self.annotation = annotations.get(kw['annr'])
     self.cannotation = colAnnotations.get(kw['annc'])
    
-    self.transforms = set(('none', 'log', 'rank')) & set(kw.get('xfrm', 'none').split(','))
+    self.transforms = []
+    for x in kw.get('xfrm', 'none').split(','):
+      x = x.strip()
+      if x in self.VALID_TRANSFORMATIONS:
+        self.transforms.append(x)
 
   @property
   def info(self):
