@@ -17,7 +17,16 @@
     <label for="gene">Gene:</label>
     <input type="text" id="gene">
   </form>
+  
+  
+   <div class="btn-group pull-right">
+     <button class="btn" data-toggle="button" id="show_labels">
+        Toggle labels 
+   </button>
+  
 </%block>
+
+
 <%block name="pagetail">
 ${parent.pagetail()}
 
@@ -93,7 +102,9 @@ $(document).ready(function() {
     if (current_dataset === '') {
       current_dataset = null;
       gene_entry.url = null;
+      $("#gene").attr('disabled', true);
     } else {
+     $("#gene").attr('disabled', false);
       gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     }
     gene_entry.$el.val('');
@@ -117,6 +128,11 @@ $(document).ready(function() {
 
   resizeGraph();
   $(window).resize(resizeGraph);
+  
+  $('#show_labels').on("click", function(event){
+  	d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
+  });
+  
 
 });
 </script>

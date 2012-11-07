@@ -139,6 +139,8 @@ tr.enter()
         sel[d.genes[i]] = true;
       }
       graph.selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
+      clearInformation();
+      graph.selectAll('rect.selected').each(function(d) {addInformation(d.name)});
     });
 
 var td = tr.selectAll('td')
@@ -207,9 +209,10 @@ node.append("rect")
     .attr('y', -6)
     .attr('fill', '#0074cc')
     .attr('stroke', '#000')
-    .on('click', function() {
+    .on('click', function(d) {
       d3.selectAll('tr.selected').classed('selected', false);
       d3.select(this).classed('selected', !d3.select(this).classed('selected'));
+      addInformation(d.name);
     })
     .append("title")
     .text(function(d) { return d.title; });
@@ -229,12 +232,15 @@ node.each(function(d) {
 $('#select_all').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
   graph.selectAll('rect').classed('selected', true);
+  clearInformation();
+  graph.selectAll('rect.selected').each(function(d){addInformation(d.name)});
   return false;
 });
 
 $('#clear_selection').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
   graph.selectAll('rect.selected').classed('selected', false);
+  clearInformation();
   return false;
 });
 

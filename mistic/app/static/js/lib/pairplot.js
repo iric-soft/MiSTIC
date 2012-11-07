@@ -22,6 +22,7 @@
         this.data = [];
     };
 
+
     pairplot.prototype.resize = function(width, height) {
         if (this.width != width || this.height != height) {
             this.width = width;
@@ -45,6 +46,7 @@
         this.draw();
     };
 
+
     pairplot.prototype.draw = function() {
         var svg = d3.select(this.svg)
 
@@ -57,8 +59,7 @@
         var N = this.data.length;
         var x, y;
         var xlo, xhi, ylo, yhi;
-
-                
+            
         var s_opts = {
             inner: 3,
             outer: 5,
@@ -67,7 +68,7 @@
             background: true,
             axes: false
         };
-
+		
         var sep = this.options.separation;
 
         if (this.options.axes && N < 4) {
@@ -90,9 +91,9 @@
                     _.extend(s_opts, { width: xhi - xlo, height: yhi - ylo });
 
                     var s = new scatterplot(s_opts, this.data[x], this.data[y]);
-
+					
                     var result = s.svg;
-
+  
                     $(g[0]).append(result);
                 } else {
                     console.log(JSON.stringify(this.data[x].symbol));
@@ -106,5 +107,11 @@
                 }
             }
         }
+        
+     
     };
+      
+        
 })();
+
+

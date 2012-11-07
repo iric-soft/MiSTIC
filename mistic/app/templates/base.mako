@@ -34,11 +34,16 @@ body {
 input.valid {
   color: blue;
 }
- 
+
 div#graph {
   margin-top: 5px;
   border: 1px solid #aaa;
 }
+
+.circlelabel {
+	font-family: helvetica; 
+}
+
 
 .dropdown-menu li > a:hover,
 .dropdown-menu .active > a:hover {
@@ -62,6 +67,9 @@ div#graph {
 .gene-item             span.label { color: black; background-color: #ddd; }
 </%block>
 </style>
+
+
+
 </head>
 <body>
   <div class="navbar navbar-fixed-top">
@@ -115,8 +123,11 @@ div#graph {
       <div class="span12">
         <div id="graph">
         </div>
+        <div id ="more-information">
+    	</div>
       </div>
     </div>
+   
   </div>
   </%block>
 </body>
@@ -135,6 +146,7 @@ div#graph {
 <script src="${request.static_url('mistic:app/static/js/lib/ontology.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/datasets.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/dropdown.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/utils.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 (function($) {

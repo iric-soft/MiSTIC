@@ -18,7 +18,15 @@
     <label for="gene2">Gene 2:</label>
     <input type="text" id="gene2">
   </form>
+  
+   <div class="btn-group pull-right">
+     <button class="btn" data-toggle="button" id="show_labels">
+        Toggle labels 
+      </button>
 </%block>
+
+
+
 
 <%block name="pagetail">
 ${parent.pagetail()}
@@ -50,6 +58,9 @@ $(document).ready(function() {
     };
   })();
 
+  
+ 
+  
   current_graph = new scatterplot();
 
   resizeGraph = function() {
@@ -66,9 +77,11 @@ $(document).ready(function() {
 
   var gene1_entry = new GeneDropdown({ el: $("#gene1") });
   var gene2_entry = new GeneDropdown({ el: $("#gene2") });
+	
 
   gene1_entry.on('change', function(item) {
     current_gene1 = item;
+    console.log(current_gene1.attributes);
     gene1_entry.$el.toggleClass('valid', item !== null);
 
     if (current_gene1 === null) { current_graph.setXData(undefined); return; }
@@ -87,6 +100,7 @@ $(document).ready(function() {
 
   gene2_entry.on('change', function(item) {
     current_gene2 = item;
+    console.log(current_gene2.attributes);
     gene2_entry.$el.toggleClass('valid', item !== null);
 
     if (current_gene2 === null) { current_graph.setYData(undefined); return; }
@@ -106,10 +120,17 @@ $(document).ready(function() {
   $('#datasets').on('change', function(event) {
     current_dataset = event.target.value;
     if (current_dataset === '') {
+      
       current_dataset = null;
       gene1_entry.url =
       gene2_entry.url = null;
+      $("#gene1").attr('disabled', true);
+      $("#gene2").attr('disabled', true);
+     
     } else {
+      
+      $("#gene1").attr('disabled', false);
+      $("#gene2").attr('disabled', false);
       gene1_entry.url =
       gene2_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     }
@@ -124,6 +145,12 @@ $(document).ready(function() {
 
   $(window).resize(resizeGraph);
   resizeGraph();
+  
+  $('#show_labels').on("click", function(event){
+  	d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
+  });
+  
+    
 });
 </script>
 </%block>
