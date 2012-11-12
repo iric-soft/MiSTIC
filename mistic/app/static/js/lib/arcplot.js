@@ -95,6 +95,7 @@
     };
 
     arcplot.prototype.updateLabels = function() {
+    	
         var self = this;
         var l = this.label_g.selectAll('g').data(this.labels);
 

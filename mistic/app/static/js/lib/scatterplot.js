@@ -13,6 +13,7 @@
             axes: true,
             display_corr: true,
             pt_size: 4,
+            makeGridLine:true,
         };
 
         if (options !== undefined) {
@@ -162,7 +163,47 @@
                 .text(this.ylab);
         }
     };
+	scatterplot.prototype.makeGridLine = function(){
+		
+       	//svg.select('g.grid-lines')
+        //    .append('g')
+        //    .attr('class', 'grid-lines-y')
+        //    .selectAll('line')
+        //    .data([100])
+        //    .enter()
+        //    .append('line')
+        //    .attr('class', 'line-y')
+        //    .attr('stroke', 'red')
+        //    .attr('stroke-width', '2.5')
+        //    .attr('y1', function(d) {return self.yScale(d)})
+        //    .attr('y2', function(d) {return self.yScale(d)})	
+        //    .attr('x1', this.xScale.range()[0])
+        //    .attr('x2', this.xScale.range()[1]);
+        
+        
+        if (this.yScale.domain()[0]<= 10) {
+        	
+        	var self = this;
+        	var svg = d3.select(this.svg);
+    		  
+        	svg.append('g')
+        		.attr('class', 'grid-lines').attr('opacity', .5)
+        		
+        	var ylim = 10 ;
+        	
+       		svg.select('g.grid-lines')	
+       			.selectAll('rect')
+       			.data([ylim])
+       			.enter()
+       			.append('rect')
+       			.attr('width', function (d) {var x=d3.min([d, self.xScale.domain()[1]]);return self.xScale(x)-self.xScale.range()[0];})
+            	.attr('height', function (d) { var y=d3.min([d, self.yScale.domain()[1]]); return (self.yScale.range()[0]-self.yScale(y)); } )
+            	.attr('x', this.xScale.range()[0])
+            	.attr('y', function(d) {var y=d3.min([d, self.yScale.domain()[1]]); return self.yScale(y)})
+            	.attr('fill', 'rgba(0,0,0,.1)');
 
+     	}     
+	}
 	
     
     scatterplot.prototype.draw = function(data) {
@@ -228,8 +269,12 @@
                 .attr('stroke', 'rgba(0,0,0,.2)')
                 .attr('stroke-width', '1')
                 .attr('shape-rendering', 'crispEdges');
+           
         }
-
+        if (this.options.makeGridLine) {
+			this.makeGridLine();
+        }
+        
         svg .selectAll("circle")
             .data(xy)
             .enter()
@@ -278,5 +323,7 @@
         if (this.options.axes) {
             this.makeAxes();
         }
+       
+        
     };
 })();

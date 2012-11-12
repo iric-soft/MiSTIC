@@ -66,7 +66,8 @@
             axis_labels: false,
             display_corr: false,
             background: true,
-            axes: false
+            axes: false,
+            makeGridLine:true,
         };
 		
         var sep = this.options.separation;
@@ -74,7 +75,7 @@
         if (this.options.axes && N < 4) {
             _.extend(s_opts, { padding: [ 5,20,46,50 ], axes: true });
         } else {
-            _.extend(s_opts, { padding: [ 5,5,5,5 ], axes: false, pt_size: 2 });
+            _.extend(s_opts, { padding: [ 5,5,5,5 ], axes: false, pt_size: 2, makeGridLine:true });
             sep = 5;
         }
 
@@ -91,7 +92,6 @@
                     _.extend(s_opts, { width: xhi - xlo, height: yhi - ylo });
 
                     var s = new scatterplot(s_opts, this.data[x], this.data[y]);
-					
                     var result = s.svg;
   
                     $(g[0]).append(result);

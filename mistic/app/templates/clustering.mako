@@ -173,21 +173,42 @@ $(document).ready(function() {
   };
 
   $('#bp_go').click(function (event) {
-    $('#bp_go').button('loading');
-    go_colour('biological_process').done(function() { $('#bp_go').button('reset'); });
-    event.preventDefault();
+  	if ($('#bp_go').hasClass("clicked")) {
+  		$('#bp_go').removeClass("clicked")
+  	}
+  	else {
+    	$('#bp_go').button('loading');
+    	go_colour('biological_process').done(function() { $('#bp_go').button('reset'); });
+    	event.preventDefault();
+    	$('#bp_go').addClass("clicked")
+    }
   });
   $('#mf_go').click(function (event) {
-    $('#mf_go').button('loading');
-    go_colour('molecular_function').done(function() { $('#mf_go').button('reset'); });
-    event.preventDefault();
+   	if ($('#mf_go').hasClass("clicked")) {
+  		$('#mf_go').removeClass("clicked")
+  	}
+  	else { 
+    	$('#mf_go').button('loading');
+    	go_colour('molecular_function').done(function() { $('#mf_go').button('reset'); });
+    	event.preventDefault();
+    	$('#mf_go').addClass("clicked")
+    }
+    
   });
   $('#cc_go').click(function (event) {
-    $('#cc_go').button('loading');
-    go_colour('cellular_component').done(function() { $('#cc_go').button('reset'); });
-    event.preventDefault();
+  	if ($('#cc_go').hasClass("clicked")) {
+  		$('#cc_go').removeClass("clicked")
+  	}
+  	else {
+    	$('#cc_go').button('loading');
+    	go_colour('cellular_component').done(function() { $('#cc_go').button('reset'); });
+    	event.preventDefault();
+    	$('#cc_go').addClass("clicked")
+    }
   });
-
+  
+  
+ 
   gene_entry.on('change', function(item) {
     if (item !== null) {
       current_graph.zoomTo(item.id);
