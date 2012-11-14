@@ -202,18 +202,25 @@ class Annotation(object):
     self.desc = {}
     self.symbol = {}
     self.attrs = {}
+    self.chr = {}
     self.go = collections.defaultdict(set)
     self.go_genes = collections.defaultdict(set)
     self.go_genes_indirect = collections.defaultdict(set)
     self.go_indirect = collections.defaultdict(set)
+    self.chr_genes = collections.defaultdict(set)
 
     desc = {}
     for row in open(self.path):
+      
       ident, row = row.split(None, 1)
-      attrs = json.loads(row)
-
+      try:
+          attrs = json.loads(row)
+      except: 
+          continue
+      
       self.attrs[ident] = attrs
       self.desc[ident] = attrs.get('name', '')
+      self.chr[ident] = attrs.get('chr', '')
       self.symbol[ident] = attrs.get('symbol', '')
       self.go[ident] = set([ x[0] for x in attrs.get('go', []) ])
       self.go_indirect[ident] = ontology.parents(self.go[ident])
@@ -223,6 +230,9 @@ class Annotation(object):
 
       for g in self.go_indirect[ident]:
         self.go_genes_indirect[g].add(ident)
+
+      for g in self.chr[ident]:
+        self.chr_genes[g].add(ident)     
 
     self.genes = set(self.attrs.keys())
 
@@ -247,7 +257,7 @@ class DataSet(object):
     self.source = kw['file']
     self.data = mistic.data.dataset.DataSet.readTSV(kw['file'])
     self.annotation = annotations.get(kw['anot'])
-    self.transforms = set(('log', 'rank', 'anscombe', 'none')) & set(kw.get('xfrm', 'none').split(','))
+    self.transforms = set(('log', 'rank', 'anscombe')) & set(kw.get('xfrm', 'none').split(','))
 
   @property
   def info(self):

@@ -1,5 +1,17 @@
 <!DOCTYPE html>
 <html>
+
+<svg height=0>
+<defs>
+<pattern id="hatch00" patternUnits="userSpaceOnUse" x="0" y="0" width="10" height="10">
+  <path d="M0,0 H10" style="fill:none; stroke:rgba(0,0,0,.5); stroke-width:1 "/>
+</pattern>
+<pattern id="hatch01" patternUnits="userSpaceOnUse" x="0" y="0" width="10" height="10">
+    <path d="M0,0 V10" style="fill:none; stroke:rgba(0,0,0,.5); stroke-width:1"/>
+ </pattern>
+</defs>
+</svg>
+
   <head>
     <title><%block name="pagetitle">Correlation waterfall plot</%block></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -44,6 +56,10 @@ div#graph {
 	font-family: helvetica; 
 }
 
+div#more-information {
+   font-family: helvetica,arial,sans-serif;
+   font-size: 11px;
+}
 
 .dropdown-menu li > a:hover,
 .dropdown-menu .active > a:hover {
@@ -72,6 +88,7 @@ div#graph {
 
 </head>
 <body>
+
   <div class="navbar navbar-fixed-top">
     <div class="navbar-inner">
       <div class="container-fluid">
@@ -119,14 +136,19 @@ div#graph {
         <%block name="controls"></%block>
       </div>
     </div>
+    
+    <%block name="graph">
+    <div class="row-fluid">
+     <div class="span12"id ="more-information"></div>
+ 	</div>
+ 	
     <div class="row-fluid">
       <div class="span12">
         <div id="graph">
         </div>
-        <div id ="more-information">
-    	</div>
       </div>
     </div>
+    </%block>
    
   </div>
   </%block>

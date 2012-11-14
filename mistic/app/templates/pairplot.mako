@@ -1,6 +1,9 @@
 <%! import mistic.app.data as data %>
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">Multi-way scatterplot</%block>
+
+
+
 <%block name="actions">
   ${parent.actions()}<button class="btn" id="static_url" href="">Static URL</button>
 </%block>
@@ -16,19 +19,18 @@
     <span id="genelist"></span>
     <label for="gene">Gene:</label>
     <input type="text" id="gene">
-  </form>
+   
+ 
   
-  
-   <div class="btn-group pull-right">
-     <button class="btn" data-toggle="button" id="show_labels">
-        Toggle labels 
-   </button>
+    <button class="btn" style="display:inline; float:right;" data-toggle="button" id="show_labels"> Toggle labels  </button> 
+   </form>
   
 </%block>
 
 
 <%block name="pagetail">
 ${parent.pagetail()}
+
 
 <script src="${request.static_url('mistic:app/static/js/lib/scatterplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
@@ -131,7 +133,10 @@ $(document).ready(function() {
   
   $('#show_labels').on("click", function(event){
   	d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
+  	return false;
   });
+  
+ 
   
 
 });

@@ -14,22 +14,35 @@ import scipy.stats
     <button class="btn btn-primary" id="clear_selection">Clear selection</button>
     <button class="btn btn-primary" id="scatterplot">Scatterplot</button>
     <div class="btn-group pull-right">
-      <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
+     <!--  <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
         GO Terms <span class="caret"></span>
       </button>
-      <div class="dropdown-menu" id="go_table">
-      </div>
+      <div class="dropdown-menu" id="go_table"></div> -->
+      
     </div>
   </form>
 </%block>
+
+
+
+
 <%block name="style">
 ${parent.style()}
 
 #go_table {
   max-height: 400px;
   max-width: 500px;
-  overflow-y: auto;
+  overflow-y: visible;
   overflow-x: hidden;
+  font-family: helvetica; 
+  font-size: 10.5px; 
+}
+
+div#more-information {
+   font-family: helvetica,arial,sans-serif;
+   font-size: 11px;
+   color: #cc7400;
+   font-weight:bold;
 }
 
 th, td {
@@ -56,6 +69,21 @@ rect.selected {
 }
 
 </%block>
+
+<%block name="graph">
+<div class="row-fluid">
+     <div class="span12" id ="more-information"></div>
+ </div>
+ <div class="row-fluid">
+ 	 <div class="span8" id="graph"></div>
+     <div class="span4" id="go_table"></div>
+     
+ </div>
+ 
+    
+</%block>
+
+
 <%block name="pagetail">
 ${parent.pagetail()}
 
@@ -66,26 +94,34 @@ ${parent.pagetail()}
 <%
   ds = data.datasets.get(dataset)
   a = ds.annotation
-
+  
   go_tab = []
 
   all_go = set()
   for n in nodes:
     all_go.update(a.go.get(n, set()))
-
+    #all_go.update(a.chr.get(n, set()))
+  
   for g in all_go:
+    
     genes_with_go_term = [
       n for n in nodes
       if g in a.go.get(n, set()) or
-         g in a.go_indirect.get(n, set()) ]
+         g in a.go_indirect.get(n, set()) 
+        # or g in a.chr.get(n, set())
+          ]
+    
     YY = len(genes_with_go_term)
     if YY == 1: continue
     YN = len(nodes) - YY
     NY = len(a.go_genes[g] |
-             a.go_genes_indirect[g]
+             a.go_genes_indirect[g]#| 
+             #a.chr_genes[g]
             ) - YY
     NN = len(a.genes) - YY - YN - NY
     tab = [ [ YY, YN ], [ NY, NN ] ]
+    
+    
     odds, p_val = scipy.stats.fisher_exact(tab)
     if odds < 1 or p_val > 0.05: continue
     go_tab.append(dict(
@@ -104,7 +140,8 @@ ${parent.pagetail()}
   V = [ dict(
     id    = n,
     name  = a.attrs.get(n, {}).get('symbol') or n,
-    title = a.attrs.get(n, {}).get('name') or ''
+    title = a.attrs.get(n, {}).get('name') or '',
+    #chr = a.attrs.get(n, {}).get('chr') or '',
   ) for n in nodes ]
 %>
 
@@ -141,7 +178,8 @@ tr.enter()
       graph.selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
       clearInformation();
       graph.selectAll('rect.selected').each(function(d) {addInformation(d.name)});
-    });
+    })
+    ;
 
 var td = tr.selectAll('td')
     .data(function(d) { return [
@@ -153,9 +191,11 @@ var td = tr.selectAll('td')
 
 td.enter()
     .append('td')
-    .text(function(d) { return d[1]; });
+    .text(function(d) { return d[1]; })
+    .attr('title', function(d) {return d[1];})
+    ;
 
-var width = 1024, height = 768;
+var width = 680, height = 768;  //was width:1024
 
 var svg = d3.select("#graph").append("svg")
     .attr("width", width)
@@ -258,6 +298,10 @@ $('#scatterplot').on('click', function(event) {
     window.open(url);
   }
   return false;
+});
+
+$("#display_table").on('click', function(event) {
+	return false;
 });
 
 force.on("tick", function() {

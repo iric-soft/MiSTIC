@@ -1,6 +1,10 @@
 <%! import mistic.app.data as data %>
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">Pairwise scatterplot</%block>
+
+
+
+
 <%block name="actions">
   ${parent.actions()}<button class="btn" id="static_url" href="">Static URL</button>
 </%block>
@@ -17,12 +21,11 @@
     <input type="text" id="gene1">
     <label for="gene2">Gene 2:</label>
     <input type="text" id="gene2">
+    <button class="btn" data-toggle="button" id="show_labels"> Toggle labels </button>
   </form>
   
-   <div class="btn-group pull-right">
-     <button class="btn" data-toggle="button" id="show_labels">
-        Toggle labels 
-      </button>
+  
+     
 </%block>
 
 
@@ -148,6 +151,7 @@ $(document).ready(function() {
   
   $('#show_labels').on("click", function(event){
   	d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
+  	return false;
   });
   
     

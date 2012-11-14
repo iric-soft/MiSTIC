@@ -2,7 +2,7 @@
 import json
 import mistic.app.data as data
 
-transforms = ('log', 'rank', 'anscombe', 'none')
+transforms = ('log', 'rank', 'anscombe')
 %>
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">RNA-seq dataset explorer</%block>

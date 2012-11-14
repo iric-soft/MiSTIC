@@ -117,7 +117,13 @@ $(document).ready(function() {
     if (current_dataset === '') {
       current_dataset = null;
       gene_entry.url = null;
-    } else {
+      $("#gene").attr("disabled", true);
+      $("#goterm").attr("disabled", true);
+      
+    } 
+    else {
+      $("#gene").attr("disabled", false);
+      $("#goterm").attr("disabled", false);
       gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     }
     gene_entry.$el.val('');

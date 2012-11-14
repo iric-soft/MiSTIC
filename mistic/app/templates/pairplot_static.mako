@@ -4,13 +4,7 @@ import json
 %>
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">Multi-way scatterplot</%block>
-<%block name="controls">
-<div class="btn-group pull-right">
-     <button class="btn" data-toggle="button" id="show_labels">
-     Toggle labels 
-</button>
-</div>
-</%block>
+
 
 <%block name="pagetail">
 ${parent.pagetail()}
@@ -43,10 +37,13 @@ $(document).ready(function() {
 
   resizeGraph();
   $(window).resize(resizeGraph);
-
-   $('#show_labels').on("click", function(event){
-  	d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
-  });
+  
+  $(".circlelabel").remove();
+  $(".grid-lines").remove();
+ 
+ 
+ 
+  
 
 });
 </script>

@@ -13,7 +13,8 @@
             axes: true,
             display_corr: true,
             pt_size: 4,
-            makeGridLine:true,
+            makeGridLine:false,
+            gridValue: 10,  // rpkm
         };
 
         if (options !== undefined) {
@@ -89,7 +90,7 @@
 		
 		var highlightedColor = "rgb(92, 173, 255)"; // do it as a class (selected) toggle and css
 		var nextColor = this.style.fill == highlightedColor ? "black" :  highlightedColor;
-		var circles = d3.selectAll('svg').selectAll('circle'); 
+		var circles = d3.selectAll('#graph svg').selectAll('circle'); 
 	
 		for (i=0; i<circles.data().length; i++){
 			var c = circles[0][i];
@@ -164,45 +165,41 @@
         }
     };
 	scatterplot.prototype.makeGridLine = function(){
-		
-       	//svg.select('g.grid-lines')
-        //    .append('g')
-        //    .attr('class', 'grid-lines-y')
-        //    .selectAll('line')
-        //    .data([100])
-        //    .enter()
-        //    .append('line')
-        //    .attr('class', 'line-y')
-        //    .attr('stroke', 'red')
-        //    .attr('stroke-width', '2.5')
-        //    .attr('y1', function(d) {return self.yScale(d)})
-        //    .attr('y2', function(d) {return self.yScale(d)})	
-        //    .attr('x1', this.xScale.range()[0])
-        //    .attr('x2', this.xScale.range()[1]);
-        
-        
-        if (this.yScale.domain()[0]<= 10) {
-        	
-        	var self = this;
-        	var svg = d3.select(this.svg);
+
+		var self = this;
+        var svg = d3.select(this.svg);
     		  
-        	svg.append('g')
-        		.attr('class', 'grid-lines').attr('opacity', .5)
+        svg.append('g')
+        		.attr('class', 'grid-lines').attr('opacity', .5);
         		
-        	var ylim = 10 ;
-        	
+        if (this.yScale.domain()[0]< 10 ){
        		svg.select('g.grid-lines')	
        			.selectAll('rect')
-       			.data([ylim])
+       			.data([this.options.gridValue])
        			.enter()
        			.append('rect')
-       			.attr('width', function (d) {var x=d3.min([d, self.xScale.domain()[1]]);return self.xScale(x)-self.xScale.range()[0];})
+       			.attr('class', 'grid-lines-y')
+       			.attr('width', this.xScale.range()[1]-this.xScale.range()[0])
             	.attr('height', function (d) { var y=d3.min([d, self.yScale.domain()[1]]); return (self.yScale.range()[0]-self.yScale(y)); } )
             	.attr('x', this.xScale.range()[0])
             	.attr('y', function(d) {var y=d3.min([d, self.yScale.domain()[1]]); return self.yScale(y)})
-            	.attr('fill', 'rgba(0,0,0,.1)');
-
-     	}     
+            	//.attr('fill', 'rgba(0,0,0,.08)');
+            	.attr('fill', 'url(#hatch00)');
+     	}
+     	
+        if (this.xScale.domain()[0]< 10 ){
+               
+       		svg.select('g.grid-lines')	
+       			.append('rect')
+       			.attr('class', 'grid-lines-x')
+       			.attr('width', function (d) {var x=d3.min([self.options.gridValue, self.xScale.domain()[1]]);return self.xScale(x)-self.xScale.range()[0];})
+            	.attr('height', this.yScale.range()[0]-this.yScale.range()[1])
+            	.attr('x', this.xScale.range()[0])
+            	.attr('y', this.yScale.range()[1])
+            	//.attr('fill', 'rgba(0,0,0,.08)');
+            	.attr('fill', 'url(#hatch01)');
+            	
+        }
 	}
 	
     
