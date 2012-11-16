@@ -56,6 +56,10 @@ div#graph {
 	font-family: helvetica; 
 }
 
+.highlighted {
+	fill : rgb(92, 173, 255);
+}
+
 div#more-information {
    font-family: helvetica,arial,sans-serif;
    font-size: 11px;

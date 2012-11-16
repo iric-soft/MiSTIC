@@ -88,15 +88,15 @@
 							 
 	scatterplot.prototype.highlightCircle = function (d){
 		
-		var highlightedColor = "rgb(92, 173, 255)"; // do it as a class (selected) toggle and css
-		var nextColor = this.style.fill == highlightedColor ? "black" :  highlightedColor;
-		var circles = d3.selectAll('#graph svg').selectAll('circle'); 
+
+        var circles = d3.selectAll('#graph svg').selectAll('circle'); 
 	
 		for (i=0; i<circles.data().length; i++){
 			var c = circles[0][i];
 			var e = circles.data()[i];					
 			if (e.k==d.k){
-				d3.select(c).style('fill',nextColor);
+                d3.select(c).classed('highlighted', !d3.select(c).classed('highlighted'))
+
 			}	
 		}	
 		addInformation(d.k);
