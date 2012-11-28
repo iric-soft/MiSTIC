@@ -21,12 +21,28 @@
     <input type="text" id="gene">
    
  
-  
-    <button class="btn" style="display:inline; float:right;" data-toggle="button" id="show_labels"> Toggle labels  </button> 
+  	<div id="function_buttons">
+    <button class="btn btn-primary" data-toggle="button" id="show_labels"> Toggle labels  </button> 
+    <button class="btn btn-primary" id="select_all">Select all</button>
+    <button class="btn btn-primary" id="clear_selection">Clear selection</button>
+    <label for="patient">Locate:</label>
+    <input type="text" id="patient">
+    </div>
    </form>
   
 </%block>
 
+<%block name="style">
+${parent.style()}
+
+div#function_buttons {
+  margin-top: 15px;
+}
+div#function_buttons .btn{
+	font-size:11px;
+}
+
+</%block>
 
 <%block name="pagetail">
 ${parent.pagetail()}
@@ -69,6 +85,7 @@ $(document).ready(function() {
     var badge_idx = parseInt(badge.attr('data-idx'));
     current_graph.removeData(function(d, i) { return i === badge_idx; });
     badge.remove();
+    clearInformation();
   });
 
   gene_entry.on('change', function(item) {
@@ -136,6 +153,22 @@ $(document).ready(function() {
   	return false;
   });
   
+  $('#select_all').on('click', function(event) {
+  	d3.selectAll('circle').classed('highlighted', true);
+  	var dat = [];
+  	d3.selectAll('circle.highlighted').each(function(d) {
+    	dat.push(d.k);
+  	});
+  	dat = _.uniq(dat);
+  	_.each(dat, addInformation);
+  	return false;
+	});
+
+$('#clear_selection').on('click', function(event) {
+  	d3.selectAll('circle').classed('highlighted', false);
+  	clearInformation();
+  	return false;
+});
  
   
 

@@ -21,7 +21,8 @@
     <input type="text" id="gene1">
     <label for="gene2">Gene 2:</label>
     <input type="text" id="gene2">
-    <button class="btn" data-toggle="button" id="show_labels"> Toggle labels </button>
+    <button class="btn btn-primary" style="float:right;" data-toggle="button" id="show_labels"> Toggle labels </button>
+  
   </form>
   
   

@@ -36,6 +36,7 @@ ${parent.style()}
   overflow-x: hidden;
   font-family: helvetica; 
   font-size: 10.5px; 
+  float: right;
 }
 
 div#more-information {
@@ -43,6 +44,7 @@ div#more-information {
    font-size: 11px;
    color: #cc7400;
    font-weight:bold;
+   float: right;
 }
 
 th, td {
@@ -71,14 +73,19 @@ rect.selected {
 </%block>
 
 <%block name="graph">
-<div class="row-fluid">
-     <div class="span12" id ="more-information"></div>
- </div>
+
  <div class="row-fluid">
- 	 <div class="span8" id="graph"></div>
-     <div class="span4" id="go_table"></div>
-     
+ 	 <div class="span12" id="more-information"></div>
  </div>
+ 
+ <div class="row-fluid" id="document-graph">
+ 	 <div class="span7" id="graph"></div>
+     <div class="span5" id="go_table"></div>
+ </div>
+ 
+
+
+ 
  
     
 </%block>
@@ -95,39 +102,47 @@ ${parent.pagetail()}
   ds = data.datasets.get(dataset)
   a = ds.annotation
   
+ 
   go_tab = []
 
   all_go = set()
   for n in nodes:
     all_go.update(a.go.get(n, set()))
-    #all_go.update(a.chr.get(n, set()))
-  
+    all_go.update(a.chr.get(n, set()))
+    all_go.update(a.leukemia_causing.get(n, set()))
+   
+ 
   for g in all_go:
     
     genes_with_go_term = [
       n for n in nodes
       if g in a.go.get(n, set()) or
-         g in a.go_indirect.get(n, set()) 
-        # or g in a.chr.get(n, set())
+         g in a.go_indirect.get(n, set()) or
+         g in a.chr.get(n, set()) or
+         g in a.leukemia_causing.get(n, set())
           ]
     
     YY = len(genes_with_go_term)
     if YY == 1: continue
     YN = len(nodes) - YY
     NY = len(a.go_genes[g] |
-             a.go_genes_indirect[g]#| 
-             #a.chr_genes[g]
+             a.go_genes_indirect[g]| 
+             a.chr_genes[g] |
+             a.leukemia_causing_genes[g]
             ) - YY
     NN = len(a.genes) - YY - YN - NY
     tab = [ [ YY, YN ], [ NY, NN ] ]
     
-    
+  
     odds, p_val = scipy.stats.fisher_exact(tab)
     if odds < 1 or p_val > 0.05: continue
+    ns = data.ontology.nodes[g].namespace if g in data.ontology.nodes.keys() else ''
+    nsdict = {'molecular_function':'[MF]', 'biological_process':'[BP]', 'cellular_component':'[CC]', '':''}
+    
     go_tab.append(dict(
       id = g,
-      ns = data.ontology.nodes[g].namespace,
-      desc = data.ontology.nodes[g].desc,
+      ns = nsdict[ns],
+      desc = data.ontology.nodes[g].desc if g in data.ontology.nodes.keys() else '',
       tab = tab,
       p_val = p_val,
       odds = odds,
@@ -141,7 +156,7 @@ ${parent.pagetail()}
     id    = n,
     name  = a.attrs.get(n, {}).get('symbol') or n,
     title = a.attrs.get(n, {}).get('name') or '',
-    #chr = a.attrs.get(n, {}).get('chr') or '',
+    chr = a.attrs.get(n, {}).get('chr') or '',
   ) for n in nodes ]
 %>
 
@@ -158,7 +173,7 @@ var thead = table.append('thead');
 var tbody = table.append('tbody');
 
 var th = thead.selectAll("th")
-    .data([ 'P-value', 'Odds', 'GO ID', 'Description' ])
+    .data([ 'P-value', 'Odds', 'ID', 'Description' ])
     .enter()
     .append("th")
     .text(function(d) { return d; });
@@ -186,7 +201,8 @@ var td = tr.selectAll('td')
       [ 'p_val', d.p_val.toExponential(2) ],
       [ 'odds', d.odds.toFixed(2) ],
       [ 'id', d.id ],
-      [ 'desc', d.desc ],
+      [ 'desc', d.desc +" "+d.ns],
+      
     ];});
 
 td.enter()
@@ -195,14 +211,15 @@ td.enter()
     .attr('title', function(d) {return d[1];})
     ;
 
-var width = 680, height = 768;  //was width:1024
+var width =($(document).width()-60)/12*7; //was width:1024
+var height =($(document).height()-($(document).height()/5));  //was width:780
 
 var svg = d3.select("#graph").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-var grav = .10;
-var charge = -150;
+var grav = .20;
+var charge = -180; //was -150
 
 var force = d3.layout.force()
     .gravity(grav)
@@ -262,7 +279,7 @@ node.append("text")
     .attr("dx", 10)
     .attr("dy", 6)
     .attr("pointer-events", "none")
-    .text(function(d) { return d.name });
+    .text(function(d) { return d.name});
 
 node.each(function(d) {
     var w = d3.select(this).select('text')[0][0].getBBox().width + 8;

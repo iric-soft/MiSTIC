@@ -88,7 +88,6 @@
 							 
 	scatterplot.prototype.highlightCircle = function (d){
 		
-
         var circles = d3.selectAll('#graph svg').selectAll('circle'); 
 	
 		for (i=0; i<circles.data().length; i++){
@@ -96,7 +95,6 @@
 			var e = circles.data()[i];					
 			if (e.k==d.k){
                 d3.select(c).classed('highlighted', !d3.select(c).classed('highlighted'))
-
 			}	
 		}	
 		addInformation(d.k);
@@ -104,19 +102,22 @@
 	};
 	
     scatterplot.prototype.makeAxes = function() {
+    	var self = this;
         var xAxis = d3.svg
             .axis()
 	    .scale(this.xScale)
 	    .orient("bottom")
             .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
-	    .ticks(5);
-
+	    .ticks(5)
+	    
+		
 		var yAxis = d3.svg
             .axis()
 	    .scale(this.yScale)
 	    .orient("left")
             .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
-	    .ticks(5);
+	    .ticks(5)
+	    
 
         var svg = d3.select(this.svg);
 
@@ -129,14 +130,25 @@
 	    .attr("class", "axis axis-y")
 	    .attr("transform", "translate(" + (this.options.padding[3] - this.options.outer) + ",0)")
 	    .call(yAxis);
-
+	    
         svg .selectAll('.axis path, .axis line')
             .attr('fill', 'none')
             .attr('stroke', 'black')
+            .attr('opacity', .3)
             .attr('shape-rendering', 'crispEdges');
+            
 
         svg .selectAll('.axis text')
             .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
+
+		if (this.options.makeGridLine) {
+			var xgrid = svg.selectAll('.axis-x line').filter(function(d, i) {return d <= self.options.gridValue});
+			xgrid.each(function(d, i) {d3.select(this).attr('y1',-(self.height -self.options.padding[2] + self.options.outer)-self.yScale(d3.min([self.yScale.domain()[1],self.options.gridValue])));});
+		
+			var ygrid = svg.selectAll('.axis-y line').filter(function(d, i) {return d <= self.options.gridValue});
+			ygrid.each(function(d, i) {d3.select(this).attr('x2', self.xScale(self.xScale.domain()[1])-(self.options.padding[3] - self.options.outer));});
+		}
+
 
         if (this.options.axis_labels) {
             svg .select('g.axis-x')
@@ -171,8 +183,8 @@
     		  
         svg.append('g')
         		.attr('class', 'grid-lines').attr('opacity', .5);
-        		
-        if (this.yScale.domain()[0]< 10 ){
+       	 		
+        if (this.yScale.domain()[0]< this.options.gridValue ){
        		svg.select('g.grid-lines')	
        			.selectAll('rect')
        			.data([this.options.gridValue])
@@ -183,11 +195,10 @@
             	.attr('height', function (d) { var y=d3.min([d, self.yScale.domain()[1]]); return (self.yScale.range()[0]-self.yScale(y)); } )
             	.attr('x', this.xScale.range()[0])
             	.attr('y', function(d) {var y=d3.min([d, self.yScale.domain()[1]]); return self.yScale(y)})
-            	//.attr('fill', 'rgba(0,0,0,.08)');
             	.attr('fill', 'url(#hatch00)');
      	}
      	
-        if (this.xScale.domain()[0]< 10 ){
+        if (this.xScale.domain()[0]< this.options.gridValue ){
                
        		svg.select('g.grid-lines')	
        			.append('rect')
@@ -196,7 +207,6 @@
             	.attr('height', this.yScale.range()[0]-this.yScale.range()[1])
             	.attr('x', this.xScale.range()[0])
             	.attr('y', this.yScale.range()[1])
-            	//.attr('fill', 'rgba(0,0,0,.08)');
             	.attr('fill', 'url(#hatch01)');
             	
         }
@@ -268,9 +278,13 @@
                 .attr('shape-rendering', 'crispEdges');
            
         }
-        if (this.options.makeGridLine) {
-			this.makeGridLine();
+        
+         if (this.options.axes) {
+            this.makeAxes();
         }
+        
+        
+      
         
         svg .selectAll("circle")
             .data(xy)
@@ -317,9 +331,7 @@
                 .text('r(anscombe) = ' + r_anscombe.toFixed(2));
         }
 
-        if (this.options.axes) {
-            this.makeAxes();
-        }
+       
        
         
     };

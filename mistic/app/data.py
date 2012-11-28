@@ -191,8 +191,6 @@ class Collection(object):
 annotations = Collection()
 datasets = Collection()
 
-
-
 class Annotation(object):
   def __init__(self, **kw):
     self.id = kw.get('id', uuid.uuid4())
@@ -202,13 +200,25 @@ class Annotation(object):
     self.desc = {}
     self.symbol = {}
     self.attrs = {}
-    self.chr = {}
+    
     self.go = collections.defaultdict(set)
     self.go_genes = collections.defaultdict(set)
-    self.go_genes_indirect = collections.defaultdict(set)
+   
     self.go_indirect = collections.defaultdict(set)
+    self.go_genes_indirect = collections.defaultdict(set)
+    
+    self.chr = collections.defaultdict(set)
     self.chr_genes = collections.defaultdict(set)
+    
+    self.band = collections.defaultdict(set)
+    self.band_genes = collections.defaultdict(set)
+    
+    self.leukemia_causing = collections.defaultdict(set)
+    self.leukemia_causing_genes = collections.defaultdict(set)
 
+    self.reactome = collections.defaultdict(set)
+    self.reactome_genes = collections.defaultdict(set)
+    
     desc = {}
     for row in open(self.path):
       
@@ -220,20 +230,32 @@ class Annotation(object):
       
       self.attrs[ident] = attrs
       self.desc[ident] = attrs.get('name', '')
-      self.chr[ident] = attrs.get('chr', '')
       self.symbol[ident] = attrs.get('symbol', '')
       self.go[ident] = set([ x[0] for x in attrs.get('go', []) ])
       self.go_indirect[ident] = ontology.parents(self.go[ident])
+      
+      chr = attrs.get('chr', '')
+      
+      self.chr[ident] = set(["chr%s"%chr if (chr.isdigit() or chr in ['X','Y','MT']) else chr])
+      self.band[ident] = set([attrs.get('band', '')])
+      self.leukemia_causing[ident] = set([attrs.get("leukemia_causing", "")])
+      self.reactome[ident] = set(attrs.get('reactome', []))
 
+  
       for g in self.go[ident]:
         self.go_genes[g].add(ident)
-
       for g in self.go_indirect[ident]:
         self.go_genes_indirect[g].add(ident)
-
       for g in self.chr[ident]:
-        self.chr_genes[g].add(ident)     
-
+        self.chr_genes[g].add(ident)
+      for g in self.band[ident]:
+        self.band_genes[g].add(ident)
+      for g in self.leukemia_causing[ident]:
+        self.leukemia_causing_genes[g].add(ident)
+      for g in self.reactome[ident]:
+        self.reactome_genes[g].add(ident)
+    
+    
     self.genes = set(self.attrs.keys())
 
   def gene_set(self, go = []):

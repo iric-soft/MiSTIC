@@ -62,7 +62,7 @@ div#graph {
 
 div#more-information {
    font-family: helvetica,arial,sans-serif;
-   font-size: 11px;
+   font-size: 11px; 
 }
 
 .dropdown-menu li > a:hover,

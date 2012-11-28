@@ -56,6 +56,7 @@
     }
 
     corrgraph.prototype.AUC = function() {
+    	console.log('AUC');
         if (this.genes === undefined) return undefined;
         
         var n1 = 0;
@@ -83,6 +84,7 @@
     };
 
     corrgraph.prototype.labelMaker = function() {
+    	console.log('labelMarker');
         var self = this;
         var xScale = this.xScale;
         var yScale = this.yScale;
@@ -132,19 +134,20 @@
         };
 
         var can_add_to_box = function(d, box) {
+        	console.log('can_add_to_box');
             var x = xScale(d.idx);
             var y_ex = y_exclusion(box.x1, box.x2);
             var label_y = [ box.y2, box.y2 + LAB.y ];
 
-            console.log('       x:', x);
-            console.log('    y_ex:', JSON.stringify(y_ex));
-            console.log(' label_y:', JSON.stringify(label_y));
-            console.log('  cond 1:', label_y[0] < TOP);
-            console.log('  cond 2:', label_y[1] >= BTM);
-            console.log('  cond 3:', overlaps(label_y, y_ex));
-            console.log('  cond 4:', (x > box.x2 && (box.a == +1 || !between(x - box.x2, [ MIN_DIST, MAX_DIST ]))));
-            console.log('  cond 5:', (x < box.x1 && (box.a == -1 || !between(box.x1 - x, [ MIN_DIST, MAX_DIST ]))));
-            console.log('        :', x < box.x1, box.a == -1, box.x1-x, [MIN_DIST, MAX_DIST], !between(box.x1 - x, [ MIN_DIST, MAX_DIST ]));
+            //console.log('       x:', x);
+            //console.log('    y_ex:', JSON.stringify(y_ex));
+            //console.log(' label_y:', JSON.stringify(label_y));
+            //console.log('  cond 1:', label_y[0] < TOP);
+            //console.log('  cond 2:', label_y[1] >= BTM);
+            //console.log('  cond 3:', overlaps(label_y, y_ex));
+            //console.log('  cond 4:', (x > box.x2 && (box.a == +1 || !between(x - box.x2, [ MIN_DIST, MAX_DIST ]))));
+            //console.log('  cond 5:', (x < box.x1 && (box.a == -1 || !between(box.x1 - x, [ MIN_DIST, MAX_DIST ]))));
+            //console.log('        :', x < box.x1, box.a == -1, box.x1-x, [MIN_DIST, MAX_DIST], !between(box.x1 - x, [ MIN_DIST, MAX_DIST ]));
 
             if (label_y[0] < TOP || 
                 label_y[1] >= BTM ||
@@ -160,6 +163,7 @@
         }
 
         var allocate_to_box = function(d) {
+        	console.log('allocate_to_box');
             var x = xScale(d.idx);
 
             var box = curr = boxes[boxes.length-1];
@@ -289,6 +293,7 @@
     };
 
     corrgraph.prototype.updateLabels = function() {
+    	console.log('updateLabels');
         var subset = _.filter(this.data, function(d) { return d.labelled === true; });
 
         subset = _.map(subset, this.labelMaker())

@@ -42,7 +42,7 @@ $(document).ready(function() {
   $(window).resize(resizeGraph);
   
   $(".circlelabel").remove();
-  $(".grid-lines").remove();
+
   
   
 });
