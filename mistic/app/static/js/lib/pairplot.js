@@ -73,9 +73,9 @@
         var sep = this.options.separation;
 
         if (this.options.axes && N < 4) {
-            _.extend(s_opts, { padding: [ 5,20,46,50 ], axes: true });
+            _.extend(s_opts, { padding: [ 5,20,46,50 ], axes:true });
         } else {
-            _.extend(s_opts, { padding: [ 5,5,5,5 ], axes: false, pt_size: 2, makeGridLine:true });
+            _.extend(s_opts, { padding: [ 5,5,5,5 ],axes:true,  axis_labels:false,  pt_size: 2 });
             sep = 5;
         }
 

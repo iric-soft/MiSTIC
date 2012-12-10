@@ -8,6 +8,10 @@
   ${parent.actions()}<button class="btn" id="static_url" href="">Static URL</button>
 </%block>
 <%block name="controls">
+
+<div class="row-fluid">
+<div class="span10" style="display:inline;">
+
   <form class="form-inline">
     <label for="datasets">Dataset:</label>
     <select id="datasets">
@@ -18,29 +22,56 @@
     </select>
     <span id="genelist"></span>
     <label for="gene">Gene:</label>
-    <input type="text" id="gene">
+    <input type="text" id="gene"/> 	
    
- 
-  	<div id="function_buttons">
-    <button class="btn btn-primary" data-toggle="button" id="show_labels"> Toggle labels  </button> 
-    <button class="btn btn-primary" id="select_all">Select all</button>
-    <button class="btn btn-primary" id="clear_selection">Clear selection</button>
-    <label for="patient">Locate:</label>
-    <input type="text" id="patient">
-    </div>
    </form>
+</div>	
+
+    <div class="span2" id="advanced" >
+   		<a id="advanced-options-link" class="dropdown-toggle" data-toggle="dropdown" href="#"> More options
+    	<strong id="link-caret" class="caret"></strong> </a>
+    </div>
+</div>    	
+ 
+ <div id="advanced-options">
+    	<label style="display:inline;" for="sample" size="10px">Locate:</label>
+    	<input type="text" id="sample" autocomplete="off"  />
+    	<button class="btn btn-primary" id="show_labels">Show labels</button> 
+    	<button class="btn btn-primary" id="select_clear">Select all</button>
+    </div>
   
+   
+
 </%block>
 
 <%block name="style">
 ${parent.style()}
 
-div#function_buttons {
-  margin-top: 15px;
+
+
+a#advanced-options-link {
+	float: right;	
+	text-decoration : none;
+	display: none;	
 }
-div#function_buttons .btn{
+
+div#advanced-options {
+  margin-top: 15px;
+  display : none;
+  float:right;
+  
+  
+}
+
+div#advanced_options .btn{
 	font-size:11px;
 }
+
+#link-caret {
+	vertical-align: middle;
+}
+
+
 
 </%block>
 
@@ -73,13 +104,13 @@ $(document).ready(function() {
       }
     };
   })();
-
+ 
   current_graph = new pairplot(undefined, undefined, $('#graph'));
 
   current_dataset = undefined;
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
-
+  
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
     var badge = $(event.target).closest('span.badge');
     var badge_idx = parseInt(badge.attr('data-idx'));
@@ -90,18 +121,19 @@ $(document).ready(function() {
 
   gene_entry.on('change', function(item) {
     if (item === null) return;
-
+    
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_dataset).replace('_gene_id_', item.id),
       dataype: 'json',
       success: function(data) {
         var gene_list = $('#genelist');
+       
         
         current_graph.addData(data);
         gene_entry.$el.val('');
         var label = $('<span>')
           .addClass('badge')
-          .css({ 'margin': '0px 5px' })
+          .css({ 'margin': '0px 5px' })	
           .attr({ 'data-idx': current_graph.data.length - 1 })
           .html(item.get('symbol') !== '' ? item.get('symbol') : item.id);
         label.append($('<i>')
@@ -109,11 +141,15 @@ $(document).ready(function() {
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);
         updateURLTarget();
+        if(current_graph.data.length>=2) {
+          $("a#advanced-options-link").css('display', 'inline');
+        }
       },
       error: function() {
         // inform the user something went wrong.
       }
     });
+   
   });
 
   $('#datasets').on('change', function(event) {
@@ -122,6 +158,7 @@ $(document).ready(function() {
       current_dataset = null;
       gene_entry.url = null;
       $("#gene").attr('disabled', true);
+      
     } else {
      $("#gene").attr('disabled', false);
       gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
@@ -150,27 +187,70 @@ $(document).ready(function() {
   
   $('#show_labels').on("click", function(event){
   	d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
-  	return false;
+  	
+  	if ($(this).text()=="Show labels"){
+  		$(this).text("Clear labels");
+  	}
+  	else {
+  		$(this).text("Show labels");
+  	}
+  	event.preventDefault();
+  	
   });
   
-  $('#select_all').on('click', function(event) {
-  	d3.selectAll('circle').classed('highlighted', true);
-  	var dat = [];
-  	d3.selectAll('circle.highlighted').each(function(d) {
-    	dat.push(d.k);
-  	});
-  	dat = _.uniq(dat);
-  	_.each(dat, addInformation);
-  	return false;
+  $('#select_clear').on('click', function(event) {
+  	if ($(this).text()=="Select all"){
+  		d3.selectAll('circle').classed('highlighted', true);
+  		var dat = [];
+  		d3.selectAll('circle.highlighted').each(function(d) {
+    		dat.push(d.k);
+  		});
+  		dat = _.uniq(dat);
+  		_.each(dat, addInformation);
+  		$(this).text("Clear all");
+  	}
+  	else {
+  		d3.selectAll('circle').classed('highlighted', false);
+  		clearInformation();
+  		$(this).text("Select all");
+  		
+	  	}
+	event.preventDefault();
 	});
+	
 
-$('#clear_selection').on('click', function(event) {
-  	d3.selectAll('circle').classed('highlighted', false);
-  	clearInformation();
-  	return false;
-});
  
+  $('#advanced-options-link').on('click', function(event) { 
+ 	$('#advanced-options').toggle();
+ 	event.preventDefault();
+ 	});
+ 		
+  $('#sample').on('change', function(event){
+  	var sample_entry = event.target.value.split(" ");
+  	var circles = d3.selectAll('circle'); 
+  	
+  	var dat = [];
+  	circles.each(function(d) { dat.push(d.k);});
+  	dat = _.uniq(dat);
+  	
+  	sample_valid = _.filter(sample_entry, function(item) {return _.contains(dat, item);});
+  	sample_invalid = _.filter(sample_entry, function(item) {return !(_.contains(dat, item));});
+  	
+  	d3.selectAll('circle').classed('highlighted', false);
+	circles.filter(function(d, i) {return (_.contains(sample_valid, d.k));})
+			.classed('highlighted', !d3.select(this).classed('highlighted'));
+	clearInformation();
+	_.each(sample_valid, addInformation);
+  	
+  	
+  	event.preventDefault();
+  	
+ 	});
   
+  
+  	
+  	
+
 
 });
 </script>

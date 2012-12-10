@@ -143,7 +143,7 @@ div#more-information {
     
     <%block name="graph">
     <div class="row-fluid">
-     <div class="span12"id ="more-information"></div>
+     <div class="span12" id ="more-information"></div>
  	</div>
  	
     <div class="row-fluid">
@@ -229,6 +229,10 @@ div#more-information {
       return { q: this.$el.val() };
     }
   });
+  
+
+  
+  
 })(jQuery);
 </script>
 </%block>

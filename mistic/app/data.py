@@ -207,17 +207,20 @@ class Annotation(object):
     self.go_indirect = collections.defaultdict(set)
     self.go_genes_indirect = collections.defaultdict(set)
     
-    self.chr = collections.defaultdict(set)
-    self.chr_genes = collections.defaultdict(set)
+    self.others = collections.defaultdict(list)
+    self.others_genes = collections.defaultdict(list)
     
-    self.band = collections.defaultdict(set)
-    self.band_genes = collections.defaultdict(set)
+    #self.chr = collections.defaultdict(set)
+    #self.chr_genes = collections.defaultdict(set)
     
-    self.leukemia_causing = collections.defaultdict(set)
-    self.leukemia_causing_genes = collections.defaultdict(set)
+    #self.band = collections.defaultdict(set)
+    #self.band_genes = collections.defaultdict(set)
+    
+    #self.leukemia_causing = collections.defaultdict(set)
+    #self.leukemia_causing_genes = collections.defaultdict(set)
 
-    self.reactome = collections.defaultdict(set)
-    self.reactome_genes = collections.defaultdict(set)
+    #self.reactome = collections.defaultdict(set)
+    #self.reactome_genes = collections.defaultdict(set)
     
     desc = {}
     for row in open(self.path):
@@ -234,26 +237,44 @@ class Annotation(object):
       self.go[ident] = set([ x[0] for x in attrs.get('go', []) ])
       self.go_indirect[ident] = ontology.parents(self.go[ident])
       
-      chr = attrs.get('chr', '')
+      for ka in attrs.keys():
+        if ka=="go": continue 
+        if not self.others.has_key(ka): 
+          self.others[ka] = collections.defaultdict(set)
+       
+        try: 
+          self.others[ka][ident].add(attrs.get(ka))
+        except :
+          self.others[ka][ident] = set(attrs.get(ka)) 
+        
+        for g in self.others[ka][ident]:
+          if not self.others_genes.has_key(ka): 
+            self.others_genes[ka] = collections.defaultdict(set)
+          self.others_genes[ka][g].add(ident)
+            
+        
+      #chr = attrs.get('chr', '')
       
-      self.chr[ident] = set(["chr%s"%chr if (chr.isdigit() or chr in ['X','Y','MT']) else chr])
-      self.band[ident] = set([attrs.get('band', '')])
-      self.leukemia_causing[ident] = set([attrs.get("leukemia_causing", "")])
-      self.reactome[ident] = set(attrs.get('reactome', []))
-
-  
+      #self.chr[ident] = set(["chr%s"%chr if (chr.isdigit() or chr in ['X','Y','MT']) else chr])
+      #self.band[ident] = set([attrs.get('band', '')])
+      #self.leukemia_causing[ident] = set([attrs.get("leukemia_causing", "")])
+      #self.reactome[ident] = set(attrs.get('reactome', []))
       for g in self.go[ident]:
         self.go_genes[g].add(ident)
       for g in self.go_indirect[ident]:
         self.go_genes_indirect[g].add(ident)
-      for g in self.chr[ident]:
-        self.chr_genes[g].add(ident)
-      for g in self.band[ident]:
-        self.band_genes[g].add(ident)
-      for g in self.leukemia_causing[ident]:
-        self.leukemia_causing_genes[g].add(ident)
-      for g in self.reactome[ident]:
-        self.reactome_genes[g].add(ident)
+      
+      
+      
+      #for g in self.chr[ident]:
+      #  self.chr_genes[g].add(ident)
+      #for g in self.band[ident]:
+      #  self.band_genes[g].add(ident)
+      #for g in self.leukemia_causing[ident]:
+      #  self.leukemia_causing_genes[g].add(ident)
+      #for g in self.reactome[ident]:
+      #  self.reactome_genes[g].add(ident)
+    
     
     
     self.genes = set(self.attrs.keys())

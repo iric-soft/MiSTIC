@@ -86,18 +86,12 @@
     };
 
 							 
-	scatterplot.prototype.highlightCircle = function (d){
+	scatterplot.prototype.highlightCircle = function (e){
 		
-        var circles = d3.selectAll('#graph svg').selectAll('circle'); 
-	
-		for (i=0; i<circles.data().length; i++){
-			var c = circles[0][i];
-			var e = circles.data()[i];					
-			if (e.k==d.k){
-                d3.select(c).classed('highlighted', !d3.select(c).classed('highlighted'))
-			}	
-		}	
-		addInformation(d.k);
+		d3.selectAll('#graph svg').selectAll('circle')
+			.filter(function(d, i) {return (d.k==e.k);})
+			.classed('highlighted', !d3.select(this).classed('highlighted'));
+		addInformation(e.k);
 		
 	};
 	
@@ -142,11 +136,13 @@
             .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
 
 		if (this.options.makeGridLine) {
-			var xgrid = svg.selectAll('.axis-x line').filter(function(d, i) {return d <= self.options.gridValue});
-			xgrid.each(function(d, i) {d3.select(this).attr('y1',-(self.height -self.options.padding[2] + self.options.outer)-self.yScale(d3.min([self.yScale.domain()[1],self.options.gridValue])));});
-		
-			var ygrid = svg.selectAll('.axis-y line').filter(function(d, i) {return d <= self.options.gridValue});
-			ygrid.each(function(d, i) {d3.select(this).attr('x2', self.xScale(self.xScale.domain()[1])-(self.options.padding[3] - self.options.outer));});
+			svg.selectAll('.axis-x line')
+				.filter(function(d, i) {return d <= self.options.gridValue})
+				.attr('y1',-(self.height -self.options.padding[2] + self.options.outer)-self.yScale(d3.min([self.yScale.domain()[1],self.options.gridValue])));
+				
+			 svg.selectAll('.axis-y line')
+			 	.filter(function(d, i) {return d <= self.options.gridValue})
+			 	.attr('x2', self.xScale(self.xScale.domain()[1])-(self.options.padding[3] - self.options.outer));
 		}
 
 
@@ -176,42 +172,7 @@
                 .text(this.ylab);
         }
     };
-	scatterplot.prototype.makeGridLine = function(){
 
-		var self = this;
-        var svg = d3.select(this.svg);
-    		  
-        svg.append('g')
-        		.attr('class', 'grid-lines').attr('opacity', .5);
-       	 		
-        if (this.yScale.domain()[0]< this.options.gridValue ){
-       		svg.select('g.grid-lines')	
-       			.selectAll('rect')
-       			.data([this.options.gridValue])
-       			.enter()
-       			.append('rect')
-       			.attr('class', 'grid-lines-y')
-       			.attr('width', this.xScale.range()[1]-this.xScale.range()[0])
-            	.attr('height', function (d) { var y=d3.min([d, self.yScale.domain()[1]]); return (self.yScale.range()[0]-self.yScale(y)); } )
-            	.attr('x', this.xScale.range()[0])
-            	.attr('y', function(d) {var y=d3.min([d, self.yScale.domain()[1]]); return self.yScale(y)})
-            	.attr('fill', 'url(#hatch00)');
-     	}
-     	
-        if (this.xScale.domain()[0]< this.options.gridValue ){
-               
-       		svg.select('g.grid-lines')	
-       			.append('rect')
-       			.attr('class', 'grid-lines-x')
-       			.attr('width', function (d) {var x=d3.min([self.options.gridValue, self.xScale.domain()[1]]);return self.xScale(x)-self.xScale.range()[0];})
-            	.attr('height', this.yScale.range()[0]-this.yScale.range()[1])
-            	.attr('x', this.xScale.range()[0])
-            	.attr('y', this.yScale.range()[1])
-            	.attr('fill', 'url(#hatch01)');
-            	
-        }
-	}
-	
     
     scatterplot.prototype.draw = function(data) {
     	clearInformation();  //utils.js  
@@ -284,31 +245,31 @@
         }
         
         
-      
-        
-        svg .selectAll("circle")
+
+        node = svg .selectAll(".node")
             .data(xy)
-            .enter()
-            .append('circle')
+            .enter().append("g")
+            .attr("class", "node");
+            
+       node.append('circle')
             .attr('cx', function(d) { return self.xScale(d.x); })
             .attr('cy', function(d) { return self.yScale(d.y); })
             .attr('r',  this.options.pt_size)
-           	.attr('opacity', 0.5)
-           	.on('click', this.highlightCircle)
-           	.append('title')
+           	.attr('opacity', 0.65)
+           	.on('click', this.highlightCircle);
+     
+       node.append('title')
             .text(function(d) {return 'ID='+d.k+'  ('+d.x.toFixed(2)+', '+d.y.toFixed(2)+')';});
            
         var pt_size = this.options.pt_size;
         var font_size = pt_size + 8; 
-     	svg .selectAll("text")
-     		.data(xy)
-     		.enter()	
-     		.append("text")
+     
+     	node.append("text")
            	.text(function(d) {return d.k;} )
            	.attr('x', function(d) { return self.xScale(d.x)+pt_size; })
            	.attr('y', function(d) { return self.yScale(d.y)+pt_size;})
            	.attr('style', 'font-size:'+ font_size+"px;")
-           	.classed('circlelabel invisible', true);
+           	.classed('circlelabel invisible', true); 
         
 
         if (this.options.display_corr) {

@@ -21,7 +21,9 @@
     <input type="text" id="gene1">
     <label for="gene2">Gene 2:</label>
     <input type="text" id="gene2">
-    <button class="btn btn-primary" style="float:right;" data-toggle="button" id="show_labels"> Toggle labels </button>
+    
+    <button class="btn btn-primary" data-toggle="button" style="float:right;display:none;"  id="show_labels"> Toggle labels </button>
+    
   
   </form>
   
@@ -85,7 +87,7 @@ $(document).ready(function() {
 
   gene1_entry.on('change', function(item) {
     current_gene1 = item;
-    console.log(current_gene1.attributes);
+    //console.log(current_gene1.attributes);
     gene1_entry.$el.toggleClass('valid', item !== null);
 
     if (current_gene1 === null) { current_graph.setXData(undefined); return; }
@@ -114,6 +116,7 @@ $(document).ready(function() {
       success: function(data) {
         current_graph.setYData(data);
         updateURLTarget({ gene2: current_gene2.id });
+        $("#show_labels").css("display","block");
       },
       error: function() {
         // inform the user something went wrong.
@@ -124,7 +127,6 @@ $(document).ready(function() {
   $('#datasets').on('change', function(event) {
     current_dataset = event.target.value;
     if (current_dataset === '') {
-      
       current_dataset = null;
       gene1_entry.url =
       gene2_entry.url = null;
