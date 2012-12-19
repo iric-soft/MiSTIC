@@ -46,12 +46,12 @@ def run(args):
   dataset = DataSet.readTSV(args.input)
   
   if args.transform == 'rank':
-    dataset.data = RankTransform()(dataset.data)
+    dataset.df = RankTransform()(dataset.df)
   elif args.transform == 'anscombe':
-    dataset.data = AnscombeTransform()(dataset.data)
+    dataset.df = AnscombeTransform()(dataset.df)
     dataset.filter(filt)
   elif args.transform == 'log':
-    dataset.data = LogTransform()(dataset.data)
+    dataset.df = LogTransform()(dataset.df)
     dataset.filter(filt)
   elif args.transform == 'none':
     dataset.filter(filt)
