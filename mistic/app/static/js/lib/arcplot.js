@@ -665,6 +665,7 @@
             .attr("width", this.width)
             .attr("height", this.height)
             .attr('version', '1.1')
+            .attr('baseProfile', 'full')
             .attr("pointer-events", "all")
             .attr('xmlns', 'http://www.w3.org/2000/svg');
 
