@@ -28,10 +28,15 @@
             _.extend(this.options, options);
         }
 
+        this.selected_ids = {};
+
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
  
         this.width = this.options.width;
         this.height = this.options.height;
+
+        this.S = 1.0;
+        this.T = [ 0.0, 0.0 ];
 
         d3.select(this.svg)
             .attr("width", this.width)
@@ -54,9 +59,8 @@
             .append('g')
             .attr('class', 'labels')
             .attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 100')
-            .attr('text-anchor', 'middle')
             .attr('dy', 5)
-            .attr('fill', '#000')
+            .attr('fill', '#fff')
             .attr("pointer-events", "none");
     };
 
@@ -65,6 +69,34 @@
     mstplot.prototype.weightColour = function(w) {
         return this.options.ramp(1-w);
     };
+
+    mstplot.prototype.screenToView = function(x, y) {
+        return {
+            x: (x - this.T[0]) / this.S,
+            y: (y - this.T[1]) / this.S
+        };
+    }
+
+    mstplot.prototype.viewToScreen = function(x, y) {
+        return {
+            x: (x * this.S) + this.T[0],
+            y: (y * this.S) + this.T[1]
+        };
+    }
+
+    mstplot.prototype.screenToPlot = function(x, y) {
+        return {
+            x: (((x - this.T[0]) / this.S) - this.options.dx) / this.options.scale,
+            y: (((y - this.T[1]) / this.S) - this.options.dy) / this.options.scale
+        };
+    }
+
+    mstplot.prototype.plotToScreen = function(x, y) {
+        return {
+            x: (((x - this.T[0]) / this.S) - this.options.dx) / this.options.scale,
+            y: (((y - this.T[1]) / this.S) - this.options.dy) / this.options.scale
+        };
+    }
 
     mstplot.prototype.visibleLabels = function(translate, scale) {
         var xlo = Math.floor((((-100 - translate[0]) / scale) - this.options.dx) / this.options.scale * GRID_DIV);
@@ -110,20 +142,35 @@
         if (T[0] + S * this.width < this.width) T[0] = this.width - (S * this.width);
         if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
 
+        this.S = S
+        this.T = [ T[0], T[1] ];
+
         this.body
             .attr("transform",
                   "translate(" + T + ")" + " scale(" + S + ")");
 
-        var opacity = Math.min(1.0, (S * this.options.node_r - 10) / 10.0);
+        this.updateLabels();
+    };
+    
+    mstplot.prototype.updateLabels = function() {
+        var self = this;
+        var labels = [];
 
-        if (opacity <= 0.0) {
-            this.labels.selectAll('g').remove();
-            return;
+        var selected = _.keys(this.selected_ids);
+        for (var i = 0; i < selected.length; ++i) {
+            if (this.nodes_by_id.hasOwnProperty(selected[i])) {
+                labels.push(this.nodes_by_id[selected[i]]);
+            }
         }
 
-        var labels = this.visibleLabels(T, S);
-
-        this.labels.attr('opacity', opacity);
+        if (this.options.node_r * this.S >= 10) {
+            var visible = this.visibleLabels(this.T, this.S);
+            for (var i = 0; i < visible.length; ++i) {
+                if (!this.selected_ids.hasOwnProperty(visible[i].id)) {
+                    labels.push(visible[i]);
+                }
+            }
+        }
 
         var l = this.labels.selectAll('g').data(labels, function(d) { return d.idx; });
 
@@ -131,12 +178,26 @@
           .enter()
             .append('g');
 
-        g.append('rect').attr('height', 13).attr('y', -6).attr('fill', '#eee').attr('stroke', '#000');
-        g.append('text').attr('x', 0).attr('y', 5).text(function(d) { return self.labelText(d.id); });
+        g.append('circle')
+            .attr('cx', 0)
+            .attr('cy', 0)
+            .attr('r', 4)
+            .attr('stroke', '#eee')
+            .attr('stroke-width', 2)
+            .attr('fill',   '#000');
+        g.append('rect')
+            .attr('height', 15)
+            .attr('x', 6).attr('y', -7.5)
+            .attr('fill', '#0074cc')
+            .attr('stroke', '#000');
+        g.append('text')
+            .attr('x', 10)
+            .attr('y', 3.5)
+            .text(function(d) { return self.labelText(d.id); });
 
         g.each(function(d) {
-            var w = d3.select(this).select('text')[0][0].getBBox().width + 4;
-            d3.select(this).select('rect').attr('x', -w / 2).attr('width', w);
+            var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
+            d3.select(this).select('rect').attr('width', w);
         });
 
         l
@@ -145,9 +206,8 @@
 
         l
             .attr('transform', function(d) {
-                var _x = T[0] + S * (d.x);
-                var _y = T[1] + S * (d.y);
-                return 'translate(' + String(_x) + ',' + String(_y) + ')';
+                var pos = self.viewToScreen(d.x, d.y);
+                return 'translate(' + String(pos.x) + ',' + String(pos.y) + ')';
             });
     };
 
@@ -157,16 +217,18 @@
         this.info = info;
 
         this.nodes = [];
+        this.nodes_by_id = {};
+
         for (var i = 0; i < nodes.length; ++i) {
-            this.nodes.push({
+            var n = {
                 id: nodes[i],
                 x: pos[i][0],
                 y: pos[i][1],
                 idx: i
-            });
+            };
+            this.nodes.push(n);
+            this.nodes_by_id[n.id] = n;
         }
-
-        // this.nodes = _.first(this.nodes, 100);
 
         var x_range = d3.extent(this.nodes, function(d) { return d.x; });
         var y_range = d3.extent(this.nodes, function(d) { return d.y; });
@@ -281,6 +343,6 @@
             .attr('r', this.options.node_r)
             .attr('stroke', '#eee')
             .attr('stroke-width', this.options.node_w)
-            .attr('fill',   '#000');
+            .attr('fill',   '#081D58');
     };
 })();

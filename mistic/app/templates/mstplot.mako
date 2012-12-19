@@ -8,6 +8,11 @@ import mistic.app.data as data
   ${parent.actions()}
 </%block>
 <%block name="controls">
+  <form class="form-inline">
+    <span id="genelist"></span>
+    <label for="gene">Gene:</label>
+    <input type="text" id="gene">
+  </form>
 </%block>
 <%block name="style">
 ${parent.style()}
@@ -35,6 +40,7 @@ ${parent.pagetail()}
      ch =  a.attrs.get(g, {}).get('chromosome')
    )) for g in nodes ])
 %>
+
 $(document).ready(function() {
   var nodes = ${json.dumps(nodes)|n};
   var edges = ${json.dumps(edges)|n};
@@ -47,6 +53,15 @@ $(document).ready(function() {
   current_graph.draw();
 
   $('div#graph').append(current_graph.svg);
+
+  var gene_entry = new GeneDropdown({ el: $("#gene") });
+  gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset=ds.id)}";
+
+  gene_entry.on('change', function(item) {
+    if (item === null) return;
+    current_graph.selected_ids[item.id] = true;
+    current_graph.updateLabels();
+  });
 });
 </script>
 </%block>
