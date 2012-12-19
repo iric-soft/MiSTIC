@@ -312,7 +312,7 @@
             .attr('x', 0.0)
             .attr('y', 0.0)
             .attr('fill', 'white')
-            .attr('stroke', 'rgba(0,0,0,.2)')
+            .attr('stroke', '#aaa')
             .attr('stroke-width', '1')
             .attr('shape-rendering', 'crispEdges');
 
