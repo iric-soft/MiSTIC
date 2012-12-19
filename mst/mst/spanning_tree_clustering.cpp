@@ -74,6 +74,70 @@ bool invertMatrix(const matrix_t &input, matrix_t &inverse) {
 
 
 template<typename matrix_t>
+void readMatrix(std::istream &in,
+                size_t id_col,
+                size_t first_data_col,
+                matrix_t &matrix,
+                std::vector<std::string> &row_labels,
+                std::vector<std::string> &col_labels,
+                bool &contains_missing_vals,
+                double missing_val = std::numeric_limits<double>::quiet_NaN()) {
+  typedef typename matrix_t::value_type T;
+
+  std::string line;
+  std::getline(in, line);
+
+  std::vector<std::string> vals;
+  vals = str::split(line, '\t');
+
+  size_t n_cols = vals.size() - first_data_col;
+  col_labels.clear();
+  col_labels.reserve(n_cols);
+  col_labels.insert(col_labels.end(),
+                    vals.begin() + first_data_col,
+                    vals.end());
+
+  std::list<std::valarray<T> > temp;
+
+  contains_missing_vals = false;
+
+  while (in.good()) {
+    std::getline(in, line);
+    if (!line.size()) break;
+    vals = str::split(line, '\t');
+
+    row_labels.push_back(vals[id_col]);
+    temp.push_back(std::valarray<T>(n_cols));
+
+    std::valarray<T> &rowdata = temp.back();
+    for (size_t i = 0; i < n_cols; ++i) {
+      std::istringstream ins(vals[first_data_col + i]);
+      ins >> rowdata[i];
+      if (ins.fail()) {
+        rowdata[i] = missing_val;
+        contains_missing_vals = true;
+        // throw std::runtime_error("failed to read matrix");
+      }
+    }
+  }
+
+  size_t n_rows = temp.size();
+
+  matrix.resize(n_rows, n_cols, false);
+
+  typedef typename std::list<std::valarray<T> >::const_iterator iter_t;
+  iter_t ii = temp.begin();
+  for (size_t i = 0; i < n_rows; ++i) {
+    for (size_t j = 0; j < n_cols; ++j) {
+      matrix(i,j) = (*ii)[j];
+    }
+    ++ii;
+  }
+}
+
+
+
+template<typename matrix_t>
 void writeMatrix(std::ostream &out,
                  matrix_t &matrix,
                  std::vector<std::string> &row_labels,
@@ -92,32 +156,40 @@ void writeMatrix(std::ostream &out,
   for (size_t i = 0; i < N; ++i) {
     out << row_labels[i];
     for (size_t j = 0; j < M; ++j) {
-      out << '\t' << matrix(i,j);
+      out << '\t';
+      if (!std::isnan(matrix(i,j))) {
+        out << matrix(i, j);
+      }
     }
     out << std::endl;
   }
 }
 
+template<bool masked>
 struct rowMax {
   template<typename row_t>
   double operator()(const row_t &row) {
-    return *std::max_element(row.begin(), row.end());
+    return mathkernel_t<masked>::max(row, row.size());
   }
 };
 
+template<bool masked>
 struct rowMean {
   template<typename row_t>
   double operator()(const row_t &row) {
-    return mean(row, row.size());
+    return mathkernel_t<masked>::mean(row, row.size());
   }
 };
 
+template<bool masked>
 struct rowVariance {
   template<typename row_t>
   double operator()(const row_t &row) {
-    return variance(row, row.size());
+    return mathkernel_t<masked>::variance(row, row.size());
   }
 };
+
+
 
 template<typename func_t>
 void selectRows(const matrix_t &m, size_t n_rows, std::vector<size_t> &selected_rows, func_t func) {
@@ -140,6 +212,8 @@ void selectRows(const matrix_t &m, size_t n_rows, std::vector<size_t> &selected_
   selected_rows.insert(selected_rows.end(), indices.end() - n_rows, indices.end());
 }
 
+
+
 void takeRows(matrix_t &m, std::vector<std::string> &m_rows, const std::vector<size_t> &selected_rows) {
   matrix_t temp(selected_rows.size(), m.size2());
   std::vector<std::string> temp_ids;
@@ -157,177 +231,62 @@ void takeRows(matrix_t &m, std::vector<std::string> &m_rows, const std::vector<s
   std::swap(m_rows, temp_ids);
 }
 
-template<typename matrix_t>
-void readMatrix(std::istream &in,
-                size_t id_col,
-                size_t first_data_col,
-                matrix_t &matrix,
-                std::vector<std::string> &row_labels,
-                std::vector<std::string> &col_labels) {
-  typedef typename matrix_t::value_type T;
 
-  std::string line;
-  std::getline(in, line);
 
-  std::vector<std::string> vals;
-  vals = str::split(line, '\t');
+template<bool masked>
+struct zScoreTransform {
+  template<typename vec_t>
+  void operator()(vec_t &v) {
+    const size_t N = v.size();
 
-  size_t n_cols = vals.size() - first_data_col;
-  col_labels.clear();
-  col_labels.reserve(n_cols);
-  col_labels.insert(col_labels.end(),
-                    vals.begin() + first_data_col,
-                    vals.end());
+    const std::pair<double, double> mean_sd = mathkernel_t<masked>::winsorised_mean_sd(v, v.size(), .05);
 
-  std::list<std::valarray<T> > temp;
+    const double mean = mean_sd.first;
+    const double sd = mean_sd.second;
 
-  while (in.good()) {
-    std::getline(in, line);
-    if (!line.size()) break;
-    vals = str::split(line, '\t');
-
-    row_labels.push_back(vals[id_col]);
-    temp.push_back(std::valarray<T>(n_cols));
-
-    std::valarray<T> &rowdata = temp.back();
-    for (size_t i = 0; i < n_cols; ++i) {
-      std::istringstream ins(vals[first_data_col + i]);
-      ins >> rowdata[i];
-      if (ins.fail()) {
-        throw std::runtime_error("failed to read matrix");
-      }
-    }
-
+    mathkernel_t<masked>::transform(v, v.size(), -mean, 1/sd);
   }
-
-  size_t n_rows = temp.size();
-
-  matrix.resize(n_rows, n_cols, false);
-
-  typedef typename std::list<std::valarray<T> >::const_iterator iter_t;
-  iter_t ii = temp.begin();
-  for (size_t i = 0; i < n_rows; ++i) {
-    for (size_t j = 0; j < n_cols; ++j) {
-      matrix(i,j) = (*ii)[j];
-    }
-    ++ii;
-  }
-}
+};
 
 
 
-template<typename vec_t>
-std::pair<double, double> trimmed_mean_sd(const vec_t &v, double discard_fraction) {
-  size_t N_disc = (size_t)floor(v.size() * discard_fraction / 2.0);
-  if (N_disc == 0) {
-    return std::make_pair(
-        mean(v, v.size()),
-        stddev(v, v.size()));
-  } else {
-    size_t N_rem = v.size() - 2*N_disc;
-    if (N_rem == 0) {
-      return std::pair<double, double>(0.0, std::numeric_limits<double>::infinity());
-    }
-    std::vector<double> trim;
-    trim.reserve(v.size());
-    std::copy(v.begin(), v.end(), std::back_inserter(trim));
-    std::nth_element(trim.begin(), trim.begin() + N_disc, trim.end(), std::less<double>());
-    std::nth_element(trim.begin() + N_disc, trim.begin() + 2*N_disc, trim.end(), std::greater<double>());
-    return std::make_pair(
-        mean(trim.begin() + 2*N_disc, N_rem),
-        stddev(trim.begin() + 2*N_disc, N_rem));
-  }
-}
+template<bool masked>
+struct rowZScoreTransform {
+  void operator()(matrix_t &m) {
+    typedef ublas::matrix_row<matrix_t> row_t;
+    const size_t N = m.size1();
 
-
-
-template<typename vec_t>
-void zScoreTransform(vec_t &v) {
-  const size_t N = v.size();
-
-  const std::pair<double, double> mean_sd = trimmed_mean_sd(v, .05);
-  const double mean = mean_sd.first;
-  const double sd = mean_sd.second;
-
-  for (size_t i = 0; i < N; ++i) {
-    v[i] = (v[i] - mean) / sd;
-  }
-}
-
-
-
-template<typename vec_t>
-void rankTransform(vec_t &v, std::vector<double> &rankvals) {
-  const size_t N = v.size();
-
-  std::vector<size_t> indices(N);
-  for (size_t i = 0; i < N; ++i) indices[i] = i;
-
-  std::sort(indices.begin(), indices.end(), make_index_cmp(v));
-
-  size_t i = 0;
-
-  while (i < N) {
-    size_t j = i;
-    double val = 0.0;
-
-    while (j < N && v[indices[j]] == v[indices[i]]) {
-      val += rankvals[j++];
-    }
-
-    val /= j-i;
-
-    while (i < j) {
-      v[indices[i++]] = val;
+    for (size_t i = 0; i < N; ++i) {
+      row_t r(m, i);
+      zScoreTransform<masked>()(r);
     }
   }
-}
+};
 
 
 
-void makeRankVals(std::vector<double> &rankvals, const size_t N) {
-  rankvals.resize(N);
-  double rs = 0;
-
-  for (size_t i = 0; i < N; ++i) {
-    rankvals[i]  = ((i+1)-(N+1)/2.0) / (N/2.0);
-    rs += rankvals[i] * rankvals[i];
+template<bool masked>
+struct rankTransform {
+  template<typename vec_t>
+  void operator()(vec_t &v) {
+    mathkernel_t<masked>::rank_transform(v, v.size());
   }
+};
 
-  rs = 1.0/sqrt(rs);
 
-  for (size_t i = 0; i < N; ++i) {
-    rankvals[i] *= rs;
+
+template<bool masked>
+struct rowRankTransform {
+  void operator()(matrix_t &m) {
+    typedef ublas::matrix_row<matrix_t> row_t;
+    const size_t N = m.size1();
+
+    for (size_t i = 0; i < N; ++i) {
+      row_t r(m, i);
+      rankTransform<masked>()(r);
+    }
   }
-}
-
-
-
-void rowZScoreTransform(matrix_t &m) {
-  typedef ublas::matrix_row<matrix_t> row_t;
-  const size_t N = m.size1();
-
-  for (size_t i = 0; i < N; ++i) {
-    row_t r(m, i);
-    zScoreTransform(r);
-  }
-}
-
-
-
-void rowRankTransform(matrix_t &m) {
-  typedef ublas::matrix_row<matrix_t> row_t;
-  const size_t N = m.size1();
-  const size_t M = m.size2();
-
-  std::vector<double> rankvals;
-  makeRankVals(rankvals, M);
-
-  for (size_t i = 0; i < N; ++i) {
-    row_t r(m, i);
-    rankTransform(r, rankvals);
-  }
-}
+};
 
 
 
@@ -626,6 +585,7 @@ void kruskalMST(const matrix_t &m_dist, undirected_graph_t &graph) {
 
 namespace metric {
   namespace weight {
+    template<bool masked>
     struct random {
       random(const matrix_t &) {
         unsigned int seed;
@@ -643,6 +603,7 @@ namespace metric {
       }
     };
   
+    template<bool masked>
     struct euclidean {
       euclidean(const matrix_t &) { }
 
@@ -650,10 +611,11 @@ namespace metric {
       double operator()(const vec_t &a,
                         const vec_t &b,
                         size_t sz) const {
-        return ::euclideanDistance(a, b, sz);
+        return mathkernel_t<masked>::euclidean_distance(a, b, sz);
       }
     };
   
+    template<bool masked>
     struct dotprod {
       dotprod(const matrix_t &) { }
 
@@ -661,10 +623,11 @@ namespace metric {
       double operator()(const vec_t &a,
                         const vec_t &b,
                         size_t sz) const {
-        return ::dotprod(a, b, sz);
+        return mathkernel_t<masked>::dot_product(a, b, sz);
       }
     };
   
+    template<bool masked>
     struct pearson_corr {
       pearson_corr(const matrix_t &) { }
 
@@ -672,13 +635,15 @@ namespace metric {
       double operator()(const vec_t &a,
                         const vec_t &b,
                         size_t sz) const {
-        return ::pearson_corr(a, b, sz);
+        return mathkernel_t<masked>::pearson_corr(a, b, sz);
       }
     };
   
+    template<bool masked>
     struct mahalanobis {
       matrix_t cov;
       matrix_t inv_cov;
+
       mahalanobis(const matrix_t &m) : cov(m.size2(), m.size2()) {
         typedef ublas::matrix_column<const matrix_t> col_t;
 
@@ -686,33 +651,54 @@ namespace metric {
 
         for (size_t i = 0; i < N; ++i) {
           for (size_t j = 0; j <= i; ++j) {
-            cov(i,j) = cov(j, i) = covariance(col_t(m, i), col_t(m, j), m.size1());
+            cov(i,j) = cov(j, i) = mathkernel_t<masked>::covariance(col_t(m, i), col_t(m, j), m.size1());
           }
         }
         invertMatrix(cov, inv_cov);
       }
 
       template<typename vec_t>
-      double operator()(const vec_t &a,
-                        const vec_t &b,
-                        size_t sz) const {
-
-        return sqrt(inner_prod(prod(a, inv_cov), b));
-      }
+      double operator()(const vec_t &a, const vec_t &b, size_t sz) const;
     };
+
+    template<>
+    template<typename vec_t>
+    double mahalanobis<false>::operator()(const vec_t &a, const vec_t &b, size_t sz) const {
+      return sqrt(inner_prod(prod(a, inv_cov), b));
+    }
+
+    template<>
+    template<typename vec_t>
+    double mahalanobis<true>::operator()(const vec_t &a, const vec_t &b, size_t sz) const {
+      double r = 0.0;
+      for (size_t i = 0; i < b.size(); ++i) {
+        if (std::isnan(b[i])) continue;
+        double p = 0.0;
+        for (size_t j = 0; j < a.size(); ++j) {
+          if (!std::isnan(a[j])) {
+            p += a[j] * inv_cov(j, i);
+          }
+        }
+        r += p * b[i];
+      }
+      return sqrt(r);
+    }
   }
 
   namespace transform {
+    template<bool masked>
     struct identity {
       void transform(matrix_t &mat) { }
     };
   
+    template<bool masked>
     struct zscore {
-      void transform(matrix_t &mat) { rowZScoreTransform(mat); }
+      void transform(matrix_t &mat) { rowZScoreTransform<masked>()(mat); }
     };
 
+    template<bool masked>
     struct rank {
-      void transform(matrix_t &mat) { rowRankTransform(mat); }
+      void transform(matrix_t &mat) { rowRankTransform<masked>()(mat); }
     };
   }
 }
@@ -972,14 +958,80 @@ struct Options : public opt::Parser {
   }
 };
 
+
+
 static Options options;
 
+
+
+template<bool masked>
+struct matrix_processor_t {
+  void select_rows(Options::SelectFunc select_func, size_t probe_count, matrix_t &m, std::vector<std::string> &m_rows) {
+    if (probe_count) {
+      std::vector<size_t> selected_rows;
+      selected_rows.reserve(probe_count);
+      switch (select_func) {
+      case Options::SF_MAX:
+        selectRows(m, probe_count, selected_rows, rowMax<masked>());
+        takeRows(m, m_rows, selected_rows);
+        break;
+      case Options::SF_MEAN:
+        selectRows(m, probe_count, selected_rows, rowMean<masked>());
+        takeRows(m, m_rows, selected_rows);
+        break;
+      case Options::SF_VARIANCE:
+        selectRows(m, probe_count, selected_rows, rowVariance<masked>());
+        takeRows(m, m_rows, selected_rows);
+        break;
+      case Options::SF_NONE:
+        break;
+      }
+    }
+  }
+
+  void transform(Options::ExprTransformFunc expr_transform, matrix_t &m) {
+    switch (expr_transform) {
+    case Options::ET_NONE:
+      break;
+    case Options::ET_RANK:
+      std::cerr << "rank transform" << std::endl;
+      metric::transform::rank<masked>().transform(m);
+      break;
+    case Options::ET_ZSCORE:
+      std::cerr << "z-score transform" << std::endl;
+      metric::transform::zscore<masked>().transform(m);
+      break;
+    }
+  }
+
+  void weight(Options::WeightFunc weight_func, const matrix_t &m, matrix_t &m_weight) {
+    switch (weight_func) {
+    case Options::PEARSON:
+      weightMatrix(m, m_weight, metric::weight::pearson_corr<masked>(m));
+      break;
+    case Options::EUCLIDEAN:
+      weightMatrix(m, m_weight, metric::weight::euclidean<masked>(m));
+      break;
+    case Options::DOTPROD:
+      weightMatrix(m, m_weight, metric::weight::dotprod<masked>(m));
+      break;
+    case Options::MAHALANOBIS:
+      weightMatrix(m, m_weight, metric::weight::mahalanobis<masked>(m));
+      break;
+    case Options::RANDOM:
+      weightMatrix(m, m_weight, metric::weight::random<masked>(m));
+      break;
+    }
+  }
+};
 
 int main(int argc, char **argv) {
   if (!options.parse(argc, argv)) exit(1);
 
   matrix_t m;
   std::vector<std::string> m_rows, m_cols;
+
+  bool missing_vals;
 
   if (options.matrix != "") {
     std::cerr << "reading matrix file [" << options.matrix << "]" << std::endl;
@@ -989,72 +1041,43 @@ int main(int argc, char **argv) {
       exit(1);
     }
 
-    readMatrix(mat, options.id_col, options.data_col, m, m_rows, m_cols);
+    readMatrix(mat, options.id_col, options.data_col, m, m_rows, m_cols, missing_vals);
   } else {
     std::cerr << "reading matrix file [stdin]" << std::endl;
-    readMatrix(std::cin, options.id_col, options.data_col, m, m_rows, m_cols);
+    readMatrix(std::cin, options.id_col, options.data_col, m, m_rows, m_cols, missing_vals);
   }
   std::cerr << "reading matrix file done" << std::endl;
 
-  if (options.probe_count) {
-    std::vector<size_t> selected_rows;
-    selected_rows.reserve(options.probe_count);
-    switch (options.select_func) {
-      case Options::SF_MAX:
-        selectRows(m, options.probe_count, selected_rows, rowMax());
-        takeRows(m, m_rows, selected_rows);
-        break;
-      case Options::SF_MEAN:
-        selectRows(m, options.probe_count, selected_rows, rowMean());
-        takeRows(m, m_rows, selected_rows);
-        break;
-      case Options::SF_VARIANCE:
-        selectRows(m, options.probe_count, selected_rows, rowVariance());
-        takeRows(m, m_rows, selected_rows);
-        break;
-      case Options::SF_NONE:
-        break;
-    }
+  if (missing_vals) {
+    std::cerr << "matrix contains missing values" << std::endl;
+  }
+
+  std::cerr << "row selection" << std::endl;
+
+  if (missing_vals) {
+    matrix_processor_t<true>().select_rows(options.select_func, options.probe_count, m, m_rows);
+  } else {
+    matrix_processor_t<false>().select_rows(options.select_func, options.probe_count, m, m_rows);
   }
 
   std::cerr << "operating on " << m_rows.size() << " rows" << std::endl;
 
-  switch (options.expr_transform) {
-    case Options::ET_NONE: {
-      break;
-    }
-    case Options::ET_RANK: {
-      std::cerr << "rank transform" << std::endl;
-      metric::transform::rank().transform(m);
-      break;
-    }
-    case Options::ET_ZSCORE: {
-      std::cerr << "z-score transform" << std::endl;
-      metric::transform::zscore().transform(m);
-      break;
-    }
+  std::cerr << "transform" << std::endl;
+
+  if (missing_vals) {
+    matrix_processor_t<true>().transform(options.expr_transform, m);
+  } else {
+    matrix_processor_t<false>().transform(options.expr_transform, m);
   }
 
   matrix_t m_weight;
 
   std::cerr << "weight matrix" << std::endl;
-  // compute weight matrix
-  switch (options.weight_func) {
-    case Options::PEARSON:
-      weightMatrix(m, m_weight, metric::weight::pearson_corr(m));
-      break;
-    case Options::EUCLIDEAN:
-      weightMatrix(m, m_weight, metric::weight::euclidean(m));
-      break;
-    case Options::DOTPROD:
-      weightMatrix(m, m_weight, metric::weight::dotprod(m));
-      break;
-    case Options::MAHALANOBIS:
-      weightMatrix(m, m_weight, metric::weight::mahalanobis(m));
-      break;
-    case Options::RANDOM:
-      weightMatrix(m, m_weight, metric::weight::random(m));
-      break;
+
+  if (missing_vals) {
+    matrix_processor_t<true>().weight(options.weight_func, m, m_weight);
+  } else {
+    matrix_processor_t<false>().weight(options.weight_func, m, m_weight);
   }
 
   if (options.weight_file != "") {
