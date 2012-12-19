@@ -14,7 +14,8 @@ if (phantom.args.length >= 4) {
 
 page.open(input, function(status) {
   if (status !== 'success') {
-    console.log('Unable to load the address!');
+    console.log('Unable to load the input file!');
+    phantom.exit();
   } else {
     window.setTimeout(function () {
       page.render(output);
