@@ -1,20 +1,46 @@
 #!/usr/bin/env python
 
+import os
 import sys
+import re
 import argparse
+import pkgutil
 
 import mistic.scripts
 
+class ArgumentParser(argparse.ArgumentParser):
+  def convert_arg_line_to_args(self, arg_line):
+    arg_line = re.sub(r'#.*', '', arg_line)
+    for arg in arg_line.split():
+      if not arg.strip():
+        continue
+      yield arg
+
+def modulesInDir(dirname):
+  for importer, package_name, _ in pkgutil.iter_modules([dirname]):
+    try:
+      module = importer.find_module(package_name).load_module(package_name)
+    except:
+      continue
+    if all([ hasattr(module, x) for x in ('cmd', 'run', 'init_parser') ]):
+      yield module
+
 if __name__ == '__main__':
-  parser = argparse.ArgumentParser(prog=sys.argv[0])
+  parser = ArgumentParser(
+    prog = sys.argv[0],
+    fromfile_prefix_chars = '@')
   subparsers = parser.add_subparsers(help='sub-command help')
 
-  for name, module in [ (k,v) for k,v in mistic.scripts.__dict__.iteritems() if not k.startswith('__') ]:
-    if not hasattr(module, 'cmd'): continue
+  subcmds = {}
+  for module in modulesInDir(os.path.split(__file__)[0]):
+    subcmds[module.cmd] = module
+  for module in modulesInDir('.'):
+    subcmds[module.cmd] = module
 
+  for module in subcmds.itervalues():
     p = subparsers.add_parser(module.cmd)
     module.init_parser(p)
     p.set_defaults(func=module.run)
-  
+
   args = parser.parse_args(sys.argv[1:])
   args.func(args)
