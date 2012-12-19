@@ -38,11 +38,40 @@ class LogTransform(object):
 class RankTransform(object):
   def __init__(self):
     pass
+
+  def rankRow(self, row):
+    idx = [ i for i, j in enumerate(row) if not numpy.isnan(j) ]
+    idx.sort(key = lambda x: row[x])
+
+    mean = (len(idx) + 1) / 2.0
+    sd = math.sqrt((len(idx) * len(idx) - 1) / 12.0)
+
+    rank_vals = [ (i - mean) / sd for i in range(1, len(idx) + 1) ]
+
+    for i, r in zip(idx, rank_vals):
+      row[i] = r
+
+
+
   def __call__(self, matrix):
     o = (numpy.random.ranf(matrix.shape) - .5) * 0.001
-    return numpy.log2(matrix + 0.1 + o).argsort().argsort().astype(numpy.int)
 
+    if hasattr(matrix, 'values'):
+      df = numpy.log2(matrix + 0.1 + o)
+      d = df.values
+      r = df
+    else:
+      d = numpy.log2(matrix + 0.1 + o)
+      r = d
 
+    if len(d.shape) == 1:
+      self.rankRow(d)
+    else:
+      for i in range(len(d)):
+        self.rankRow(d[i])
+
+    return r
+    
 
 class DataSet(object):
   @property
