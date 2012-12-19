@@ -18,14 +18,18 @@ class PDFData(object):
   def _convert_rsvg(self, input_file, output_file):
     subprocess.call([self.rsvg_convert, '-f', 'pdf', '-o', output_file, input_file ])
 
-  def _convert_phantomjs(self, input_file, output_file):
+  def _convert_phantomjs(self, input_file, output_file, wd, ht):
     import os.path
     render_script = os.path.join(os.path.dirname(__file__), 'render.js')
-    subprocess.call([ self.phantomjs, render_script, input_file, output_file ])
+    if ht and wd:
+      subprocess.call([ self.phantomjs, render_script, input_file, output_file, wd, ht ])
+    else:
+      subprocess.call([ self.phantomjs, render_script, input_file, output_file ])
 
-  def _convert_svg(self, input_file, output_file):
+  def _convert_svg(self, input_file, output_file, wd, ht):
+    subprocess.call([ '/bin/cp', input_file, '/tmp/to_render.svg' ])
     if self.phantomjs is not None:
-      return self._convert_phantomjs(input_file, output_file)
+      return self._convert_phantomjs(input_file, output_file, wd, ht)
 
     elif self.rsvg_convert is not None:
       return self._convert_rsvg(input_file, output_file)
@@ -35,9 +39,24 @@ class PDFData(object):
   @view_config(route_name="mistic.pdf.fromsvg", request_method="POST")
   def convert_svg(self):
     _data = self.request.POST['pdfdata']
-    _data = re.sub ('<text [^<>]* class="circlelabel invisible">[^<>]*</text>', '', _data)
-    _data = re.sub ('class="highlighted"', 'fill="rgb(20, 216, 28)"', _data)
-    
+
+    # XXX: do this with lxml instead of regexp hacks.
+    # strip out invisible labels
+    _data = re.sub('<text [^<>]* class="circlelabel invisible">[^<>]*</text>', '', _data)
+    # explicitly set the fill of highlighted objects
+    _data = re.sub('class="highlighted"', 'fill="rgb(20, 216, 28)"', _data)
+
+    # extract width and height
+    ht = re.search(r'height\s*=\s*"([^"]*)"', _data)
+    wd = re.search( r'width\s*=\s*"([^"]*)"', _data)
+
+    if ht is not None and wd is not None:
+      ht = ht.group(1)
+      wd = wd.group(1)
+    else:
+      ht = None
+      wd = None
+
     input = tempfile.NamedTemporaryFile(suffix='.svg')
     input.write(_data.encode('utf-8'))
     input.flush()
@@ -45,7 +64,7 @@ class PDFData(object):
     output = tempfile.NamedTemporaryFile('rb', suffix='.pdf')
 
     try:
-      self._convert_svg(input.name, output.name)
+      self._convert_svg(input.name, output.name, wd, ht)
     except:
       raise
       raise HTTPNotFound()
