@@ -1,6 +1,7 @@
 <%!
 import json
 import mistic.app.data as data
+import pickle
 %>
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">MST Clustering</%block>

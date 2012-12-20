@@ -60,7 +60,7 @@ class DataSet(object):
       data = self.data
     else:
       data = transform(self.data)
-
+    
     return numpy.corrcoef(data)
 
   def rowcorr(self, rownum, transform = None):

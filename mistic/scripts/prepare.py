@@ -1,6 +1,7 @@
 import sys
 import os
 import re
+import time
 import argparse
 import collections
 import exceptions
@@ -42,13 +43,16 @@ class Task(object):
   def run(self):
     # check prerequisites are satisfied
     if not self.canRun():
+      print "NOT RUNNABLE: %s for %s " % (self.cmd[0], os.path.basename(self.cmd[-1]).replace("g.input.dot", "") )
       return NOT_RUNNABLE
 
     # check if already up to date
     if not self.needsToRun():
+      print "NO NEED TO RUN : %s for %s " % (self.cmd[0], os.path.basename(self.cmd[-1]).replace("g.input.dot", "")) 
       return 0
 
     try:
+      
       print '[' + self.id + ']', 'RUN', ' '.join(self.cmd)
       return subprocess.call(self.cmd)
     except OSError:
@@ -135,12 +139,13 @@ class TaskRunner(object):
     completion_queue.put((task.id, task.run()))
 
   def executeTask(self, task):
+   
     self.updateState(task, self.READY, self.RUNNING)
     p = multiprocessing.Process(target = self._execute, args = (task, self.completion_queue))
     task.id = p.name
     self.current_processes[p.name] = p
     p.start()
-
+    
   def printState(self):
     print 'WAIT:', len(self.task_state[self.WAITING]),
     print 'READY:', len(self.task_state[self.READY]),
@@ -179,13 +184,16 @@ class TaskRunner(object):
       self.finalizeOneTask()
 
   def run(self):
+    t0= time.time()
+    print "CONFIG : %s  ; %s" % ( self.n_parallel_jobs, self.noparallel_roots)
     self.printState()
     while self.tasksRemain():
       while len(self.task_state[self.RUNNING]) >= self.n_parallel_jobs:
         self.finalizeOneTask()
-
+      
       task = self.selectTask()
-
+      t1 = time.time()
+      
       while task is None:
         if len(self.task_state[self.RUNNING]) == 0:
           break
@@ -201,13 +209,15 @@ class TaskRunner(object):
         self.finalizeOneTask()
       else:
         self.executeTask(task)
-
+      print "time : ", task.cmd[0], task.cmd[-1].split('transformed/')[1].split('/')[0], time.time()-t1
+      
     self.finalizeAllTasks()
 
     sys.stdout.write('\n')
-
+   
     print 'completed tasks:' , len(self.task_state[self.COMPLETED])
     print '   failed tasks:' , len(self.task_state[self.FAILED])
+    print'time elapsed: ' , time.time()-t0
 
 def init_parser(parser):
   parser.add_argument('-j', '--jobs',      type=int, help='number of parallel jobs', default=1)
@@ -283,8 +293,9 @@ def run(args):
 
   runner = TaskRunner(task_list, n_parallel = args.jobs)
   runner.run()
-
+  
+  
   for failed in runner.task_state[TaskRunner.FAILED]:
-    print ' '.join(failed.cmd)
+    print 'FAILED : ', ' '.join(failed.cmd)
 
 __all__ = [ 'cmd', 'init_parser', 'run' ]

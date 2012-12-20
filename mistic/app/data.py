@@ -301,6 +301,7 @@ class DataSet(object):
     self.data = mistic.data.dataset.DataSet.readTSV(kw['file'])
     self.annotation = annotations.get(kw['anot'])
     self.transforms = set(('log', 'rank', 'anscombe')) & set(kw.get('xfrm', 'none').split(','))
+    self.tags = kw.get('tags', '')
 
   @property
   def info(self):
@@ -337,6 +338,9 @@ class DataSet(object):
       thresh = float(thresh)
       result = [ r for r in result if r[2] >= thresh ]
 
+   
+    
+    
     return dict(
       gene = gene,
       symbol = self.annotation.symbol.get(gene, ''),
@@ -496,7 +500,7 @@ def loadAnnotations(settings):
 def loadData(settings):
     for d in collectItems(settings, 'mistic.dataset.'):
       datasets.add(DataSet(**d))
-
+      
 
 
 def load(settings):
@@ -509,3 +513,7 @@ def load(settings):
   logging.info('loading data')
   loadData(settings)
   logging.info('loading done')
+
+  # get corr for BAD and SLC39A13
+  #print [x for x in datasets.all()[0].genecorr('BAD', 'log', 0, 0)['data'] if x['symbol']=='SLC39A13']
+  

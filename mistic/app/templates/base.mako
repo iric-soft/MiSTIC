@@ -21,6 +21,8 @@
     <meta name="keywords" content="">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-responsive.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/jquery.dataTables.css')}" type="text/css" media="screen" charset="utf-8">
+
 
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -165,6 +167,9 @@ div#more-information {
 <script src="${request.static_url('mistic:app/static/js/lib/backbone-min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/bootstrap.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/d3.v2.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/plugin.js')}" type="text/javascript"></script>
+
 
 <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/math.js')}" type="text/javascript"></script>

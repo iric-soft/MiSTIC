@@ -6,6 +6,8 @@
             outer: 15,
             xlab_offset: -50,
             ylab_offset: 40,
+            show:10,
+            
         };
 
         this.elem = $(elem);
@@ -37,9 +39,15 @@
         }
     };
 
+    corrgraph.prototype.setLabelNb = function(n) {
+        this.options.show=n;
+    };
+
     corrgraph.prototype.markGenes = function(genes) {
+        //console.log('markGenes');
         this.genes = genes
-        this.updateGeneTicks();
+        this.updateGeneTicks();   
+       
     };
 
     corrgraph.prototype.setData = function(data) {
@@ -48,15 +56,16 @@
         for (var i = 0; i < this.data.length; ++i) {
             this.data[i].idx = i;
         }
-
+       
+        
         _.each(this.data,              function(d) { d.labelled = false; });
-        _.each(_.first(this.data, 20), function(d) { d.labelled = true; });
+        _.each(_.first(this.data, this.options.show), function(d) { d.labelled = true; });
         // _.each(_.first(_.last(this.data, 9490), 80), function(d) { d.labelled = true; });
-        _.each( _.last(this.data, 20), function(d) { d.labelled = true; });
+        _.each( _.last(this.data, this.options.show), function(d) { d.labelled = true; });
     }
 
     corrgraph.prototype.AUC = function() {
-    	console.log('AUC');
+    	//console.log('AUC');
         if (this.genes === undefined) return undefined;
         
         var n1 = 0;
@@ -77,14 +86,14 @@
 
         var U1 = R1 - n1 * (n1 + 1) / 2;
         var U2 = R2 - n2 * (n2 + 1) / 2;
-        console.log('U-test:', U1, U2, U1+U2, n1*n2);
+        //console.log('U-test:', U1, U2, U1+U2, n1*n2);
 
         var z = (U1 - (n1*n2) / 2) / Math.sqrt(n1*n2*(n1+n2+1) / 12);
         return { U: U1, z: z, p: stats.z_low(z) };
     };
 
     corrgraph.prototype.labelMaker = function() {
-    	console.log('labelMarker');
+    	//console.log('labelMarker');
         var self = this;
         var xScale = this.xScale;
         var yScale = this.yScale;
@@ -134,7 +143,7 @@
         };
 
         var can_add_to_box = function(d, box) {
-        	console.log('can_add_to_box');
+        	//console.log('can_add_to_box');
             var x = xScale(d.idx);
             var y_ex = y_exclusion(box.x1, box.x2);
             var label_y = [ box.y2, box.y2 + LAB.y ];
@@ -155,7 +164,7 @@
                 (x > box.x2 && (box.a == +1 || !between(x - box.x2, [ MIN_DIST, MAX_DIST ]))) ||
                 (x < box.x1 && (box.a == -1 || !between(box.x1 - x, [ MIN_DIST, MAX_DIST ])))) {
 
-                console.log(JSON.stringify(d), 'can\'t fit into box:', JSON.stringify(box));
+                //console.log(JSON.stringify(d), 'can\'t fit into box:', JSON.stringify(box));
 
                 return false;
             }
@@ -163,7 +172,7 @@
         }
 
         var allocate_to_box = function(d) {
-        	console.log('allocate_to_box');
+        	//console.log('allocate_to_box');
             var x = xScale(d.idx);
 
             var box = curr = boxes[boxes.length-1];
@@ -171,7 +180,7 @@
             if (!can_add_to_box(d, box)) {
                 var fitted = false;
 
-                console.log('* try continuation');
+                //console.log('* try continuation');
                 // try directly under current box.
                 box = {
                     x1: curr.x1, y1: curr.y2 + SEP.y,
@@ -182,7 +191,7 @@
                 fitted = can_add_to_box(d, box);
 
                 if (!fitted) {
-                    console.log('* try under graph');
+                    //console.log('* try under graph');
                     // try below data points.
                     var y_ex = y_exclusion(box.x1, box.x2);
                     if (curr.y2 < y_ex[1]) {
@@ -192,10 +201,10 @@
                 }
 
                 if (!fitted) {
-                    console.log('* try new adjacent column');
-                    console.log('curr =', JSON.stringify(curr));
+                    //console.log('* try new adjacent column');
+                    //console.log('curr =', JSON.stringify(curr));
                     // try a new column immediately to the the right of the current column.
-                    console.log(typeof curr.x2, typeof SEP.x, curr.x2, SEP.x);
+                    //console.log(typeof curr.x2, typeof SEP.x, curr.x2, SEP.x);
                     box = {
                         x1: curr.x2 + SEP.x,
                         y1: TOP,
@@ -203,13 +212,13 @@
                         y2: TOP,
                         a:  curr.x2 + SEP.x < x ? -1 : +1
                     };
-                    console.log('testing', JSON.stringify(box));
+                    //console.log('testing', JSON.stringify(box));
                     fitted = can_add_to_box(d, box);
                 }
 
                 if (!fitted) {
                     // consider a new column to the left as far away as possible.
-                    console.log('* try new left column');
+                    //console.log('* try new left column');
                     box.x1 = x - MAX_DIST + 10 - LAB.x;
                     box.x2 = x - MAX_DIST + 10;
                     box.a = -1;
@@ -220,7 +229,7 @@
 
                 if (!fitted) {
                     // consider a new column to the right as close as possible.
-                    console.log('* try new right column');
+                    //console.log('* try new right column');
                     box.x1 = x + MIN_DIST + 10;
                     box.x2 = x + MIN_DIST + 10 + LAB.x;
                     box.a = +1;
@@ -255,6 +264,7 @@
             l.id = d.gene;
             l.hl = d.in_gene_set;
             l.t = d.symbol === '' ? d.gene : d.symbol;
+            l.d = d.desc;
 
             var tangent;
 
@@ -293,7 +303,8 @@
     };
 
     corrgraph.prototype.updateLabels = function() {
-    	console.log('updateLabels');
+    	//console.log('updateLabels');
+    	
         var subset = _.filter(this.data, function(d) { return d.labelled === true; });
 
         subset = _.map(subset, this.labelMaker())
@@ -309,7 +320,8 @@
         labels
             .attr('x', function(d, i) { return d.x; })
             .attr('y', function(d, i) { return d.y; });
-
+            
+       
         labels
           .enter()
             .append('text')
@@ -320,8 +332,10 @@
             .attr('dx', '2px')
             .attr('dy', '11px')
             .attr('text-anchor', function(d, i) { return [ 'end', 'middle', 'start' ][d.a+1]; })
-            .attr('fill', function (d) { return d.hl ? 'blue' : 'black'; })
-            .text(function (d) { return d.t; });
+            .attr('fill', function (d) {return d.hl ? 'blue' : 'black'; })
+            .text(function (d) { return d.t; })
+            .append('title')
+            .text(function(d) {return d.d});
 
         labels
           .exit()
@@ -350,13 +364,14 @@
     };
 
     corrgraph.prototype.updateGeneTicks = function() {
+        //console.log('updateGeneTicks');
         var ticks = d3.select(this.elem[0]).selectAll('g.gene-ticks');
         var xScale = this.xScale;
         var yScale = this.yScale;
         var subset = [];
-
+        var gene_hash = {};
         if (this.genes !== undefined) {
-            var gene_hash = {};
+            //var gene_hash = {};
             _.each(
                 this.genes,
                 function(d) {
@@ -369,7 +384,13 @@
                     return d.in_gene_set = (gene_hash[d.gene] === true);
                 });
         }
-
+       
+       
+        d3.selectAll('g.labels').selectAll('.label')
+            .attr('fill', function (d) {return (gene_hash[d.t]===true) ? 'blue' : 'black'; })
+       
+        
+        
         var geneticks = ticks
             .selectAll('line')
             .data(subset, function(d) { return d.gene; });
@@ -383,6 +404,8 @@
             .attr('y1', function(d) { return yScale(0.0) - 4; })
             .attr('x2', function(d) { return xScale(d.idx); })
             .attr('y2', function(d) { return yScale(0.0) + 4; });
+
+      
 
         geneticks
           .exit()
@@ -484,7 +507,7 @@
 
         if (this.height == 0) return;
 
-        console.log('draw');
+        //console.log('draw');
 
         this.elem.empty();
 
