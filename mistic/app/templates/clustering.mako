@@ -110,7 +110,8 @@ ${parent.pagetail()}
 <script type="text/javascript">
 $(document).ready(function() {
 <%
-  my_annotation = data.datasets.get(dataset).annotation.id
+  ds = data.datasets.get(dataset)
+  my_annotation = ds.annotation.id
 %>
 
   resizeGraph = function() {
@@ -123,7 +124,10 @@ $(document).ready(function() {
 
   cluster_roots = Node.fromMST(nodes, edges);
 
-  current_graph = new arcplot($('#graph'));
+  current_graph = new arcplot($('#graph'), {
+    cluster_minsize: ${int(ds.config.get('icicle.cluster_minsize', '5'))}
+  });
+
   current_graph.setData(cluster_roots);
   current_graph.setGraphInfo(["Dataset: ${dataset}", 
                               "Transform: ${xform}"]); 
