@@ -246,7 +246,7 @@ def run(args):
   GRAPH_TO_DOT = tuple(config['mistic.prepare.graph-to-dot'].split())
   LAYOUT =       tuple(config['mistic.prepare.layout'].split())
 
-  for dataset in collectItems(config, 'mistic.dataset.'):
+  for dataset in collectItems(config, 'mistic.dataset'):
     base = dataset.get('file')
     if base is None:
       continue

@@ -296,6 +296,7 @@ class DataSet(object):
   VALID_TRANSFORMATIONS = set(('log', 'rank', 'none'))
 
   def __init__(self, **kw):
+    self.config = kw
     self.id = kw.get('id', uuid.uuid4())
     self.name = kw.get('name', self.id)
     self.description = kw.get('desc', '')
@@ -510,9 +511,9 @@ def collectItems(settings, prefix):
   items = collections.defaultdict(dict)
 
   for k, v in settings.iteritems():
-    if k.startswith(prefix):
-      k = k.split('.')
-      items[int(k[2])][k[3]] = v
+    if k.startswith(prefix) and k[len(prefix)] == '.':
+      k = k[len(prefix) + 1:].split('.', 1)
+      items[int(k[0])][k[1]] = v
 
   return [ v for k,v in sorted(items.items()) ]
 
@@ -523,15 +524,15 @@ def loadOrthology(settings):
   orthology.load(settings['mistic.orthology'])
 
 def loadAnnotations(settings):
-  for d in collectItems(settings, 'mistic.annotation.'):
+  for d in collectItems(settings, 'mistic.annotation'):
     annotations.add(Annotation(**d))
 
 def loadColAnnotations(settings):
-  for d in collectItems(settings, 'mistic.col_annotation.'): 
+  for d in collectItems(settings, 'mistic.col_annotation'): 
     colAnnotations.add(ColAnnotation(**d))
     
 def loadData(settings):
-  for d in collectItems(settings, 'mistic.dataset.'):
+  for d in collectItems(settings, 'mistic.dataset'):
     print ('Loading %s' % d['name'])
     datasets.add(DataSet(**d))
 
