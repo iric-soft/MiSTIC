@@ -3,6 +3,7 @@ from mistic.app.resources import Root
 import collections
 import data
 import exceptions
+import ConfigParser
 
 import binascii
 
@@ -121,10 +122,28 @@ def http_basic_authenticator(auth):
         raise exceptions.RuntimeError('only SHA authentication hashes are supported')
 
 
+def load_datasets_settings (configurationFile, global_config):
+    
+    defaultByKey = {'here' : global_config['here']}
+    configParser = ConfigParser.ConfigParser(defaultByKey)
+    
+    if not configParser.read(configurationFile):
+        raise ConfigParser.Error('Could not open %s' % configurationFile)
+    datasets_settings = {}
+    for key, value in configParser.items('datasets:mistic'):
+      datasets_settings[key] = value
+   
+    return datasets_settings
+  
+
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     set_cache_regions_from_settings(settings)
+    
+    if 'mistic.datasets' in settings: 
+      settings.update(load_datasets_settings (settings['mistic.datasets'], global_config))
+      
 
     config_args = dict(root_factory=Root,
                        settings=settings,
@@ -142,6 +161,7 @@ def main(global_config, **settings):
     def authorize(request):
         return HTTPUnauthorized(headers = forget(request)) ## Response(body='hello world!', content_type='text/plain')
     config.add_view(authorize, context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
+    
     data.load(settings)
 
     mistic.app.views.pdffile.PDFData.rsvg_convert = settings['mistic.rsvg-convert']

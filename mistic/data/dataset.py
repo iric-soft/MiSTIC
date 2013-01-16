@@ -20,6 +20,7 @@ class LogTransform(object):
   def __init__(self, scale = 1024, bias = 1, base = 2):
     self.params = (scale, bias, base)
   def __call__(self, matrix):
+    print matrix
     scale, bias, base = self.params
     if base == 2:
       return numpy.log2(matrix * scale + bias)
@@ -29,7 +30,7 @@ class LogTransform(object):
       return numpy.log(matrix * scale + bias)
     else:
       return numpy.log(matrix * scale + bias) / numpy.log(base)
-
+   
 
 
 class RankTransform(object):
@@ -46,7 +47,7 @@ class DataSet(object):
     self.colnames = colnames
     self.rownames = rownames
     self.data = numpy.array(data)
-
+    
     self.colname_to_col = dict([ (k, i) for i, k in enumerate(self.colnames) ])
     self.rowname_to_row = dict([ (k, i) for i, k in enumerate(self.rownames) ])
 
@@ -60,17 +61,21 @@ class DataSet(object):
       data = self.data
     else:
       data = transform(self.data)
-    
+      
     return numpy.corrcoef(data)
 
   def rowcorr(self, rownum, transform = None):
     row = self.data[rownum,:]
+    print 'rownum', rownum
     if transform is not None: row = transform(row)
     out = []
     for i, r in enumerate(self.rownames):
+      print i, r
       row2 = self.data[i,:]
       if transform is not None: row2 = transform(row2)
+      print row, row2
       c = numpy.corrcoef(row, row2)[0,1]
+      
       if math.isnan(c): c = 0.0
       out.append((i, r, c))
     return out

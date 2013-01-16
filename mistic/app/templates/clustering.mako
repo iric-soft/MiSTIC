@@ -211,6 +211,7 @@ $(document).ready(function() {
   
  
   gene_entry.on('change', function(item) {
+    console.log (item.id);
     if (item !== null) {
       current_graph.zoomTo(item.id);
     } else {

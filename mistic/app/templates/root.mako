@@ -3,7 +3,7 @@
 import json
 import mistic.app.data as data
 
-transforms = ('log', 'rank', 'anscombe')
+transforms = ('log', 'rank', 'anscombe', 'none')
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -27,16 +27,18 @@ ${parent.style()}
 
 
 
-<table  id="datasets-table">
+<table id="datasets-table">
 <thead>
 <tr>
   
+  <th></th>
   <th></th>
   <th colspan="${len(transforms) * 2 }">Transform</th>
   <th></th>
 </tr>
 <tr>
  <th></th>
+ <th>n</th>
 
 %for i, tf in enumerate(transforms):
   <th colspan="2">${tf.capitalize()}</th>
@@ -52,10 +54,12 @@ ${parent.style()}
   <tr>
     
     <th>${ds.name}</th>
-    
+    <th>${ds.numberSamples}</th>
   %for i, tf in enumerate(transforms):
- 
+  
+  
   %if tf in ds.transforms:
+    
     <td><a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">Icicle</a></td>
     <td><a href="${request.route_url('mistic.template.mstplot', dataset=ds.id, xform=tf)}">MST</a></td>
   %else:
@@ -86,8 +90,8 @@ ${parent.pagetail()}
 <script type="text/javascript" charset="utf-8">
       $(document).ready(function() {
         $('#datasets-table').dataTable( {  
-                        "aoColumns": [null,null, null,null, null, null, null, null]  ,   
-                        "bSearch": [null,true, null,null, null, null, null, true]  ,
+                        "aoColumns": [null,null, null, null, null,null, null, null, null,null]  ,   
+                        "bSearch": [true, null, null, null, null,null, null, null, null, true]  ,
                         "bPaginate": false
                       
                           });

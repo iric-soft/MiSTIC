@@ -18,6 +18,7 @@ ${parent.style()}
 %for d in data.datasets.all():
       <option value="${d.id}">${d.name}</option>
 %endfor
+
     </select>
     <label for="gene">Gene:</label> <input type="text" id="gene"></input></label>
     <label for="nlabel"># labels:</label> <input type="text" style="width:20px;" id="nlabel"  autocomplete='off' value=10></input></label>
@@ -69,7 +70,7 @@ $(document).ready(function() {
   })();
 
   var dataset_annotation = ${json.dumps(dict([ (ds.id, ds.annotation.id) for ds in data.datasets.all() ]))|n};
-
+  
   var current_dataset = null;
   var current_gene = null;
   var current_go_term = null;
@@ -132,20 +133,29 @@ $(document).ready(function() {
   });
 
   $('#plot').click(function (event) {
+    console.log('plot');
     if (current_dataset !== null && current_gene !== null) {
       $('#plot').button('loading');
-      //console.log(mistic.url);
+      
+      
       var req = $.ajax({
         url: mistic.url + '/datasets/' + current_dataset + '/genes/' + current_gene.id + '/corr',
-        data: {x: 'log'},
+        data: {x: 'none'},
         dataype: 'json',
+        
         success: function(data) {
           var nlabel = $("#nlabel").val();
           current_graph.annotation = current_dataset.genes;
+          console.log('annotation: ' +current_graph.annotation);
           current_graph.setLabelNb(nlabel);
+          
+       
           current_graph.setData(data.data);
+          
           current_graph.draw();
           updateURLTarget({ dataset: current_dataset, gene: current_gene.id });
+          console.log('end');
+          
         },
         error: function() {
           // inform the user something went wrong.
@@ -157,7 +167,7 @@ $(document).ready(function() {
   });
 
   $('#datasets').change();
-  gene_entry.trigger('change', null);
+  gene_entry.trigger('cthange', null);
   updateURLTarget({ dataset: null });
 
   $(window).resize(resizeGraph);

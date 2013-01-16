@@ -186,8 +186,6 @@ class Collection(object):
   def all(self):
     return tuple(self.objects)
 
-
-
 annotations = Collection()
 datasets = Collection()
 
@@ -209,19 +207,7 @@ class Annotation(object):
     
     self.others = collections.defaultdict(list)
     self.others_genes = collections.defaultdict(list)
-    
-    #self.chr = collections.defaultdict(set)
-    #self.chr_genes = collections.defaultdict(set)
-    
-    #self.band = collections.defaultdict(set)
-    #self.band_genes = collections.defaultdict(set)
-    
-    #self.leukemia_causing = collections.defaultdict(set)
-    #self.leukemia_causing_genes = collections.defaultdict(set)
-
-    #self.reactome = collections.defaultdict(set)
-    #self.reactome_genes = collections.defaultdict(set)
-    
+        
     desc = {}
     for row in open(self.path):
       
@@ -252,31 +238,11 @@ class Annotation(object):
             self.others_genes[ka] = collections.defaultdict(set)
           self.others_genes[ka][g].add(ident)
             
-        
-      #chr = attrs.get('chr', '')
-      
-      #self.chr[ident] = set(["chr%s"%chr if (chr.isdigit() or chr in ['X','Y','MT']) else chr])
-      #self.band[ident] = set([attrs.get('band', '')])
-      #self.leukemia_causing[ident] = set([attrs.get("leukemia_causing", "")])
-      #self.reactome[ident] = set(attrs.get('reactome', []))
       for g in self.go[ident]:
         self.go_genes[g].add(ident)
       for g in self.go_indirect[ident]:
         self.go_genes_indirect[g].add(ident)
       
-      
-      
-      #for g in self.chr[ident]:
-      #  self.chr_genes[g].add(ident)
-      #for g in self.band[ident]:
-      #  self.band_genes[g].add(ident)
-      #for g in self.leukemia_causing[ident]:
-      #  self.leukemia_causing_genes[g].add(ident)
-      #for g in self.reactome[ident]:
-      #  self.reactome_genes[g].add(ident)
-    
-    
-    
     self.genes = set(self.attrs.keys())
 
   def gene_set(self, go = []):
@@ -300,9 +266,10 @@ class DataSet(object):
     self.source = kw['file']
     self.data = mistic.data.dataset.DataSet.readTSV(kw['file'])
     self.annotation = annotations.get(kw['anot'])
-    self.transforms = set(('log', 'rank', 'anscombe')) & set(kw.get('xfrm', 'none').split(','))
+    self.transforms = set(('none', 'log', 'rank', 'anscombe')) & set(kw.get('xfrm', 'none').split(','))
     self.tags = kw.get('tags', '')
-
+   
+   
   @property
   def info(self):
     return dict(
@@ -318,7 +285,11 @@ class DataSet(object):
   @property
   def samples(self):
     return self.data.colnames
-
+  
+  @property
+  def numberSamples(self):
+    return len(self.data.colnames)
+    
   def _makeTransform(self, xform):
     return dict(
       log =      mistic.data.dataset.LogTransform,
@@ -329,7 +300,7 @@ class DataSet(object):
   @key_cache_region('mistic', 'genecorr', lambda args: (args[0].id,) + args[1:])
   def _genecorr(self, gene, xform, absthresh, thresh):
     result = self.data.rowcorr(self.data.r(gene), transform = self._makeTransform(xform))
-
+    
     if absthresh is not None:
       absthresh = float(absthresh)
       result = [ r for r in result if abs(r[2]) >= absthresh ]
@@ -338,9 +309,6 @@ class DataSet(object):
       thresh = float(thresh)
       result = [ r for r in result if r[2] >= thresh ]
 
-   
-    
-    
     return dict(
       gene = gene,
       symbol = self.annotation.symbol.get(gene, ''),
@@ -500,10 +468,13 @@ def loadAnnotations(settings):
 def loadData(settings):
     for d in collectItems(settings, 'mistic.dataset.'):
       datasets.add(DataSet(**d))
+     
       
 
 
 def load(settings):
+  
+ 
   logging.info('loading ontology')
   loadOntology(settings)
   logging.info('loading orthologs')

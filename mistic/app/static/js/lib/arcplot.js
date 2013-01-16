@@ -215,13 +215,15 @@
     };
 
     arcplot.prototype.zoomTo = function(id) {
+        console.log('zoomTo');
         var arc = this.body
             .selectAll('path.arc')
             .classed('highlight', function(d) { return d.content.hasOwnProperty(id); });
 
+        
         var hl = this.body
             .selectAll('path.arc.highlight');
-
+        
         var S, T;
 
         if (hl[0].length === 1) {
@@ -240,6 +242,7 @@
             if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
 
         } else {
+            console.log(id+' not found');
             return;
         }
 

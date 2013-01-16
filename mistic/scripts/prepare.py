@@ -248,6 +248,10 @@ def run(args):
   )
 
   config = read_config(args.config, 'app:main', defaults)
+  
+  if 'mistic.datasets' in config : 
+    configFile = open (config['mistic.datasets']) 
+    config.update (read_config(configFile, 'datasets:mistic',  defaults))
 
   task_list = []
 

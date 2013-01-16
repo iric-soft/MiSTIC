@@ -12,6 +12,10 @@ import math
 import scipy.stats
 import re
 
+import pickle
+import os
+
+
 def urank(ranks, N):
     # takes 0-based ranks.
     N1 = len(ranks)
@@ -299,13 +303,14 @@ class DatasetGene(Dataset):
             print out[-1]
         out.sort()
         return out
-
+        
     @view_config(route_name="mistic.json.gene.corr", request_method="GET", renderer="json")
     def corr(self):
         absthresh = self.request.GET.get('a')
         thresh = self.request.GET.get('t')
-
+        
         return self.dataset.genecorr(self.gene, xform = self.x, absthresh = absthresh, thresh = thresh)
+        
 
     @view_config(route_name="mistic.json.gene.expr", request_method="GET", renderer="json")
     def expr(self):

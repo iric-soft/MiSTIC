@@ -44,7 +44,7 @@
     };
 
     corrgraph.prototype.markGenes = function(genes) {
-        //console.log('markGenes');
+        console.log('markGenes');
         this.genes = genes
         this.updateGeneTicks();   
        
@@ -65,7 +65,7 @@
     }
 
     corrgraph.prototype.AUC = function() {
-    	//console.log('AUC');
+    	console.log('AUC');
         if (this.genes === undefined) return undefined;
         
         var n1 = 0;
@@ -93,7 +93,7 @@
     };
 
     corrgraph.prototype.labelMaker = function() {
-    	//console.log('labelMarker');
+    	console.log('labelMaker');
         var self = this;
         var xScale = this.xScale;
         var yScale = this.yScale;
@@ -303,68 +303,69 @@
     };
 
     corrgraph.prototype.updateLabels = function() {
-    	//console.log('updateLabels');
+    	  console.log('updateLabels');
     	
         var subset = _.filter(this.data, function(d) { return d.labelled === true; });
+        
+        if (subset.length>0) {
+          subset = _.map(subset, this.labelMaker())
+          var label_g = d3.select(this.elem[0]).selectAll('g.labels');
 
-        subset = _.map(subset, this.labelMaker())
+          var current_box = null;
 
-        var label_g = d3.select(this.elem[0]).selectAll('g.labels');
-
-        var current_box = null;
-
-        var labels = label_g
+          var labels = label_g
             .selectAll('.label')
             .data(subset, function(d) { return d.id; });
 
-        labels
+          labels
             .attr('x', function(d, i) { return d.x; })
             .attr('y', function(d, i) { return d.y; });
             
        
-        labels
-          .enter()
-            .append('text')
-            .attr('class', 'label')
-            .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100')
-            .attr('x', function(d, i) { return d.x; })
-            .attr('y', function(d, i) { return d.y; })
-            .attr('dx', '2px')
-            .attr('dy', '11px')
-            .attr('text-anchor', function(d, i) { return [ 'end', 'middle', 'start' ][d.a+1]; })
-            .attr('fill', function (d) {return d.hl ? 'blue' : 'black'; })
-            .text(function (d) { return d.t; })
-            .append('title')
-            .text(function(d) {return d.d});
+          labels
+            .enter()
+              .append('text')
+              .attr('class', 'label')
+              .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100')
+              .attr('x', function(d, i) { return d.x; })
+              .attr('y', function(d, i) { return d.y; })
+              .attr('dx', '2px')
+              .attr('dy', '11px')
+              .attr('text-anchor', function(d, i) { return [ 'end', 'middle', 'start' ][d.a+1]; })
+              .attr('fill', function (d) {return d.hl ? 'blue' : 'black'; })
+              .text(function (d) { return d.t; })
+              .append('title')
+              .text(function(d) {return d.d});
 
-        labels
-          .exit()
-            .remove();
+          labels
+            .exit()
+              .remove();
 
-        var lines = label_g
-            .selectAll('.label-path')
-            .data(subset, function(d) { return d.gene; });
+          var lines = label_g
+              .selectAll('.label-path')
+              .data(subset, function(d) { return d.gene; });
 
-        lines
-            .attr('d', function(d, i) { return d.p; })
+          lines
+              .attr('d', function(d, i) { return d.p; })
 
-        lines
-          .enter()
-            .append('path')
-            .attr('class', 'label-path')
-            .attr('fill', 'none')
-            .attr('stroke', '#123')
-            .attr('opacity', .5)
-            .attr('stroke-width', '0.5')
-            .attr('d', function(d, i) { return d.p; })
+          lines
+            .enter()
+              .append('path')
+              .attr('class', 'label-path')
+              .attr('fill', 'none')
+              .attr('stroke', '#123')
+              .attr('opacity', .5)
+              .attr('stroke-width', '0.5')
+              .attr('d', function(d, i) { return d.p; })
 
-        lines
-          .exit()
-            .remove();
+          lines
+            .exit()
+              .remove();
+        }
     };
 
     corrgraph.prototype.updateGeneTicks = function() {
-        //console.log('updateGeneTicks');
+        console.log('updateGeneTicks');
         var ticks = d3.select(this.elem[0]).selectAll('g.gene-ticks');
         var xScale = this.xScale;
         var yScale = this.yScale;
