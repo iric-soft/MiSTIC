@@ -175,5 +175,8 @@ class Graph(object):
       pos = mst[2]
     )
 
-    return render_to_response('mistic:app/templates/mstplot.mako', args, request = self.request)
+    if len(mst[0]) < 200:
+      return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
+    else:
+      return render_to_response('mistic:app/templates/mstplot.mako', args, request = self.request)
 
