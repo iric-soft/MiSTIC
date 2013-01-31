@@ -242,18 +242,14 @@ class Annotation(object):
     self.chr_genes = collections.defaultdict(set)
 
     desc = {}
-    
-    for row in open(self.path):
+    for rownum, row in enumerate(open(self.path)):
       ident, row = row.split(None, 1)
       try:
-          attrs = json.loads(row)
-          
-      except: 
-          #print 'NOT ABLE TO LOAD '
-          #print ident, row
-          
-          continue
-      
+        attrs = json.loads(row)
+      except ValueError:
+        logging.warn('failed to parse JSON data for identifier {0} on row {1}'.format(ident, rownum))
+        continue
+
       self.attrs[ident] = attrs
       self.desc[ident] = attrs.get('name', '')
       self.chr[ident] = attrs.get('chr', '')
