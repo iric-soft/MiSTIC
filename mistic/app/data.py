@@ -67,7 +67,7 @@ def parse_obo(file):
   if rectype is not None:
     yield rectype, kv
 
-        
+
 
 class OntologyNode(object):
   def __init__(self, kv):
