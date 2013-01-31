@@ -228,7 +228,8 @@ class Annotation(object):
     self.desc = {}
     self.symbol = {}
     self.attrs = {}
-   
+
+    self.chr = {}
     self.go = collections.defaultdict(set)
     self.go_genes = collections.defaultdict(set)
    
@@ -237,7 +238,9 @@ class Annotation(object):
     
     self.others = collections.defaultdict(list)
     self.others_genes = collections.defaultdict(list)
-        
+
+    self.chr_genes = collections.defaultdict(set)
+
     desc = {}
     
     for row in open(self.path):
@@ -253,6 +256,7 @@ class Annotation(object):
       
       self.attrs[ident] = attrs
       self.desc[ident] = attrs.get('name', '')
+      self.chr[ident] = attrs.get('chr', '')
       self.symbol[ident] = attrs.get('symbol', '')
       self.go[ident] = set([ x[0] for x in attrs.get('go', []) ])
       self.go_indirect[ident] = ontology.parents(self.go[ident])
@@ -276,7 +280,9 @@ class Annotation(object):
         self.go_genes[g].add(ident)
       for g in self.go_indirect[ident]:
         self.go_genes_indirect[g].add(ident)
-      
+      for g in self.chr[ident]:
+        self.chr_genes[g].add(ident)
+
     self.genes = set(self.attrs.keys())
 
   def gene_set(self, go = []):
