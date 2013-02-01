@@ -14,9 +14,7 @@
         this.options = {
             width:           1000,
             height:          750,
-            scale:           740,
-            dx:              130,
-            dy:              5,
+            scale:           1000,
             padding:         10,
             ramp:            YlGnBl,
             node_r:         undefined, // node radius.
@@ -45,19 +43,32 @@
             .attr("pointer-events", "all")
             .attr('xmlns', 'http://www.w3.org/2000/svg');
 
+        this.zoom_behaviour = d3.behavior
+            .zoom()
+            .scaleExtent([1, 100])
+            .on("zoom", _.bind(this.zoom, this));
+
         this.zoom_g = d3.select(this.svg)
             .append('g')
-            .call(d3.behavior
-                  .zoom()
-                  .scaleExtent([1, 100])
-                  .on("zoom", _.bind(this.zoom, this)));
+            .attr("pointer-events", "all")
+            .call(this.zoom_behaviour);
+
+        this.zoom_g
+            .append('rect')
+            .classed('background', true)
+            .attr('width', this.width)
+            .attr('height', this.height)
+            .attr('x', 0.0)
+            .attr('y', 0.0)
+            .attr('fill', 'white')
+            .attr('shape-rendering', 'crispEdges');
 
         this.body = this.zoom_g
             .append('g');
 
         this.labels = d3.select(this.svg)
             .append('g')
-            .attr('class', 'labels')
+            .classed('labels', true)
             .attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 100')
             .attr('dy', 5)
             .attr('fill', '#fff')
@@ -86,23 +97,23 @@
 
     mstplot.prototype.screenToPlot = function(x, y) {
         return {
-            x: (((x - this.T[0]) / this.S) - this.options.dx) / this.options.scale,
-            y: (((y - this.T[1]) / this.S) - this.options.dy) / this.options.scale
+            x: ((x - this.T[0]) / this.S) / this.options.scale,
+            y: ((y - this.T[1]) / this.S) / this.options.scale
         };
     }
 
     mstplot.prototype.plotToScreen = function(x, y) {
         return {
-            x: (((x - this.T[0]) / this.S) - this.options.dx) / this.options.scale,
-            y: (((y - this.T[1]) / this.S) - this.options.dy) / this.options.scale
+            x: ((x - this.T[0]) / this.S) / this.options.scale,
+            y: ((y - this.T[1]) / this.S) / this.options.scale
         };
     }
 
     mstplot.prototype.visibleLabels = function(translate, scale) {
-        var xlo = Math.floor((((-100 - translate[0]) / scale) - this.options.dx) / this.options.scale * GRID_DIV);
-        var ylo = Math.floor((((-100 - translate[1]) / scale) - this.options.dy) / this.options.scale * GRID_DIV);
-        var xhi = Math.ceil( (((1100 - translate[0]) / scale) - this.options.dx) / this.options.scale * GRID_DIV);
-        var yhi = Math.ceil( (((1100 - translate[1]) / scale) - this.options.dy) / this.options.scale * GRID_DIV);
+        var xlo = Math.floor(((-100 - translate[0]) / scale) / this.options.scale * GRID_DIV);
+        var ylo = Math.floor(((-100 - translate[1]) / scale) / this.options.scale * GRID_DIV);
+        var xhi = Math.ceil( ((1100 - translate[0]) / scale) / this.options.scale * GRID_DIV);
+        var yhi = Math.ceil( ((1100 - translate[1]) / scale) / this.options.scale * GRID_DIV);
 
         xlo = Math.max(0, Math.min(xlo, GRID_DIV));
         ylo = Math.max(0, Math.min(ylo, GRID_DIV));
@@ -133,17 +144,24 @@
     mstplot.prototype.zoom = function() {
         var self = this;
 
-        var S = d3.event.scale
-        var T = d3.event.translate
+        var S = d3.event.scale;
+        var T = d3.event.translate;
 
-        if (T[0] > 0) T[0] = 0;
-        if (T[1] > 0) T[1] = 0;
+        this.setTransform(S, T);
+        return false;
+    };
 
-        if (T[0] + S * this.width < this.width) T[0] = this.width - (S * this.width);
-        if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
+    mstplot.prototype.centerOn = function(x, y, S) {
+        var cx = this.width / 2.0;
+        var cy = this.height / 2.0;
+        this.setTransform(S, [ -(x * S) + cx, -(y * S) + cy ]);
+    };
 
+    mstplot.prototype.setTransform = function(S, T) {
         this.S = S
         this.T = [ T[0], T[1] ];
+
+        this.zoom_behaviour.scale(S).translate(T);
 
         this.body
             .attr("transform",
@@ -240,11 +258,12 @@
             y: (y_range[1] + y_range[0]) / 2.0
         };
 
+        var xform_x = function(x) { return self.options.scale * ((x - centre.x) / scale + 0.5); }
+        var xform_y = function(y) { return self.options.scale * ((y - centre.y) / scale + 0.5); }
+
         for (var i = 0; i < this.nodes.length; ++i) {
-            this.nodes[i]._x = Math.max(0.0, Math.min(1.0, (this.nodes[i].x - centre.x) / scale + 0.5));
-            this.nodes[i]._y = Math.max(0.0, Math.min(1.0, (this.nodes[i].y - centre.y) / scale + 0.5));
-            this.nodes[i].x = this.nodes[i]._x * this.options.scale + this.options.dx;
-            this.nodes[i].y = this.nodes[i]._y * this.options.scale + this.options.dy;
+            this.nodes[i].x = xform_x(this.nodes[i].x);
+            this.nodes[i].y = xform_y(this.nodes[i].y);
         }
 
         this.grid = [];
@@ -257,8 +276,8 @@
         }
 
         for (var i = 0; i < this.nodes.length; ++i) {
-            var gx = Math.min(GRID_DIV-1, Math.floor(this.nodes[i]._x * GRID_DIV));
-            var gy = Math.min(GRID_DIV-1, Math.floor(this.nodes[i]._y * GRID_DIV));
+            var gx = Math.min(GRID_DIV-1, Math.floor(this.nodes[i].x / this.options.scale * GRID_DIV));
+            var gy = Math.min(GRID_DIV-1, Math.floor(this.nodes[i].y / this.options.scale * GRID_DIV));
             this.grid[gy][gx].push(this.nodes[i]);
         }
 
@@ -296,35 +315,61 @@
         if (this.options.node_w == undefined) {
             this.options.node_w = this.avg_edge_len / 40.0;
         }
+
+        var b = 2 * this.options.node_r;
+        this.bounds = {
+            lo: {
+                x: xform_x(x_range[0]) - b,
+                y: xform_y(y_range[0]) - b
+            },
+            hi: {
+                x: xform_x(x_range[1]) + b,
+                y: xform_y(y_range[1]) + b
+            }
+        };
+
+        this.centerOn(
+            (this.bounds.lo.x + this.bounds.hi.x) / 2.0,
+            (this.bounds.lo.y + this.bounds.hi.y) / 2.0,
+            1.0
+        );
     };
 
     mstplot.prototype.click = function(node) {
         this.trigger('click:cluster', _.keys(node.getContent()));
     };
 
+    mstplot.prototype.resize = function(width, height) {
+        if (this.width != width || this.height != height) {
+            var cc = this.screenToView(this.width / 2.0, this.height / 2.0);
+
+            this.width = width;
+            this.height = height;
+
+            d3.select(this.svg)
+                .attr("width", this.width)
+                .attr("height", this.height)
+
+            this.zoom_g.select('rect.background')
+                .attr('width', this.width)
+                .attr('height', this.height);
+
+            this.centerOn(cc.x, cc.y, this.S);
+        }
+    };
+
     mstplot.prototype.draw = function() {
         var self = this;
 
-        this.body
-            .append('rect')
-            .attr('width', this.width)
-            .attr('height', this.height)
-            .attr('x', 0.0)
-            .attr('y', 0.0)
-            .attr('fill', 'white')
-            .attr('stroke', '#aaa')
-            .attr('stroke-width', '1')
-            .attr('shape-rendering', 'crispEdges');
-
         var mst = this.body
             .append('g')
-            .attr('class', 'mst');
+            .classed('mst', true);
 
         mst .selectAll('line.edge')
             .data(this.edges)
           .enter()
             .append('line')
-            .attr('class', 'edge')
+            .classed('edge', true)
             .attr('x1', function(d) { return self.nodes[d.src].x; })
             .attr('y1', function(d) { return self.nodes[d.src].y; })
             .attr('x2', function(d) { return self.nodes[d.tgt].x; })
@@ -337,7 +382,7 @@
             .data(this.nodes, function(d) { return d.idx; })
           .enter()
             .append('circle')
-            .attr('class', 'node')
+            .classed('node', true)
             .attr('cx', function(d) { return d.x; })
             .attr('cy', function(d) { return d.y; })
             .attr('r', this.options.node_r)

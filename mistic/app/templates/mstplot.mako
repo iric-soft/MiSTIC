@@ -49,10 +49,29 @@ $(document).ready(function() {
 
   current_graph = new mstplot();
 
+  $('div#graph').append(current_graph.svg);
+
+  var doResize = function() {
+    var graph = $('div#graph');
+    var container = graph.closest('.container-fluid');
+    var enclosing_div = graph.parent();
+    var height = $(window).height()
+      - container.offset().top
+      - container.children("#graph-header").height()
+      - container.children("#graph-footer").height()
+      - 14;
+    var width = graph.width();
+
+    graph.height(height);
+
+    current_graph.resize(width, height);
+  };
+
+  $(window).resize(doResize);
+  doResize();
+
   current_graph.setData(nodes, edges, info, pos);
   current_graph.draw();
-
-  $('div#graph').append(current_graph.svg);
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset=ds.id)}";
