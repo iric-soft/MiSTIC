@@ -80,7 +80,6 @@ class CSVData(object):
           row = dataset.data.r(d.get(str(_gene)))
           
         except Exception, e:
-          print e, _gene
           raise HTTPNotFound()
       
       spearman = dataset.data.rowcorr(row, transform = RankTransform())
