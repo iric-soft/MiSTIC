@@ -39,9 +39,13 @@ path.axis.selected {
   stroke-width:3.5;
 }
 
+
 </%block>
 <%block name="pagetail">
-<form id="genesetform" target="_blank" method="post" action="${request.route_url('mistic.template.mstplot', dataset=dataset, xform=xform)}"><input id="geneset" type="hidden" name="geneset" value=""></input></form>
+<form id="genesetform" target="_blank" method="post" action="${request.route_url('mistic.template.mstplot', dataset=dataset, xform=xform)}">
+<input id="geneset" type="hidden" name="geneset" value=""></input>
+</form>
+
 ${parent.pagetail()}
 
 <script src="${request.static_url('mistic:app/static/js/lib/djset.js')}" type="text/javascript"></script>
