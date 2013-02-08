@@ -35,6 +35,9 @@ path.arc:hover {
 path.arc.highlight {
   fill: #f00;
 }
+path.axis.selected {
+  stroke-width:3.5;
+}
 
 </%block>
 <%block name="pagetail">

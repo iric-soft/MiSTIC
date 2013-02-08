@@ -163,7 +163,8 @@
             [0.025, 4],
             [0.0,   1]
         ];
-
+        ticks = ticks.reverse();
+        
         var w_lo = Math.min(this.options.weight_outer, this.options.weight_inner);
         var w_hi = Math.max(this.options.weight_outer, this.options.weight_inner);
 
@@ -200,7 +201,11 @@
                       'A' + String(r) + ',' + String(r) + ' 0 1,0 ' + String(p1[0]) + ',' + String(p1[1]))
                 .attr('stroke', 'rgba(0,0,0,' + String(alpha) + ')')
                 .attr('fill', 'none')
-                .attr('stroke-width', '0.5');
+                .attr('class', 'axis')
+                .attr('stroke-width', '0.5')
+                .on ('click', function(d) {d3.select(this).classed('selected', !d3.select(this).classed('selected')); })
+                ;
+                
 
             var p1 = p2c(self.options.plot_dir + 180, r);
             axes
@@ -210,7 +215,9 @@
                 .attr('dy', '.35em')
                 .attr('text-anchor', 'middle')
                 .attr('style', 'font-family: helvetica; font-size: ' + String(self.options.font_size) + 'px; font-weight: 600')
-                .text(String(1-w));
+                .on ('click', function(d) {d3.select(this.previousSibling).classed('selected', !d3.select(this.previousSibling).classed('selected'));  })
+                .text(String(1-w))
+                ;
         });
     };
 
@@ -323,7 +330,8 @@
         var total = 0;
 
         var r = this.root.getContent();
-
+        console.log('clusters' , clusters);
+        
         for (i = 0; i < clusters.length; ++i) {
             var k = _.keys(clusters[i]);
             var k_count = 0;
@@ -358,7 +366,7 @@
             }
 
             var content = _.keys(n.content);
-
+            console.log('keys : ',content);
             var __pn = 0
             for (i = 0; i < content.length; ++i) {
                 if (_.has(cids, content[i])) ++__pn;
@@ -379,7 +387,7 @@
                         n.__pn[x[j]]--;
                     }
                 } else {
-                    console.log('missed id: ', id);
+                    console.log('missed ids: ', id);
                     n_missed++;
                 }
             }
