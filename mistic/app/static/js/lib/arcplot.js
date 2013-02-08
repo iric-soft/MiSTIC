@@ -330,8 +330,7 @@
         var total = 0;
 
         var r = this.root.getContent();
-        console.log('clusters' , clusters);
-        
+
         for (i = 0; i < clusters.length; ++i) {
             var k = _.keys(clusters[i]);
             var k_count = 0;
@@ -366,7 +365,7 @@
             }
 
             var content = _.keys(n.content);
-            console.log('keys : ',content);
+
             var __pn = 0
             for (i = 0; i < content.length; ++i) {
                 if (_.has(cids, content[i])) ++__pn;
