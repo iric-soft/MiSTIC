@@ -8,7 +8,9 @@ import json
 ${parent.style()}
 </%block>
 <%block name="actions">
-  <button class="btn" id="download">CSV</button>${parent.actions()}<button class="btn" id="static_url">Static URL</button>
+  <button class="btn" id="download">CSV</button>
+  <button class="btn" id="download-all">CSV [all]</button>${parent.actions()}
+  <button class="btn" id="static_url">Static URL</button>
 </%block>
 <%block name="controls">
   <form class="form-inline">
@@ -55,6 +57,12 @@ $(document).ready(function() {
           .replace('_dataset_', opts.dataset)
           .replace('_gene_', opts.gene);
         url_button($('#download'), url);
+        
+        url = "${request.route_url('mistic.csv.corrds',  dataset = '_dataset_', gene = '_gene_')}"
+          .replace('_dataset_', opts.dataset)
+          .replace('_gene_', opts.gene);
+        url_button($('#download-all'), url);
+        
         url = "${request.route_url('mistic.template.corrgraph_static', dataset = '_dataset_', gene = '_gene_')}"
           .replace('_dataset_', opts.dataset)
           .replace('_gene_', opts.gene);
@@ -64,6 +72,7 @@ $(document).ready(function() {
         url_button($('#static_url'), url);
       } else {
         url_button($('#download'), null);
+        url_button($('#download-all'), null);
         url_button($('#static_url'), null);
       }
     };
