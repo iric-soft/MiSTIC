@@ -90,8 +90,8 @@ ${parent.pagetail()}
 <script type="text/javascript" charset="utf-8">
       $(document).ready(function() {
         $('#datasets-table').dataTable( {  
-                        "aoColumns": [null,null, null, null, null,null, null, null, null,null]  ,   
-                        "bSearch": [true, null, null, null, null,null, null, null, null, true]  ,
+                        "aoColumns": [null,null, null, null, null,null, null, null, null, null, null]  ,   
+                        "bSearch": [true, null, null, null, null,null, null, null, null, null, true]  ,
                         "bPaginate": false
                       
                           });
