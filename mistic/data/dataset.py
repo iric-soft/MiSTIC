@@ -20,7 +20,7 @@ class LogTransform(object):
   def __init__(self, scale = 1024, bias = 1, base = 2):
     self.params = (scale, bias, base)
   def __call__(self, matrix):
-    print matrix
+    
     scale, bias, base = self.params
     if base == 2:
       return numpy.log2(matrix * scale + bias)
@@ -66,14 +66,14 @@ class DataSet(object):
 
   def rowcorr(self, rownum, transform = None):
     row = self.data[rownum,:]
-    print 'rownum', rownum
+    
     if transform is not None: row = transform(row)
     out = []
     for i, r in enumerate(self.rownames):
-      print i, r
+      
       row2 = self.data[i,:]
       if transform is not None: row2 = transform(row2)
-      print row, row2
+     
       c = numpy.corrcoef(row, row2)[0,1]
       
       if math.isnan(c): c = 0.0
