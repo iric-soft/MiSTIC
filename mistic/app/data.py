@@ -214,7 +214,11 @@ class Annotation(object):
       ident, row = row.split(None, 1)
       try:
           attrs = json.loads(row)
+          
       except: 
+          print 'NOT ABLE TO LOAD '
+          print ident, row
+          
           continue
       
       self.attrs[ident] = attrs
@@ -223,7 +227,7 @@ class Annotation(object):
       self.go[ident] = set([ x[0] for x in attrs.get('go', []) ])
       self.go_indirect[ident] = ontology.parents(self.go[ident])
       
-      for ka in attrs.keys():
+      for ka in  attrs.keys():
         if ka=="go": continue 
         if not self.others.has_key(ka): 
           self.others[ka] = collections.defaultdict(set)
@@ -265,6 +269,8 @@ class DataSet(object):
     self.description = kw.get('desc', '')
     self.source = kw['file']
     self.data = mistic.data.dataset.DataSet.readTSV(kw['file'])
+    self.type = kw.get('type', '')
+    self.experiment = kw.get('expt', '')
     self.annotation = annotations.get(kw['anot'])
     self.transforms = set(('none', 'log', 'rank', 'anscombe')) & set(kw.get('xfrm', 'none').split(','))
     self.tags = kw.get('tags', '')
@@ -283,13 +289,17 @@ class DataSet(object):
     return self.data.rownames
 
   @property
+  def symbols(self):
+    return [self.annotation.symbol.get(r) for r in self.data.rownames]
+
+  @property
   def samples(self):
     return self.data.colnames
   
   @property
   def numberSamples(self):
     return len(self.data.colnames)
-    
+        
   def _makeTransform(self, xform):
     return dict(
       log =      mistic.data.dataset.LogTransform,
@@ -467,6 +477,7 @@ def loadAnnotations(settings):
 
 def loadData(settings):
     for d in collectItems(settings, 'mistic.dataset.'):
+      print ('Loading %s' % d['name'])
       datasets.add(DataSet(**d))
      
       

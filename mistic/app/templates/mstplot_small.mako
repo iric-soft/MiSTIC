@@ -3,6 +3,7 @@ import json
 import mistic.app.data as data
 import scipy.stats
 %>
+
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">MST</%block>
 <%block name="actions">
@@ -10,21 +11,18 @@ import scipy.stats
 </%block>
 <%block name="controls">
   <form class="form-inline">
-    <button class="btn btn-primary" id="select_all">Select all</button>
-    <button class="btn btn-primary" id="clear_selection">Clear selection</button>
-    <button class="btn btn-primary" id="scatterplot">Scatterplot</button>
-    <div class="btn-group pull-right">
-     <!--  <button class="btn btn-primary dropdown-toggle" data-toggle="dropdown">
-        GO Terms <span class="caret"></span>
-      </button>
-      <div class="dropdown-menu" id="go_table"></div> -->
-      
+   
+    <div class="btn-group-pull-right">
+    <%block name="controls_buttons">
+      <button class="btn btn-primary" id="select_all">Select all</button>
+      <button class="btn btn-primary" id="clear_selection">Clear selection</button>
+      <button class="btn btn-primary" id="scatterplot">Scatterplot</button>
+      <button class="btn btn-primary" data-toggle="button"  id="show_labels">Toggle labels</button>
+    </%block>  
     </div>
+    
   </form>
 </%block>
-
-
-
 
 <%block name="style">
 ${parent.style()}
@@ -46,6 +44,15 @@ div#more-information {
    font-weight:bold;
    float: right;
 }
+
+div#more-information a  {
+  text-decoration:none;
+  color: #cc7400;
+}
+div#more-information a:hover  {
+  cursor : default;
+}
+
 
 th, td {
   white-space: nowrap;
@@ -80,10 +87,9 @@ rect.selected {
  
  <div class="row-fluid" id="document-graph">
  	 <div class="span7" id="graph"></div>
-     <div class="span5" id="go_table"></div>
+   <div class="span5" id="go_table"></div>
  </div>
  
-
     
 </%block>
 
@@ -95,10 +101,11 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
 
+
 <%
   ds = data.datasets.get(dataset)
   a = ds.annotation
-  
+ 
   enrichment_tab = []
   for k in a.others.keys():
     a_others = a.others.get(k)	
@@ -107,7 +114,6 @@ ${parent.pagetail()}
  
     for n in nodes : 
       all_terms.update(a_others.get(n, set()))
-  
    
     for g in all_terms:
       if g=="": continue
@@ -169,15 +175,26 @@ ${parent.pagetail()}
 
 
   enrichment_tab.sort(key = lambda d: d['p_val'])
- 
+
+
+
   E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
   V = [ dict(
     id    = n,
     name  = a.attrs.get(n, {}).get('symbol') or n,
     title = a.attrs.get(n, {}).get('name') or '',
     chr = a.attrs.get(n, {}).get('chr') or '',
+    formula = a.attrs.get(n, {}).get('formula') or '',
+    can = a.attrs.get(n, {}).get('can') or '',
+    smile = a.attrs.get(n, {}).get('smi') or '',
+    actions = a.attrs.get(n, {}).get('actions') or '',
+    type = ds.type,
   ) for n in nodes ]
+ 
 %>
+
+
+
 
 <script type="text/javascript">
 
@@ -187,9 +204,11 @@ var json = {
   "enrichmenttab": ${json.dumps(enrichment_tab)|n},
 };
 
-var table = d3.select('#go_table').append('table');
+
+var table = d3.select('#go_table').insert('table', ':first-child');
 var thead = table.append('thead');
 var tbody = table.append('tbody');
+
 
 var th = thead.selectAll("th")
     .data([ 'P-value', 'Odds', 'Type', 'Term', 'Description' ])
@@ -211,7 +230,12 @@ tr.enter()
       }
       graph.selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
       clearInformation();
-      graph.selectAll('rect.selected').each(function(d) {addInformation(d.name)});
+      graph.selectAll('rect.selected').each(function(d) {
+          addInformation(d.name);
+         
+          }
+         
+          );
     })
     ;
 
@@ -230,6 +254,8 @@ td.enter()
     .text(function(d) { return d[1]; })
     .attr('title', function(d) {return d[1];})
     ;
+ 
+
 
 var width =($(document).width()-60)/12*7; //was width:1024
 var height =($(document).height()-($(document).height()/5));  //was width:780
@@ -238,20 +264,59 @@ var svg = d3.select("#graph").append("svg")
     .attr("width", width)
     .attr("height", height);
 
-var grav = .20;
-var charge = -180; //was -150
 
+var grav = .20;
+var charge = -150; //was -150
 var force = d3.layout.force()
     .gravity(grav)
     .charge(charge)
     .distance(50)
     .size([width, height]);
 
+force
+   .nodes(json.nodes)
+   .links(json.links)
+   .start();
 
-  force
-      .nodes(json.nodes)
-      .links(json.links)
-      .start();
+force.on("tick", function() {
+  link.attr("x1", function(d) { return d.source.x; })
+      .attr("y1", function(d) { return d.source.y; })
+      .attr("x2", function(d) { return d.target.x; })
+      .attr("y2", function(d) { return d.target.y; });
+
+  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
+
+  var xlo, xhi, ylo, yhi;
+
+  xlo = xhi = json.nodes[0].x;
+  ylo = yhi = json.nodes[0].x;
+
+  for (var i = 1; i < json.nodes.length; ++i) {
+    xlo = Math.min(xlo, json.nodes[i].x);
+    ylo = Math.min(ylo, json.nodes[i].y);
+    xhi = Math.max(xhi, json.nodes[i].x);
+    yhi = Math.max(yhi, json.nodes[i].y);
+  
+  }
+
+  var xfrac = (xhi - xlo) / width;
+  var yfrac = (yhi - ylo) / height;
+
+  if (xfrac < .75 && yfrac < .75) {
+    if (grav > 0.05) grav *= .99;
+    charge *= 1.01;
+    force.gravity(grav);
+    force.charge(charge);
+  }
+
+  if (xfrac > 1.0 || yfrac > 1.0) {
+    grav *= 1.01;
+    charge *= .99;
+    force.gravity(grav);
+    force.charge(charge);
+  }
+
+});
 
 var graph = svg
     .append('g')
@@ -263,8 +328,9 @@ var link = graph.selectAll(".link")
     .attr("stroke-width", 2)
     .attr("stroke", function(d) { return YlGnBl(1-d.weight); })
     .on('click', function(d) {
-      console.log(d);
+     
       window.open("${request.route_url('mistic.template.scatterplot_static', dataset=dataset, gene1='_g1_', gene2='_g2_')}".replace('_g1_', d.source.id).replace('_g2_',d.target.id));
+     
     });
 
 var node = graph.selectAll(".node")
@@ -280,6 +346,7 @@ node.append("circle")
     .attr("r", 5)
     .attr("fill", "#000");
 
+
 node.append("rect")
     .attr('height', 15)
     .attr('x', 5)
@@ -289,10 +356,47 @@ node.append("rect")
     .on('click', function(d) {
       d3.selectAll('tr.selected').classed('selected', false);
       d3.select(this).classed('selected', !d3.select(this).classed('selected'));
+      
+      if (!d3.select(this).classed('selected')){ hideMore(); }
       addInformation(d.name);
+
+      if (d3.select(this).classed('selected')){  addMore(d); }   
+    
+      
     })
     .append("title")
     .text(function(d) { return d.title+" "+d.chr; });
+
+<%block name="popover_creation">
+getContent = function(d) {
+  return(d.title +
+           '<p><a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+' target="_blank">GeneCards</a>'+
+           '<p><a href=http://en.wikipedia.org/wiki/'+d.name+' target="_blank">Wikipedia</a>');
+};
+
+
+hideMore = function() {
+  $('div#more-information a').popover('hide');
+  return false;
+};
+
+
+</%block>
+
+addMore = function(d) {
+ $('div#more-information a').popover({title:"",  
+                                      placement:'right', 
+                                      html:true, trigger: 'trigger', 
+                                      content: getContent(d), 
+                                      template : '<div class="popover"><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>'
+                                    })
+                                   .click(function(e) {
+                                         e.preventDefault();
+                                       
+                                         $(this).focus();
+                               });
+
+};
 
 
 node.append("text")
@@ -301,18 +405,42 @@ node.append("text")
     .attr("pointer-events", "none")
     .text(function(d) { return d.name});
 
+
 node.each(function(d) {
     var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
     d3.select(this).select('rect').attr('width', w);
 });
 
+
+
 $('#select_all').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
   graph.selectAll('rect').classed('selected', true);
   clearInformation();
-  graph.selectAll('rect.selected').each(function(d){addInformation(d.name)});
+  graph.selectAll('rect.selected').each(function(d){
+         addInformation(d.name); 
+         
+         });
   return false;
 });
+
+
+var showName = false;
+ $('#show_labels').on("click", function(event){
+    showName = !showName;
+    if (showName) {
+      graph.selectAll('text').each(function(d) { d3.select(this).text(d.name);  });
+    }
+    if (!showName){
+      graph.selectAll('text').each(function(d) { d3.select(this).text(d.title);  });
+    }
+    
+    node.each(function(d) {
+        var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
+        d3.select(this).select('rect').attr('width', w); });
+    return false;
+  });
+
 
 $('#clear_selection').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
@@ -337,47 +465,10 @@ $('#scatterplot').on('click', function(event) {
   return false;
 });
 
-$("#display_table").on('click', function(event) {
-	return false;
-});
 
-force.on("tick", function() {
-  link.attr("x1", function(d) { return d.source.x; })
-      .attr("y1", function(d) { return d.source.y; })
-      .attr("x2", function(d) { return d.target.x; })
-      .attr("y2", function(d) { return d.target.y; });
 
-  node.attr("transform", function(d) { return "translate(" + d.x + "," + d.y + ")"; });
-
-  var xlo, xhi, ylo, yhi;
-
-  xlo = xhi = json.nodes[0].x;
-  ylo = yhi = json.nodes[0].x;
-
-  for (var i = 1; i < json.nodes.length; ++i) {
-    xlo = Math.min(xlo, json.nodes[i].x);
-    ylo = Math.min(ylo, json.nodes[i].y);
-    xhi = Math.max(xhi, json.nodes[i].x);
-    yhi = Math.max(yhi, json.nodes[i].y);
-  }
-
-  var xfrac = (xhi - xlo) / width;
-  var yfrac = (yhi - ylo) / height;
-
-  if (xfrac < .75 && yfrac < .75) {
-    if (grav > 0.05) grav *= .99;
-    charge *= 1.01;
-    force.gravity(grav);
-    force.charge(charge);
-  }
-
-  if (xfrac > 1.0 || yfrac > 1.0) {
-    grav *= 1.01;
-    charge *= .99;
-    force.gravity(grav);
-    force.charge(charge);
-  }
-
+$(document).keyup(function(e) {
+  if (e.keyCode == 27) {  hideMore(); } 
 });
 
 </script>
