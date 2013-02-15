@@ -7,10 +7,8 @@ import pybel
 
 <%inherit file="mistic:app/templates/mstplot_small.mako"/>
 
-
 <%block name="controls_buttons">
  ${parent.controls_buttons()}
-
     <a href="#document-tanimoto" role="button" class="btn" data-toggle="modal">Tanimoto</a>
 </%block>
 
@@ -21,53 +19,38 @@ ${parent.style()}
   overflow-y: visible;
   overflow-x: hidden;
   font-family: helvetica; 
-  font-size: 11px; 
-  border : 1px solid black;
-    
+  font-size: 11px;    
+  max-height:800px;
 }
 
-tr.selected {
-  background-color: #cc7400;
-  color: #fff;
+#tanimoto_table  tr.selected {
+  background-color: #d4c6ba;
+  font-weight:bold;
 }
 
-#document-tanimoto { 
-  padding-top: 45px;
-    
+#tanimoto_chord {
+  overflow: hidden;
 }
 
-th, td {
-  white-space: nowrap;
-  padding: 0px 5px;
-  text-align: left;
+#tanimoto_table tr:hover {
+  background-color: #d4c6ba;
 }
-
-tr {
-  cursor: pointer;
-}
-
-tr:hover {
-  background-color: #cc7400;
-}
-
-
 
 #part2 {
   overflow-y: hidden;
   overflow-x: hidden;
   font-family: helvetica; 
   font-size: 10.5px; 
-
 }
 
 .modal {
   position: fixed;
-  top: 50%;
-  left: 50%;
+  top: 30%;
+  left: 30%;
   z-index: 1050;
-  width: 860px;
-  margin: -250px 0 0 -280px;
-  overflow: auto;
+  width: 1050px;
+  margin: -300px 0 0 -280px;
+  overflow: hidden;
   background-color: #ffffff;
   border: 1px solid #999;
   border: 1px solid rgba(0, 0, 0, 0.3);
@@ -82,12 +65,10 @@ tr:hover {
      -moz-background-clip: padding-box;
           background-clip: padding-box;
 }
-
-
 .modal-body {
-  max-height: 800px;
+  max-height: 600px;
   padding: 15px;
-  overflow-y: auto;
+  overflow:hidden;
 }
 
 </%block>
@@ -108,11 +89,12 @@ tr:hover {
     except:
       print a.attrs.get(n, {})
       
+      
   tanimoto =  [[ mol1.calcfp() | mol2.calcfp() for mol1 in molecules] for mol2 in molecules]
   d = dict(zip(nodes,tanimoto))
   d.update({'header': nodes})
   tanimoto_tab = d 
-
+  
   A = [ dict(
     id    = n,
     name  = a.attrs.get(n, {}).get('name') or n,
@@ -122,7 +104,7 @@ tr:hover {
     index = nodes.index(n),
     mean = numpy.mean(tanimoto[nodes.index(n)]),
     sum = numpy.sum(tanimoto[nodes.index(n)]),
-  ) for n in nodes ]
+  ) for n in nodes if n in tanimoto_tab.keys()]
 %>
 
 
@@ -140,45 +122,7 @@ tr:hover {
  </div>
      
 
-<!--<div class="row-fluid" id="document-tanimoto">
 
-   <div  class='span6' id="tanimoto_table-tmp">
-    <table><thead>
-   
-    <tr><th></th>
-    %for r in tanimoto_tab['header'] : 
-      <th>  </th>
-    %endfor
-    <th>Mean</th>
-    <th>Name</th>
-    <th>Formula</th>
-    </tr>
-     
-    </thead><tbody>
-    %for i in range(0,len(tanimoto_tab['header'])):
-      <%  k = tanimoto_tab['header'][i]   %>
-      <tr><td>${k}</td>
-      
-      %for j in range(0,len(tanimoto_tab[k])) :
-          //<% v= "%0.2f"%tanimoto_tab[k][j] %>  
-          <% v = "%0.2f"%tanimoto_tab[k][j] if j>=i else '' %>
-          <td>${v}</td>
-      %endfor 
-       <td> ${"%0.2f"%(numpy.mean(tanimoto_tab[k])) } </td>
-       <td> ${str(a.attrs.get(k, {}).get('name')).lower()} </td>
-       <td> ${str(a.attrs.get(k, {}).get('formula'))} </td>
-      </tr>  
-     %endfor    
-     </tbody> 
-     </table>
-   </div>
-
-  <div class="row-fluid" id="document-tanimoto">
-    <div class="span5" id="tanimoto_table" ></div>
-    <div class="span7" id="tanimoto_chord" ></div>
-  </div>
-  
-//-->
 
  <div class="modal hide fade" id="document-tanimoto">
   <div class='modal-body'>
@@ -198,7 +142,12 @@ tr:hover {
 var matrix=${[[(tanimoto[i][j] if i!=j else 0) for j in range(len(tanimoto[i]))] for i in range(len(tanimoto))]};
 var title= ${json.dumps(nodes)|n};
 var ann= ${json.dumps(A)|n};
-var range = ["#000000", "#33585e", "#957244", "#F26223", "#155420","#FFDD89", "#957244", "#F26223"];
+var range = ["#000000", "#e3dfd3", "#93b8a9", "#4c7869", "#FFDD89", "#ba873f", "#5aa3bd", "#e34245",
+             "#383535", "#d6a446", "#8596ab", "#b54536", "#13213b", "#b53f86", "#4a4948", "#8f332c",
+             "#ed7e3d", "#8a728f", "#413f57",  "#e68384", "#e6eda4","#8bb056", "#cc3535", "#4ea7ad",
+             "#f2a69e", "#8cc9b3", "#806667", "#3260ba", "#8a7c6e", "#f26671", "#583059", "#59280e",
+             "#a17b55", "#b06e3f", "#558dad", "#e8e099", "#d9b571", "#cc9c82", "#73877b", "#995057",
+             ];
 
 </script>
 
@@ -294,19 +243,45 @@ var table = d3.select('#tanimoto_table').insert('table', ':first-child');
 var thead = table.append('thead');
 var tbody = table.append('tbody');
 
+var valueCell = 1;
+var maxNodes = 40;
 
 var th = thead.selectAll("th")
-    .data([ 'ID', 'Name', 'Formula', 'Sum', 'Mean', 'Value' ])
+    .data([ 'ID', 'Value', 'Formula', 'Mean', 'Name' ])
     .enter()
     .append("th")
     .text(function(d) { return d; });
 
 var tr = tbody.selectAll('tr').data(chord.groups)
 
+
 tr.enter()
-    .append('tr')
-    .style("color", function(d) {return range[d.index]; })
-    .on("mouseover", function(d) {
+    .append('tr');
+  
+if (title.length >= maxNodes) {
+
+tr.style("color", function(d) {return 'black'; })
+  .on("click", function(d) { 
+       
+       d3.selectAll('#tanimoto_table tbody tr').classed('selected',false);
+       d3.selectAll('#tanimoto_table tbody tr').each(function(){
+                 d3.select(this.cells[valueCell]).text('');} );
+
+       d3.select(this).classed('selected','true');                                    
+       tr = d3.selectAll('#tanimoto_table tbody tr')[0]; 
+       var mx = matrix[d.index];
+       mx[d.index] = 1.00;
+                                
+       d3.selectAll(tr).each(function(d,i) {  
+       d3.select(this.cells[valueCell])
+               .append("text")
+                .text(mx[i].toFixed(2));   }); 
+
+    });
+} 
+else {
+tr.style("color", function(d) {return range[d.index]; })
+  .on("mouseover", function(d) {
                            fade(d,.03)
                            d3.select(this).classed('selected','true');
                                            
@@ -315,49 +290,55 @@ tr.enter()
                            mx[d.index] = 1.00;
                                 
                           d3.selectAll(tr).each(function(d,i) {  
-                             d3.select(this.cells[5])
+                             d3.select(this.cells[valueCell])
                                       .append("text")
                                       .text(mx[i].toFixed(2));   });})
                                       
     .on("mouseout", function(d) {fade(d,1);
                                   d3.selectAll('#tanimoto_table tbody tr').classed('selected',false);
-                                     d3.selectAll('#tanimoto_table tbody tr').each(function(){
-                                        d3.select(this.cells[5]).text('');} ) })
+                                  d3.selectAll('#tanimoto_table tbody tr').each(function(){
+                                        d3.select(this.cells[valueCell]).text('');} ) })
     ;
-
+}
 var td = tr.selectAll('td')
     .data(function(d) {return [
       [ 'compound_id', ann[d.index].id],
-      [ 'name', ann[d.index].name.toLowerCase()],
+      [ 'value',''],  
       [ 'formula', ann[d.index].formula ],
-      [ 'sum', ann[d.index].sum.toFixed(2) ],   
       [ 'mean', ann[d.index].mean.toFixed(2) ],  
-      [ 'value',''],      
+      [ 'name', ann[d.index].name.toLowerCase()],
+          
     ];})
+    
     ;
 
 td.enter()
     .append('td')
     .text(function(d) { return d[1]; })
-  
-    //.attr('title', function(d) {return d[1];})
+    .attr('title', function(d) {return d[1];})
     ;
  
+ 
+if (title.length < maxNodes) {
+  var inr = 0.31;
+  var dnm = 2.22;
+  
+  if (title.length>20) {inr=0.21; dnm=3;}
 
-var width = 300+20*title.length;
-var height = 300 +20 * title.length;
-var innerRadius = Math.min(width, height) * .31;
-var outerRadius = innerRadius * 1.1;
 
+  var width = Math.min(200 +20 * title.length, 1050);
+  var height = Math.min(200 +20 * title.length, 850);
+  var innerRadius = Math.min(width, height) * inr;
+  var outerRadius = innerRadius * 1.1;
 
-var svg = d3.select("#tanimoto_chord")
-     .append("svg")
-     .attr("width", width)
-     .attr("height", height)
-     .append("g")
-     .attr("transform","translate(" + width / 2 + "," + height/2.25  + ")");
+  var svg = d3.select("#tanimoto_chord")
+      .append("svg")
+      .attr("width", width)
+      .attr("height", height)
+      .append("g")
+      .attr("transform","translate(" + width / dnm + "," + height/dnm  + ")");
 
-svg.append("g")
+  svg.append("g")
         .selectAll("path")
         .data(chord.groups)
         .enter().append("path")
@@ -374,7 +355,7 @@ svg.append("g")
                               mx[d.index] = 1.00;
                                 
                               d3.selectAll(tr).each(function(d,i) {  
-                                       d3.select(this.cells[5])
+                                       d3.select(this.cells[valueCell])
                                          .append("text")
                                          .text(mx[i].toFixed(2));   });
                               
@@ -382,10 +363,10 @@ svg.append("g")
         .on("mouseout", function(d) {fade( d,1);
                                      d3.selectAll('#tanimoto_table tbody tr').classed('selected',false);
                                      d3.selectAll('#tanimoto_table tbody tr').each(function(){
-                                        d3.select(this.cells[5]).text('');}); 
+                                        d3.select(this.cells[valueCell]).text('');}); 
         });
 
-svg.append("g")
+  svg.append("g")
         .attr("class", "chord")
         .selectAll("path")
         .data(chord.chords)
@@ -406,7 +387,7 @@ svg.append("g")
                                   
                                   tr = d3.selectAll('#tanimoto_table tbody tr.selected')[0];
                                   d3.selectAll(tr).each(function() { 
-                                       d3.select(this.cells[5])
+                                       d3.select(this.cells[valueCell])
                                          .append("text")
                                          .text(val);   });
    
@@ -417,52 +398,40 @@ svg.append("g")
         .on("mouseout", function() { d3.selectAll('g.chord path').style('opacity',1);
                                      d3.selectAll('#tanimoto_table tbody tr').classed('selected',false);
                                      d3.selectAll('#tanimoto_table tbody tr').each(function(){
-                                                              d3.select(this.cells[5]).text('');});  })
+                                                              d3.select(this.cells[valueCell]).text('');});  })
         .append("title")
         .text(function(d) { return title[d.source.index]+"-"+title[d.target.index]+" :  "+ d.source.value.toFixed(2) ; })
         ;
        
-      
-//svg.selectAll("text")
-//        .data(chord.groups)
-//        .enter()
-//        .append("text")
-//        .text(function(d) { return title[d.index]+" "+ann[d.index].name+" " ;  })
-//        .attr("x", function(d) { return -width/2+10; })
-//        .attr("y", function(d) { return -height / 2 + 20*(d.index+1);  })
-//       .attr("font-size", "11px")
-//        .attr("fill", function(d) {return range[d.index]; })
-//        .on("mouseover", fade(.03))
-//        .on("mouseout", fade(1));
-        
+     
+  if (title.length < 25) {
+  
+    var ticks = svg.append("g").selectAll("g")
+      .data(chord.groups)
+    .enter().append("g").selectAll("g")
+      .data(groupTicks)
+    .enter().append("g")
+      .attr("transform", function(d) {
+        return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
+            + "translate(" + outerRadius + ",0)";
+      });
 
+    ticks.append("line")
+      .attr("x1", 1)
+      .attr("y1", 0)
+      .attr("x2", 5)
+      .attr("y2", 0)
+      .style("stroke", "#000");
+ 
+    ticks.append("text")
+      .attr("x", 8)
+      .attr("dy", ".35em")
+      .attr("transform", function(d) { return d.angle > Math.PI ? "rotate(180)translate(-16)" : null; })
+      .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
+      .text(function(d) { return d.label });
+  }
 
-var ticks = svg.append("g").selectAll("g")
-    .data(chord.groups)
-  .enter().append("g").selectAll("g")
-    .data(groupTicks)
-  .enter().append("g")
-    .attr("transform", function(d) {
-      return "rotate(" + (d.angle * 180 / Math.PI - 90) + ")"
-          + "translate(" + outerRadius + ",0)";
-    });
-
-ticks.append("line")
-    .attr("x1", 1)
-    .attr("y1", 0)
-    .attr("x2", 5)
-    .attr("y2", 0)
-    .style("stroke", "#000");
-
-ticks.append("text")
-    .attr("x", 8)
-    .attr("dy", ".35em")
-    .attr("transform", function(d) { return d.angle > Math.PI ? "rotate(180)translate(-16)" : null; })
-    .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
-    .text(function(d) { return d.label });
-
-
-
+}
 // Returns an array of tick angles and labels, given a group.
  function groupTicks(d) {
    var k = (d.endAngle - d.startAngle) / d.value;
