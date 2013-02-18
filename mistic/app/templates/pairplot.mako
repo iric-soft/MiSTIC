@@ -34,10 +34,11 @@
 </div>    	
  
  <div id="advanced-options">
-    	<label style="display:inline;" for="sample" size="10px">Locate:</label>
-    	<input type="text" id="sample" autocomplete="off"  />
+    	<label style="display:inline;" for="tag" size="10px">Locate:</label>
+    	<input type="text" id="tag" autocomplete="off"  />
     	<button class="btn btn-primary" id="show_labels">Show labels</button> 
-    	<button class="btn btn-primary" id="select_clear">Select all</button>
+    	<button class="btn btn-primary" data-toggle="button" id="select_clear">Select all</button>
+    	<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>
     </div>
   
    
@@ -199,7 +200,8 @@ $(document).ready(function() {
   });
   
   $('#select_clear').on('click', function(event) {
-  	if ($(this).text()=="Select all"){
+  
+  	if (!d3.select(this).classed("active")){
   		d3.selectAll('circle').classed('highlighted', true);
   		var dat = [];
   		d3.selectAll('circle.highlighted').each(function(d) {
@@ -207,40 +209,43 @@ $(document).ready(function() {
   		});
   		dat = _.uniq(dat);
   		_.each(dat, addInformation);
-  		$(this).text("Clear all");
+  		d3.select(this).text("Clear all");
   	}
   	else {
   		d3.selectAll('circle').classed('highlighted', false);
   		clearInformation();
-  		$(this).text("Select all");
+  		d3.select(this).text("Select all");
   		
 	  	}
 	event.preventDefault();
 	});
 	
-
+  $("#toggle_ids").on("click", function(event) {
+     d3.selectAll('#text-symbol').classed('invisible', ! d3.selectAll('#text-symbol').classed('invisible'));
+     d3.selectAll('#text-desc').classed('invisible', ! d3.selectAll('#text-desc').classed('invisible'));
+  });
  
   $('#advanced-options-link').on('click', function(event) { 
  	$('#advanced-options').toggle();
  	event.preventDefault();
  	});
  		
-  $('#sample').on('change', function(event){
-  	var sample_entry = event.target.value.split(" ");
+  $('#tag').on('change', function(event){
+  	var tag_entry = event.target.value.split(" ");
   	var circles = d3.selectAll('circle'); 
   	
   	var dat = [];
   	circles.each(function(d) { dat.push(d.k);});
   	dat = _.uniq(dat);
   	
-  	sample_valid = _.filter(sample_entry, function(item) {return _.contains(dat, item);});
-  	sample_invalid = _.filter(sample_entry, function(item) {return !(_.contains(dat, item));});
+  	tag_valid = _.filter(sample_entry, function(item) {return _.contains(dat, item);});
+  	tag_invalid = _.filter(sample_entry, function(item) {return !(_.contains(dat, item));});
   	
   	d3.selectAll('circle').classed('highlighted', false);
-	circles.filter(function(d, i) {return (_.contains(sample_valid, d.k));})
+	circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
 			.classed('highlighted', !d3.select(this).classed('highlighted'));
 	clearInformation();
-	_.each(sample_valid, addInformation);
+	_.each(tag_valid, addInformation);
   	
   	
   	event.preventDefault();
