@@ -75,7 +75,7 @@
         if (this.options.axes && N < 4) {
             _.extend(s_opts, { padding: [ 5,20,46,50 ], axes:true });
         } else {
-            _.extend(s_opts, { padding: [ 5,5,5,5 ],axes:true,  axis_labels:false,  pt_size: 2 });
+            _.extend(s_opts, { padding: [ 5,5,5,5 ], axes:true, axis_labels:false,  pt_size: 2 });
             sep = 5;
         }
 
@@ -97,13 +97,30 @@
                     $(g[0]).append(result);
                 } else {
                     console.log(JSON.stringify(this.data[x].symbol));
-                    g   .append('text')
+                     g.append('text')
                         .attr('x', (xhi-xlo)/2)
                         .attr('y', (yhi-ylo)/2)
                         .attr('dy', '12px')
                         .attr('text-anchor', 'middle')
                         .attr('style', 'font-family: helvetica; font-size: 24px; font-weight: 600')
+                        .attr('id', 'text-symbol')
                         .text(this.data[x].symbol ? this.data[x].symbol : this.data[x].gene);
+                    
+                    var fontsize = N>=4 ? 12 : 18;    
+                    g.append('text')
+                        .attr('x', (xhi-xlo)/2)
+                        .attr('y', (yhi-ylo)/2)
+                        .attr('dy', '12px')
+                        .attr('text-anchor', 'middle')
+                        .attr('style', 'font-family: helvetica; font-size: '+ fontsize + 'px; font-weight: 600')
+                        .attr('id', 'text-desc')
+                        .classed('invisible', true)
+                        .attr('title', this.data[x].desc)
+                        .text(this.data[x].desc ? this.data[x].desc : this.data[x].gene);
+                        
+                        
+                        
+                   
                 }
             }
         }
