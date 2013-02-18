@@ -47,12 +47,11 @@ div#more-information {
 
 div#more-information a  {
   text-decoration:none;
-  color: #cc7400;
+  color: grey;
 }
 div#more-information a:hover  {
   cursor : default;
 }
-
 
 th, td {
   white-space: nowrap;
@@ -77,6 +76,13 @@ rect.selected {
   fill: #cc7400;
 }
 
+#part2 {
+  overflow-y: hidden;
+  overflow-x: hidden;
+  font-family: helvetica; 
+  font-size: 10.5px; 
+  width: 400px;
+}
 </%block>
 
 <%block name="graph">
@@ -84,12 +90,16 @@ rect.selected {
  <div class="row-fluid">
  	 <div class="span12" id="more-information"></div>
  </div>
- 
+
  <div class="row-fluid" id="document-graph">
- 	 <div class="span7" id="graph"></div>
-   <div class="span5" id="go_table"></div>
+   <div class="span7" id="graph"></div>
+   <div class="span5" id="graph-right">
+      <div class="span12" id="go_table"></div>
+      <div class="span12" id="spacer" style='height:100px;'></div>
+      <div class="span12" id="part2"></div>
+   </div>
  </div>
- 
+  
     
 </%block>
 
@@ -176,8 +186,6 @@ ${parent.pagetail()}
 
   enrichment_tab.sort(key = lambda d: d['p_val'])
 
-
-
   E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
   V = [ dict(
     id    = n,
@@ -193,9 +201,6 @@ ${parent.pagetail()}
  
 %>
 
-
-
-
 <script type="text/javascript">
 
 var json = {
@@ -204,11 +209,9 @@ var json = {
   "enrichmenttab": ${json.dumps(enrichment_tab)|n},
 };
 
-
 var table = d3.select('#go_table').insert('table', ':first-child');
 var thead = table.append('thead');
 var tbody = table.append('tbody');
-
 
 var th = thead.selectAll("th")
     .data([ 'P-value', 'Odds', 'Type', 'Term', 'Description' ])
@@ -233,9 +236,7 @@ tr.enter()
       graph.selectAll('rect.selected').each(function(d) {
           addInformation(d.name);
          
-          }
-         
-          );
+          } );
     })
     ;
 
@@ -256,14 +257,12 @@ td.enter()
     ;
  
 
-
 var width =($(document).width()-60)/12*7; //was width:1024
 var height =($(document).height()-($(document).height()/5));  //was width:780
 
 var svg = d3.select("#graph").append("svg")
     .attr("width", width)
     .attr("height", height);
-
 
 var grav = .20;
 var charge = -150; //was -150
@@ -327,8 +326,7 @@ var link = graph.selectAll(".link")
   .enter().append("line")
     .attr("stroke-width", 2)
     .attr("stroke", function(d) { return YlGnBl(1-d.weight); })
-    .on('click', function(d) {
-     
+    .on('click', function(d) {   
       window.open("${request.route_url('mistic.template.scatterplot_static', dataset=dataset, gene1='_g1_', gene2='_g2_')}".replace('_g1_', d.source.id).replace('_g2_',d.target.id));
      
     });
@@ -346,7 +344,6 @@ node.append("circle")
     .attr("r", 5)
     .attr("fill", "#000");
 
-
 node.append("rect")
     .attr('height', 15)
     .attr('x', 5)
@@ -360,42 +357,26 @@ node.append("rect")
       if (!d3.select(this).classed('selected')){ hideMore(); }
       addInformation(d.name);
 
-      if (d3.select(this).classed('selected')){  addMore(d); }   
-    
-      
+      if (d3.select(this).classed('selected')){  
+        getContent(d);
+       }   
     })
     .append("title")
     .text(function(d) { return d.title+" "+d.chr; });
 
-<%block name="popover_creation">
+<%block name="getExtraContent">
 getContent = function(d) {
-  return(d.title +
+ 
+  d3.select('#part2').html("<h4>"+d.title +"</h4>"+
            '<p><a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+' target="_blank">GeneCards</a>'+
-           '<p><a href=http://en.wikipedia.org/wiki/'+d.name+' target="_blank">Wikipedia</a>');
+           '&nbsp;&nbsp;<a href=http://en.wikipedia.org/wiki/'+d.name+' target="_blank">Wikipedia</a>');
 };
-
-
-hideMore = function() {
-  $('div#more-information a').popover('hide');
-  return false;
-};
-
 
 </%block>
 
-addMore = function(d) {
- $('div#more-information a').popover({title:"",  
-                                      placement:'right', 
-                                      html:true, trigger: 'trigger', 
-                                      content: getContent(d), 
-                                      template : '<div class="popover"><div class="popover-inner"><div class="popover-content"><p></p></div></div></div>'
-                                    })
-                                   .click(function(e) {
-                                         e.preventDefault();
-                                       
-                                         $(this).focus();
-                               });
-
+hideMore = function() {
+  d3.select('#part2').html('');
+  return false;
 };
 
 

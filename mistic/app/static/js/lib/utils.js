@@ -13,8 +13,6 @@
 			
 			$('div#more-information a').filter(":contains('"+information+" ')").remove();
       			
-		
-			
 		}
 	};
 })();

@@ -87,8 +87,7 @@ ${parent.style()}
     try:
       molecules.append(pybel.readstring( 'smi', str(a.attrs.get(n, {}).get('smi'))))
     except:
-      print a.attrs.get(n, {})
-      
+      print a.attrs.get(n, {})  
       
   tanimoto =  [[ mol1.calcfp() | mol2.calcfp() for mol1 in molecules] for mol2 in molecules]
   d = dict(zip(nodes,tanimoto))
@@ -120,10 +119,9 @@ ${parent.style()}
       <div class="span12" id="part2"></div>
    </div>
  </div>
-     
+  
 
-
-
+ 
  <div class="modal hide fade" id="document-tanimoto">
   <div class='modal-body'>
      <div class="row-fluid" id="document-tanimoto">
@@ -133,8 +131,6 @@ ${parent.style()}
    </div>
   </div>
  </div>
-
-
 
 
 <script>
@@ -154,7 +150,7 @@ var range = ["#000000", "#e3dfd3", "#93b8a9", "#4c7869", "#FFDD89", "#ba873f", "
 </%block>
 
 
-<%block name="popover_creation">
+<%block name="getExtraContent">
 
 getContent = function(d) {
   
@@ -166,9 +162,11 @@ getContent = function(d) {
       var dt = d.title.toLowerCase().replace(' ','&nbsp;');
       content = "<h4>"+d.title+"</h4>" +'<p><a href=http://en.wikipedia.org/wiki/'+ dt +' target="_blank">Wikipedia</a>';
       url = 'http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/'+d.title+'/property/MolecularFormula/JSON'
-     
+      content = content + "<p>Formula : "+ d.formula +                               
+                "<p><img height=200px src='"+png_url+"' alt='[structure not found/available]'>"
+                
       $('#part2').html(content);
-      
+   
       $.ajax({type: 'GET',
                 url: url,
                 success: function(json) { 
@@ -177,47 +175,27 @@ getContent = function(d) {
                       // "<p><img height=200px src='http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+d.title+"/PNG' alt='[structure not found/available]'>"+
                       pubchem = "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid="+cid;
                       pubchem_assay = "http://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?cid="+cid;
-                      
-                    
-                      content = "<p><a href="+pubchem+" target='_blank'>Pubchem</a>&nbsp;&nbsp;"+
-                                "<a href="+pubchem_assay+" target='_blank'>Pubchem_BioAssay</a>"+
-                                "<p>Formula : "+ d.formula +
-                               
-                                "<p><img height=200px src='"+png_url+"' alt='[structure not found/available]'>"
-                                
-                                            
-                      ; 
+                      content = content + "<p><a href="+pubchem+" target='_blank'>Pubchem</a>&nbsp;&nbsp;"+
+                                "<a href="+pubchem_assay+" target='_blank'>Pubchem_BioAssay</a>"; 
                       if (d.actions!=''){
                         content = content +  "<p>Action : "+ d.actions 
                     }
-              
-                      pop = $('div#more-information a:contains('+d.name+')').data('popover')
-                      pop.options.content =  pop.options.content + content;
-                      
-                      $('#part2').append(content);
-                      
-                      
+                      d3.select('#part2').html(content);
+     
                 },
                 error: function() {console.log("Not found :"+d.title);},
                 dataType: 'json',
                 async: true
             });
+            console.log('here');
    }
   else  {
-   
-   content ="<p>Formula : "+ d.formula + "<p><img height=200px src='"+png_url+"' alt='[structure not found/available]'>"
-             
-   $('#part2').html(content);
+  
+    content ="<p>Formula : "+ d.formula + "<p><img height=200px src='"+png_url+"' alt='[structure not found/available]'>"        
+    d3.select('#part2').html(content);
   }
-  return (content);
 };
 
-hideMore = function() {
- 
-  $('div#more-information a').popover('hide');
-  d3.select('#part2').html('');
-  return false;
-};
 
 
 </%block>
