@@ -17,8 +17,15 @@ def read_config(config, section, defaults):
         result[key] = value
 
   config.seek(0, 0)
+
+  return result
+
+def init_logging(config, defaults):
   logging.config.fileConfig(config, defaults)
 
+  config.seek(0, 0)
+
+def init_beaker_cache():
   cache_opts = {
     'cache.type': 'memory',
     'cache.regions': 'mistic',
@@ -27,8 +34,8 @@ def read_config(config, section, defaults):
 
   cache = CacheManager(**parse_cache_config_options(cache_opts))
 
-  return result
-
 __all__ = [
-  'read_config'
+  'read_config',
+  'init_logging',
+  'init_beaker_cache'
 ]

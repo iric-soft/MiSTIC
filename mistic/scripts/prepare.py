@@ -8,7 +8,7 @@ import exceptions
 import ConfigParser
 import multiprocessing
 import subprocess
-from mistic.app.data import collectItems
+from mistic.app import data
 from mistic.scripts.helpers import *
 
 cmd = 'prepare'
@@ -223,36 +223,46 @@ class TaskRunner(object):
 def init_parser(parser):
   parser.add_argument('-j', '--jobs',      type=int, help='number of parallel jobs', default=1)
   parser.add_argument('-p', '--par-mst',   action='store_true', help='run mst jobs in parallel', default=False)
+  parser.add_argument('-n', '--app-name',  type=str, help='Load the named application', default='main')
   parser.add_argument('config',            type=argparse.FileType('r'), help='config file')
 
 def run(args):
-  config = {}
-
   defaults = dict(
     here = os.path.dirname(os.path.abspath(args.config.name)),
     __file__ = os.path.abspath(args.config.name)
   )
 
-  config = read_config(args.config, 'app:main', defaults)
-  
-  if 'mistic.datasets' in config : 
-    configFile = open (config['mistic.datasets']) 
-    config.update (read_config(configFile, 'datasets:mistic',  defaults))
+  init_logging(args.config, defaults)
+  init_beaker_cache()
+
+  config = {}
+
+  settings = read_config(args.config, 'app:' + args.app_name, defaults)
+
+  if 'mistic.data' not in settings:
+    raise exceptions.RuntimeError('no dataset configuration supplied')
+
+  APP_DATA = data.GlobalConfig(settings['mistic.data'])
 
   task_list = []
 
-  TRANSFORM =    tuple(config['mistic.prepare.transform'].split())
-  MST =          tuple(config['mistic.prepare.mst'].split())
-  GRAPH_TO_DOT = tuple(config['mistic.prepare.graph-to-dot'].split())
-  LAYOUT =       tuple(config['mistic.prepare.layout'].split())
+  PREPARE = read_config(args.config, 'mistic:prepare', defaults)
 
-  for dataset in collectItems(config, 'mistic.dataset'):
-    base = dataset.get('file')
+  TRANSFORM =    tuple(PREPARE['transform'].split())
+  MST =          tuple(PREPARE['mst'].split())
+  GRAPH_TO_DOT = tuple(PREPARE['graph-to-dot'].split())
+  LAYOUT =       tuple(PREPARE['layout'].split())
+
+  for dataset in APP_DATA.json_data.get('datasets'):
+    if 'path' not in dataset:
+      raise exceptions.RuntimeError('no path for dataset ' + dataset.get('id', '????'))
+
+    base = APP_DATA.file_path(dataset.get('path'))
     if base is None:
       continue
     basedir, basefile = os.path.split(base)
 
-    transforms = set(('none', 'log', 'anscombe', 'rank')) & set(re.split(r'\s*,\s*', dataset.get('xfrm', 'none').strip()))
+    transforms = set(('none', 'log', 'anscombe', 'rank')) & set(dataset.get('xfrm', []))
 
     for t in transforms:
       transformed = os.path.join(basedir, 'transformed', t, basefile)
