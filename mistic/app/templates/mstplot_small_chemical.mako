@@ -71,6 +71,19 @@ ${parent.style()}
   overflow:hidden;
 }
 
+#document-tanimoto input {
+  width:70px;
+  font-size:10.5px;
+}
+
+#document-tanimoto label {
+  font-size:10.5px;
+}
+
+#tanimoto-value {
+  font-size:10.5px;
+}
+
 </%block>
 
 
@@ -121,11 +134,18 @@ ${parent.style()}
  </div>
   
 
- 
  <div class="modal hide fade" id="document-tanimoto">
   <div class='modal-body'>
      <div class="row-fluid" id="document-tanimoto">
-    <div class="span6" id="tanimoto_table" ></div>
+    <div class="span5" id="tanimoto_table" ></div>
+    <div class="span1" id="tanimoto_search" ></div>
+     <form class="form-inline">
+       <label for="search1">Compound1:</label>
+       <input type="text" id="search1" >
+       <label for="search2">Compound2:</label>
+       <input type="text" id="search2" ">
+       <span id="tanimoto-value"></span>
+     </form>
     <div class="span6" id="tanimoto_chord" ></div>
   </div>
    </div>
@@ -175,7 +195,7 @@ getContent = function(d) {
                       // "<p><img height=200px src='http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+d.title+"/PNG' alt='[structure not found/available]'>"+
                       pubchem = "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid="+cid;
                       pubchem_assay = "http://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?cid="+cid;
-                      content = content + "<p><a href="+pubchem+" target='_blank'>Pubchem</a>&nbsp;&nbsp;"+
+                      content = "<p><a href="+pubchem+" target='_blank'>Pubchem</a>&nbsp;&nbsp;"+
                                 "<a href="+pubchem_assay+" target='_blank'>Pubchem_BioAssay</a>"; 
                       if (d.actions!=''){
                         content = content +  "<p>Action : "+ d.actions 
@@ -260,7 +280,7 @@ tr.style("color", function(d) {return 'black'; })
 else {
 tr.style("color", function(d) {return range[d.index]; })
   .on("mouseover", function(d) {
-                           fade(d,.03)
+                           fade(d.index,.03)
                            d3.select(this).classed('selected','true');
                                            
                            tr = d3.selectAll('#tanimoto_table tbody tr')[0]; 
@@ -272,7 +292,7 @@ tr.style("color", function(d) {return range[d.index]; })
                                       .append("text")
                                       .text(mx[i].toFixed(2));   });})
                                       
-    .on("mouseout", function(d) {fade(d,1);
+    .on("mouseout", function(d) {fade(d.index,1);
                                   d3.selectAll('#tanimoto_table tbody tr').classed('selected',false);
                                   d3.selectAll('#tanimoto_table tbody tr').each(function(){
                                         d3.select(this.cells[valueCell]).text('');} ) })
@@ -324,7 +344,7 @@ if (title.length < maxNodes) {
         .style("stroke", function(d) { return fill(d.index); })
         .attr("d", d3.svg.arc().innerRadius(innerRadius).outerRadius(outerRadius))
         .on("mouseover", function(d) {
-                              fade(d,.03);
+                              fade(d.index,.03);
                               tr = d3.selectAll('#tanimoto_table tbody tr')[0][d.index];
                               d3.select(tr).classed('selected',true);
                                                             
@@ -338,7 +358,7 @@ if (title.length < maxNodes) {
                                          .text(mx[i].toFixed(2));   });
                               
                               })
-        .on("mouseout", function(d) {fade( d,1);
+        .on("mouseout", function(d) {fade(d.index,1);
                                      d3.selectAll('#tanimoto_table tbody tr').classed('selected',false);
                                      d3.selectAll('#tanimoto_table tbody tr').each(function(){
                                         d3.select(this.cells[valueCell]).text('');}); 
@@ -432,8 +452,7 @@ function fade2(opacity) {
     };
 }
 
-function fade(d, opacity) {
-   var i = d.index;
+function fade(i, opacity) {
    svg.selectAll("g.chord path")
        .filter(function(d) {
            return d.source.index != i && d.target.index != i;
@@ -441,6 +460,78 @@ function fade(d, opacity) {
       .style("opacity", opacity);
    
 }
+
+function highlightCompound(idx) {
+  fade(idx,.03);
+  tr = d3.selectAll('#tanimoto_table tbody tr')[0][idx];
+  d3.select(tr).classed('selected',true);
+  tr = d3.selectAll('#tanimoto_table tbody tr')[0]; 
+  var mx = matrix[idx];
+  mx[idx] = 1.00;
+  d3.selectAll(tr).each(function(d,i) { 
+       d3.select(this.cells[valueCell])
+            .append("text")
+            .text(mx[i].toFixed(2));   });
+}
+
+
+function highlightPairCompounds(idx1, idx2) {
+ // highlight selected rows in table (source target)
+  tr = d3.selectAll('#tanimoto_table tbody tr')[0][idx1];
+  d3.select(tr).classed('selected',true);
+  tr = d3.selectAll('#tanimoto_table tbody tr')[0][idx2];
+  d3.select(tr).classed('selected',true);
+                               
+  //display value in table
+  var idx = [idx1, idx2]
+  var val = matrix[idx1][idx2].toFixed(2);
+                                  
+  tr = d3.selectAll('#tanimoto_table tbody tr.selected')[0];
+  d3.selectAll(tr).each(function() { 
+        d3.select(this.cells[valueCell])
+           .append("text")
+           .text(val);   });
+   
+ return (val);
+}
+
+function blendCompounds() {
+  d3.selectAll('g.chord path').style('opacity',1);
+  d3.selectAll('#tanimoto_table tbody tr').classed('selected',false);
+  d3.selectAll('#tanimoto_table tbody tr').each(function(){d3.select(this.cells[valueCell]).text('');});  
+}
+
+
+var search1_entry = d3.select('#search1');
+var search2_entry = d3.select('#search2');
+
+var i1 = -1;
+var i2 = -1; 
+
+function showSearched (i1,i2){
+  d3.select("#tanimoto-value").html('');
+  blendCompounds();
+  var val = '';
+  if (i1!=-1 && i2!=-1) {val = highlightPairCompounds(i1, i2); }
+  if (i1!=-1 && i2==-1) {highlightCompound(i1); }
+  if (i1==-1 && i2!=-1) {highlightCompound(i2); }
+  if (i1==-1 && i2==-1) { blendCompounds();}  
+  d3.select("#tanimoto-value").html(val);
+
+}
+
+search1_entry.on('keypress', function() {
+ i1 = title.indexOf(this.value);
+ showSearched (i1,i2)
+  
+});
+
+search2_entry.on('change', function() {
+ i2 = title.indexOf(this.value);
+ showSearched (i1,i2)
+  
+});
+
 
 
 
