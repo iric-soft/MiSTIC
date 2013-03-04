@@ -528,8 +528,8 @@ class DataSet(object):
     return self._genecorr(gene, xform, absthresh, thresh)
 
   def readPositionData(self, pos):
-    node_re = re.compile(r'^\s*(\S*) \[(.*)\];$')
-    attr_re = re.compile(r'(\S+=(?:[^"\s]+|"[^"]*"))\s*,\s*')
+    node_re = re.compile(r'^\s*(\S*)\s+\[(.*?)\];$', re.S|re.M)
+    attr_re = re.compile(r'(\S+=(?:[^"\s]+|"[^"]*"))\s*,\s*', re.S|re.M)
 
     if isinstance(pos, basestring):
       try:
@@ -538,21 +538,18 @@ class DataSet(object):
         return None
     pos_data = {}
 
-    for l in pos:
-      m = node_re.match(l)
+    for m in node_re.finditer(pos.read()):
+      node, args = m.groups()
+      if node in ('node', 'edge', 'graph'):
+        continue
 
-      if m is not None:
-        node, args = m.groups()
-        if node in ('node', 'edge', 'graph'):
-          continue
+      node = int(node) - 1
 
-        node = int(node) - 1
-
-        for x in attr_re.split(args):
-          if len(x):
-            k, v = x.split('=', 1)
-            if k == 'pos':
-              pos_data[node] = map(float, v[1:-1].split(','))
+      for x in attr_re.split(args):
+        if len(x):
+          k, v = x.split('=', 1)
+          if k == 'pos':
+            pos_data[node] = map(float, v[1:-1].split(','))
 
     n_components = min([ len(v) for v in pos_data.itervalues() ])
     ranges = [ (min([ v[c] for v in pos_data.itervalues()]),
