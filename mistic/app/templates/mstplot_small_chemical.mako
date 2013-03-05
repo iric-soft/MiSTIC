@@ -195,7 +195,7 @@ getContent = function(d) {
                       // "<p><img height=200px src='http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+d.title+"/PNG' alt='[structure not found/available]'>"+
                       pubchem = "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid="+cid;
                       pubchem_assay = "http://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?cid="+cid;
-                      content = "<p><a href="+pubchem+" target='_blank'>Pubchem</a>&nbsp;&nbsp;"+
+                      content = content + "<p><a href="+pubchem+" target='_blank'>Pubchem</a>&nbsp;&nbsp;"+
                                 "<a href="+pubchem_assay+" target='_blank'>Pubchem_BioAssay</a>"; 
                       if (d.actions!=''){
                         content = content +  "<p>Action : "+ d.actions 
@@ -222,7 +222,7 @@ getContent = function(d) {
 
 
 <%block name="pagetail">
-${parent.pagetail()}
+${parent.pagetail()} 
 
 
 <script>
