@@ -142,14 +142,18 @@ $(document).ready(function() {
   });
 
   $('#plot').click(function (event) {
-    console.log('plot');
+    //console.log('plot');
     if (current_dataset !== null && current_gene !== null) {
       $('#plot').button('loading');
       
+      var dataset_expt = ${json.dumps(dict([ (ds.id, ds.experiment) for ds in data.datasets.all() ]))|n};
+      var expt = dataset_expt[current_dataset]
+      var xform  = 'log'
+      if (expt=='hts') {xform='none'}
       
       var req = $.ajax({
         url: mistic.url + '/datasets/' + current_dataset + '/genes/' + current_gene.id + '/corr',
-        data: {x: 'none'},
+        data: {x: xform},
         dataype: 'json',
         
         success: function(data) {
@@ -158,7 +162,6 @@ $(document).ready(function() {
           console.log('annotation: ' +current_graph.annotation);
           current_graph.setLabelNb(nlabel);
           
-       
           current_graph.setData(data.data);
           
           current_graph.draw();

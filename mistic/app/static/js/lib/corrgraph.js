@@ -44,7 +44,7 @@
     };
 
     corrgraph.prototype.markGenes = function(genes) {
-        console.log('markGenes');
+        //console.log('markGenes');
         this.genes = genes
         this.updateGeneTicks();   
        
@@ -65,7 +65,7 @@
     }
 
     corrgraph.prototype.AUC = function() {
-    	console.log('AUC');
+    	//console.log('AUC');
         if (this.genes === undefined) return undefined;
         
         var n1 = 0;
@@ -93,7 +93,7 @@
     };
 
     corrgraph.prototype.labelMaker = function() {
-    	console.log('labelMaker');
+    	//console.log('labelMaker');
         var self = this;
         var xScale = this.xScale;
         var yScale = this.yScale;
@@ -303,7 +303,7 @@
     };
 
     corrgraph.prototype.updateLabels = function() {
-    	  console.log('updateLabels');
+    	  //console.log('updateLabels');
     	
         var subset = _.filter(this.data, function(d) { return d.labelled === true; });
         
@@ -365,7 +365,7 @@
     };
 
     corrgraph.prototype.updateGeneTicks = function() {
-        console.log('updateGeneTicks');
+        //console.log('updateGeneTicks');
         var ticks = d3.select(this.elem[0]).selectAll('g.gene-ticks');
         var xScale = this.xScale;
         var yScale = this.yScale;
@@ -561,6 +561,9 @@
             .attr('fill', '#050')
             .attr('cx', function(d) { return xScale(d.idx); })
             .attr('cy', function(d) { return yScale(d.corr); })
-            .attr('r',  2);
+            .attr('r',  2)
+            .append('title')
+            .text(function(d) {return(d.corr.toFixed(2));});
+           
     };
 })();
