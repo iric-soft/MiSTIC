@@ -7,6 +7,7 @@
             xlab_offset: -50,
             ylab_offset: 40,
             show:10,
+            descAsLabel: false
             
         };
 
@@ -41,6 +42,9 @@
 
     corrgraph.prototype.setLabelNb = function(n) {
         this.options.show=n;
+    };
+    corrgraph.prototype.setDescAsLabel = function(b) {
+        this.options.descAsLabel=b;
     };
 
     corrgraph.prototype.markGenes = function(genes) {
@@ -97,7 +101,9 @@
         var self = this;
         var xScale = this.xScale;
         var yScale = this.yScale;
-
+        var descAsLabel = this.options.descAsLabel;
+        console.log(descAsLabel);
+        
         var TOP = 100;
         var BTM = d3.select(this.elem[0]).select('svg').attr('height') - 100;
 
@@ -260,11 +266,18 @@
             if (!d.labelled) return null;
 
             var l = allocate_to_box(d);
-
+           
             l.id = d.gene;
             l.hl = d.in_gene_set;
             l.t = d.symbol === '' ? d.gene : d.symbol;
             l.d = d.desc;
+   
+            if (descAsLabel) { 
+              l.t = d.desc === '' ? d.gene : d.desc; 
+              l.d = d.symbol === '' ? d.gene : d.symbol;
+            }
+            
+          
 
             var tangent;
 
@@ -304,7 +317,7 @@
 
     corrgraph.prototype.updateLabels = function() {
     	  //console.log('updateLabels');
-    	
+    	 
         var subset = _.filter(this.data, function(d) { return d.labelled === true; });
         
         if (subset.length>0) {

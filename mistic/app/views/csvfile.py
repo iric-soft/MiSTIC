@@ -28,8 +28,15 @@ class CSVData(object):
       raise HTTPNotFound()
 
     spearman = dataset.data.rowcorr(row, transform = RankTransform())
-    pearson  = dataset.data.rowcorr(row, transform = LogTransform())
-
+    
+    colPearson = "pearson"
+    if dataset.experiment=="ngs": 
+      pearson  = dataset.data.rowcorr(row, transform = LogTransform())
+      colPearson = colPearson + " (on log transformed data)"
+    else : 
+      pearson  = dataset.data.rowcorr(row)
+     
+      
     result = [
       (i1, r1,
        dataset.annotation.symbol.get(r1, ''),
@@ -37,7 +44,7 @@ class CSVData(object):
        r, s)
       for (i1, r1, r), (i2, r2, s) in zip(pearson, spearman) ]
 
-    header = [ 'idx', 'ident', 'symbol', 'desc', 'pearson', 'spearman' ]
+    header = [ 'idx', 'ident', 'symbol', 'desc', colPearson, 'spearman' ]
 
     resp = Response(
       content_type = 'text/csv',
@@ -83,8 +90,14 @@ class CSVData(object):
           raise HTTPNotFound()
       
       spearman = dataset.data.rowcorr(row, transform = RankTransform())
-      pearson  = dataset.data.rowcorr(row, transform = LogTransform())
-
+     
+      colPearson = "pearson"
+      if dataset.experiment=="ngs": 
+        pearson  = dataset.data.rowcorr(row, transform = LogTransform())
+        colPearson = colPearson + " (on log transformed data)"
+      else : 
+        pearson  = dataset.data.rowcorr(row)
+       
       result = [
                 (i1, r1,
                  dataset.annotation.symbol.get(r1, ''),
@@ -96,7 +109,7 @@ class CSVData(object):
       
     header = [  ]
     for k in results.keys(): 
-      header = header + ['%s ident' %k, '%s symbol'%k, '%s desc'%k  ,'%s pearson'%k, '%s spearman'%k]
+      header = header + ['%s ident' %k, '%s symbol'%k, '%s desc'%k  ,'%s %s'% (k, colPearson), '%s spearman'%k]
     
     res = []
     for symbol in symbols :

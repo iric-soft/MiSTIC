@@ -3,7 +3,7 @@
 import json
 import mistic.app.data as data
 
-transforms = ('log', 'rank', 'anscombe', 'none')
+transforms = ('log', 'rank',  'none')
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -27,13 +27,13 @@ ${parent.style()}
 
 
 
-<table id="datasets-table">
+<table id="datasets-table"  style="width:850px;">
 <thead>
 <tr>
   
   <th></th>
   <th></th>
-  <th colspan="${len(transforms) * 2 }">Transform</th>
+  <th colspan="${len(transforms) * 1 }">Transformed data type</th>
   <th></th>
 </tr>
 <tr>
@@ -41,7 +41,7 @@ ${parent.style()}
  <th>n</th>
 
 %for i, tf in enumerate(transforms):
-  <th colspan="2">${tf.capitalize()}</th>
+  <th colspan="1">${tf.capitalize()}</th>
 %endfor
  <th></th>
 </tr>
@@ -61,9 +61,9 @@ ${parent.style()}
   %if tf in ds.transforms:
     
     <td><a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">Icicle</a></td>
-    <td><a href="${request.route_url('mistic.template.mstplot', dataset=ds.id, xform=tf)}">MST</a></td>
+    <!--<td><a href="${request.route_url('mistic.template.mstplot', dataset=ds.id, xform=tf)}">MST</a></td> -->
   %else:
-    <td></td>
+     <!--<td></td> -->
     <td></td>
   %endif
   %endfor
@@ -90,9 +90,11 @@ ${parent.pagetail()}
 <script type="text/javascript" charset="utf-8">
       $(document).ready(function() {
         $('#datasets-table').dataTable( {  
-                        "aoColumns": [null,null, null, null, null,null, null, null, null, null, null]  ,   
-                        "bSearch": [true, null, null, null, null,null, null, null, null, null, true]  ,
-                        "bPaginate": false
+                        "aoColumns": [null, null,  null, null, null, null]  ,   
+                        "bSearch": [true, null, null, null, null, true]  ,
+                        "bPaginate": false, 
+                        "bSort":false,
+                        "bProcessing": false
                       
                           });
       } );

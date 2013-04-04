@@ -148,8 +148,8 @@ $(document).ready(function() {
       
       var dataset_expt = ${json.dumps(dict([ (ds.id, ds.experiment) for ds in data.datasets.all() ]))|n};
       var expt = dataset_expt[current_dataset]
-      var xform  = 'log'
-      if (expt=='hts') {xform='none'}
+      var xform  = 'none'
+      if (expt=='ngs') {xform='log'}
       
       var req = $.ajax({
         url: mistic.url + '/datasets/' + current_dataset + '/genes/' + current_gene.id + '/corr',
@@ -161,9 +161,10 @@ $(document).ready(function() {
           current_graph.annotation = current_dataset.genes;
           console.log('annotation: ' +current_graph.annotation);
           current_graph.setLabelNb(nlabel);
+          if (expt=='hts' || expt=='ngs,hts') { current_graph.setDescAsLabel (true); }
           
           current_graph.setData(data.data);
-          
+          console.log(data.data);
           current_graph.draw();
           updateURLTarget({ dataset: current_dataset, gene: current_gene.id });
           console.log('end');

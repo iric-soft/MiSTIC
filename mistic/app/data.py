@@ -198,7 +198,7 @@ class Annotation(object):
     self.desc = {}
     self.symbol = {}
     self.attrs = {}
-    
+   
     self.go = collections.defaultdict(set)
     self.go_genes = collections.defaultdict(set)
    
@@ -209,15 +209,15 @@ class Annotation(object):
     self.others_genes = collections.defaultdict(list)
         
     desc = {}
+    
     for row in open(self.path):
-      
       ident, row = row.split(None, 1)
       try:
           attrs = json.loads(row)
           
       except: 
-          print 'NOT ABLE TO LOAD '
-          print ident, row
+          #print 'NOT ABLE TO LOAD '
+          #print ident, row
           
           continue
       
@@ -270,12 +270,11 @@ class DataSet(object):
     self.source = kw['file']
     self.data = mistic.data.dataset.DataSet.readTSV(kw['file'])
     self.type = kw.get('type', '')
+    self.tags = kw.get('tags', '')
     self.experiment = kw.get('expt', '')
     self.annotation = annotations.get(kw['anot'])
-    self.transforms = set(('none', 'log', 'rank', 'anscombe')) & set(kw.get('xfrm', 'none').split(','))
-    self.tags = kw.get('tags', '')
-   
-   
+    self.transforms = set(('none', 'log', 'rank')) & set(kw.get('xfrm', 'none').split(','))
+
   @property
   def info(self):
     return dict(
@@ -382,6 +381,7 @@ class DataSet(object):
   @key_cache_region('mistic', 'mst', lambda args: (args[0].id,) + args[1:])
   def mst(self, xform):
     d, f = os.path.split(self.source)
+    
     g = os.path.join(d, 'transformed', xform, os.path.splitext(f)[0] + '.g')
     pos = os.path.join(d, 'transformed', xform, os.path.splitext(f)[0] + '.output.dot')
 

@@ -110,11 +110,16 @@ class Graph(object):
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
 
+    
     _dataset = data.datasets.get(dataset)
+    
     if _dataset is None:
+      print 'Not found'
+      
       raise HTTPNotFound()
 
     mst = _dataset.mst(xform)
+   
     if mst is None:
       raise HTTPNotFound()
 
@@ -130,6 +135,8 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.mstplot", request_method="POST")
   def mstplot_post(self):
+  
+    
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
 
@@ -151,13 +158,16 @@ class Graph(object):
       edges = mst[1],
       pos = mst[2]
     )
-
+   
     if len(mst[0]) < 200:
-      
+     
       if _dataset.experiment=="ngs":
-        return render_to_response('mistic:app/templates/mstplot_small_genes.mako', args, request = self.request)
-      if _dataset.experiment=="hts":
-        return render_to_response('mistic:app/templates/mstplot_small_chemical.mako', args, request = self.request)
+        return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
+      else : 
+        if _dataset.experiment=="hts":
+          return render_to_response('mistic:app/templates/mstplot_small_chemical.mako', args, request = self.request)
+        else : 
+          return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
     else:
       return render_to_response('mistic:app/templates/mstplot.mako', args, request = self.request)
 
