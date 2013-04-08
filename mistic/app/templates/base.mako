@@ -189,7 +189,7 @@ div#more-information {
   });
 
   window.GeneItemView = DropdownItemView.extend({
-    template: _.template(<%text>"<span class='label'><%- get('symbol') %></span> <%- get('desc') %>"</%text>),
+    template: _.template(<%text>"<span class='label'><%- get('id') %></span> <%- get('symbol') %> <%- get('desc') %>  "</%text>),
     itemClass: 'gene-item'
   });
 
