@@ -225,6 +225,7 @@ $(document).ready(function() {
       current_graph.zoomTo(null);
     }
     return false;
+    event.preventDefault();
   });
 
   current_graph.on('click:cluster', function(selection) {
