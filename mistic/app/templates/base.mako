@@ -144,9 +144,6 @@ div#more-information {
     </div>
     
     <%block name="graph">
-    <div class="row-fluid">
-     <div class="span12" id ="more-information"></div>
- 	</div>
  	
     <div class="row-fluid">
       <div class="span12">
