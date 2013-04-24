@@ -105,15 +105,16 @@ class BasicAuthenticationPolicy(object):
 
 
 def http_basic_authenticator(auth):
-    user, pwdhash = auth.split(':', 1)
-    if pwdhash.startswith('{SHA}'):
+    
+    auths = dict([tuple([x  for x  in a.split(':')]) for a in auth.split(' ')])
+    isSHA = all(['{SHA}' in x for x in auths.values()])
+    if isSHA:
         import base64
         import sha
 
-        pwdhash = pwdhash[5:]
         def http_basic_auth(credentials, request):
-            if (credentials['login'] == user and
-                base64.standard_b64encode(sha.sha(credentials['password']).digest()) == pwdhash):
+            if (credentials['login'] in auths.keys() and
+                base64.standard_b64encode(sha.sha(credentials['password']).digest()) ==  auths[credentials['login']][5:]):
                 return []
             return None
 
