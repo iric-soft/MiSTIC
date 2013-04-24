@@ -10,8 +10,8 @@ for ds in data.datasets.all() :
   
 terms = reduce(lambda x, y: x if y in x else x + [y], terms, [])
 
-#transforms = ('log', 'rank',  'none')
-transforms = ['log']
+transforms = ('log', 'rank',  'none')
+#transforms = ['log']
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -43,6 +43,10 @@ a#oo{
 }
 
 </%block>
+<%block name="actions">
+  <button class="btn" id="csv-button">CSV</button>
+</%block>
+
 
 <%block name="pagecontent">
 
@@ -62,8 +66,11 @@ a#oo{
 %for term in terms :
   <th><a><i class="icon-th-list"></a></i>${term}</th>
 %endfor
-<th>n<th>
-<th><th>
+
+<th>n</th>
+<th></th>
+<th >Icicle</th>
+<th></th>
 </tr>
 </thead>
 
@@ -71,15 +78,23 @@ a#oo{
   %for ds in data.datasets.all() :
   <tr>
    %for term in terms :
-    <td>${dds[ds.name].get(term, '')}</th>
+    <td>${dds[ds.name].get(term, '')}</td>
    %endfor
    <td>${ds.numberSamples}</td>
-    <td><a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform='log')}">Icicle</a></td>
+    %for i, tf in enumerate(transforms):
+      %if tf in ds.transforms:
+      <td><a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a></td>
+     %else:
+      <td></td>
+  %endif
+  %endfor
+   
+   
    
   </tr>
   %endfor
 </table>
-
+</div>
 
 
 <table id="datasets-table-2"  style="width:850px; display:none;">
@@ -143,9 +158,10 @@ ${parent.pagetail()}
 
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
-    
+      
       var oTable = initTable();
-  
+      
+
     });
     
   function initTable() {
@@ -155,8 +171,8 @@ ${parent.pagetail()}
             aoc.push(null);
             bsc.push(true);
         }
-        aoc = aoc.concat([null, null]);
-        bsc = bsc.concat([true, null]);
+        aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": false }, { "bSortable": false } ]);
+        bsc = bsc.concat([true, null, null, null ]);
   
        
         return $('#datasets-table').dataTable( {  
@@ -165,8 +181,8 @@ ${parent.pagetail()}
                         "bPaginate": false, 
                         "bSort":true,
                         "bProcessing": false ,
-                        "sDom": "Rlfrtip",
-                        "bRetrieve":true
+                        "sDom": 'Rlfrtip',
+                        "bRetrieve":true,
                       });    
   }    
   
@@ -176,28 +192,41 @@ $('#datasets-table th a i').on('click', function(event) {
     var cell = this.parentElement.parentElement; 
     var cellContent = cell.innerHTML;
     var oTable = initTable();
-      
-    var j =-1;
-    for (var i=0;i<oTable.fnSettings().aoColumns.length; i++) {
-      if (oTable.fnSettings().aoColumns[i]['sTitle']==cellContent){
-        j=i;
-      }
-    }
-    j = j;
-   
-    $('.icon-th-list').removeClass('icon-active');
-    $(this).addClass('icon-active');
-  
-    oTable.fnSettings().sDom = "";
-    oTable.fnSettings().oInstance._oPluginColReorder.s['allowReorder']= false;
-     
-    oTable.rowGrouping({ iGroupingColumnIndex: j,
-                         bExpandableGrouping: true, 
-                         bHideGroupingColumn: false});
-   
+    var alreadyActive = $(this).hasClass('icon-active');
     
+    $('.icon-th-list').removeClass('icon-active');
+    if (alreadyActive) {
+      console.debug ( oTable.fnSettings().sDom);
+        
+    
+    }
+    
+    else {
+    
+      var j =-1;
+      for (var i=0;i<oTable.fnSettings().aoColumns.length; i++) {
+       if (oTable.fnSettings().aoColumns[i]['sTitle']==cellContent){
+         j=i;
+       }
+     }
+     j = j;
+    
+     $(this).addClass('icon-active');
+  
+     oTable.fnSettings().sDom = "";
+     oTable.fnSettings().oInstance._oPluginColReorder.s['allowReorder']= false;
+     
+     oTable.rowGrouping({ iGroupingColumnIndex: j,
+                           bExpandableGrouping: true, 
+                           bHideGroupingColumn: false});
+   
+      } 
     });
 
+$('#csv-button').on('click', function(event){
+  
+  console.debug(tableToJSON($('#datasets-table')[0])[1]);
+});
       
 </script>
 
