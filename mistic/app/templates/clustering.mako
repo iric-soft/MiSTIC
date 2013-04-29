@@ -57,16 +57,21 @@ $(document).ready(function() {
 <%
   my_annotation = data.datasets.get(dataset).annotation.id
 %>
+
+  resizeGraph = function() {
+    current_graph.elem.height($(window).height() - 180);
+    current_graph.resize();
+  };
+
   var nodes = ${json.dumps(nodes)|n};
   var edges = ${json.dumps(edges)|n};
 
   cluster_roots = Node.fromMST(nodes, edges);
 
-  current_graph = new arcplot();
-
+  current_graph = new arcplot($('#graph'));
   current_graph.setData(cluster_roots);
-
-  current_graph.draw();
+  current_graph.setGraphInfo(["Dataset: ${dataset}", 
+                              "Transform: ${xform}"]); 
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset=dataset)}";
@@ -214,8 +219,6 @@ $(document).ready(function() {
     	$('#cc_go').addClass("clicked")
     }
   });
-  
-  
  
   gene_entry.on('change', function(item) {
     console.log (item.id);
@@ -232,7 +235,8 @@ $(document).ready(function() {
     $('#genesetform').submit();
   });
 
-  $('div#graph').append(current_graph.svg);
+  $(window).resize(resizeGraph);
+  resizeGraph();  
 });
 </script>
 </%block>
