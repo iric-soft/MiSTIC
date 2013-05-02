@@ -238,8 +238,8 @@ $(document).ready(function() {
   	circles.each(function(d) { dat.push(d.k);});
   	dat = _.uniq(dat);
   	
-  	tag_valid = _.filter(sample_entry, function(item) {return _.contains(dat, item);});
-  	tag_invalid = _.filter(sample_entry, function(item) {return !(_.contains(dat, item));});
+  	tag_valid = _.filter(tag_entry, function(item) {return _.contains(dat, item);});
+  	tag_invalid = _.filter(tag_entry, function(item) {return !(_.contains(dat, item));});
   	
   	d3.selectAll('circle').classed('highlighted', false);
 	circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
