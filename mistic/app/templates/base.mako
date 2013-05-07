@@ -149,7 +149,7 @@ div#more-information {
  	</div>
  	
     <div class="row-fluid">
-      <div class="span12">
+      <div class="span8">
         <div id="graph">
         </div>
       </div>

@@ -19,7 +19,7 @@
         return [ ang, hypot(x, y) ];
     }
 
-    arcplot = function(options) {
+    arcplot = function(elem, options) {
         this.options = {
             max_weight:      1.0,
             cluster_minsize: 5,
@@ -40,58 +40,47 @@
             _.extend(this.options, options);
         }
 
-        this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
- 
-        this.width = this.options.width;
-        this.height = this.options.height;
-
-        d3.select(this.svg)
-            .attr("width", this.width)
-            .attr("height", this.height)
-            .attr('version', '1.1')
-            .attr("pointer-events", "all")
-            .attr('xmlns', 'http://www.w3.org/2000/svg');
-
-        this.zoom_g = d3.select(this.svg)
-            .append('g')
-            .call(
-                this.zoom = d3.behavior.zoom()
-                    .scaleExtent([1, 50])
-                    .on("zoom", _.bind(this.zoom, this)));
-
-        this.xform = { T: [ 0, 0 ], S: 1 };
-
-        this.body = this.zoom_g
-            .append('g');
-
-        this.labels = [];
-
-        this.label_g = d3.select(this.svg)
-            .append('g')
-            .attr('class', 'labels')
-            .attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 400')
-            .attr('dy', 5)
-            .attr('fill', '#fff')
-            .attr("pointer-events", "none");
-
+        this.elem = $(elem);
         _.extend(this, Backbone.Events);
     };
 
     arcplot.prototype.zoom = function() {
+        console.debug("zoom");
         var S = d3.event.scale
         var T = d3.event.translate
 
-        if (T[0] > 0) T[0] = 0;
+/*        if (T[0] > 0) T[0] = 0;
         if (T[1] > 0) T[1] = 0;
-
         if (T[0] + S * this.width < this.width) T[0] = this.width - (S * this.width);
         if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
-
+*/
         this.xform = { T: [T[0], T[1]], S: S };
-
         this.body.attr("transform", "translate(" + T + ")" + " scale(" + S + ")");
 
         this.updateLabels();
+    };
+
+    arcplot.prototype.resize = function() {
+        setTimeout(_.bind(this._resize, this), 0);
+    };
+
+    arcplot.prototype._resize = function() {
+        console.debug("_resize");
+        var curr_width = 0;
+        var curr_height = 0;
+        var svg = d3.select(this.elem[0]).select('svg');
+
+        if (!svg.empty()) {
+            curr_width = svg.attr('width');
+            curr_height = svg.attr('height');
+        } 
+
+        var width = this.elem.width();
+        var height = this.elem.height();
+
+        if (curr_width != width || curr_height != height) {
+            this.draw();
+        }
     };
 
     arcplot.prototype.updateLabels = function() {
@@ -552,6 +541,13 @@
             .attr('fill', '#000');
     };
 
+    arcplot.prototype.setGraphInfo = function(graph_info) {
+        // graph_info is a list of element to be displayed at the top-left position in the svg image 
+        // see .draw function for actual display
+        
+        this.graph_info = graph_info;
+    };
+
     arcplot.prototype.setData = function(roots) {
         var self = this;
 
@@ -656,19 +652,72 @@
     };
 
     arcplot.prototype.draw = function() {
+        console.debug("draw");
         var self = this;
+        this.width = this.elem.width();
+        this.height = this.elem.height();
+
+        // reset the container 
+        this.elem.empty();
+
+        d3.select(this.elem[0])
+            .append('svg')
+            .attr("width", this.width)
+            .attr("height", this.height)
+            .attr('version', '1.1')
+            .attr("pointer-events", "all")
+            .attr('xmlns', 'http://www.w3.org/2000/svg');
+
+        this.svg  = d3.select(this.elem[0]).select('svg');
+
+        this.zoom_g = this.svg
+            .append('g')
+            .call(
+                this.zoom = d3.behavior.zoom()
+                    .scaleExtent([0.75, 50])
+                    .on("zoom", _.bind(this.zoom, this)));
+ 
+        this.xform = { T: [ 0, 0 ], S: 1.0 };
+
+        this.body = this.zoom_g
+            .append('g');
+
+        this.labels = [];
+
+        this.label_g = this.svg
+            .append('g')
+            .attr('class', 'labels')
+            .attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 400')
+            .attr('dy', 5)
+            .attr('fill', '#fff')
+            .attr("pointer-events", "none");        
 
         this.body
             .append('rect')
-            .attr('width', this.width)
-            .attr('height', this.height)
-            .attr('x', 0.0)
-            .attr('y', 0.0)
+            .attr('width', 4*this.width)
+            .attr('height', 4*this.height)
+            .attr('x', -2*this.width)
+            .attr('y', -1.5*this.height)
             .attr('fill', 'white')
             .attr('stroke', 'rgba(0,0,0,.2)')
             .attr('stroke-width', '1')
             .attr('shape-rendering', 'crispEdges');
 
+        this.body
+            .append('g')
+            .attr('class', 'graph_info')
+            .attr('transform', 'translate(10,20)');
+            
+        // should have a better way than a fixed offset? http://www.w3.org/TR/SVG/text.html    
+        for (var i=0;i<this.graph_info.length;i++) {    
+            this.body
+                .select('g.graph_info')
+                .append('text')
+                .attr('x', 0)
+                .attr('y', i*15)
+                .text(this.graph_info[i])
+        }
+        
         this.drawAxes();
 
         this.body
@@ -681,7 +730,7 @@
         for (p = new PreorderTraversal(this.root); (n = p.next()) !== null; ) {
             nodes.push(n);
         }
-
+        
         this.body
             .select('g.plot')
             .selectAll('path.arc')
@@ -693,5 +742,7 @@
             .attr('fill', 'black')
             .attr('stroke', 'none')
             .on('click', _.bind(this.click, this));
+            
+        console.debug(this);
     };
 })();
