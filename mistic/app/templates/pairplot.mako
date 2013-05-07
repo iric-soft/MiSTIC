@@ -61,12 +61,29 @@ div#advanced-options {
   display : none;
   float:right;
   
-  
+}
+div#advanced_options .btn{
+  font-size:11px;
 }
 
-div#advanced_options .btn{
-	font-size:11px;
+div#graph text {
+  pointer-events : none;
 }
+.extent {
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+  cursor:crosshair;
+}
+
+
+.circlelabel .invisible {
+  pointer-events : none;
+}
+
+circle  {
+  pointer-events : auto;
+}
+
 
 #link-caret {
 	vertical-align: middle;
@@ -113,6 +130,7 @@ $(document).ready(function() {
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
+    console.debug('badge');
     var badge = $(event.target).closest('span.badge');
     var badge_idx = parseInt(badge.attr('data-idx'));
     current_graph.removeData(function(d, i) { return i === badge_idx; });
@@ -238,14 +256,16 @@ $(document).ready(function() {
   	circles.each(function(d) { dat.push(d.k);});
   	dat = _.uniq(dat);
   	
-  	tag_valid = _.filter(sample_entry, function(item) {return _.contains(dat, item);});
-  	tag_invalid = _.filter(sample_entry, function(item) {return !(_.contains(dat, item));});
+  	tag_valid = _.filter(tag_entry, function(item) {return _.contains(dat, item);});
+  	tag_invalid = _.filter(tag_entry, function(item) {return !(_.contains(dat, item));});
   	
   	d3.selectAll('circle').classed('highlighted', false);
-	circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
+  	
+	 circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
 			.classed('highlighted', !d3.select(this).classed('highlighted'));
-	clearInformation();
-	_.each(tag_valid, addInformation);
+	
+	 clearInformation();
+	 _.each(tag_valid, addInformation);
   	
   	
   	event.preventDefault();

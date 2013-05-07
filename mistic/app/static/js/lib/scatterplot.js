@@ -95,7 +95,41 @@
 		
 	};
 	
+	scatterplot.prototype.brushclean = function () {
+	   console.debug('brushclean');
+	   d3.select('#graph svg').selectAll('.extent').classed('extent', false);
+	   d3.selectAll('#graph svg').selectAll('circle').classed('highlighted',false);
+     clearInformation();
+	};
+   
+  scatterplot.prototype.brushed= function () {
+   
+    var e = d3.event.target.extent();
+    var circles  = d3.select(this.parentNode).selectAll("circle")
+      .filter(function(d) { return e[0][0] <= d.x && d.x <= e[1][0] && e[0][1] <= d.y && d.y <= e[1][1] });
+      
+    var selected =  _.map(circles.data(), function(c) {return c.k;});
+   
+    d3.selectAll('#graph svg').selectAll("circle")
+      .classed('highlighted', function(d) {return _.contains(selected, d.k);  });
+      
+  };
+
+  scatterplot.prototype.brushend = function () {
+  
+    var circles = d3.select('#graph svg').selectAll("circle")
+            .filter (function () {return this.className.baseVal=='highlighted'});
+    var selected =  _.map(circles.data(), function(c) { return c.k;});
+    selected = _.uniq(selected);
+    clearInformation();
+    _.each(selected, addInformation);
+   
+    
+    
+  };
+	
     scatterplot.prototype.makeAxes = function() {
+    
     	var self = this;
         var xAxis = d3.svg
             .axis()
@@ -226,27 +260,44 @@
 	    .range([ this.height - this.options.padding[2], this.options.padding[0] ])
             .nice();
             
-
-        if (this.options.background) {
-            svg .append('rect')
+     this.brush = d3.svg.brush()
+        .x(this.xScale)
+        .y(this.yScale)
+        .on("brush", this.brushed)
+        .on("brushend", this.brushend);
+      
+     
+      
+      var color='transparent';
+      if (this.options.background) { color='white'; }
+       
+      svg .append('rect')
                 .attr('width', this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2)
                 .attr('height', this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2)
                 .attr('x', this.options.padding[3] - this.options.inner)
                 .attr('y', this.options.padding[0] - this.options.inner)
-                .attr('fill', 'white')
+                .attr('fill', color)
                 .attr('stroke', 'rgba(0,0,0,.2)')
                 .attr('stroke-width', '1')
                 .attr('shape-rendering', 'crispEdges');
-           
-        }
-        
-         if (this.options.axes) {
+                
+                
+                //.call(this.brush);
+       
+      svg.append("g")
+         .classed("brush", true)
+         .call(this.brush);
+             
+             
+             
+      d3.selectAll('.background').on('click', this.brushclean);
+       
+       if (this.options.axes) {
             this.makeAxes();
         }
         
-        
-
-        node = svg .selectAll(".node")
+    
+       node = svg .selectAll(".node")
             .data(xy)
             .enter().append("g")
             .attr("class", "node");
@@ -255,7 +306,7 @@
             .attr('cx', function(d) { return self.xScale(d.x); })
             .attr('cy', function(d) { return self.yScale(d.y); })
             .attr('r',  this.options.pt_size)
-           	.attr('opacity', 0.65)
+           	//.attr('opacity', 0.65)
            	.on('click', this.highlightCircle);
      
        node.append('title')
@@ -293,7 +344,7 @@
         }
 
        
-       
+     
         
     };
 })();

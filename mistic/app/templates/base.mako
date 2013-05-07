@@ -54,6 +54,8 @@ div#graph {
   border: 1px solid #aaa;
 }
 
+
+
 .circlelabel {
 	font-family: helvetica; 
 }
@@ -62,10 +64,23 @@ div#graph {
 	fill : rgb(92, 173, 255);
 }
 
+circle {
+  fill-opacity: .7;
+}
+
 div#more-information {
    font-family: helvetica,arial,sans-serif;
    font-size: 11px; 
 }
+div#more-information a,
+div#more-information a:hover
+{
+  text-decoration: none;
+  color : #0088cc;
+  pointer-events : none;
+}
+
+
 
 .dropdown-menu li > a:hover,
 .dropdown-menu .active > a:hover {
@@ -109,11 +124,13 @@ div#more-information {
 %if request.matched_route.name == 'mistic.template.corrgraph_static':
             <li class="active"><a href="#">&#x25b6; [static plot]</a></li>
 %endif
+<!--
 %if request.matched_route.name == 'mistic.template.scatterplot':
             <li class="active"><a href="#">Scatterplot</a></li>
 %else:
             <li><a href="${request.route_url('mistic.template.scatterplot')}">Scatterplot</a></li>
 %endif
+-->
 %if request.matched_route.name == 'mistic.template.scatterplot_static':
             <li class="active"><a href="#">&#x25b6; [static plot]</a></li>
 %endif
