@@ -34,14 +34,16 @@
 </div>    	
  
  <div id="advanced-options">
-    	<label style="display:inline;" for="tag" size="10px">Locate:</label>
-    	<input type="text" id="tag" autocomplete="off"  />
+    
     	<button class="btn btn-primary" id="show_labels">Show labels</button> 
     	<button class="btn btn-primary" data-toggle="button" id="select_clear">Select all</button>
     	<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>
     </div>
   
-   
+ <div>  
+    <label style="display:inline;" for="tag" size="10px">Locate:</label>
+      <input type="text" id="tag" autocomplete="off"  />
+   </div>
 
 </%block>
 
@@ -74,6 +76,13 @@ div#graph text {
   shape-rendering: crispEdges;
   cursor:crosshair;
 }
+
+.extent {
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+  cursor:crosshair;
+}
+
 
 
 .circlelabel .invisible {
@@ -177,9 +186,11 @@ $(document).ready(function() {
       current_dataset = null;
       gene_entry.url = null;
       $("#gene").attr('disabled', true);
+      $("#tag").attr('disabled', true);
       
     } else {
      $("#gene").attr('disabled', false);
+     $("#tag").attr('disabled', false);
       gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     }
     gene_entry.$el.val('');

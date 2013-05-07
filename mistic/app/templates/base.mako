@@ -54,18 +54,17 @@ div#graph {
   border: 1px solid #aaa;
 }
 
-
-
 .circlelabel {
 	font-family: helvetica; 
 }
 
 .highlighted {
-	fill : rgb(92, 173, 255);
+	fill : rgb(20, 216, 28);
+	
 }
 
 circle {
-  fill-opacity: .7;
+  fill-opacity: 1;
 }
 
 div#more-information {
@@ -76,10 +75,9 @@ div#more-information a,
 div#more-information a:hover
 {
   text-decoration: none;
-  color : #0088cc;
+  color : rgb(58, 55, 55);
   pointer-events : none;
 }
-
 
 
 .dropdown-menu li > a:hover,

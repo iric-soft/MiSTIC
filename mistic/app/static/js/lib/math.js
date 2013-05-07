@@ -219,6 +219,44 @@
         return 2 * stats.z_high(Math.abs(x));
     };
 
+   
+  stats.average = function(a) {
+      var sz = a.length;
+      var mean_a = a[0];
+       
+      for (var i = 1; i < sz; ++i) {    
+        var delta_a = a[i] - mean_a;
+        mean_a += delta_a / (i+1);
+    }
+    return mean_a;
+    };
+
+  stats.stdev = function(a) {
+     var sz = a.length;
+     var sum_sq_a = 0.0; 
+     var mean_a = a[0];
+        
+    for (var i = 1; i < sz; ++i) {
+        var sweep = i / (i+1);
+        var delta_a = a[i] - mean_a;    
+        sum_sq_a += delta_a * delta_a * sweep;   
+        mean_a += delta_a / (i+1);
+       }
+
+     var pop_sd_a = Math.sqrt(sum_sq_a / sz);
+     return pop_sd_a ;
+    };
+  stats.range = function (a) {
+      var sz = a.length;
+      var range = [a[0], a[0]];
+      for (var i = 1; i < sz; ++i) { 
+        if (a[i]<range[0]) { range[0] = a[i];} 
+        if (a[i]>range[1]) { range[1] = a[i];} 
+      }
+      return range
+  };
+
+
     stats.pearson = function(a, b) {
         var sz = Math.min(a.length, b.length);
         var sum_sq_a = 0.0;
