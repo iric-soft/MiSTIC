@@ -7,6 +7,7 @@ from mistic.data.dataset import *
 from mistic.app import data
 
 import csv
+import json
 
 
 
@@ -14,6 +15,26 @@ class CSVData(object):
   def __init__(self, request):
     self.request = request
 
+
+  @view_config(route_name="mistic.csv.root")
+  def rootcsv(self):
+    
+    _data = self.request.POST['csvdata']
+    _data = json.loads(_data)
+        
+    header = _data['table']['1'].keys()
+    result = [[_data['table'][str(i)].get(k) for k in header] for i in range(1,len(_data['table'].keys())+1) ]
+   
+    resp = Response(
+      content_type = 'text/csv',
+      content_disposition = 'attachment;filename=' + 'dataset.csv')
+    
+    w = csv.writer(resp.body_file)
+    w.writerow(header)
+    w.writerows(result)
+
+    return resp
+    
   @view_config(route_name="mistic.csv.corr")
   def corrcsv(self):
     _dataset = self.request.matchdict['dataset']

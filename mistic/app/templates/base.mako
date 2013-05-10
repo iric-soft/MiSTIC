@@ -168,6 +168,8 @@ div#more-information {
 <script src="${request.static_url('mistic:app/static/js/lib/bootstrap.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/d3.v2.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/ColReorderWithResize.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/plugin.js')}" type="text/javascript"></script>
 
 
@@ -189,7 +191,7 @@ div#more-information {
   });
 
   window.GeneItemView = DropdownItemView.extend({
-    template: _.template(<%text>"<span class='label'><%- get('id') %></span> <%- get('symbol') %> <%- get('desc') %>  "</%text>),
+    template: _.template(<%text>"<span class='label'><%- get('id') %></span><%- get('desc') %>  "</%text>),
     itemClass: 'gene-item'
   });
 
