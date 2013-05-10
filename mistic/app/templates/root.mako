@@ -44,7 +44,7 @@ a#oo{
 
 </%block>
 <%block name="actions">
-  <button class="btn" id="csv-button">CSV</button>
+  <!--<button class="btn" id="csv-button">CSV</button>-->
 </%block>
 
 
@@ -156,6 +156,9 @@ a#oo{
 <%block name="pagetail">
 ${parent.pagetail()}
 
+<form id="csvform" target="_blank" method="post" action="${request.route_url('mistic.csv.root')}">
+<input id="csvdata" type="hidden" name="csvdata" value=""></input></form>
+ 
 <script type="text/javascript" charset="utf-8">
     $(document).ready(function() {
       
@@ -196,8 +199,7 @@ $('#datasets-table th a i').on('click', function(event) {
     
     $('.icon-th-list').removeClass('icon-active');
     if (alreadyActive) {
-      console.debug ( oTable.fnSettings().sDom);
-        
+      console.debug ( oTable.fnSettings().sDom); 
     
     }
     
@@ -224,8 +226,10 @@ $('#datasets-table th a i').on('click', function(event) {
     });
 
 $('#csv-button').on('click', function(event){
-  
-  console.debug(tableToJSON($('#datasets-table')[0])[1]);
+   
+    $('#csvdata').val(tableToJSON($('#datasets-table')[0]));
+    $('#csvform').submit();
+     
 });
       
 </script>

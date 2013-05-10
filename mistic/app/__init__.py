@@ -204,9 +204,11 @@ def main(global_config, **settings):
     config.add_route('mistic.template.pairplot',           '/pairplot')
     config.add_route('mistic.template.pairplot_static',    '/pairplot/{dataset}*genes')
 
+    #config.add_route('mistic.csv.root',                    '/csv/root')
+    config.add_route('mistic.pdf.fromsvg',                 '/pdf')
     config.add_route('mistic.csv.corr',                    '/csv/genecorr/{dataset}/{gene}')
     config.add_route('mistic.csv.corrds',                  '/csv/genecorr/{dataset}/{gene}/all')
-    config.add_route('mistic.pdf.fromsvg',                 '/pdf')
+    
 
     config.add_route('mistic.template.clustering',         '/clustering/{dataset}/{xform}')
     config.add_route('mistic.template.mstplot',            '/mstplot/{dataset}/{xform}')
