@@ -67,7 +67,8 @@
             display_corr: false,
             background: true,
             axes: false,
-            makeGridLine:true,
+            makeGridLine:false,
+            textOnly:false,
         };
 		
         var sep = this.options.separation;
@@ -75,7 +76,7 @@
         if (this.options.axes && N < 4) {
             _.extend(s_opts, { padding: [ 5,20,46,50 ], axes:true });
         } else {
-            _.extend(s_opts, { padding: [ 5,5,5,5 ], axes:true, axis_labels:false,  pt_size: 2 });
+            _.extend(s_opts, { padding: [ 5,5,5,5 ], axes:true,  pt_size: 2 });
             sep = 5;
         }
 
@@ -88,39 +89,75 @@
 
                 var g = svg.append('g').attr('transform', 'translate(' + String(xlo) + ',' + String(ylo) +')');
 
-                if (x != y) {
+                if (x != y) {  
                     _.extend(s_opts, { width: xhi - xlo, height: yhi - ylo });
-
-                    var s = new scatterplot(s_opts, this.data[x], this.data[y]);
+                   
+                    if (x < y ) {  _.extend(s_opts, {textOnly:true });} 
+                    if (x > y ) {  _.extend(s_opts, {textOnly:false });} 
+                    
+                    var s = new scatterplot(s_opts, this.data[x], this.data[y]); 
                     var result = s.svg;
   
                     $(g[0]).append(result);
-                } else {
-                    console.log(JSON.stringify(this.data[x].symbol));
+                } 
+                
+                
+                else {                  
+                   
+                    //console.log(JSON.stringify(this.data[x].symbol));
                      g.append('text')
                         .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/2)
+                        .attr('y', (yhi-ylo)/5-8)
                         .attr('dy', '12px')
                         .attr('text-anchor', 'middle')
                         .attr('style', 'font-family: helvetica; font-size: 24px; font-weight: 600')
                         .attr('id', 'text-symbol')
                         .text(this.data[x].symbol ? this.data[x].symbol : this.data[x].gene);
                     
-                    var fontsize = N>=4 ? 12 : 18;    
+                    var fontsize = N>=4 ? 12 : 16;    
                     g.append('text')
                         .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/2)
+                        .attr('y', (yhi-ylo)/5+8)
                         .attr('dy', '12px')
                         .attr('text-anchor', 'middle')
                         .attr('style', 'font-family: helvetica; font-size: '+ fontsize + 'px; font-weight: 600')
                         .attr('id', 'text-desc')
-                        .classed('invisible', true)
+                        //.classed('invisible', true)
                         .attr('title', this.data[x].desc)
                         .text(this.data[x].desc ? this.data[x].desc : this.data[x].gene);
+                     if (N<=5 ) {
+                     
+                      var expr = _.map(this.data[x].data, function(d) {return d.expr});
+                      //console.debug(expr);
+                      //console.debug(this.data[x]);
+                      //console.debug(stats.average(expr));
+                      //console.debug(stats.stdev(expr));
+                    
+                     var sd_e = stats.stdev(expr);
+                     var mu_e = stats.average(expr);
+                     var rg_e = stats.range(expr);
+                     g.append('text')
+                        .attr('x', (xhi-xlo)/2)
+                        .attr('y', (yhi-ylo)/5+44)
+                        .attr('text-anchor', 'middle')
+                        .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
+                        .text('Mean expression =  ' + mu_e.toFixed(2));
                         
+                      g.append('text')
+                        .attr('x', (xhi-xlo)/2)
+                        .attr('y', (yhi-ylo)/5+64)
+                        .attr('text-anchor', 'middle')
+                        .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
+                        .text('Stdev expression =  ' + sd_e.toFixed(2));
                         
-                        
-                   
+                     g.append('text')
+                        .attr('x', (xhi-xlo)/2)
+                        .attr('y', (yhi-ylo)/5+84)
+                        .attr('text-anchor', 'middle')
+                        .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
+                        .text('Range =  [' + rg_e[0].toFixed(2) +", "+ rg_e[1].toFixed(2)+"]");
+                       
+                   }
                 }
             }
         }

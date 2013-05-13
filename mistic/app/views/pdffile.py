@@ -5,6 +5,7 @@ from pyramid.renderers import render_to_response
 
 import tempfile
 import subprocess
+import re
 
 class PDFData(object):
   rsvg_convert = None
@@ -18,7 +19,9 @@ class PDFData(object):
       raise HTTPNotFound()
 
     _data = self.request.POST['pdfdata']
-
+    _data = re.sub ('<text [^<>]* class="circlelabel invisible">\d*H\d*</text>', '', _data)
+   
+    
     input = tempfile.NamedTemporaryFile()
     input.write(_data.encode('utf-8'))
     input.flush()

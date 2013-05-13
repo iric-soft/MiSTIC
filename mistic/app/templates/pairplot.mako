@@ -34,14 +34,16 @@
 </div>    	
  
  <div id="advanced-options">
-    	<label style="display:inline;" for="tag" size="10px">Locate:</label>
-    	<input type="text" id="tag" autocomplete="off"  />
+    
     	<button class="btn btn-primary" id="show_labels">Show labels</button> 
     	<button class="btn btn-primary" data-toggle="button" id="select_clear">Select all</button>
-    	<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>
+    	<!--<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>-->
     </div>
   
-   
+ <div>  
+    <label style="display:inline;" for="tag" size="10px">Locate:</label>
+      <input type="text" id="tag" autocomplete="off"  />
+   </div>
 
 </%block>
 
@@ -61,12 +63,36 @@ div#advanced-options {
   display : none;
   float:right;
   
-  
+}
+div#advanced_options .btn{
+  font-size:11px;
 }
 
-div#advanced_options .btn{
-	font-size:11px;
+div#graph text {
+  pointer-events : none;
 }
+.extent {
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+  cursor:crosshair;
+}
+
+.extent {
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+  cursor:crosshair;
+}
+
+
+
+.circlelabel .invisible {
+  pointer-events : none;
+}
+
+circle  {
+  pointer-events : auto;
+}
+
 
 #link-caret {
 	vertical-align: middle;
@@ -113,6 +139,7 @@ $(document).ready(function() {
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
+    console.debug('badge');
     var badge = $(event.target).closest('span.badge');
     var badge_idx = parseInt(badge.attr('data-idx'));
     current_graph.removeData(function(d, i) { return i === badge_idx; });
@@ -159,9 +186,11 @@ $(document).ready(function() {
       current_dataset = null;
       gene_entry.url = null;
       $("#gene").attr('disabled', true);
+      $("#tag").attr('disabled', true);
       
     } else {
      $("#gene").attr('disabled', false);
+     $("#tag").attr('disabled', false);
       gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     }
     gene_entry.$el.val('');
@@ -242,10 +271,12 @@ $(document).ready(function() {
   	tag_invalid = _.filter(tag_entry, function(item) {return !(_.contains(dat, item));});
   	
   	d3.selectAll('circle').classed('highlighted', false);
-	circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
+  	
+	 circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
 			.classed('highlighted', !d3.select(this).classed('highlighted'));
-	clearInformation();
-	_.each(tag_valid, addInformation);
+	
+	 clearInformation();
+	 _.each(tag_valid, addInformation);
   	
   	
   	event.preventDefault();
