@@ -229,11 +229,16 @@
         var v2_anscombe = [];
 		
         var xy = [];
+        var lg = true;
+        
         for (var i in keys) {
             var k = keys[i];
             var x = this.xdata[k];
             var y = this.ydata[k];
-            xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});
+            xy.push({ x: x >= 0.0 & x <0.0105 ? 0.01 : x, y: y >= 0.0 & y<0.0105 ? 0.01 : y , k: k});
+            //xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});
+            if  (x < 0.0 ||  y < 0.0) { lg=false;}
+            
             v1.push(x);
             v2.push(y);
             v1_log.push(Math.log(x + 1/1024));
@@ -241,7 +246,7 @@
             v1_anscombe.push(2 * Math.sqrt(x + 3/8));
             v2_anscombe.push(2 * Math.sqrt(y + 3/8));
         }
-
+        
         var r = stats.pearson(v1, v2);
         var r_log = stats.pearson(v1_log, v2_log);
         var r_anscombe = stats.pearson(v1_anscombe, v2_anscombe);
@@ -253,17 +258,7 @@
                 .attr('height', this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2)
                 .attr('x', this.options.padding[3] - this.options.inner)
                 .attr('y', this.options.padding[0] - this.options.inner)
-                .attr('fill', 'transparent')
-                .attr('stroke', 'rgba(55,55,55,.1)')
-                .attr('stroke-width', '1')
-                .attr('shape-rendering', 'crispEdges');
-                
-             //svg .append('text')
-             //   .attr('x', this.options.padding[3]+ 20)
-             //   .attr('y', this.options.padding[0] + 12)
-             //   .attr('text-anchor', 'left')
-             //   .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300')
-             //   .text('Correlation for  ' + keys.length.toFixed(2)+" samples");
+                .attr('fill', 'white');
                 
             svg .append('text')
                 .attr('x', this.options.padding[3]+ 20)
@@ -285,6 +280,8 @@
         
         
         else {
+          
+          if (lg) {
           this.xScale = d3.scale
             .log()
 	          .domain(d3.extent(xy, function(d) { return d.x; }))
@@ -296,7 +293,22 @@
 	          .domain(d3.extent(xy, function(d) { return d.y; }))
 	          .range([ this.height - this.options.padding[2], this.options.padding[0] ])
             .nice();
-     
+          }
+          else {
+          
+           this.xScale = d3.scale
+            .linear()
+            .domain(d3.extent(xy, function(d) { return d.x; }))
+            .range([ this.options.padding[3], this.width - this.options.padding[1] ])
+            .nice();
+
+          this.yScale = d3.scale
+            .linear()
+            .domain(d3.extent(xy, function(d) { return d.y; }))
+            .range([ this.height - this.options.padding[2], this.options.padding[0] ])
+            .nice();         
+          }
+          
           this.brush = d3.svg.brush()
               .x(this.xScale)
               .y(this.yScale)

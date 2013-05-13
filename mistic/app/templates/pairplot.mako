@@ -37,7 +37,7 @@
     
     	<button class="btn btn-primary" id="show_labels">Show labels</button> 
     	<button class="btn btn-primary" data-toggle="button" id="select_clear">Select all</button>
-    	<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>
+    	<!--<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>-->
     </div>
   
  <div>  
