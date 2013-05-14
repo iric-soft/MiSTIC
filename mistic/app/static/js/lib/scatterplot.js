@@ -16,6 +16,7 @@
             makeGridLine:false,
             gridValue: 10, 
             textOnly : false,
+            minimal : true,
             
         };
 
@@ -125,26 +126,52 @@
 	
     scatterplot.prototype.makeAxes = function() {
     
-    	var self = this;
-      var xAxis = d3.svg
+    	if (this.options.minimal)  {
+    	  xmean = stats.average(_.values(this.xdata)); 
+    	  ymean = stats.average(_.values(this.ydata)); 
+        xrg = stats.range(_.values(this.xdata));
+        yrg = stats.range(_.values(this.ydata));
+      
+       var xAxis = d3.svg
             .axis()
-	    .scale(this.xScale)
-	    .orient("bottom")
+       .scale(this.xScale)
+       .orient("bottom")
+       .tickValues([xrg[0]+0.001, xmean, xrg[1]])
+       .tickFormat(d3.format(",.1f"));
+       
+      
+    
+      var yAxis = d3.svg
+            .axis()
+      .scale(this.yScale)
+      .orient("left")
+      .tickValues([yrg[0]+0.01, ymean, yrg[1]])
+      .tickFormat(d3.format(",.1f"));
+        
+        
+        
+        
+    	}
+    	else {
+        var xAxis = d3.svg
+            .axis()
+	     .scale(this.xScale)
+	     .orient("bottom")
             .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
-	    .ticks(5)
+	     .ticks(5);
 	    
 		
-		var yAxis = d3.svg
+		  var yAxis = d3.svg
             .axis()
 	    .scale(this.yScale)
 	    .orient("left")
             .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
-	    .ticks(5)
-	    
+	    .ticks(5);
+	   }
 
         var svg = d3.select(this.svg);
 
-        svg .append("g")
+       svg .append("g")
 	    .attr("class", "axis axis-x")
 	    .attr("transform", "translate(0," + (this.height - this.options.padding[2] + this.options.outer) + ")")
 	    .call(xAxis);

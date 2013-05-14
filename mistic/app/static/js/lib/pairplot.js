@@ -110,17 +110,17 @@
                         .attr('y', (yhi-ylo)/5-8)
                         .attr('dy', '12px')
                         .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: 24px; font-weight: 600')
+                        .attr('style', 'font-family: helvetica; font-size: 22px; font-weight: 600')
                         .attr('id', 'text-symbol')
                         .text(this.data[x].symbol ? this.data[x].symbol : this.data[x].gene);
                     
-                    var fontsize = N>=4 ? 12 : 16;    
+                    
                     g.append('text')
                         .attr('x', (xhi-xlo)/2)
                         .attr('y', (yhi-ylo)/5+8)
                         .attr('dy', '12px')
                         .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: '+ fontsize + 'px; font-weight: 600')
+                        .attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 600')
                         .attr('id', 'text-desc')
                         //.classed('invisible', true)
                         .attr('title', this.data[x].desc)

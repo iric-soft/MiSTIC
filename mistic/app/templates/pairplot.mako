@@ -71,17 +71,6 @@ div#advanced_options .btn{
 div#graph text {
   pointer-events : none;
 }
-.extent {
-  fill-opacity: .125;
-  shape-rendering: crispEdges;
-  cursor:crosshair;
-}
-
-.extent {
-  fill-opacity: .125;
-  shape-rendering: crispEdges;
-  cursor:crosshair;
-}
 
 
 
@@ -267,8 +256,10 @@ $(document).ready(function() {
   	circles.each(function(d) { dat.push(d.k);});
   	dat = _.uniq(dat);
   	
-  	tag_valid = _.filter(tag_entry, function(item) {return _.contains(dat, item);});
-  	tag_invalid = _.filter(tag_entry, function(item) {return !(_.contains(dat, item));});
+  	search = function (list, regex) {
+      return _.filter(list, function(obj){ return obj.match(regex);});
+    };
+  	tag_valid = _.flatten(_.map(tag_entry, function(item) {return search(dat, item);}  ));
   	
   	d3.selectAll('circle').classed('highlighted', false);
   	

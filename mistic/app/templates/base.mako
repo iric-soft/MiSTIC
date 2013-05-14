@@ -63,6 +63,14 @@ div#graph {
 	
 }
 
+.extent {
+  fill-opacity: .125;
+  shape-rendering: crispEdges;
+  cursor:crosshair;
+}
+
+
+
 circle {
   fill-opacity: 1;
 }
