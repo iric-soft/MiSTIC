@@ -19,7 +19,7 @@
             minimal : true,
             
         };
-
+      
         if (options !== undefined) {
             _.extend(this.options, options);
         }
@@ -41,6 +41,9 @@
 
         this.setXData(xdata, false);
         this.setYData(ydata, false);
+      
+        this.yAxis = undefined;
+        this.xAxis = undefined;
 
         this.draw();
     };
@@ -124,49 +127,60 @@
     
   };
 	
-    scatterplot.prototype.makeAxes = function() {
-    
-    	if (this.options.minimal)  {
-    	  xmean = stats.average(_.values(this.xdata)); 
-    	  ymean = stats.average(_.values(this.ydata)); 
+	
+	  scatterplot.prototype.makeMinimalAxes = function() {
+	      
+	      xmean = stats.average(_.values(this.xdata)); 
+        ymean = stats.average(_.values(this.ydata)); 
         xrg = stats.range(_.values(this.xdata));
         yrg = stats.range(_.values(this.ydata));
       
-       var xAxis = d3.svg
+       this.xAxis = d3.svg
             .axis()
        .scale(this.xScale)
        .orient("bottom")
        .tickValues([xrg[0]+0.001, xmean, xrg[1]])
        .tickFormat(d3.format(",.1f"));
        
-      
-    
-      var yAxis = d3.svg
+      this.yAxis = d3.svg
             .axis()
       .scale(this.yScale)
       .orient("left")
       .tickValues([yrg[0]+0.01, ymean, yrg[1]])
       .tickFormat(d3.format(",.1f"));
         
-        
-        
+	  };
+	  
+	  scatterplot.prototype.makeFullAxes = function() {
+	   
+      this.xAxis = d3.svg
+            .axis()
+       .scale(this.xScale)
+       .orient("bottom")
+            .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
+       .ticks(5);
+      
+    
+      this.yAxis = d3.svg
+            .axis()
+      .scale(this.yScale)
+      .orient("left")
+            .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
+      .ticks(5);
+    };
+	
+	
+	 
+    scatterplot.prototype.makeAxes = function() {
+     
+    	if (this.options.minimal)  {
+    	  
+        this.makeMinimalAxes();
         
     	}
     	else {
-        var xAxis = d3.svg
-            .axis()
-	     .scale(this.xScale)
-	     .orient("bottom")
-            .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
-	     .ticks(5);
-	    
-		
-		  var yAxis = d3.svg
-            .axis()
-	    .scale(this.yScale)
-	    .orient("left")
-            .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
-	    .ticks(5);
+        
+        this.makeFullAxes(); 
 	   }
 
         var svg = d3.select(this.svg);
@@ -174,12 +188,12 @@
        svg .append("g")
 	    .attr("class", "axis axis-x")
 	    .attr("transform", "translate(0," + (this.height - this.options.padding[2] + this.options.outer) + ")")
-	    .call(xAxis);
+	    .call(this.xAxis);
 
 	    svg .append("g")
 	    .attr("class", "axis axis-y")
 	    .attr("transform", "translate(" + (this.options.padding[3] - this.options.outer) + ",0)")
-	    .call(yAxis);
+	    .call(this.yAxis);
 	    
         svg .selectAll('.axis path, .axis line')
             .attr('fill', 'none')

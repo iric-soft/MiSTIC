@@ -18,11 +18,13 @@ import pickle
 %endfor
     </select>
     <label for="goterm">GO colour:</label> <input type="text" id="goterm"></input></label>
-    <label for="gene1">Locate:</label>
+    <label for="gene1">Locate :</label>
     <input type="text" id="gene">
-    <button class="btn btn-primary" id="bp_go">BP</button>
-    <button class="btn btn-primary" id="mf_go">MF</button>
-    <button class="btn btn-primary" id="cc_go">CC</button>
+    <div style='padding-top:10px;'>GO categories: 
+    <button class="btn btn-primary"  id='bp_go' title='Biological Process'>BP</button>
+    <button class="btn btn-primary"  id='mf_go' title='Molecular Function'>MF</button>
+    <button class="btn btn-primary"  id='cc_go' title='Cellular Compartment'>CC</button>
+    </div>
   </form>
 </%block>
 <%block name="style">

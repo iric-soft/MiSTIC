@@ -6,6 +6,7 @@
             width: 1000,
             height: 1000,
             axes: true,
+            minimalAxes: false,
         };
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -21,7 +22,9 @@
 
         this.data = [];
     };
-
+    pairplot.prototype.setMinimalAxes = function(b) {
+      this.options.minimalAxes = b;
+    };
 
     pairplot.prototype.resize = function(width, height) {
         if (this.width != width || this.height != height) {
@@ -41,6 +44,7 @@
         this.draw();
     };
 
+
     pairplot.prototype.addData = function(data) {
         this.data.push(data);
         this.draw();
@@ -48,6 +52,7 @@
 
 
     pairplot.prototype.draw = function() {
+       
         var svg = d3.select(this.svg)
 
         svg.selectAll('*').remove();
@@ -69,14 +74,18 @@
             axes: false,
             makeGridLine:false,
             textOnly:false,
+            minimal: false,
         };
 		
         var sep = this.options.separation;
-
+        
+        _.extend(s_opts, {axes:true , minimal: this.options.minimalAxes});
+              
+        
         if (this.options.axes && N < 4) {
-            _.extend(s_opts, { padding: [ 5,20,46,50 ], axes:true });
+            _.extend(s_opts, { padding: [ 5,20,46,50 ] });
         } else {
-            _.extend(s_opts, { padding: [ 5,5,5,5 ], axes:true,  pt_size: 2 });
+            _.extend(s_opts, { padding: [ 5,5,5,5 ], pt_size: 2 });
             sep = 5;
         }
 

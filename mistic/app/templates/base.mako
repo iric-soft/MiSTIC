@@ -107,6 +107,7 @@ div#more-information a:hover
 .go-cellular_component span.label { background-color: #800; }
 .go-biological_process span.label { background-color: #080; }
 .go-molecular_function span.label { background-color: #008; }
+
 .gene-item             span.label { color: black; background-color: #ddd; }
 </%block>
 </style>
@@ -172,7 +173,7 @@ div#more-information a:hover
  	</div>
  	
     <div class="row-fluid">
-      <div class="span8">
+      <div class="span10">
         <div id="graph">
         </div>
       </div>

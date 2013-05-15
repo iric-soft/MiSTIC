@@ -38,6 +38,7 @@
     	<button class="btn btn-primary" id="show_labels">Show labels</button> 
     	<button class="btn btn-primary" data-toggle="button" id="select_clear">Select all</button>
     	<!--<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>-->
+    	<button class="btn btn-primary" id="change_axes">Change axes</button>
     </div>
   
  <div>  
@@ -125,7 +126,18 @@ $(document).ready(function() {
 
   current_dataset = undefined;
 
+
+
   var gene_entry = new GeneDropdown({ el: $("#gene") });
+  
+  var minimal_axes = false;
+  $('#change_axes').on('click', function(event){ 
+     
+      minimal_axes = !minimal_axes;
+      current_graph.setMinimalAxes(minimal_axes);
+      current_graph.draw()
+     
+   });  
   
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
     console.debug('badge');
@@ -144,9 +156,9 @@ $(document).ready(function() {
       dataype: 'json',
       success: function(data) {
         var gene_list = $('#genelist');
-       
         
         current_graph.addData(data);
+        
         gene_entry.$el.val('');
         var label = $('<span>')
           .addClass('badge')

@@ -142,13 +142,14 @@ $(document).ready(function() {
   });
 
   $('#plot').click(function (event) {
-    //console.log('plot');
+   
     if (current_dataset !== null && current_gene !== null) {
       $('#plot').button('loading');
       
       var dataset_expt = ${json.dumps(dict([ (ds.id, ds.experiment) for ds in data.datasets.all() ]))|n};
       var expt = dataset_expt[current_dataset]
       var xform  = 'none'
+      
       if (expt=='ngs') {xform='log'}
       
       var req = $.ajax({
@@ -159,15 +160,15 @@ $(document).ready(function() {
         success: function(data) {
           var nlabel = $("#nlabel").val();
           current_graph.annotation = current_dataset.genes;
-          console.log('annotation: ' +current_graph.annotation);
           current_graph.setLabelNb(nlabel);
+          
           if (expt=='hts' || expt=='ngs,hts') { current_graph.setDescAsLabel (true); }
           
           current_graph.setData(data.data);
-          console.log(data.data);
+          
           current_graph.draw();
           updateURLTarget({ dataset: current_dataset, gene: current_gene.id });
-          console.log('end');
+         
           
         },
         error: function() {
