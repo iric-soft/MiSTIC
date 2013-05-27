@@ -194,7 +194,6 @@ div#more-information a:hover
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/ColReorderWithResize.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/plugin.js')}" type="text/javascript"></script>
 
 
 <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
