@@ -65,3 +65,39 @@
   return json;
 };
 })();
+
+
+// Functions for dataTable
+(function() {
+   removeGrouping = function (oTable){
+
+
+   for (f = 0; f < oTable.fnSettings().aoDrawCallback.length; f++) {
+       if (oTable.fnSettings().aoDrawCallback[f].sName == 'fnRowGrouping') {
+         oTable.fnSettings().aoDrawCallback.splice(f, 1);
+      break;
+      }
+    }
+    // reallowing the sorting on the grouping column
+    oTable.fnSettings().aaSortingFixed = null;
+    return oTable;
+
+  };
+})();
+
+(function() {
+   setColReorder = function (oTable){
+     oTable.fnSettings().sDom = "Rlfrtip";
+     oTable.fnSettings().oInstance._oPluginColReorder.s['allowReorder']= true;
+     return oTable;
+   };
+})();
+
+
+(function() {
+   removeColReorder = function (oTable){
+     oTable.fnSettings().sDom = "";
+     oTable.fnSettings().oInstance._oPluginColReorder.s['allowReorder']= false;
+     return oTable;
+   };
+})();

@@ -160,14 +160,15 @@ ${parent.pagetail()}
 <input id="csvdata" type="hidden" name="csvdata" value=""></input></form>
  
 <script type="text/javascript" charset="utf-8">
-    $(document).ready(function() {
-      
+
+
+ $(document).ready(function() {
       var oTable = initTable();
       
-
     });
     
   function initTable() {
+        
         var aoc = new Array();
         var bsc = new Array();
         for (var i=0; i<${len(terms)}; i++) {
@@ -187,6 +188,9 @@ ${parent.pagetail()}
                         "sDom": 'Rlfrtip',
                         "bRetrieve":true,
                       });    
+                      
+                      
+               
   }    
   
 $('#datasets-table th a i').on('click', function(event) { 
@@ -195,12 +199,16 @@ $('#datasets-table th a i').on('click', function(event) {
     var cell = this.parentElement.parentElement; 
     var cellContent = cell.innerHTML;
     var oTable = initTable();
+      
     var alreadyActive = $(this).hasClass('icon-active');
     
     $('.icon-th-list').removeClass('icon-active');
-    if (alreadyActive) {
-      console.debug ( oTable.fnSettings().sDom); 
     
+    oTable = removeGrouping(oTable);  // utils.js
+    oTable = setColReorder(oTable);  // utils.js
+   
+    if (alreadyActive) {
+      oTable.fnDraw();
     }
     
     else {
@@ -214,15 +222,15 @@ $('#datasets-table th a i').on('click', function(event) {
      j = j;
     
      $(this).addClass('icon-active');
-  
-     oTable.fnSettings().sDom = "";
-     oTable.fnSettings().oInstance._oPluginColReorder.s['allowReorder']= false;
+    
+     oTable = removeColReorder(oTable);  // utils.js
      
      oTable.rowGrouping({ iGroupingColumnIndex: j,
-                           bExpandableGrouping: true, 
-                           bHideGroupingColumn: false});
+                          bExpandableGrouping: true, 
+                          bHideGroupingColumn: false});
    
       } 
+      
     });
 
 $('#csv-button').on('click', function(event){
