@@ -71,21 +71,18 @@
             axis_labels: false,
             display_corr: false,
             background: true,
-            axes: false,
+            axes: true,
             makeGridLine:false,
             textOnly:false,
-            minimal: false,
+            minimal: this.options.minimalAxes,
         };
 		
         var sep = this.options.separation;
-        
-        _.extend(s_opts, {axes:true , minimal: this.options.minimalAxes});
-              
-        
+
         if (this.options.axes && N < 4) {
             _.extend(s_opts, { padding: [ 5,20,46,50 ] });
         } else {
-            _.extend(s_opts, { padding: [ 5,5,5,5 ], pt_size: 2 });
+            _.extend(s_opts, { padding: [ 5,5,5,5 ], pt_size: 2, axes:false });
             sep = 5;
         }
 
@@ -110,9 +107,7 @@
                     $(g[0]).append(result);
                 } 
                 
-                
                 else {                  
-                   
                     //console.log(JSON.stringify(this.data[x].symbol));
                      g.append('text')
                         .attr('x', (xhi-xlo)/2)
@@ -134,7 +129,20 @@
                         //.classed('invisible', true)
                         .attr('title', this.data[x].desc)
                         .text(this.data[x].desc ? this.data[x].desc : this.data[x].gene);
-                     if (N<=5 ) {
+                   
+                   
+                    if (N<=7)  {
+                      var fsize=12;
+                      var f=1;
+                      var d=44;
+                      var p=20;
+                      
+                      if (N>4){
+                        fsize=9; 
+                        f = 0.5;
+                        d = 38; 
+                       }                       
+                      
                      
                       var expr = _.map(this.data[x].data, function(d) {return d.expr});
                       //console.debug(expr);
@@ -147,23 +155,23 @@
                      var rg_e = stats.range(expr);
                      g.append('text')
                         .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5+44)
+                        .attr('y', (yhi-ylo)/5+d)
                         .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
+                        .attr('style', 'font-family: helvetica; font-size: '+fsize+'px; font-weight: 600')
                         .text('Mean expression =  ' + mu_e.toFixed(2));
                         
                       g.append('text')
                         .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5+64)
+                        .attr('y', (yhi-ylo)/5+d+p*f)
                         .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
+                        .attr('style', 'font-family: helvetica; font-size: '+fsize+'px; font-weight: 600')
                         .text('Stdev expression =  ' + sd_e.toFixed(2));
                         
                      g.append('text')
                         .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5+84)
+                        .attr('y', (yhi-ylo)/5+d+2*p*f)
                         .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
+                        .attr('style', 'font-family: helvetica; font-size: '+fsize+'px; font-weight: 600')
                         .text('Range =  [' + rg_e[0].toFixed(2) +", "+ rg_e[1].toFixed(2)+"]");
                        
                    }

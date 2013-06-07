@@ -11,7 +11,6 @@
             axis_labels: false,
             background: true,
             axes: true,
-            display_corr: true,
             pt_size: 4,
             makeGridLine:false,
             gridValue: 10, 
@@ -102,7 +101,9 @@
 	};
 	
   scatterplot.prototype.brushstart= function () {
-    d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
+    console.debug(this);
+    //d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
+    for (d3.selectAll('.brush').selectAll('.extent'));
   };
   
   scatterplot.prototype.brushed= function () {
@@ -124,6 +125,7 @@
     selected = _.uniq(selected);
     clearInformation();
     _.each(selected, addInformation);
+    
     
   };
 	
@@ -153,37 +155,27 @@
 	  
 	  scatterplot.prototype.makeFullAxes = function() {
 	   
-      this.xAxis = d3.svg
-            .axis()
+      this.xAxis = d3.svg.axis()
        .scale(this.xScale)
        .orient("bottom")
-            .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
+       .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
        .ticks(5);
       
     
-      this.yAxis = d3.svg
-            .axis()
+      this.yAxis = d3.svg.axis()
       .scale(this.yScale)
       .orient("left")
-            .tickFormat(this.xScale.tickFormat(5, d3.format(".1f")))
+      .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
       .ticks(5);
+
     };
 	
-	
-	 
     scatterplot.prototype.makeAxes = function() {
-     
-    	if (this.options.minimal)  {
-    	  
-        this.makeMinimalAxes();
-        
-    	}
-    	else {
-        
-        this.makeFullAxes(); 
-	   }
+ 
+    	if (this.options.minimal)  {  this.makeMinimalAxes(); }
+    	else { this.makeFullAxes();  }
 
-        var svg = d3.select(this.svg);
+      var svg = d3.select(this.svg);
 
        svg .append("g")
 	    .attr("class", "axis axis-x")
@@ -241,15 +233,12 @@
                 .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
                 .text(this.ylab);
         }
-        
-      
-        
     };
 
     
     scatterplot.prototype.draw = function(data) {
-    	clearInformation();  //utils.js  
-    	
+    	  clearInformation();  //utils.js  
+    	 
         var self = this;
 
         if (this.xdata === undefined || this.ydata === undefined) {
@@ -276,104 +265,94 @@
             var k = keys[i];
             var x = this.xdata[k];
             var y = this.ydata[k];
-            xy.push({ x: x >= 0.0 & x <0.0105 ? 0.01 : x, y: y >= 0.0 & y<0.0105 ? 0.01 : y , k: k});
-            //xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});
-            if  (x < 0.0 ||  y < 0.0) { lg=false;}
-            
+            if  (x < 0.0 ||  y < 0.0) { lg=false; xy.push({x:x,y:y,k:k});  }
+            else {xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});}
+            //xy.push({ x: x >= 0.0 & x <0.0105 ? 0.01 : x, y: y >= 0.0 & y<0.0105 ? 0.01 : y , k: k});
+           
             v1.push(x);
             v2.push(y);
             v1_log.push(Math.log(x + 1/1024));
             v2_log.push(Math.log(y + 1/1024));
-            v1_anscombe.push(2 * Math.sqrt(x + 3/8));
-            v2_anscombe.push(2 * Math.sqrt(y + 3/8));
+          
         }
         
         var r = stats.pearson(v1, v2);
         var r_log = stats.pearson(v1_log, v2_log);
-        var r_anscombe = stats.pearson(v1_anscombe, v2_anscombe);
-
+       
+        var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
+        var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
        
         if (this.options.textOnly) {
            svg .append('rect')
-                .attr('width', this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2)
-                .attr('height', this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2)
+                .attr('width', width)
+                .attr('height', height)
                 .attr('x', this.options.padding[3] - this.options.inner)
                 .attr('y', this.options.padding[0] - this.options.inner)
                 .attr('fill', 'white');
-                
-            svg .append('text')
+            
+            this.corr = svg .append('text')
                 .attr('x', this.options.padding[3]+ 20)
                 .attr('y', this.options.padding[0] + 28)
                 .attr('text-anchor', 'left')
-                .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300')
-                .text('r = ' + r.toFixed(2));
-
-              svg .append('text')
-                .attr('x', this.options.padding[3] + 20)
-                .attr('y', this.options.padding[0] + 44)
-                .attr('text-anchor', 'left')
-                .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300')
-                .text('r(log) = ' + r_log.toFixed(2));
-        
+                .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300');
+                
+            if (lg) { this.corr.text('r(log+k) = ' + r_log.toFixed(2));}
+            else {this.corr.text('r = ' + r.toFixed(2));}
+                
+           
         }
-        
-        
-        
-        
+  
         else {
           
           if (lg) {
-          this.xScale = d3.scale
-            .log()
-	          .domain(d3.extent(xy, function(d) { return d.x; }))
-	          .range([ this.options.padding[3], this.width - this.options.padding[1] ])
-            .nice();
-
-		      this.yScale = d3.scale
-            .log()
-	          .domain(d3.extent(xy, function(d) { return d.y; }))
-	          .range([ this.height - this.options.padding[2], this.options.padding[0] ])
-            .nice();
+            this.xScale = d3.scale.log();  
+		        this.yScale = d3.scale.log();
           }
           else {
-          
-           this.xScale = d3.scale
-            .linear()
-            .domain(d3.extent(xy, function(d) { return d.x; }))
-            .range([ this.options.padding[3], this.width - this.options.padding[1] ])
-            .nice();
-
-          this.yScale = d3.scale
-            .linear()
-            .domain(d3.extent(xy, function(d) { return d.y; }))
-            .range([ this.height - this.options.padding[2], this.options.padding[0] ])
-            .nice();         
+            this.xScale = d3.scale.linear();
+            this.yScale = d3.scale.linear();
           }
+           this.xScale.domain(d3.extent(xy, function(d) { return d.x; }))
+               .range([ this.options.padding[3], this.width - this.options.padding[1] ])
+               .nice();
+
+           this.yScale.domain(d3.extent(xy, function(d) { return d.y; }))
+              .range([ this.height - this.options.padding[2], this.options.padding[0] ])
+              .nice();         
+        
+        
+          var bkgx = this.options.padding[3]-this.options.inner;
+          var bkgy = this.options.padding[0]-this.options.inner;
+          this.xScaleBrush = this.xScale.copy();
+          this.yScaleBrush = this.yScale.copy();
+          this.xScaleBrush.range([ bkgx, bkgx+width ]);
+          this.yScaleBrush.range([ bkgy + height, bkgy ]);
+               
           
           this.brush = d3.svg.brush()
-              .x(this.xScale)
-              .y(this.yScale)
+              .x(this.xScaleBrush)
+              .y(this.yScaleBrush)
               .on("brushstart", this.brushstart)
               .on("brush", this.brushed)
               .on("brushend", this.brushend);
-      
-     
-      
+              
+       
            var color='transparent';
            if (this.options.background) { color='white'; }
        
+       
            svg .append('rect')
-                .attr('width', this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2)
-                .attr('height', this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2)
-                .attr('x', this.options.padding[3] - this.options.inner)
-                .attr('y', this.options.padding[0] - this.options.inner)
+                .attr('width', width)
+                .attr('height',height)
+                .attr('x', bkgx)
+                .attr('y', bkgy)
                 .attr('fill', color)
                 .attr('stroke', 'rgba(0,0,0,.2)')
                 .attr('stroke-width', '1')
                 .attr('shape-rendering', 'crispEdges');
                 
-                
-                
+         
+          
           svg.append("g")
               .classed("brush", true)
               .call(this.brush);
@@ -408,25 +387,7 @@
            	.classed('circlelabel invisible', true); 
         
 
-          if (this.options.display_corr) {
-              svg .append('text')
-                .attr('x', this.options.padding[3])
-                .attr('y', this.options.padding[0] + 12)
-                .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300')
-                .text('r = ' + r.toFixed(2));
-
-              svg .append('text')
-                .attr('x', this.options.padding[3])
-                .attr('y', this.options.padding[0] + 28)
-                .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300')
-                .text('r(log) = ' + r_log.toFixed(2));
-
-              svg .append('text')
-                .attr('x', this.options.padding[3])
-                .attr('y', this.options.padding[0] + 44)
-                .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300')
-                .text('r(anscombe) = ' + r_anscombe.toFixed(2));
-        }
+      
 
        }
     

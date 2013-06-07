@@ -39,6 +39,7 @@ mistic = {
  
 <style type="text/css">
 <%block name="style">
+
 body {
   font-family: helvetica,arial,sans-serif;
   background-color: #f0f0f0;
@@ -65,8 +66,13 @@ div#graph {
 
 .extent {
   fill-opacity: .125;
+  fill: 'black';
   shape-rendering: crispEdges;
   cursor:crosshair;
+}
+
+.resize {
+  fill: 'white';
 }
 
 
