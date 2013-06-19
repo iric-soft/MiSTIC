@@ -10,7 +10,7 @@
             height: 1000,
             axis_labels: false,
             background: true,
-            axes: true,
+            axes: false,
             pt_size: 4,
             makeGridLine:false,
             gridValue: 10, 
@@ -101,9 +101,9 @@
 	};
 	
   scatterplot.prototype.brushstart= function () {
-    console.debug(this);
-    //d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
-    for (d3.selectAll('.brush').selectAll('.extent'));
+    //console.debug(this);
+    d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
+    
   };
   
   scatterplot.prototype.brushed= function () {
@@ -120,7 +120,7 @@
   scatterplot.prototype.brushend = function () {
   
     var circles = d3.select('#graph svg').selectAll("circle")
-            .filter (function () {return this.className.baseVal=='highlighted'});
+          .filter(function() {return d3.select(this).classed('highlighted');});
     var selected =  _.map(circles.data(), function(c) { return c.k;});
     selected = _.uniq(selected);
     clearInformation();
@@ -171,7 +171,7 @@
     };
 	
     scatterplot.prototype.makeAxes = function() {
- 
+      
     	if (this.options.minimal)  {  this.makeMinimalAxes(); }
     	else { this.makeFullAxes();  }
 
@@ -181,7 +181,7 @@
 	    .attr("class", "axis axis-x")
 	    .attr("transform", "translate(0," + (this.height - this.options.padding[2] + this.options.outer) + ")")
 	    .call(this.xAxis);
-
+     
 	    svg .append("g")
 	    .attr("class", "axis axis-y")
 	    .attr("transform", "translate(" + (this.options.padding[3] - this.options.outer) + ",0)")
@@ -199,13 +199,17 @@
 
 		if (this.options.makeGridLine) {
 			svg.selectAll('.axis-x line')
-				.filter(function(d, i) {return d <= self.options.gridValue})
-				.attr('y1',-(self.height -self.options.padding[2] + self.options.outer)-self.yScale(d3.min([self.yScale.domain()[1],self.options.gridValue])));
+				.filter(function(d, i) {return d <= this.options.gridValue})
+				.attr('y1',-(this.height -this.options.padding[2] + this.options.outer)-this.yScale(d3.min([this.yScale.domain()[1],this.options.gridValue])));
 				
 			 svg.selectAll('.axis-y line')
-			 	.filter(function(d, i) {return d <= self.options.gridValue})
-			 	.attr('x2', self.xScale(self.xScale.domain()[1])-(self.options.padding[3] - self.options.outer));
+			 	.filter(function(d, i) {return d <= this.options.gridValue})
+			 	.attr('x2', this.xScale(this.xScale.domain()[1])-(this.options.padding[3] - this.options.outer));
 		}
+		
+	
+  
+
     
     if (this.options.axis_labels) {
             svg .select('g.axis-x')
@@ -283,22 +287,30 @@
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
        
         if (this.options.textOnly) {
+           var fsize = 12-100/width;
+           
            svg .append('rect')
                 .attr('width', width)
                 .attr('height', height)
                 .attr('x', this.options.padding[3] - this.options.inner)
                 .attr('y', this.options.padding[0] - this.options.inner)
                 .attr('fill', 'white');
-            
+            if (fsize>8) {
             this.corr = svg .append('text')
-                .attr('x', this.options.padding[3]+ 20)
-                .attr('y', this.options.padding[0] + 28)
+                .attr('x', this.options.padding[3]+ width/20)
+                .attr('y', this.options.padding[0]+ height/3)
                 .attr('text-anchor', 'left')
-                .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 300');
-                
-            if (lg) { this.corr.text('r(log+k) = ' + r_log.toFixed(2));}
-            else {this.corr.text('r = ' + r.toFixed(2));}
-                
+                .attr('style', 'font-family: helvetica; font-size: '+ fsize+ 'px; font-weight: 300');
+            
+            
+             
+            if (lg) { 
+              var rtext = fsize>=11 ? 'r(log+k) = ' : '';
+              this.corr.text(rtext + r_log.toFixed(2));}
+            else {
+              var rtext = fsize>=11 ? 'r = ' : '';
+              this.corr.text(rtext + r.toFixed(2));}
+            }
            
         }
   
@@ -340,7 +352,6 @@
            var color='transparent';
            if (this.options.background) { color='white'; }
        
-       
            svg .append('rect')
                 .attr('width', width)
                 .attr('height',height)
@@ -350,9 +361,7 @@
                 .attr('stroke', 'rgba(0,0,0,.2)')
                 .attr('stroke-width', '1')
                 .attr('shape-rendering', 'crispEdges');
-                
-         
-          
+
           svg.append("g")
               .classed("brush", true)
               .call(this.brush);

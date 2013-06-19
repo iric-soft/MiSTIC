@@ -37,7 +37,6 @@
     
     	<button class="btn btn-primary" id="show_labels">Show labels</button> 
     	<button class="btn btn-primary" data-toggle="button" id="select_clear">Select all</button>
-    	<!--<button class="btn btn-primary" data-toggle="button" id="toggle_ids">Toggle IDs</button>-->
     	<button class="btn btn-primary" id="change_axes">Change axes</button>
     </div>
   
@@ -140,12 +139,19 @@ $(document).ready(function() {
    });  
   
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
-    console.debug('badge');
+    
     var badge = $(event.target).closest('span.badge');
     var badge_idx = parseInt(badge.attr('data-idx'));
+    
+       
     current_graph.removeData(function(d, i) { return i === badge_idx; });
     badge.remove();
+    
+    var badges = d3.selectAll('.badge');
+    badges.each (function(d,i) {d3.select(this).attr('data-idx',i);});
+    
     clearInformation();
+    $('#tag').change();
   });
 
   gene_entry.on('change', function(item) {
@@ -173,6 +179,7 @@ $(document).ready(function() {
         if(current_graph.data.length>=2) {
           $("a#advanced-options-link").css('display', 'inline');
         }
+        $('#tag').change();
       },
       error: function() {
         // inform the user something went wrong.
@@ -216,9 +223,18 @@ $(document).ready(function() {
   resizeGraph();
   $(window).resize(resizeGraph);
   
+  
   $('#show_labels').on("click", function(event){
-  	d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
-  	
+    
+    var selected = d3.selectAll("text.circlelabel").filter(function(){var c = $(this).siblings('circle'); return $(c)[0].className.baseVal=='highlighted';});
+    
+    if (selected[0].length>0 ) { 
+           selected.classed('invisible', !selected.classed('invisible'));
+           
+    }
+    else {
+  	     d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
+  	}
   	if ($(this).text()=="Show labels"){
   		$(this).text("Clear labels");
   	}
@@ -250,10 +266,7 @@ $(document).ready(function() {
 	event.preventDefault();
 	});
 	
-  $("#toggle_ids").on("click", function(event) {
-     d3.selectAll('#text-symbol').classed('invisible', ! d3.selectAll('#text-symbol').classed('invisible'));
-     d3.selectAll('#text-desc').classed('invisible', ! d3.selectAll('#text-desc').classed('invisible'));
-  });
+
  
   $('#advanced-options-link').on('click', function(event) { 
  	$('#advanced-options').toggle();
@@ -261,6 +274,7 @@ $(document).ready(function() {
  	});
  		
   $('#tag').on('change', function(event){
+    
   	var tag_entry = event.target.value.split(" ");
   	var circles = d3.selectAll('circle'); 
   	
@@ -269,17 +283,19 @@ $(document).ready(function() {
   	dat = _.uniq(dat);
   	
   	search = function (list, regex) {
+  	  if (regex=='') { return (new Array());}
       return _.filter(list, function(obj){ return obj.match(regex);});
     };
-  	tag_valid = _.flatten(_.map(tag_entry, function(item) {return search(dat, item);}  ));
+    
+  	var tag_valid = _.flatten(_.map(tag_entry, function(item) {return search(dat, item);}  ));
   	
   	d3.selectAll('circle').classed('highlighted', false);
   	
-	 circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
+	  circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
 			.classed('highlighted', !d3.select(this).classed('highlighted'));
 	
-	 clearInformation();
-	 _.each(tag_valid, addInformation);
+	  clearInformation();
+	  _.each(tag_valid, addInformation);
   	
   	
   	event.preventDefault();
