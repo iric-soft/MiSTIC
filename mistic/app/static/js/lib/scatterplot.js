@@ -16,7 +16,7 @@
             gridValue: 10, 
             textOnly : false,
             minimal : true,
-            
+           
         };
       
         if (options !== undefined) {
@@ -68,6 +68,10 @@
             vals[pt.sample] = pt.expr;
         }
         return vals;
+    };
+
+    scatterplot.prototype.setLog = function(l) {
+        this.options.lg=l;
     };
 
     scatterplot.prototype.setXData = function(xdata, redraw) {
@@ -263,6 +267,7 @@
         var v2_anscombe = [];
 		
         var xy = [];
+        
         var lg = true;
         
         for (var i in keys) {
@@ -277,8 +282,11 @@
             v2.push(y);
             v1_log.push(Math.log(x + 1/1024));
             v2_log.push(Math.log(y + 1/1024));
-          
+ 
         }
+        
+        var rr = Math.max((stats.range(v1)[1]-stats.range(v1)[0]), (stats.range(v2)[1]-stats.range(v2)[0]));     
+        if (rr<1) {lg=false;}
         
         var r = stats.pearson(v1, v2);
         var r_log = stats.pearson(v1_log, v2_log);
@@ -315,23 +323,32 @@
         }
   
         else {
+          var dmx = d3.extent(xy, function(d) { return d.x; });
+          var dmy = d3.extent(xy, function(d) { return d.y; });
           
           if (lg) {
             this.xScale = d3.scale.log();  
 		        this.yScale = d3.scale.log();
+		        
           }
           else {
-            this.xScale = d3.scale.linear();
-            this.yScale = d3.scale.linear();
+              this.xScale = d3.scale.linear();
+              this.yScale = d3.scale.linear();
+              //if (rr<1) {
+              //  dmx = [0,1];
+              //  dmy = [0,1];
+              //}
           }
-           this.xScale.domain(d3.extent(xy, function(d) { return d.x; }))
+          
+         
+          this.xScale.domain(dmx)
                .range([ this.options.padding[3], this.width - this.options.padding[1] ])
                .nice();
 
-           this.yScale.domain(d3.extent(xy, function(d) { return d.y; }))
+          this.yScale.domain(dmy)
               .range([ this.height - this.options.padding[2], this.options.padding[0] ])
               .nice();         
-        
+                
         
           var bkgx = this.options.padding[3]-this.options.inner;
           var bkgy = this.options.padding[0]-this.options.inner;
