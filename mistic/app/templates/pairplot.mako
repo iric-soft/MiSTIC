@@ -1,39 +1,47 @@
-<%! import mistic.app.data as data %>
+<%! 
+import mistic.app.data as data 
+import json
+%>
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">Multi-way scatterplot</%block>
 
-
-
 <%block name="actions">
-  ${parent.actions()}<button class="btn" id="static_url" href="">Static URL</button>
+  ${parent.actions()}
+  
+   <a id="share_url" href="#link_to_share" role="button" class="btn" data-toggle="modal">Link to share</a>
+
 </%block>
+
 <%block name="controls">
 
 <div class="row-fluid">
-<div class="span10" style="display:inline;">
+    <div class="span10" style="display:inline;">
 
-  <form class="form-inline">
-    <label for="datasets">Dataset:</label>
-    <select id="datasets">
-      <option value="">Select a dataset</option>
-%for d in data.datasets.all():
-      <option value="${d.id}">${d.name}</option>
-%endfor
-    </select>
-    <span id="genelist"></span>
-    <label for="gene">Gene:</label>
-    <input type="text" id="gene"/> 	
+   <form class="form-inline">
+      <label for="datasets">Dataset:</label>
+      <select id="datasets">
+        <option value="">Select a dataset</option>
+        %for d in data.datasets.all():
+              <option value="${d.id}">${d.name}</option>
+        %endfor
+      </select>
+    
+    
+    
+      <span id="genelist"></span>
+      <label for="gene">Gene:</label>
+      <input type="text" id="gene"/> 	
    
    </form>
 </div>	
 
-    <div class="span2" id="advanced" >
+  <div class="span2" id="advanced" >
    		<a id="advanced-options-link" class="dropdown-toggle" data-toggle="dropdown" href="#"> More options
     	<strong id="link-caret" class="caret"></strong> </a>
     </div>
 </div>    	
  
- <div id="advanced-options">
+ <div id="advanced-options" >
     
     	<button class="btn btn-primary" id="show_labels">Show labels</button> 
     	<button class="btn btn-primary" data-toggle="button" id="select_clear">Select all</button>
@@ -41,16 +49,27 @@
     </div>
   
  <div>  
-    <label style="display:inline;" for="tag" size="10px">Locate:</label>
-      <input type="text" id="tag" autocomplete="off"  />
-   </div>
+       <label style="display:inline;" for="tag" size="10px">Locate:</label>
+       <input type="text" id="tag1" autocomplete="off"  />
+</div>
+
 
 </%block>
 
+<%block name="graph">
+ ${parent.graph()}
+ 
+  <div class="modal hide" id="link_to_share">
+  <div class='modal-body'>
+  <span id="share"></span>
+  </div> 
+ </div>  
+
+</%block>
+
+
 <%block name="style">
 ${parent.style()}
-
-
 
 a#advanced-options-link {
 	float: right;	
@@ -72,8 +91,6 @@ div#graph text {
   pointer-events : none;
 }
 
-
-
 .circlelabel .invisible {
   pointer-events : none;
 }
@@ -81,7 +98,6 @@ div#graph text {
 circle  {
   pointer-events : auto;
 }
-
 
 #link-caret {
 	vertical-align: middle;
@@ -94,18 +110,23 @@ circle  {
 <%block name="pagetail">
 ${parent.pagetail()}
 
-
 <script src="${request.static_url('mistic:app/static/js/lib/scatterplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
+
 
 <script type="text/javascript">
 $(document).ready(function() {
   (function() {
+  
+  
+  
+  
     var opts = {};
+  
     updateURLTarget = function(params) {
       _.extend(opts, params);
       if (opts.dataset !== null) {
-        var url = "${request.route_url('mistic.template.pairplot_static', dataset='_dataset_', genes=[])}"
+        var url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
           .replace('_dataset_', opts.dataset);
         _.each(current_graph.data, function(x) { url += '/' + x.gene; });
         $('#static_url')
@@ -121,17 +142,54 @@ $(document).ready(function() {
     };
   })();
  
-  current_graph = new pairplot(undefined, undefined, $('#graph'));
-
-  current_dataset = undefined;
-
-
-
+ 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
+  current_graph = new pairplot(undefined, undefined, $('#graph'));
+  
+   <%  
+   ds = data.datasets.get(dataset)
+   gene_data = [ds.expndata(gene) for gene in genes ]
+   
+  %>
+  
+  %if not ds==None:
+    current_dataset = "${dataset}";
+    $('#datasets').val(current_dataset).change();
+    gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
+   
+  %else:
+    current_dataset = undefined;
+    gene_entry.url = null;
+    $("#gene").attr('disabled', true);
+    $("#tag").attr('disabled', true);
+  %endif
+  
+
+  //  Gene symbols were passed in the URL
+  %if len(genes)>0:
+    %for g in genes:      
+      // Selecting the first item corresponding to the gene symbol (no validation)
+      gene = ${json.dumps(g)|n};
+      gene_entry.$el.val(gene).select();
+    
+    %endfor
+  %endif 
+  
+ 
+  $("#share_url").on('click', function(event){
+    var url = "${request.route_url('mistic.template.pairplot', dataset='None', genes=[])}";
+    if (current_graph.data.length>0){
+      
+      url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
+         .replace('_dataset_', current_graph.data[0].dataset);
+        _.each(current_graph.data, function(x) { url += '/' + x.gene; });
+    }
+    $("span#share").html(url);
+  });
+  
   
   var minimal_axes = false;
-  $('#change_axes').on('click', function(event){ 
-     
+  $('#change_axes').on('click', function(event){  
       minimal_axes = !minimal_axes;
       current_graph.setMinimalAxes(minimal_axes);
       current_graph.draw()
@@ -143,26 +201,28 @@ $(document).ready(function() {
     var badge = $(event.target).closest('span.badge');
     var badge_idx = parseInt(badge.attr('data-idx'));
     
-       
     current_graph.removeData(function(d, i) { return i === badge_idx; });
     badge.remove();
     
     var badges = d3.selectAll('.badge');
     badges.each (function(d,i) {d3.select(this).attr('data-idx',i);});
-    
+    if (current_graph.data.length<2) { 
+        $("a#advanced-options-link").css('display', 'none');
+    }
     clearInformation();
     $('#tag').change();
   });
 
+
   gene_entry.on('change', function(item) {
+        
     if (item === null) return;
     
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_dataset).replace('_gene_id_', item.id),
       dataype: 'json',
       success: function(data) {
-        var gene_list = $('#genelist');
-        
+ 
         current_graph.addData(data);
         
         gene_entry.$el.val('');
@@ -175,7 +235,8 @@ $(document).ready(function() {
           .addClass('icon-white icon-remove-sign')
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);
-        updateURLTarget();
+       
+      
         if(current_graph.data.length>=2) {
           $("a#advanced-options-link").css('display', 'inline');
         }
@@ -188,8 +249,12 @@ $(document).ready(function() {
    
   });
 
+  
+
   $('#datasets').on('change', function(event) {
+   
     current_dataset = event.target.value;
+    
     if (current_dataset === '') {
       current_dataset = null;
       gene_entry.url = null;
@@ -199,16 +264,17 @@ $(document).ready(function() {
     } else {
      $("#gene").attr('disabled', false);
      $("#tag").attr('disabled', false);
-      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
+     gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     }
     gene_entry.$el.val('');
 
     $('#genelist').empty();
     current_graph.removeData(function() { return true; });
-    updateURLTarget({ dataset: current_dataset });
+    
+    
   });
 
-  $('#datasets').change();
+  
 
   resizeGraph = function() {
     $('div#graph').height($(window).height() - 124);
@@ -273,6 +339,9 @@ $(document).ready(function() {
  	event.preventDefault();
  	});
  		
+ 	// Point labels 
+ 	
+ 	
   $('#tag').on('change', function(event){
     
   	var tag_entry = event.target.value.split(" ");

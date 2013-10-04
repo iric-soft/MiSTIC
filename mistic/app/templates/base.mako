@@ -22,6 +22,7 @@
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-responsive.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/jquery.dataTables.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
 
 
 <!--[if lt IE 9]>
@@ -46,75 +47,6 @@ body {
   padding: 60px 0px 0px 0px;
 }
 
-input.valid {
-  color: blue;
-}
-
-div#graph {
-  margin-top: 5px;
-  border: 1px solid #aaa;
-}
-
-.circlelabel {
-	font-family: helvetica; 
-}
-
-.highlighted {
-	fill : rgb(20, 216, 28);
-	
-}
-
-.extent {
-  fill-opacity: .125;
-  fill: 'black';
-  shape-rendering: crispEdges;
-  cursor:crosshair;
-}
-
-.resize {
-  fill: 'white';
-}
-
-
-
-circle {
-  fill-opacity: 1;
-}
-
-div#more-information {
-   font-family: helvetica,arial,sans-serif;
-   font-size: 11px; 
-}
-div#more-information a,
-div#more-information a:hover
-{
-  text-decoration: none;
-  color : rgb(58, 55, 55);
-  pointer-events : none;
-}
-
-
-.dropdown-menu li > a:hover,
-.dropdown-menu .active > a:hover {
-  background-color: #66aacc;
-}
-
-.go-cellular_component span.label,
-.go-biological_process span.label,
-.go-molecular_function span.label,
-.gene-item             span.label {
-  -webkit-border-radius: 5px;
-     -moz-border-radius: 5px;
-          border-radius: 5px;
-  padding: 2px 4px 1px;
-  border: 1px solid white;
-  font-weight: inherit;
-}
-.go-cellular_component span.label { background-color: #800; }
-.go-biological_process span.label { background-color: #080; }
-.go-molecular_function span.label { background-color: #008; }
-
-.gene-item             span.label { color: black; background-color: #ddd; }
 </%block>
 </style>
 
@@ -129,32 +61,37 @@ div#more-information a:hover
         <a class="brand" href="${request.route_url('mistic.template.root')}">[MiSTIC]</a>
         <div class="nav-collapse">
           <ul class="nav">
-%if request.matched_route.name == 'mistic.template.corrgraph':
+      
+        %if request.matched_route.name == 'mistic.template.corrgraph':
             <li class="active"><a href="#">Waterfall</a></li>
-%else:
+        %else:
             <li><a href="${request.route_url('mistic.template.corrgraph')}">Waterfall</a></li>
-%endif
-%if request.matched_route.name == 'mistic.template.corrgraph_static':
+        %endif
+
+
+        %if request.matched_route.name == 'mistic.template.corrgraph_static':
             <li class="active"><a href="#">&#x25b6; [static plot]</a></li>
-%endif
+        %endif
+
 <!--
-%if request.matched_route.name == 'mistic.template.scatterplot':
+  %if request.matched_route.name == 'mistic.template.scatterplot':
             <li class="active"><a href="#">Scatterplot</a></li>
 %else:
             <li><a href="${request.route_url('mistic.template.scatterplot')}">Scatterplot</a></li>
 %endif
 -->
-%if request.matched_route.name == 'mistic.template.scatterplot_static':
+      %if request.matched_route.name == 'mistic.template.scatterplot_static':
             <li class="active"><a href="#">&#x25b6; [static plot]</a></li>
-%endif
-%if request.matched_route.name == 'mistic.template.pairplot':
-            <li class="active"><a href="#">Multi-way Scatterplot</a></li>
-%else:
-            <li><a href="${request.route_url('mistic.template.pairplot')}">Multi-way Scatterplot</a></li>
-%endif
-%if request.matched_route.name == 'mistic.template.pairplot_static':
-            <li class="active"><a href="#">&#x25b6; [static plot]</a></li>
-%endif
+      %endif
+
+      %if request.matched_route.name == 'mistic.template.pairplot':
+            <li class="active">
+      %else: 
+            <li>
+      %endif
+      <a href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Multi-way Scatterplot</a></li>
+
+
           </ul>
         </div>
         <div class="pull-right">
@@ -190,7 +127,8 @@ div#more-information a:hover
   </%block>
 </body>
 <%block name="pagetail">
-<form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}"><input id="pdfdata" type="hidden" name="pdfdata" value=""></input></form>
+<form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}">
+<input id="pdfdata" type="hidden" name="pdfdata" value=""></input></form>
  
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/underscore-min.js')}" type="text/javascript"></script>

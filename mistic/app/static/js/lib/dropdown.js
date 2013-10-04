@@ -76,6 +76,7 @@
         attributes: { type: 'text' },
 
         events: {
+            'select' :  'selectManual',
             'change':   'update',
             'keydown':  'keydown',
             'keyup':    'keyup',
@@ -114,6 +115,7 @@
         },
 
         activeItem: function() {
+            
             var active = this.$menu.find('.active');
             if (active.length === 0) return null;
             return this.collection.get(active.attr('data-id'));
@@ -123,27 +125,48 @@
             return model.get('label');
         },
 
-
+       
         selectActive: function() {
             this.selectItem(this.activeItem());
         },
 
+      
         selectItem: function(item) {
-            if (item === this.selected_item) return;
-
+            
+            if (item === this.selected_item) {
+           
+            return;
+            }
             if (item !== null) {
                 var txt = this.autofillText(item);
+              
                 this.$el.val(txt);
                 this.selected_item = item;
                 this.selected_text = txt;
+               
             } else {
                 this.selected_item = null;
                 this.selected_text = null;
             }
+           
             this.trigger('change', this.selected_item);
             this.hide();
         },
+        
 
+        selectManual : function(event) {
+          
+           var url = this.searchURL();
+           var data =  this.searchData();
+           var self = this;
+           this.collection.fetch({
+                     data: data, 
+                     url : url,
+                     success: function(collection){self.selectItem(collection.at(0));  } });
+          
+          
+        },
+        
         show: function() {
             if (!this.shown) {
                 var pos = _.extend(
@@ -196,6 +219,7 @@
         },
 
         update: function(event) {
+           
             this.beginFetching(this.searchURL(), this.searchData());
             if (this.$el.val() !== this.selected_text) {
                 this.selectItem(null);
@@ -332,6 +356,7 @@
         },
 
         itemMousedown: function(event) {
+            
             var self = this;
             event.preventDefault();
 
@@ -340,7 +365,7 @@
         },
 
         itemClick: function(event) {
-            console.log('click');
+            
             var item = $(event.target).closest('li');
             this.$menu.find('.active').removeClass('active')
             item.addClass('active')
@@ -350,7 +375,7 @@
 
         render: function() {
         },
-
+      
         initialize: function() {
             var self = this;
 
@@ -366,6 +391,8 @@
             this.selected_text = null
 
             this.collection.on('all', _.bind(this.renderItems, this));
+
+        
 
             this.$menu = $(this.menu);
             this.shown = false;
