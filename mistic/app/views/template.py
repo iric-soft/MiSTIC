@@ -73,37 +73,18 @@ class Graph(object):
     )
     return render_to_response('mistic:app/templates/scatterplot_static.mako', args, request = self.request)
 
+
   @view_config(route_name="mistic.template.pairplot")
   def pairplot(self):
-    args = dict()
-    return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)
-
-  @view_config(route_name="mistic.template.pairplot_static")
-  def pairplot_static(self):
-    dataset = self.request.matchdict['dataset']
-    genes = self.request.matchdict['genes']
-
-    _dataset = data.datasets.get(dataset)
-    if _dataset is None:
-      raise HTTPNotFound()
-
-    _rows = [ _dataset.data.r(gene) for gene in genes ]
-    if any([ _r == -1 for _r in _rows ]):
-      raise HTTPNotFound()
-
-    if len(genes) == 2:
-      args = dict(
-        dataset = dataset,
-        gene1 = genes[0],
-        gene2 = genes[1],
-        )
-      return render_to_response('mistic:app/templates/scatterplot_static.mako', args, request = self.request)
+    
+    dataset = self.request.matchdict.get('dataset', None)
+    genes = self.request.matchdict.get('genes', [])
 
     args = dict(
       dataset = dataset,
       genes = genes,
     )
-    return render_to_response('mistic:app/templates/pairplot_static.mako', args, request = self.request)
+    return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.clustering")
   def clustering(self):

@@ -19,8 +19,8 @@ class PDFData(object):
       raise HTTPNotFound()
 
     _data = self.request.POST['pdfdata']
-    _data = re.sub ('<text [^<>]* class="circlelabel invisible">\d*H\d*</text>', '', _data)
-   
+    _data = re.sub ('<text [^<>]* class="circlelabel invisible">[^<>]*</text>', '', _data)
+    _data = re.sub ('class="highlighted"', 'fill="rgb(20, 216, 28)"', _data)
     
     input = tempfile.NamedTemporaryFile()
     input.write(_data.encode('utf-8'))

@@ -1,0 +1,92 @@
+
+/*
+ * Mistic general css
+ */
+ 
+body {
+  font-family: helvetica,arial,sans-serif;
+  background-color: #f0f0f0;
+  padding: 60px 0px 0px 0px;
+}
+
+input.valid {
+  color: blue;
+}
+
+div#graph {
+  margin-top: 5px;
+  border: 1px solid #aaa;
+}
+
+.circlelabel {
+  font-family: helvetica; 
+}
+
+.highlighted {
+  fill : rgb(20, 216, 28); 
+}
+
+.highlighted_green {
+  fill : rgb(20, 216, 28); 
+}
+
+.highlighted_blue {
+  fill : rgb(0, 154, 255); 
+}
+
+.highlighted_red {
+  fill : rgb(255, 43, 0); 
+}
+
+.highlighted_orange {
+  fill : rgb(255, 222, 0); 
+}
+
+.extent {
+  fill-opacity: .125;
+  fill: 'black';
+  shape-rendering: crispEdges;
+  cursor:crosshair;
+}
+
+.resize {
+  fill: 'white';
+}
+
+circle {
+  fill-opacity: 1;
+}
+
+div#more-information {
+   font-family: helvetica,arial,sans-serif;
+   font-size: 11px; 
+}
+div#more-information a,
+div#more-information a:hover
+{
+  text-decoration: none;
+  color : rgb(58, 55, 55);
+  pointer-events : none;
+}
+
+.dropdown-menu li > a:hover,
+.dropdown-menu .active > a:hover {
+  background-color: #66aacc;
+}
+
+.go-cellular_component span.label,
+.go-biological_process span.label,
+.go-molecular_function span.label,
+.gene-item             span.label {
+  -webkit-border-radius: 5px;
+     -moz-border-radius: 5px;
+          border-radius: 5px;
+  padding: 2px 4px 1px;
+  border: 1px solid white;
+  font-weight: inherit;
+}
+.go-cellular_component span.label { background-color: #800; }
+.go-biological_process span.label { background-color: #080; }
+.go-molecular_function span.label { background-color: #008; }
+
+.gene-item             span.label { color: black; background-color: #ddd; }

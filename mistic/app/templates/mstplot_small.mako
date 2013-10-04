@@ -437,7 +437,7 @@ $('#scatterplot').on('click', function(event) {
     ids.push(d.id);
   });
   if (ids.length > 1) {
-    var url = "${request.route_url('mistic.template.pairplot_static', dataset=dataset, genes=[])}";
+    var url = "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}";
     for (var i = 0; i < ids.length; ++i) {
       url += '/' + ids[i];
     }
