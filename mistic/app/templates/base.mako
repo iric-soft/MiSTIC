@@ -19,8 +19,8 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="keywords" content="">
-    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8">
-    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-responsive.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-2.0.4.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-responsive-2.0.4.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/jquery.dataTables.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
 
@@ -55,7 +55,7 @@ body {
 </head>
 <body>
 
-  <div class="navbar navbar-fixed-top">
+  <div class="navbar navbar-fixed-top navbar-inverse">
     <div class="navbar-inner">
       <div class="container-fluid">
         <a class="brand" href="${request.route_url('mistic.template.root')}">[MiSTIC]</a>
@@ -102,29 +102,38 @@ body {
       </div>
     </div>
   </div>
-  <%block name="pagecontent">
+  
+  
+<%block name="pagecontent">
   <div class="container-fluid">
-    <div class="row-fluid">
-      <div class="span12">
+  
+  
+  
+  <div class="row-fluid">
+    <div class="span3">
         <%block name="controls"></%block>
-      </div>
-    </div>
+     </div>
     
     <%block name="graph">
-    <div class="row-fluid">
-     <div class="span12" id ="more-information"></div>
- 	</div>
- 	
-    <div class="row-fluid">
-      <div class="span10">
+     <div class="span9">
         <div id="graph">
         </div>
       </div>
-    </div>
-    </%block>
    
+   
+   <div class="row-fluid">
+     <div class="span12" id ="more-information"></div>
   </div>
+   </%block>
+ </div>  
+  </div>
+  
   </%block>
+
+
+
+
+
 </body>
 <%block name="pagetail">
 <form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}">
@@ -133,7 +142,7 @@ body {
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/underscore-min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/backbone-min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/bootstrap.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/bootstrap-2.0.4.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/d3.v2.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/ColReorderWithResize.js')}" type="text/javascript"></script>

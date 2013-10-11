@@ -110,9 +110,9 @@ ${parent.style()}
   A = [ dict(
     id    = n,
     name  = a.attrs.get(n, {}).get('name') or n,
-    formula = a.attrs.get(n, {}).get('formula') or '',
-    can = a.attrs.get(n, {}).get('can') or '',
-    smile = a.attrs.get(n, {}).get('smi') or '',
+    #formula = a.attrs.get(n, {}).get('formula') or '',
+    #can = a.attrs.get(n, {}).get('can') or '',
+    #smile = a.attrs.get(n, {}).get('smi') or '',
     index = nodes.index(n),
     mean = numpy.mean(tanimoto[nodes.index(n)]),
     sum = numpy.sum(tanimoto[nodes.index(n)]),
@@ -207,7 +207,7 @@ getContent = function(d) {
                 dataType: 'json',
                 async: true
             });
-            console.log('here');
+           
    }
   else  {
   

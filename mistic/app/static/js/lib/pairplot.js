@@ -7,6 +7,7 @@
             height: 1000,
             axes: true,
             minimalAxes: false,
+            clearBrush : false,
         };
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -24,6 +25,10 @@
     };
     pairplot.prototype.setMinimalAxes = function(b) {
       this.options.minimalAxes = b;
+    };
+
+    pairplot.prototype.clearBrush = function() {
+      this.options.clearBrush = true;
     };
 
     pairplot.prototype.resize = function(width, height) {
@@ -49,8 +54,8 @@
         this.data.push(data);
         this.draw();
     };
-
-
+    
+   
     pairplot.prototype.draw = function() {
        
         var svg = d3.select(this.svg)
@@ -77,6 +82,7 @@
             makeGridLine:false,
             textOnly:false,
             minimal: this.options.minimalAxes,
+            clearBrush : this.options.clearBrush,
         };
 		
         var sep = this.options.separation;

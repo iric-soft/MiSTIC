@@ -188,6 +188,36 @@ class Collection(object):
 
 annotations = Collection()
 datasets = Collection()
+colAnnotations = Collection ()
+
+
+
+
+class ColAnnotation (object):
+  def __init__(self, **kw):
+    self.id = kw.get('id', uuid.uuid4())
+    self.name = kw.get('name', self.id)
+    self.description = kw.get('desc', '')
+    self.path = kw['path']
+    self.attrs = {}
+    
+    for row in open(self.path):
+      ident, row = row.split(None, 1)
+      
+      try:
+        attrs = json.loads(row)
+        self.attrs[ident] = attrs
+          
+      except: 
+        continue
+
+  @property
+  def info(self):
+    return dict(id = self.id, name = self.name, desc = self.description)
+  
+  def get(self, id):
+    return self.attrs.get(id, {})
+    
 
 class Annotation(object):
   def __init__(self, **kw):
@@ -272,7 +302,9 @@ class DataSet(object):
     self.type = kw.get('type', '')
     self.tags = kw.get('tags', '')
     self.experiment = kw.get('expt', '')
-    self.annotation = annotations.get(kw['anot'])
+    self.annotation = annotations.get(kw['annr'])
+    self.cannotation = colAnnotations.get(kw['annc'])
+   
     self.transforms = set(('none', 'log', 'rank')) & set(kw.get('xfrm', 'none').split(','))
 
   @property
@@ -294,6 +326,8 @@ class DataSet(object):
   @property
   def samples(self):
     return self.data.colnames
+  
+  
   
   @property
   def numberSamples(self):
@@ -442,7 +476,15 @@ class DataSet(object):
 
   def expndata(self, gene, xform = None):
     expn = self.data.row(self.data.r(gene), transform = self._makeTransform(xform))
-
+    
+    data =[]
+    for i in range(len(self.samples)): 
+      dat =  self.cannotation.get(self.samples[i])
+      dat.update({'sample':self.samples[i], 'expr':expn[i]})
+      data.append(dat) 
+      
+    data = tuple (data)
+    
     return dict(
       gene = gene,
       symbol = self.annotation.symbol.get(gene, ''),
@@ -450,10 +492,13 @@ class DataSet(object):
       dataset = self.id,
       row = self.data.r(gene),
       xform = xform,
-      data = tuple([ dict(sample=a, expr=float(b)) for a, b in zip(self.samples, expn) ])
+      data = data
+    
     )
-
-
+    
+  def getSamplesByCharacteristic (self, ki, vi):
+    return [k for k,v in d.items() if v[ki]==vi]
+    
 
 def collectItems(settings, prefix):
   items = collections.defaultdict(dict)
@@ -475,27 +520,40 @@ def loadAnnotations(settings):
     for d in collectItems(settings, 'mistic.annotation.'):
         annotations.add(Annotation(**d))
 
+def loadColAnnotations(settings):
+    
+    for d in collectItems(settings, 'mistic.col_annotation.'): 
+      colAnnotations.add(ColAnnotation(**d))
+    
 def loadData(settings):
     for d in collectItems(settings, 'mistic.dataset.'):
       print ('Loading %s' % d['name'])
       datasets.add(DataSet(**d))
      
-      
-
+def loadData(settings):
+    for d in collectItems(settings, 'mistic.dataset.'):
+      print ('Loading %s' % d['name'])
+      datasets.add(DataSet(**d))
+     
 
 def load(settings):
   
  
   logging.info('loading ontology')
   loadOntology(settings)
+  
   logging.info('loading orthologs')
   loadOrthology(settings)
+  
   logging.info('loading annotations')
   loadAnnotations(settings)
+  loadColAnnotations(settings)
+  
   logging.info('loading data')
   loadData(settings)
+  
   logging.info('loading done')
 
   # get corr for BAD and SLC39A13
   #print [x for x in datasets.all()[0].genecorr('BAD', 'log', 0, 0)['data'] if x['symbol']=='SLC39A13']
-  
+

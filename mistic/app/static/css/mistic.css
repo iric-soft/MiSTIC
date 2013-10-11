@@ -13,6 +13,11 @@ input.valid {
   color: blue;
 }
 
+input.locate {
+  width:160px;
+
+}
+
 div#graph {
   margin-top: 5px;
   border: 1px solid #aaa;
@@ -22,25 +27,33 @@ div#graph {
   font-family: helvetica; 
 }
 
-.highlighted {
-  fill : rgb(20, 216, 28); 
+
+
+.highlighted1, .highlighted_turquoise {
+  fill : rgb(0, 204, 204); 
 }
 
-.highlighted_green {
-  fill : rgb(20, 216, 28); 
-}
-
-.highlighted_blue {
+.highlighted2, highlighted_blue {
   fill : rgb(0, 154, 255); 
 }
 
-.highlighted_red {
+.highlighted3, .highlighted_red {
   fill : rgb(255, 43, 0); 
 }
 
-.highlighted_orange {
-  fill : rgb(255, 222, 0); 
+.highlighted4, .highlighted_purple {
+  fill : rgb(199, 21, 133); 
 }
+
+.notselected {
+  fill : rgb(0, 0, 0); 
+}
+
+.selected, .highlighted_green {
+  fill : rgb(20, 216, 28); 
+}
+
+
 
 .extent {
   fill-opacity: .125;
@@ -50,7 +63,8 @@ div#graph {
 }
 
 .resize {
-  fill: 'white';
+  fill: 'blue';
+  visibility: visible;
 }
 
 circle {
@@ -89,4 +103,44 @@ div#more-information a:hover
 .go-biological_process span.label { background-color: #080; }
 .go-molecular_function span.label { background-color: #008; }
 
-.gene-item             span.label { color: black; background-color: #ddd; }
+.gene-item  span.label { color: black; background-color: #ddd; }
+
+
+.label,
+.badge {
+  display: inline-block;
+  
+}
+
+.accordion-body {
+  background-color: #ffffff;
+}
+
+.accordion-heading {
+  border-bottom: 1px solid transparent;
+  border-top-right-radius: 3px;
+  border-top-left-radius: 3px;
+}
+
+.accordion-toggle, .accordion-toggle:hover,
+.accordion-toggle:focus  {
+  cursor: pointer;
+  text-decoration: none;
+  color:#333333;
+}
+
+.dropdown-submenu {
+    left: 100%;
+    position: absolute;
+    top:0;
+    visibility: invisible;
+    display: none;
+    margin-top: -1px;
+}
+
+.dropdown-menu li:hover .dropdown-submenu {
+    visibility: visible;
+    display: block;
+   
+}
+

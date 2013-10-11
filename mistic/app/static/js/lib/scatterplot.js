@@ -16,6 +16,7 @@
             gridValue: 10, 
             textOnly : false,
             minimal : true,
+            clearBrush: false,
            
         };
       
@@ -96,42 +97,53 @@
 
 							 
 	scatterplot.prototype.highlightCircle = function (e){
-		
+		//d3.selectAll('#graph svg').selectAll('circle').classed('notselected', true);
 		d3.selectAll('#graph svg').selectAll('circle')
 			.filter(function(d, i) {return (d.k==e.k);})
-			.classed('highlighted', !d3.select(this).classed('highlighted'));
+			.classed('selected', !d3.select(this).classed('selected'));
 		addInformation(e.k);
 		
 	};
 	
   scatterplot.prototype.brushstart= function () {
-    //console.debug(this);
-    d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
+    console.debug('brushstart');
+    //d3.selectAll('#graph svg').selectAll('circle').classed('notselected', true);
+    //d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
+
     
   };
   
   scatterplot.prototype.brushed= function () {
-   
+    
+    console.debug('brushed');
     var e = d3.event.target.extent();
     var circles  = d3.select(this.parentNode).selectAll("circle")
       .filter(function(d) { return e[0][0] <= d.x && d.x <= e[1][0] && e[0][1] <= d.y && d.y <= e[1][1] });
     var selected =  _.map(circles.data(), function(c) {return c.k;});
     d3.selectAll('#graph svg').selectAll("circle")
-      .classed('highlighted', function(d) {return _.contains(selected, d.k);  });
+      .classed('selected', function(d) {return _.contains(selected, d.k);  });
       
   };
 
   scatterplot.prototype.brushend = function () {
-  
+    
+    console.debug('brushend');
     var circles = d3.select('#graph svg').selectAll("circle")
-          .filter(function() {return d3.select(this).classed('highlighted');});
+          .filter(function() {return d3.select(this).classed('selected');});
+    
+    //d3.selectAll('#graph svg').selectAll('circle').classed('selected', false);
+    //d3.selectAll('#graph svg').selectAll('circle').classed('notselected', false);
     var selected =  _.map(circles.data(), function(c) { return c.k;});
     selected = _.uniq(selected);
     clearInformation();
     _.each(selected, addInformation);
     
     
+   
+    
+    
   };
+
 	
 	
 	  scatterplot.prototype.makeMinimalAxes = function() {
@@ -357,13 +369,14 @@
           this.xScaleBrush.range([ bkgx, bkgx+width ]);
           this.yScaleBrush.range([ bkgy + height, bkgy ]);
                
-          
+        
           this.brush = d3.svg.brush()
               .x(this.xScaleBrush)
               .y(this.yScaleBrush)
               .on("brushstart", this.brushstart)
               .on("brush", this.brushed)
               .on("brushend", this.brushend);
+              
               
        
            var color='transparent';
@@ -382,6 +395,7 @@
           svg.append("g")
               .classed("brush", true)
               .call(this.brush);
+            
              
            
           if (this.options.axes) {  this.makeAxes();  }
@@ -396,7 +410,7 @@
             .attr('cx', function(d) { return self.xScale(d.x); })
             .attr('cy', function(d) { return self.yScale(d.y); })
             .attr('r',  this.options.pt_size)
-           	//.attr('opacity', 0.65)
+           	.attr('opacity', 0.65)
            	.on('click', this.highlightCircle);
      
           node.append('title')
