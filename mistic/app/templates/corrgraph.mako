@@ -10,22 +10,71 @@ ${parent.style()}
 <%block name="actions">
   <button class="btn" id="download">CSV</button>
   <button class="btn" id="download-all">CSV [all]</button>${parent.actions()}
-  <button class="btn" id="static_url">Static URL</button>
+  
 </%block>
+
+
 <%block name="controls">
   <form class="form-inline">
-    <label for="datasets">Dataset:</label>
-    <select id="datasets">
-      <option value="">Select a dataset</option>
-%for d in data.datasets.all():
-      <option value="${d.id}">${d.name}</option>
-%endfor
+
+ <div class="accordion" id="accordion">
+
+    <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset </a></h4>
+       </div>
+       
+       <div id="dataset_menu" class="accordion-body collapse in">
+         <div class="accordion-inner">    
+           
+                <select id="datasets">
+                    <option value="">Select a dataset</option>
+                    %for d in data.datasets.all():
+                    <option value="${d.id}">${d.name}</option>
+        %endfor
 
     </select>
-    <label for="gene">Gene:</label> <input type="text" id="gene"></input></label>
-    <label for="nlabel"># labels:</label> <input type="text" style="width:20px;" id="nlabel"  autocomplete='off' value=10></input></label>
-    <button class="btn" id="plot">Plot</button>
-    <label for="goterm">GO Term:</label> <input type="text" autocomplete='off' id="goterm"></input></label>
+                 
+              </div>
+            </div>
+          </div>
+          
+      <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Gene </a></h4>
+       </div>
+       
+       <div id="gene_menu" class="accordion-body collapse in">
+         <div class="accordion-inner">    
+        <input type="text" id="gene"></input></label>
+        <button class="btn" id="plot">Plot</button>
+          </div>
+        </div>
+       </div> 
+       
+      <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a></h4>
+       </div>
+      <div id="options_menu" class="accordion-body collapse ">
+         <div class="accordion-inner">     
+          <label for="nlabel">Display </label> 
+          <input type="text" style="width:20px;" id="nlabel"  autocomplete='off' value=10></input></label>
+           labels 
+         <br>
+         <hr>
+          <label for="goterm">Show GO term members </label> <input type="text" autocomplete='off' id="goterm"></input></label>
+   </div>
+        </div>
+       </div> 
+
+</div>
+
+    
+    
+   
+    
+   
   </form>
 </%block>
 
@@ -86,7 +135,7 @@ $(document).ready(function() {
   var current_graph = new corrgraph([], $('#graph'));
   
   resizeGraph = function() {
-    current_graph.elem.height($(window).height() - 124);
+    current_graph.elem.height($(window).height() -248 );
     current_graph.resize();
   };
 
@@ -181,7 +230,7 @@ $(document).ready(function() {
   });
 
   $('#datasets').change();
-  gene_entry.trigger('cthange', null);
+  gene_entry.trigger('change', null);
   updateURLTarget({ dataset: null });
 
   $(window).resize(resizeGraph);
