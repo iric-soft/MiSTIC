@@ -10,36 +10,89 @@ import pickle
 </%block>
 <%block name="controls">
   <form class="form-inline">
-    <label for="datasets">Dataset colour:</label>
-    <select id="dataset_cmp">
-      <option value="">None</option>
-%for d in data.datasets.all():
-      <option value="${d.id}">${d.name}</option>
-%endfor
-    </select>
-    <label for="goterm">GO colour:</label> <input type="text" id="goterm"></input></label>
-    <label for="gene1">Locate :</label>
+  
+  <div class="accordion" id="accordion">
+  
+  
+     <div class="accordion-heading"><h4 class="accordion-title"> <a class="accordion-toggle" >Color plot by  </a></h4></div> 
+      
+     <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset</a></h4>
+       </div>
+       
+       <div id="dataset_menu" class="accordion-body collapse in">
+         <div class="accordion-inner">    
+           
+               <select id="dataset_cmp">
+                    <option value="">Choose a dataset for comparison </option>
+            %for d in data.datasets.all():
+                    <option value="${d.id}">${d.name}</option>
+            %endfor
+            </select>
+                 
+              </div>
+            </div>
+          </div>
+          
+          
+    <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Gene  </a></h4>
+      </div>
+  
+   <div id="locate_gene" class="accordion-body collapse in">
+       <div class="accordion-inner">  
+    
+    
+    <label for="gene1"></label>
     <input type="text" id="gene">
-    <div style='padding-top:10px;'>GO categories: 
-    <button class="btn btn-primary"  id='bp_go' title='Biological Process'>BP</button>
-    <button class="btn btn-primary"  id='mf_go' title='Molecular Function'>MF</button>
-    <button class="btn btn-primary"  id='cc_go' title='Cellular Compartment'>CC</button>
+  
     </div>
+      </div>
+    </div>
+          
+          
+   <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+         <a class="accordion-toggle" data-toggle="collapse"  href="#go_colour">Gene Ontology  </a></h4>
+      </div>
+  
+   <div id="go_colour" class="accordion-body collapse in">
+       <div class="accordion-inner">  
+            <label for="goterm"></label> <input type="text" id="goterm"></input></label>
+    
+            <div style='padding-top:10px;'> 
+            <button class="btn btn-primary"  id='bp_go' title='Biological Process'>BP</button>
+            <button class="btn btn-primary"  id='mf_go' title='Molecular Function'>MF</button>
+            <button class="btn btn-primary"  id='cc_go' title='Cellular Compartment'>CC</button>
+            </div>
+    
+      </div>
+      </div>
+    </div>
+    
+    
+   
+  
+  </div>
+  
+  
+  
+  
+  
+  
+  
+  
+  
+ 
+    
+    
   </form>
 </%block>
 <%block name="style">
 ${parent.style()}
 
-path.arc:hover {
-  fill: #346;
-}
-
-path.arc.highlight {
-  fill: #f00;
-}
-path.axis.selected {
-  stroke-width:3.5;
-}
 
 
 </%block>
