@@ -179,6 +179,8 @@ def main(global_config, **settings):
     config.add_route('mistic.json.datasets',               '/datasets')
     config.add_route('mistic.json.dataset',                '/datasets/{dataset}')
     config.add_route('mistic.json.dataset.search',         '/datasets/{dataset}/search')
+   
+    config.add_route('mistic.json.dataset.samples',        '/datasets/{dataset}/samples')
 
     config.add_route('mistic.json.dataset.mst',            '/datasets/{dataset}/mst/{xform}')
     config.add_route('mistic.json.dataset.mapped_mst',     '/datasets/{dataset}/mst/{xform}/{tgt_annotation}')

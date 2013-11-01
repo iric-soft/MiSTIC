@@ -73,6 +73,7 @@ class GO(object):
                 out.append(r)
         out.sort(key = lambda r: r['id'])
         out = out[:limit]
+        print out
         return out
 
 
@@ -169,7 +170,8 @@ class Dataset(object):
     @view_config(route_name="mistic.json.dataset.samples", request_method="GET", renderer="json")
     def samples(self):
         return self.dataset.samples
-
+      
+       
     @view_config(route_name="mistic.json.dataset.search", request_method="GET", renderer="json")
     def search(self):
         query = self.request.GET.getall('q')

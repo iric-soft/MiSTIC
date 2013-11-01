@@ -44,6 +44,7 @@
         }
     };
 
+   
     pairplot.prototype.removeData = function(matcher) {
         this.data = _.reject(this.data, matcher);
         this.draw();
@@ -104,6 +105,7 @@
 
                 var g = svg.append('g').attr('transform', 'translate(' + String(xlo) + ',' + String(ylo) +')');
               
+                
                 if (x != y) {  
                     _.extend(s_opts, { width: xhi - xlo, height: yhi - ylo });
                    
