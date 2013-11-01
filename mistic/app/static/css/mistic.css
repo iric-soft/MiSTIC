@@ -7,6 +7,19 @@ body {
   font-family: helvetica,arial,sans-serif;
   background-color: #f0f0f0;
   padding: 60px 0px 0px 0px;
+  z-index:10;
+}
+
+input {
+  width:230px;
+}
+
+select {
+  width:230px;
+}
+
+select[name$="_length"] {
+width:10px;
 }
 
 input.valid {
@@ -14,8 +27,7 @@ input.valid {
 }
 
 input.locate {
-  width:160px;
-
+  width:145px;
 }
 
 div#graph {
@@ -23,36 +35,67 @@ div#graph {
   border: 1px solid #aaa;
 }
 
+div#graph text {
+  pointer-events : none;
+}
+
+
 .circlelabel {
   font-family: helvetica; 
 }
 
 
-
-.highlighted1, .highlighted_turquoise {
-  fill : rgb(0, 204, 204); 
+.circlelabel .invisible {
+  pointer-events : none;
 }
 
-.highlighted2, highlighted_blue {
-  fill : rgb(0, 154, 255); 
+circle  {
+  pointer-events : auto;
 }
 
-.highlighted3, .highlighted_red {
-  fill : rgb(255, 43, 0); 
+
+.color1 {
+  fill : rgb(252, 132, 3);
+ }
+.color2{
+  fill : #0BBEDE; 
+}
+.color3  {
+  fill : rgb(36, 153, 36); 
+}
+.color4  {
+  fill :rgb(155, 42, 141); 
 }
 
-.highlighted4, .highlighted_purple {
-  fill : rgb(199, 21, 133); 
+.stroke1, .stroke2,
+.stroke3, .stroke4 {
+  stroke-width : 4px;
+  fill:white;
 }
+
+.stroke1 {
+  stroke:rgb(252, 132, 3);
+}
+
+.stroke2 {
+  stroke: #0BBEDE;
+}
+.stroke3 {
+  stroke: rgb(36, 153, 36);
+  }
+.stroke4 {
+  stroke:rgb(155, 42, 141);
+ }
+
+
 
 .notselected {
   fill : rgb(0, 0, 0); 
 }
 
-.selected, .highlighted_green {
-  fill : rgb(20, 216, 28); 
+.selected  {
+  fill :rgb(20, 216, 28); 
 }
-
 
 
 .extent {
@@ -74,6 +117,7 @@ circle {
 div#more-information {
    font-family: helvetica,arial,sans-serif;
    font-size: 11px; 
+   padding: 10px 0px 0px 0px;
 }
 div#more-information a,
 div#more-information a:hover
@@ -83,10 +127,6 @@ div#more-information a:hover
   pointer-events : none;
 }
 
-.dropdown-menu li > a:hover,
-.dropdown-menu .active > a:hover {
-  background-color: #66aacc;
-}
 
 .go-cellular_component span.label,
 .go-biological_process span.label,
@@ -112,35 +152,71 @@ div#more-information a:hover
   
 }
 
+
+
+
 .accordion-body {
   background-color: #ffffff;
+  
 }
 
 .accordion-heading {
+  background-color:#EAE9E9;
   border-bottom: 1px solid transparent;
   border-top-right-radius: 3px;
   border-top-left-radius: 3px;
+ 
+   
 }
+
 
 .accordion-toggle, .accordion-toggle:hover,
 .accordion-toggle:focus  {
   cursor: pointer;
   text-decoration: none;
   color:#333333;
+  
 }
 
+ul#menu1{
+  position:relative;
+}
+
+.dropdown-menu li {
+  position:relative;
+ }
+
+.dropdown-menu li > a:hover,
+.dropdown-menu .active > a:hover {
+  background-color: #66aacc;
+}
+
+
+
 .dropdown-submenu {
-    left: 100%;
-    position: absolute;
-    top:0;
-    visibility: invisible;
+    
+    position:absolute;
     display: none;
-    margin-top: -1px;
+    left: 50%;
+    top:-1px;
+    
+
 }
 
 .dropdown-menu li:hover .dropdown-submenu {
-    visibility: visible;
     display: block;
    
 }
+path.arc:hover {
+  fill: #346;
+}
+
+path.arc.highlight {
+  fill: #f00;
+}
+path.axis.selected {
+  stroke-width:3.5;
+  fill :#A3A3C2; 
+}
+
 
