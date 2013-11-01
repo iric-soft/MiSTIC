@@ -22,12 +22,17 @@ transforms = ('log', 'rank',  'none')
 <%block name="style">
 ${parent.style()}
 
+#datasets-table tbody tr:hover {
+background-color:#DAD9DB;
+cursor:pointer;
+}
+
 td.group {
-  background-color: grey; 
+  background-color: #EAE9E9; 
   text-align:left;
 }
 td.subgroup {
-  background-color: grey; 
+  background-color: #EAE9E9; 
   text-align:left;
   padding : 10px;
 }
@@ -124,7 +129,6 @@ ${parent.pagetail()}
         aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": false }, { "bSortable": false } ]);
         bsc = bsc.concat([true, null, null, null ]);
   
-       
         return $('#datasets-table').dataTable( {  
                         "aoColumns": aoc  ,   
                         "bSearch": bsc  ,
@@ -187,7 +191,13 @@ $('#csv-button').on('click', function(event){
 });
       
 $('#datasets-table tbody tr ').on('click', function(event){
-    var link = this.cells[5].innerHTML;
+    var values = _.map(this.cells, function(d){return(d.innerText);});
+    
+    var i = _.indexOf(values, 'log');
+    if (i==-1) { i = _.indexOf(values, 'rank');} 
+    else { if (i==-1) { i = _.indexOf(values, 'none');}} 
+    
+    var link = this.cells[i].innerHTML;
     window.open ($(link).attr("href"));
     
 });
