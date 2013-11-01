@@ -9,20 +9,47 @@ import scipy.stats
 <%block name="actions">
   ${parent.actions()}
 </%block>
-<%block name="controls">
-  <form class="form-inline">
+
+<%block name="pagecontent">
+
+<div class="container-fluid"> 
+  <div class="row-fluid">
+    <div class="span12">
+        
+    <form class="form-inline">
    
-    <div class="btn-group-pull-right">
-    <%block name="controls_buttons">
-      <button class="btn btn-primary" id="select_all">Select all</button>
-      <button class="btn btn-primary" id="clear_selection">Clear selection</button>
-      <button class="btn btn-primary" id="scatterplot">Scatterplot</button>
-      <button class="btn btn-primary" data-toggle="button"  id="show_labels">Toggle labels</button>
-    </%block>  
+        <div class="btn-group-pull-right">
+            <%block name="controls_buttons">
+            <button class="btn btn-primary" id="select_all">Select all</button>
+            <button class="btn btn-primary" id="clear_selection">Clear selection</button>
+            <button class="btn btn-primary" id="scatterplot">Scatterplot</button>
+            <button class="btn btn-primary" data-toggle="button"  id="show_labels">Toggle labels</button>
+            </%block>  
+        </div>
+    </form>
     </div>
+  </div>
     
-  </form>
+  <div class="row-fluid">
+  <div class="span12">
+    <div class="span12 information"> Selection :</span>
+    <div class="span12" id="more-information"> </div>
+    </div></div>
+
+ <div class="row-fluid" id="document-graph">
+   <div class="span7" id="graph"></div>
+   <div class="span5" id="graph-right">
+      <div class="span12" id="go_table"></div>
+      <div class="span12" id="spacer" style='height:100px;'></div>
+      <div class="span12" id="part2"></div>
+   </div>
+ </div>
+  
+    
+
+  
 </%block>
+
 
 <%block name="style">
 ${parent.style()}
@@ -37,7 +64,9 @@ ${parent.style()}
   float: right;
 }
 
-div#more-information {
+
+
+div#more-information, .information{
    font-family: helvetica,arial,sans-serif;
    font-size: 11px;
    color: #cc7400;
@@ -85,23 +114,7 @@ rect.selected {
 }
 </%block>
 
-<%block name="graph">
 
- <div class="row-fluid">
- 	 <div class="span12" id="more-information"></div>
- </div>
-
- <div class="row-fluid" id="document-graph">
-   <div class="span7" id="graph"></div>
-   <div class="span5" id="graph-right">
-      <div class="span12" id="go_table"></div>
-      <div class="span12" id="spacer" style='height:100px;'></div>
-      <div class="span12" id="part2"></div>
-   </div>
- </div>
-  
-    
-</%block>
 
 
 <%block name="pagetail">
@@ -203,20 +216,29 @@ ${parent.pagetail()}
 
 <script type="text/javascript">
 
+
 var json = {
   "nodes": ${json.dumps(V)|n},
   "links": ${json.dumps(E)|n},
   "enrichmenttab": ${json.dumps(enrichment_tab)|n},
 };
 
-var table = d3.select('#go_table').insert('table', ':first-child');
+var table = d3.select('#go_table').insert('table', ':first-child').attr('id', 'gotable');
+
 var thead = table.append('thead');
 var tbody = table.append('tbody');
 
-var th = thead.selectAll("th")
+
+
+var thr = thead.selectAll("tr")
+    .data([ 1 ])
+    .enter()
+    .append("tr")
+
+var th = thr.selectAll('th')
     .data([ 'P-value', 'Odds', 'Type', 'Term', 'Description' ])
     .enter()
-    .append("th")
+    .append('th')
     .text(function(d) { return d; });
 
 var tr = tbody.selectAll('tr')
@@ -256,7 +278,6 @@ td.enter()
     .attr('title', function(d) {return d[1];})
     ;
  
-
 var width =($(document).width()-60)/12*7; //was width:1024
 var height =($(document).height()-($(document).height()/5));  //was width:780
 
@@ -265,7 +286,7 @@ var svg = d3.select("#graph").append("svg")
     .attr("height", height);
 
 var grav = .20;
-var charge = -150; //was -150
+var charge = -150; 
 var force = d3.layout.force()
     .gravity(grav)
     .charge(charge)
@@ -326,8 +347,13 @@ var link = graph.selectAll(".link")
   .enter().append("line")
     .attr("stroke-width", 2)
     .attr("stroke", function(d) { return YlGnBl(1-d.weight); })
-    .on('click', function(d) {   
-      window.open("${request.route_url('mistic.template.scatterplot_static', dataset=dataset, gene1='_g1_', gene2='_g2_')}".replace('_g1_', d.source.id).replace('_g2_',d.target.id));
+    .on('click', function(d) { 
+       var url = "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}";
+            
+       url += '/' + d.source.id;
+       url += '/' + d.target.id;
+       window.open(url);  
+       
      
     });
 
@@ -451,6 +477,30 @@ $('#scatterplot').on('click', function(event) {
 $(document).keyup(function(e) {
   if (e.keyCode == 27) {  hideMore(); } 
 });
+
+
+$(document).ready(function() {   
+$('#gotable').dataTable({"aaSorting": [[1,"asc"]],
+                          "sType": ['numeric','numeric','string','string','string'], 
+                          "bPaginate" : true,
+                          "iDisplayLength": 10,
+                          "sPaginationType": "full_numbers",
+                          "bLengthChange": false,
+                          "bFilter": true,
+                          "bSort": true,
+                          "bInfo": true,
+          
+    });    
+          
+});    
+
+
+
+
+
+
+
+
 
 </script>
 </%block>
