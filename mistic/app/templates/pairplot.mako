@@ -2,39 +2,24 @@
 import mistic.app.data as data 
 import json
 %>
+
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">Multi-way scatterplot</%block>
 
 <%block name="actions">
-  ${parent.actions()}
-  
+  ${parent.actions()} 
    <a id="share_url" href="#link_to_share" role="button" class="btn" data-toggle="modal">Link to share</a>
-
 </%block>
 
 <%block name="controls">
 
-
-<%
-   
-
+<% 
    ds = data.datasets.get(dataset)
-   op1 = []
-   op2 = []
-   if ds: 
-    ca = ds.cannotation.attrs
-    so =list(set(sum([e.items() for e in ca.values()], [])))
-    op1 = list(set([x[0] for x in so]))
-    op1.remove('sample')
-    op1.remove('expr')
-    op2 = [list(set([x[1] for x in so if  x[0]==a])) for a in op1]
-   
-   
 %>
 
 
 <div class="row-fluid">
-   <div id="menu" class="span12" style="display:inline;" >
+   <div id="menu" class="span12"  >
 
       <form class="form-inline">
      
@@ -42,20 +27,22 @@ import json
             <div class="accordion-group">        
               <div class="accordion-heading">
                 <h4 class="accordion-title">
-                  <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Datasets <div id="nb_datasets" class='text-info'></div></a>
+                  <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Datasets <div id="nb_datasets" class='text-info' style='display:inline;'>(0)</div></a>
                 </h4>
               </div>
        
               <div id="dataset_menu" class="accordion-body collapse in">
                 <div class="accordion-inner">
                   
-                  <label for="datasets">Choose a dataset:</label>
+                 
+                  
                   <select id="datasets">
-                    <option value=""></option>
+                    <option value="">Select a dataset</option>
                     %for d in data.datasets.all():
                       <option value="${d.id}">${d.name}</option>
                     %endfor
                  </select>
+                 
               </div>
             </div>
           </div>
@@ -63,7 +50,7 @@ import json
           <div class="accordion-group">        
             <div class="accordion-heading">
                <h4 class="accordion-title">
-                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Genes <div id="nb_genes" class='text-info'></div></a>
+                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Genes <div id="nb_genes" class='text-info' style='display:inline;'>(0)</div></a>
                </h4>
             </div>
     
@@ -71,7 +58,7 @@ import json
               <div class="accordion-inner">
       
                   <label for="gene">Select a gene :</label>
-                  <input type="text" id="gene" autocomplete="off"/> 	
+                  <input type="text" id="gene" autocomplete="off"/> <br>	
       
                   <span id="genelist"></span>
               </div>
@@ -81,7 +68,8 @@ import json
         <div class="accordion-group">        
            <div class="accordion-heading">
              <h4 class="accordion-title">
-                <a class="accordion-toggle" data-toggle="collapse"  href="#sample_menu">Samples <div id="nb_samples" class='text-info'></div></a>
+                <a class="accordion-toggle" data-toggle="collapse"  href="#sample_menu">Samples 
+                <div id="nb_samples" class='text-info' style='display:inline;'>(0)</div></a>
             </h4>
        </div>
     
@@ -92,71 +80,43 @@ import json
           <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Selected samples</a></h5>
           <div id="current_selection" class="accordion-body collapse in ">
           
-          <div>
-          <label style="display:inline;" for="highlighted1" size="10px">[1]</label>
-          <input type="text" class="locate" id="highlighted1" autocomplete="off"  />
-          <i id="add1" class="icon-plus"></i>
-          <i id="minus1" class="icon-minus"></i>
-          </div>
+          %for i in range(1,5) :
+            <br>
+            <label style="display:inline;" for="highlighted${i}" size="8px">
+            
+           
+            <svg height='10' width="10">
+            <rect id="spectrum${i}" width="10" height="10" class="highlighted${i} color${i}" />
+            
+            <!-- <svg height='10' width="10">
+            <rect id="spectrum${i}-stroke" width="10" height="10" class="highlighted${i} stroke${i}"/>
+            </svg> -->
+              
+            </label>
+            <input type="text" class="locate" id="highlighted${i}" autocomplete="off" data-index='${i}' />
+            <div style="display:inline;">
+              <i id="add${i}" class="icon-plus "></i>
+              <i id="minus${i}" class="icon-minus "></i>
+              <i id="remove${i}" class="icon-remove"></i>
+              <i id="tograph${i}" class="icon-share-alt"></i>
+             
+            </div>
+            
+          %endfor
           
-          <div>
-          <label style="display:inline;" for="highlighted2" size="10px">[2]</label>
-          <input type="text" class="locate" id="highlighted2" autocomplete="off"   />
-          <i id="add2" class="icon-plus"></i>
-          <i id="minus2" class="icon-minus"></i>
-          </div>
-          
-          <div>
-          <label style="display:inline;" for="highlighted3" size="10px">[3]</label>
-          <input type="text" class="locate" id="highlighted3" autocomplete="off"  />
-          <i id="add3" class="icon-plus"></i>
-          <i id="minus3" class="icon-minus"></i>
-          
-          
-          </div>
-          <div>
-            <label style="display:inline;" for="highlighted4" size="10px">[4]</label>
-            <input type="text" class="locate" id="highlighted4" autocomplete="off"  />
-            <i id="add4" class="icon-plus"></i>
-            <i id="minus4" class="icon-minus"></i>
-         
-          </div>
           </div>
           
           <hr>
-          <h5><a class="accordion-toggle" data-toggle="collapse"  href="#characteristic_selection">Select by characteristic</a></h5>
-          <div id="characteristic_selection" class="accordion-body collapse in ">
-           
-             
-          <!--<div class="dropdown">
-              <a data-toggle="dropdown" class="dropdown-toggle" href="#">Click me!!  <b class="caret"></b></a>
-              <ul class="dropdown-menu" id="menu1">
-                %for i in range(len(op1)) :
-                    <li><a href="#">${op1[i]}</a>
-                      <ul class="dropdown-menu dropdown-submenu">
-                      % for e2 in op2[i] : 
-                        <li><a href="#">${e2}</a></li>
-                      %endfor
-                      </ul>
-             
-                   </li>
-               %endfor
-       
-            </ul>
-          </div>-->
-             
-             
-             
-             
-            </div>     
           
-          
+              <select id="sample_selection" >
+                <option selected value="none">Select by characteristic</option>
+              </select>
+
         </div> 
       </div>
    
     </div> 
-    
-    
+       
      <div class="accordion-group">        
        <div class="accordion-heading">
          <h4 class="accordion-title">
@@ -176,53 +136,12 @@ import json
       </div>
     </div>
     </div>
-    
-    
-   
+       
   </div>	
 </div>
   
- 
-
 </form>
   
-          <div class="dropdown">
-              <a data-toggle="dropdown" class="dropdown-toggle" href="#">Click me!!  <b class="caret"></b></a>
-              <ul class="dropdown-menu" id="menu1">
-                %for i in range(len(op1)) :
-                    <li><a class='l1' href="#">${op1[i]}</a>
-                      <ul class="dropdown-menu dropdown-submenu">
-                      % for e2 in op2[i] : 
-                        <li><a class='l2' href="#">${e2}</a></li>
-                      %endfor
-                      </ul>
-             
-                   </li>
-               %endfor
-       
-            </ul>
-          </div>
-
- <!--<div class="span12" id="advanced"  >
- 
- <div class="btn-group">
-  <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">More options
-    <span class="caret"></span>
-  </button>
-  <ul class="dropdown-menu" role="menu">
-    <li><a id='show_labels'  href="#">Show labels</a></li>
-    <li><a id='select_clear' href="#">Select all</a></li>
-    <li class="divider"></li>
-    <li><a id="change_axes"  href="#">Change axes</a></li>
-
-  </ul>
-</div>
-      
- </div>-->
-      
- 
-
-
 </%block>
 
 <%block name="graph">
@@ -236,22 +155,8 @@ import json
 
 </%block>
 
-
 <%block name="style">
 ${parent.style()}
-
-div#graph text {
-  pointer-events : none;
-}
-
-.circlelabel .invisible {
-  pointer-events : none;
-}
-
-circle  {
-  pointer-events : auto;
-}
-
 
 
 
@@ -263,10 +168,91 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/scatterplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
 
-
 <script type="text/javascript">
 $(document).ready(function() {
- 
+  
+  var highlights= new Object();
+   
+   for (i = 1; i < 5; ++i)  {
+    
+    highlights['highlighted'+i] = {'fill':$("rect#spectrum"+i).css('fill'), 'stroke':$("rect#spectrum"+i+"-stroke").css('stroke')};
+
+   _.each($("[id ^='spectrum_i']".replace('_i', i)), function(event){ 
+   
+        $(event).spectrum({
+            showButtons: false,
+            change : function(event){
+              
+              var newColor = event.toHexString(); 
+  
+              var classes = $(this).attr('class').split(' '); 
+              var id = this.id;
+              var ix = parseInt($(this).data()['spectrum.id']);
+              var f = $(".sp-coloring")[ix];
+              var w = $(f).find('input:checked').val();
+              
+              var highlight = classes[0];
+              if (classes.length>1) {              
+                 var cssColor = classes[1];
+                 d3.select(this).classed(cssColor,false);
+              }
+              
+              if (w=='stroke'){
+                d3.select(this).attr('stroke', newColor);
+                d3.select(this).attr('stroke-width', '4px' );
+                d3.select(this).attr('fill', 'white');
+                
+                highlights[highlight]['stroke']=newColor;
+                highlights[highlight]['fill']=undefined;
+                
+              
+              }
+              else {
+                d3.select(this).attr('stroke', null);
+                d3.select(this).attr('stroke-width',null );
+                d3.select(this).attr('fill', newColor);
+                
+                highlights[highlight]['fill']=newColor;
+                highlights[highlight]['stroke']=undefined;
+              }
+              
+              $('.locate').change();
+          }
+    });
+   });
+   
+   
+  }
+  console.debug($(window.spectrum));
+  var radiobuttons = "<div class='sp-coloring'><input name='coloring'  type='radio' value='fill' checked='checked'>Fill </input>"
+  radiobuttons += "<input name='coloring' type='radio' value='stroke' >Stroke</input></div>"
+                   
+  $(".sp-button-container").before(radiobuttons) 
+  /*$("input.sp-no-color").on("click", function(event) { 
+  if (event.target.checked) {
+        var c = $(".sp-container").filter($(":not(.sp-hidden)"));
+        var f = _.map($(".sp-container"), function(d, i) {if(! ($(d).hasClass('sp-hidden') ))  {return (i+1); }});
+        var f = _.without(f, undefined)[0]
+        var i = Math.ceil(f/2);
+        var e = f%2;
+        
+        var suff = '';
+        if (e==0) {
+            console.debug(f);
+            suff="-stroke";
+        }
+        
+        console.debug($("spectrum"+i+suff));
+        $("spectrum"+i+suff).spectrum('set', "white");
+               
+        
+        $(this).offsetParent().find('div.sp-dragger').css('left', '0px');
+        $(this).offsetParent().find('div.sp-dragger').css('top', '0px');    
+        $("spectrum"+i+suff).spectrum('reflow');
+    }
+  });  
+  */
+  
   
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   current_graph = new pairplot(undefined, undefined, $('#graph'));
@@ -279,13 +265,17 @@ $(document).ready(function() {
   %>
   
   %if not ds==None:
-    current_dataset = "${dataset}";
-    $('#datasets').val(current_dataset).change();
+    current_dataset = "${dataset}"; 
+    $('#datasets').val(current_dataset);
+   
     gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
+    $("#nb_datasets").text('(1)');
+    
    
   %else:
     current_dataset = undefined;
     gene_entry.url = null;
+  
     $("#gene").attr('disabled', true);
     $("#tag").attr('disabled', true);
   %endif
@@ -293,6 +283,7 @@ $(document).ready(function() {
 
   //  Gene symbols were passed in the URL
   %if len(genes)>0:
+    $("#nb_genes").text('(${len(genes)})');
     %for g in genes:      
       // Selecting the first item corresponding to the gene symbol (no validation)
       gene = ${json.dumps(g)|n};
@@ -301,14 +292,16 @@ $(document).ready(function() {
     %endfor
   %endif 
   
- 
+  
+  
+
   $("#share_url").on('click', function(event){
    
     var url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
               .replace('_dataset_', current_dataset);
          
     if (current_graph.data.length>0){
-        _.each(current_graph.data, function(x) { url += '/' + x.gene; });
+        _.each(current_graph.data, function(x) { url += '/' + x.gene;console.debug(x.gene); });
     }
     $("span#share").html(url);
   });
@@ -336,6 +329,7 @@ $(document).ready(function() {
         $("#options").css('display', 'none');
     }
     clearInformation();
+    $("#nb_genes").text('('+current_graph.data.length+')');
     $('.locate').change();
   });
 
@@ -362,7 +356,7 @@ $(document).ready(function() {
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);
        
-      
+        $("#nb_genes").text('('+current_graph.data.length+')');
         if(current_graph.data.length>=2) {
           $("#options").css('display', 'inline');
          
@@ -378,33 +372,56 @@ $(document).ready(function() {
 
   
 
-  $('#datasets').on('change', function(event) {
-   
+  $('#datasets').on('change custom', function(event) {
+   console.debug('change datasets')
     current_dataset = event.target.value;
     
     if (current_dataset === '') {
       current_dataset = null;
       gene_entry.url = null;
+      
       $("#gene").attr('disabled', true);
       $(".locate").attr('disabled', true);
+      $("#nb_datasets").text('(0)');
+      $("#nb_genes").text('(0)');
+      $("#nb_samples").text('(0)');
+      $('#sample_selection').html('<option selected value="none">Select a characteristic</option>');
     
-      
+     
     } else {
      $("#gene").attr('disabled', false);
      $(".locate").attr('disabled', false);
+     $("#nb_datasets").text('(1)');
      
      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
      
+     $.ajax({
+      url:  "${request.route_url('mistic.json.cannotation.items', dataset='_dataset_')}".replace('_dataset_', current_dataset),
+      dataype: 'json',
+      success: function(data) {
+           
+            var options = $('#sample_selection');
+            _.each(data, function(d) {
+                _.each(d, function(e,v) {
+                options.append('<optgroup label="'+v+'">');
+                _.each(e, function(l) {
+                    options.append('<option value="'+v+'.'+l+'">'+l+'</options>');
+                });
+                options.append('</optgroup>');
+                });            
+            });
+       }
+        
+        });
     }
     gene_entry.$el.val('');
 
     $('#genelist').empty();
     current_graph.removeData(function() { return true; });
-    
-    
+   
   });
 
-  
+  $('#datasets').change();
 
   resizeGraph = function() {
     $('div#graph').height($(window).height() - 124);
@@ -412,6 +429,7 @@ $(document).ready(function() {
     current_graph.resize(
       $('div#graph').width(),
       $('div#graph').height());
+    $('.locate').change();
   };
 
   $('div#graph').append(current_graph.svg);
@@ -419,14 +437,12 @@ $(document).ready(function() {
   resizeGraph();
   $(window).resize(resizeGraph);
   
-  
   $('#show_labels').on("click", function(event){
     
     var selected = d3.selectAll("text.circlelabel").filter(function(){var c = $(this).siblings('circle'); return $(c)[0].className.baseVal=='selected';});
     
     if (selected[0].length>0 ) { 
            selected.classed('invisible', !selected.classed('invisible'));
-           
     }
     else {
   	     d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
@@ -468,29 +484,69 @@ $(document).ready(function() {
 
   $("[id^='add']").on('click', function(event) {
     var cclass = this.id.replace('add', 'highlighted'); 
- 
+      
     var dat = [];
     d3.selectAll('circle.selected').each(function(d) { dat.push(d.k); });
+    d3.selectAll('circle.'+cclass).each(function(d) { dat.push(d.k); });
+    
     if (dat.length > 0 ) {
+      dat = _.uniq(dat);
       $('#'+cclass).val(dat.join(' '));
       current_graph.draw()
       $('.locate').change();
- 
-    }
-   
+    } 
+    $("#sample_selection > option").attr('selected', false);
   });
-  $("[id^='minus']").on('click', function(event){
+  
+   $("[id^='minus']").on('click', function(event){
     var cclass = this.id.replace('minus', 'highlighted'); 
+    
+    var highlighted = [];
+    d3.selectAll('circle.'+cclass).each(function(d) { highlighted.push(d.k); });
+    
+    var selected = [];
+    d3.selectAll('circle.selected').each(function(d) { selected.push(d.k); });
+    
+    var dat= _.difference(highlighted,selected);
+    d3.selectAll('circle.selected').attr('fill', undefined);
+      
+    dat = _.uniq(dat);
+    $('#'+cclass).val(dat.join(' '));
+    $('.locate').change();
+    d3.selectAll('circle.selected').classed('selected', false);
+    d3.selectAll('circle.selected').classed(cclass, false);
+    
+  });
+  
+  
+  $("[id^='tograph']").on('click', function(event){
+    var cclass = this.id.replace('tograph', 'highlighted'); 
+    var dat =  $('#'+cclass).val().split(' ');
+    var circles = d3.selectAll('circle'); 
+    //d3.selectAll('circle').classed(cclass, false);
+    circles.filter(function(d, i) {return (_.contains(dat, d.k));})
+      .classed('selected', true );
+     _.each(dat, addInformation);
+  });
+  
+  $("[id^='remove']").on('click', function(event){
+    var cclass = this.id.replace('remove', 'highlighted'); 
+    d3.selectAll('circle.'+cclass).attr('fill', undefined);
     $('#'+cclass).val('');
     $('.locate').change();
   
   });
- 		
- 	// Point labels 
+	
+  $("[id^='spectrum']").on('click', function(event){
+    $(this).spectrum('set',(this.id.indexOf('stroke')!=-1 ? $(this).css('stroke'): $(this).css('fill') ));
+    $(this).show();
+  });
+  
 
- 	
   $('.locate').on('change', function(event){
+    
     var cclass = this.id;
+    var index = parseInt($(this).data()['index'])-1;
   	var tag_entry = event.target.value.split(" ");
   	var circles = d3.selectAll('circle'); 
   	
@@ -506,22 +562,47 @@ $(document).ready(function() {
   	var tag_valid = _.flatten(_.map(tag_entry, function(item) {return search(dat, item);}  ));
   	
   	d3.selectAll('circle').classed(cclass, false);
-  	
-	  circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));})
-			.classed(cclass, !d3.select(this).classed(cclass));
+  	  	
+	circles = circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));});
+	console.debug(circles);
+    circles.classed(cclass, !d3.select(this).classed(cclass));
 	
-	  clearInformation();
+	
+	var fills = _.pluck(highlights, 'fill').slice(0,index+1);
+	fills = _.without(fills, undefined);
+	
+	var strokes = _.pluck(highlights, 'stroke').slice(0,index+1);
+	strokes = _.filter(strokes, function(e) {return !_.isUndefined(e);});
+	
+	//var fillColor =    _.isUndefined(highlights[cclass].fill) ? fills.pop() : highlights[cclass].fill;  
+	//var strokeColor = _.isUndefined(highlights[cclass].stroke) ? strokes.pop() : highlights[cclass].stroke;
+
+    var fillColor =  highlights[cclass].fill;  
+    var strokeColor = highlights[cclass].stroke;
+
+    d3.selectAll('circle.'+cclass).attr('fill', fillColor );
+    d3.selectAll('circle.'+cclass).attr('stroke', strokeColor );
+    d3.selectAll('circle.'+cclass).attr('stroke-width', '2px');
+
+	clearInformation();
 	  _.each(tag_valid, addInformation);
   	
+  	var nplots = stats.sum(_.range(1,current_graph.data.length));
+  	var nsamples = $("circle[class^='highlighted']").length/nplots;
+  	if (_.isNaN(nsamples)) { nsamples=0;}
+    $("#nb_samples").text('('+nsamples+')');
   	event.preventDefault();
   	
  	});
   
-  $('#menu1 li ul li').on('click', function() {
-    var l2 = event.target.text;
-    var l1 = $(event.target).parents('li')[1].firstChild.text;
-    console.debug(l1);
-    console.debug(l2);
+
+  
+  $("#sample_selection").on("change", function(){
+   
+    var val = $(event.target).val().split('.');
+   
+    var l1 = val[0];
+    var l2 = val[1];
     
     var tags = [];
     _.each(current_graph.data, function (d) {_.each(d.data, function(e) {if (e[l1]==l2){tags.push(e.sample);}});});
@@ -531,13 +612,9 @@ $(document).ready(function() {
     d3.selectAll('circle').classed(cclass, false);
     d3.selectAll('circle').filter(function(d, i) {return (_.contains(tags, d.k));})
       .classed(cclass, !d3.select(this).classed(cclass));
-    
-    
-    
+  
   });
-  	
-  	
-
+        
 
 });
 </script>

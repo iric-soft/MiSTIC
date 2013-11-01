@@ -101,21 +101,19 @@
 		d3.selectAll('#graph svg').selectAll('circle')
 			.filter(function(d, i) {return (d.k==e.k);})
 			.classed('selected', !d3.select(this).classed('selected'));
-		addInformation(e.k);
+		toggleInformation(e.k);
 		
 	};
 	
   scatterplot.prototype.brushstart= function () {
-    console.debug('brushstart');
+    
     //d3.selectAll('#graph svg').selectAll('circle').classed('notselected', true);
     //d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
 
-    
   };
   
   scatterplot.prototype.brushed= function () {
-    
-    console.debug('brushed');
+   
     var e = d3.event.target.extent();
     var circles  = d3.select(this.parentNode).selectAll("circle")
       .filter(function(d) { return e[0][0] <= d.x && d.x <= e[1][0] && e[0][1] <= d.y && d.y <= e[1][1] });
@@ -127,7 +125,6 @@
 
   scatterplot.prototype.brushend = function () {
     
-    console.debug('brushend');
     var circles = d3.select('#graph svg').selectAll("circle")
           .filter(function() {return d3.select(this).classed('selected');});
     
@@ -144,11 +141,9 @@
     
   };
 
-	
-	
 	  scatterplot.prototype.makeMinimalAxes = function() {
 	      
-	      xmean = stats.average(_.values(this.xdata)); 
+	    xmean = stats.average(_.values(this.xdata)); 
         ymean = stats.average(_.values(this.ydata)); 
         xrg = stats.range(_.values(this.xdata));
         yrg = stats.range(_.values(this.ydata));
