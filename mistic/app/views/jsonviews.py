@@ -96,7 +96,26 @@ class GOTerm(GO):
     def desc(self):
         return self.node.desc
 
-
+class ColAnnotation(object):
+    def __init__(self, request):
+        self.request = request
+        #self.cannotation = data.annotations.get(request.matchdict['cannotation'])
+        self.dataset = data.datasets.get(request.matchdict['dataset'])
+       
+    @view_config(route_name="mistic.json.cannotation.items", request_method="GET", renderer="json")
+    def items(self):
+      
+      k = []
+      v = []
+      anns = self.dataset.cannotation.attrs
+      s =list(set(sum([e.items() for e in anns.values()], [])))
+      k = list(set([x[0] for x in s]))
+  
+      if 'sample' in k : k.remove('sample')
+      if 'expr' in k : k.remove('expr')
+      v = [list(set([x[1] for x in s if  x[0]==a])) for a in k]
+       
+      return [dict (zip(k,v))]
 
 class Annotation(object):
     def __init__(self, request):
