@@ -176,6 +176,8 @@ def main(global_config, **settings):
     config.add_route('mistic.json.annotation.gene.go',     '/annotations/{annotation}/genes/{gene_id}/go')
     config.add_route('mistic.json.annotation.gene.desc',   '/annotations/{annotation}/genes/{gene_id}/desc')
 
+    config.add_route('mistic.json.cannotation.items',  'cannotations/datasets/{dataset}')
+
     config.add_route('mistic.json.datasets',               '/datasets')
     config.add_route('mistic.json.dataset',                '/datasets/{dataset}')
     config.add_route('mistic.json.dataset.search',         '/datasets/{dataset}/search')
@@ -193,7 +195,9 @@ def main(global_config, **settings):
     config.add_route('mistic.json.gene.utest',             '/datasets/{dataset}/genes/{gene_id}/utest')
     config.add_route('mistic.json.gene.gorilla',           '/datasets/{dataset}/genes/{gene_id}/gorilla')
 
-    config.add_route('mistic.json.dataset.samples',        '/datasets/{dataset}/samples')
+    
+
+
 
     config.add_route('mistic.json.go',                     '/go')
     config.add_route('mistic.json.go.search',              '/go/search')
