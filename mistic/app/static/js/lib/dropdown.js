@@ -93,8 +93,8 @@
         url: undefined,
 
         hasScroll: function() {
-	    console.log(this.$menu.outerHeight(), this.$menu[0].scrollHeight);
-	    return this.$menu.outerHeight() < this.$menu[0].scrollHeight;
+	         console.log(this.$menu.outerHeight(), this.$menu[0].scrollHeight);
+	         return this.$menu.outerHeight() < this.$menu[0].scrollHeight;
         },
 
         scrollToItem: function(item) {
@@ -155,14 +155,20 @@
         
 
         selectManual : function(event) {
-          
+           
            var url = this.searchURL();
            var data =  this.searchData();
            var self = this;
+           
            this.collection.fetch({
-                     data: data, 
-                     url : url,
-                     success: function(collection){self.selectItem(collection.at(0));  } });
+              data: data, 
+              url : url,
+              success: function(collection){
+                    self.selectItem(collection.get(data.q));  
+                    }
+                   
+             
+              });
           
           
         },
@@ -361,6 +367,7 @@
             event.preventDefault();
 
 	    this.cancel_blur = true;
+	         
             setTimeout(function() { delete self.cancel_blur; }, 0);
         },
 
@@ -395,6 +402,7 @@
         
 
             this.$menu = $(this.menu);
+           
             this.shown = false;
             this.$menu
                 .hide()
