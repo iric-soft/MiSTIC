@@ -1,16 +1,7 @@
 <!DOCTYPE html>
 <html>
 
-<svg height=0>
-<defs>
-<pattern id="hatch00" patternUnits="userSpaceOnUse" x="0" y="0" width="10" height="10">
-  <path d="M0,0 H10" style="fill:none; stroke:rgba(0,0,0,.5); stroke-width:1 "/>
-</pattern>
-<pattern id="hatch01" patternUnits="userSpaceOnUse" x="0" y="0" width="10" height="10">
-    <path d="M0,0 V10" style="fill:none; stroke:rgba(0,0,0,.5); stroke-width:1"/>
- </pattern>
-</defs>
-</svg>
+
 
   <head>
     <title><%block name="pagetitle">Correlation waterfall plot</%block></title>
@@ -22,6 +13,7 @@
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-2.0.4.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-responsive-2.0.4.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/jquery.dataTables.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
 
 
@@ -41,11 +33,7 @@ mistic = {
 <style type="text/css">
 <%block name="style">
 
-body {
-  font-family: helvetica,arial,sans-serif;
-  background-color: #f0f0f0;
-  padding: 60px 0px 0px 0px;
-}
+
 
 </%block>
 </style>
@@ -128,7 +116,7 @@ body {
  </div>  
   </div>
   
-  </%block>
+</%block>
 
 
 
@@ -147,7 +135,7 @@ body {
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/ColReorderWithResize.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
-
+<script src="${request.static_url('mistic:app/static/js/lib/spectrum.js')}" type="text/javascript"></script>
 
 <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/math.js')}" type="text/javascript"></script>
@@ -175,7 +163,8 @@ body {
     item_view: GeneItemView,
 
     autofillText: function(model) {
-      return model.get('symbol');
+      var symbol = model.get('symbol') ?  model.get('symbol') :  model.get('id')
+      return symbol  +" "+ model.get('desc');
     },
 
     searchData: function() {
@@ -205,7 +194,7 @@ body {
     menu: '<ul class="typeahead dropdown-menu" style="max-width: 400px; max-height: 300px; overflow-x: hidden; overflow-y: auto"></ul>',
 
     autofillText: function(model) {
-      return model.id;
+      return model.id+'|'+model.get('desc');
     },
 
     searchData: function() {
