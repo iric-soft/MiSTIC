@@ -219,6 +219,16 @@
         return 2 * stats.z_high(Math.abs(x));
     };
 
+  stats.sum = function(a) {
+     var sz = a.length;
+     var sum_a = a[0];
+       
+     for (var i = 1; i < sz; ++i) {    
+        sum_a += a[i];
+    }
+    return sum_a;
+    };
+  
    
   stats.average = function(a) {
       var sz = a.length;
