@@ -3,7 +3,7 @@
 		$('div#more-information').html("");
 	};			
 				
-	addInformation = function(information) {
+	toggleInformation = function(information) {
 	
 	if ($('div#more-information').text().search(information) == -1){
 			$('div#more-information').append(" <a href=#>"+information+" </a>"  );
@@ -15,6 +15,14 @@
       			
 		}
 	};
+	
+	addInformation = function(information) {
+    
+    if ($('div#more-information').text().search(information) == -1){
+            $('div#more-information').append(" <a href=#>"+information+" </a>"  );
+      }  
+    };
+	
 })();
 
 
