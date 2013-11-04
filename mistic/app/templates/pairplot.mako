@@ -380,6 +380,8 @@ $(document).ready(function() {
         });
     }
     gene_entry.$el.val('');
+    $(".locate").val('');
+    info.clear();
 
     $('#genelist').empty();
     current_graph.removeData(function() { return true; });
@@ -461,6 +463,7 @@ $(document).ready(function() {
       $('.locate').change();
     } 
     $("#sample_selection > option").attr('selected', false);
+    info.clear();
   });
   
    $("[id^='minus']").on('click', function(event){
@@ -478,6 +481,7 @@ $(document).ready(function() {
     dat = _.uniq(dat);
     $('#'+cclass).val(dat.join(' '));
     $('.locate').change();
+    info.clear();
   });
   
   
