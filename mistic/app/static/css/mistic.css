@@ -118,6 +118,7 @@ div#more-information {
    font-family: helvetica,arial,sans-serif;
    font-size: 11px; 
    padding: 10px 0px 0px 0px;
+   overflow:hidden;
 }
 div#more-information a,
 div#more-information a:hover

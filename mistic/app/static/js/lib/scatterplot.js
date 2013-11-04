@@ -101,7 +101,7 @@
 		d3.selectAll('#graph svg').selectAll('circle')
 			.filter(function(d, i) {return (d.k==e.k);})
 			.classed('selected', !d3.select(this).classed('selected'));
-		toggleInformation(e.k);
+		info.toggle(e.k);
 		
 	};
 	
@@ -132,8 +132,9 @@
     //d3.selectAll('#graph svg').selectAll('circle').classed('notselected', false);
     var selected =  _.map(circles.data(), function(c) { return c.k;});
     selected = _.uniq(selected);
-    clearInformation();
-    _.each(selected, addInformation);
+    
+    info.clear();
+    _.each(selected, info.add);
     
     
    
@@ -252,7 +253,7 @@
 
     
     scatterplot.prototype.draw = function(data) {
-    	  clearInformation();  //utils.js  
+    	info.clear();  //utils.js  
     	 
         var self = this;
 

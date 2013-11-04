@@ -254,9 +254,9 @@ tr.enter()
         sel[d.genes[i]] = true;
       }
       graph.selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
-      clearInformation();
+      info.clear();
       graph.selectAll('rect.selected').each(function(d) {
-          addInformation(d.name);
+          info.toggle(d.name);
          
           } );
     })
@@ -381,7 +381,7 @@ node.append("rect")
       d3.select(this).classed('selected', !d3.select(this).classed('selected'));
       
       if (!d3.select(this).classed('selected')){ hideMore(); }
-      addInformation(d.name);
+      info.toggle(d.name);
 
       if (d3.select(this).classed('selected')){  
         getContent(d);
@@ -423,9 +423,9 @@ node.each(function(d) {
 $('#select_all').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
   graph.selectAll('rect').classed('selected', true);
-  clearInformation();
+  info.clear();
   graph.selectAll('rect.selected').each(function(d){
-         addInformation(d.name); 
+         info.add(d.name); 
          
          });
   return false;
@@ -452,7 +452,7 @@ var showName = false;
 $('#clear_selection').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
   graph.selectAll('rect.selected').classed('selected', false);
-  clearInformation();
+  info.clear();
   return false;
 });
 

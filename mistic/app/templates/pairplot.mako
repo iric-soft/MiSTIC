@@ -293,7 +293,7 @@ $(document).ready(function() {
     if (current_graph.data.length<2) { 
         $("#options").css('display', 'none');
     }
-    clearInformation();
+    info.clear();
     $("#nb_genes").text('('+current_graph.data.length+')');
     $('.locate').change();
   });
@@ -431,14 +431,14 @@ $(document).ready(function() {
     		dat.push(d.k);
   		});
   		dat = _.uniq(dat);
-  		_.each(dat, addInformation);
+  		_.each(dat, info.add);
   		d3.select(this).text("Clear all");
   		d3.select(this).classed("active", true);
   	}
   	else {
   	  
   		d3.selectAll('circle').classed('selected', false);
-  		clearInformation();
+  		info.clear();
   		d3.select(this).text("Select all");
   		d3.select(this).classed("active", false);
   		
@@ -487,7 +487,7 @@ $(document).ready(function() {
     var circles = d3.selectAll('circle'); 
     circles.filter(function(d, i) {return (_.contains(dat, d.k));})
       .classed('selected', true );
-     _.each(dat, addInformation);
+     _.each(dat, info.add);
   });
   
   $("[id^='remove']").on('click', function(event){
@@ -553,9 +553,8 @@ $(document).ready(function() {
 	         });  
 	});
 	
-	
-	clearInformation();
-	  _.each(tag_valid, addInformation);
+	info.clear();
+	  _.each(tag_valid, info.add);
   	
   	// Update counts label (dataset, genes, samples)
   	var nplots = stats.sum(_.range(1,current_graph.data.length));

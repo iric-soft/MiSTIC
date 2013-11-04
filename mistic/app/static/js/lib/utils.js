@@ -1,28 +1,42 @@
 (function() {
-   clearInformation = function (){
-		$('div#more-information').html("");
-	};			
-				
-	toggleInformation = function(information) {
-	
-	if ($('div#more-information').text().search(information) == -1){
-			$('div#more-information').append(" <a href=#>"+information+" </a>"  );
-			
-		}
-		else {
-			
-			$('div#more-information a').filter(":contains('"+information+" ')").remove();
-      			
-		}
-	};
-	
-	addInformation = function(information) {
-    
-    if ($('div#more-information').text().search(information) == -1){
-            $('div#more-information').append(" <a href=#>"+information+" </a>"  );
-      }  
+    info = {};
+
+    info.template = _.template('<span> <%- info %> </span>');
+
+    info.clear = function () {
+        var info_div = $('div#more-information');
+        info_div.html("");
     };
-	
+
+    info.find = function(information) {
+        var info_spans = $('div#more-information span');
+        return _.find(info_spans, function(span) { return $(span).data('information') == information; });
+    };
+
+    info.toggle = function(information) {
+        var info_div = $('div#more-information');
+        var info_span = info.find(information);
+        if (info_span !== undefined) {
+            info_span.remove();
+        } else {
+            info_span = $(info.template({ info: information }));
+            info_span.data('information', information);
+            info_div.append(info_span);
+        }
+    };
+    
+     info.add = function(information) {
+    
+        var info_div = $('div#more-information');
+        var info_span = info.find(information);
+       
+        info_span = $(info.template({ info: information }));
+        info_span.data('information', information);
+        info_div.append(info_span);
+        
+    
+    };
+
 })();
 
 
