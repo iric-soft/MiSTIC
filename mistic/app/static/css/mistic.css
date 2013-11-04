@@ -54,36 +54,36 @@ circle  {
 }
 
 
-.color1 {
+.color0 {
   fill : rgb(252, 132, 3);
  }
-.color2{
+.color1{
   fill : #0BBEDE; 
 }
-.color3  {
+.color2  {
   fill : rgb(36, 153, 36); 
 }
-.color4  {
+.color3  {
   fill :rgb(155, 42, 141); 
 }
 
-.stroke1, .stroke2,
-.stroke3, .stroke4 {
+.stroke0, .stroke1,
+.stroke2, .stroke3 {
   stroke-width : 4px;
   fill:white;
 }
 
-.stroke1 {
+.stroke0 {
   stroke:rgb(252, 132, 3);
 }
 
-.stroke2 {
+.stroke1 {
   stroke: #0BBEDE;
 }
-.stroke3 {
+.stroke2 {
   stroke: rgb(36, 153, 36);
   }
-.stroke4 {
+.stroke3 {
   stroke:rgb(155, 42, 141);
  }
 

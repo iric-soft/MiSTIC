@@ -18,6 +18,7 @@
         flat: false,
         showInput: false,
         showButtons: true,
+        showRadio:false,
         clickoutFiresChange: false,
         showInitial: false,
         showPalette: false,
@@ -92,6 +93,10 @@
                         "<input class='sp-input' type='text' spellcheck='false'  />",
                     "</div>",
                     "<div class='sp-initial sp-thumb sp-cf'></div>",
+                    "<div class='sp-radio-container'>",
+                    "<input class='sp-radio' name='sp-radio' type='radio' value='fill'>Fill </input>",
+                    "<input class='sp-radio' name='sp-radio' type='radio' value='stroke'>Stroke</input>",
+                    "</div>",
                     "<div class='sp-button-container sp-cf'>",
                         "<a class='sp-cancel' href='#'></a>",
                         "<button class='sp-choose'></button>",
@@ -181,6 +186,7 @@
             initialColorContainer = container.find(".sp-initial"),
             cancelButton = container.find(".sp-cancel"),
             chooseButton = container.find(".sp-choose"),
+            radioButton = container.find(".sp-radio"),
             isInput = boundElement.is("input"),
             shouldReplace = isInput && !flat,
             replacer = (shouldReplace) ? $(replaceInput).addClass(theme).addClass(opts.className) : $([]),
@@ -194,7 +200,7 @@
 
 
         function applyOptions() {
-
+            
             container.toggleClass("sp-flat", flat);
             container.toggleClass("sp-input-disabled", !opts.showInput);
             container.toggleClass("sp-alpha-enabled", opts.showAlpha);
@@ -202,6 +208,7 @@
             container.toggleClass("sp-palette-disabled", !opts.showPalette);
             container.toggleClass("sp-palette-only", opts.showPaletteOnly);
             container.toggleClass("sp-initial-disabled", !opts.showInitial);
+            container.toggleClass("sp-radio-disabled", !opts.showRadio);
             container.addClass(opts.className);
 
             reflow();
@@ -295,7 +302,15 @@
                     hide();
                 }
             });
-
+            
+            $(radioButton[0]).attr('name','radio'+spectrums.length);
+            $(radioButton[1]).attr('name','radio'+spectrums.length);
+            $(radioButton[0]).attr('checked','checked');
+            
+            radioButton.bind("click.spectrum", function (e) {
+              $(boundElement).data('applyTo',  e.target.value);
+            });
+            
             draggable(alphaSlider, function (dragX, dragY, e) {
                 currentAlpha = (dragX / alphaWidth);
                 if (e.shiftKey) {
@@ -748,6 +763,7 @@
             boundElement.attr("disabled", true);
             offsetElement.addClass("sp-disabled");
         }
+        
 
         initialize();
 
@@ -765,11 +781,12 @@
             },
             get: get,
             destroy: destroy,
-            container: container
+            container: container,
         };
-
+        
+        
         spect.id = spectrums.push(spect) - 1;
-
+        spect.to = 'fill';
         return spect;
     }
 
@@ -943,7 +960,6 @@
             this.each(function () {
                 var spect = spectrums[$(this).data(dataID)];
                 if (spect) {
-
                     var method = spect[opts];
                     if (!method) {
                         throw new Error( "Spectrum: no such method: '" + opts + "'" );
@@ -975,6 +991,9 @@
         return this.spectrum("destroy").each(function () {
             var spect = spectrum(this, opts);
             $(this).data(dataID, spect.id);
+            $(this).data('applyTo', spect.to);
+            
+
         });
     };
 

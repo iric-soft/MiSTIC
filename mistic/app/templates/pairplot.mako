@@ -80,18 +80,14 @@ import json
           <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Selected samples</a></h5>
           <div id="current_selection" class="accordion-body collapse in ">
           
-          %for i in range(1,5) :
+          %for i in range(0,4) :
             <br>
             <label style="display:inline;" for="highlighted${i}" size="8px">
             
            
             <svg height='10' width="10">
             <rect id="spectrum${i}" width="10" height="10" class="highlighted${i} color${i}" />
-            
-            <!-- <svg height='10' width="10">
-            <rect id="spectrum${i}-stroke" width="10" height="10" class="highlighted${i} stroke${i}"/>
-            </svg> -->
-              
+                
             </label>
             <input type="text" class="locate" id="highlighted${i}" autocomplete="off" data-index='${i}' />
             <div style="display:inline;">
@@ -173,7 +169,7 @@ $(document).ready(function() {
   
   var highlights= new Object();
    
-   for (i = 1; i < 5; ++i)  {
+   for (i = 0; i < 4; ++i)  {
     
     highlights['highlighted'+i] = {'fill':$("rect#spectrum"+i).css('fill'), 'stroke':$("rect#spectrum"+i+"-stroke").css('stroke')};
 
@@ -181,15 +177,13 @@ $(document).ready(function() {
    
         $(event).spectrum({
             showButtons: false,
+            showRadio: true,
+          
             change : function(event){
-              
               var newColor = event.toHexString(); 
-  
               var classes = $(this).attr('class').split(' '); 
               var id = this.id;
-              var ix = parseInt($(this).data()['spectrum.id']);
-              var f = $(".sp-coloring")[ix];
-              var w = $(f).find('input:checked').val();
+              var to = $(this).data().applyTo;
               
               var highlight = classes[0];
               if (classes.length>1) {              
@@ -197,7 +191,7 @@ $(document).ready(function() {
                  d3.select(this).classed(cssColor,false);
               }
               
-              if (w=='stroke'){
+              if (to=='stroke'){
                 d3.select(this).attr('stroke', newColor);
                 d3.select(this).attr('stroke-width', '4px' );
                 d3.select(this).attr('fill', 'white');
@@ -223,36 +217,7 @@ $(document).ready(function() {
    
    
   }
-  console.debug($(window.spectrum));
-  var radiobuttons = "<div class='sp-coloring'><input name='coloring'  type='radio' value='fill' checked='checked'>Fill </input>"
-  radiobuttons += "<input name='coloring' type='radio' value='stroke' >Stroke</input></div>"
-                   
-  $(".sp-button-container").before(radiobuttons) 
-  /*$("input.sp-no-color").on("click", function(event) { 
-  if (event.target.checked) {
-        var c = $(".sp-container").filter($(":not(.sp-hidden)"));
-        var f = _.map($(".sp-container"), function(d, i) {if(! ($(d).hasClass('sp-hidden') ))  {return (i+1); }});
-        var f = _.without(f, undefined)[0]
-        var i = Math.ceil(f/2);
-        var e = f%2;
-        
-        var suff = '';
-        if (e==0) {
-            console.debug(f);
-            suff="-stroke";
-        }
-        
-        console.debug($("spectrum"+i+suff));
-        $("spectrum"+i+suff).spectrum('set', "white");
-               
-        
-        $(this).offsetParent().find('div.sp-dragger').css('left', '0px');
-        $(this).offsetParent().find('div.sp-dragger').css('top', '0px');    
-        $("spectrum"+i+suff).spectrum('reflow');
-    }
-  });  
-  */
-  
+
   
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   current_graph = new pairplot(undefined, undefined, $('#graph'));
@@ -373,7 +338,7 @@ $(document).ready(function() {
   
 
   $('#datasets').on('change custom', function(event) {
-   console.debug('change datasets')
+   
     current_dataset = event.target.value;
     
     if (current_dataset === '') {
@@ -500,7 +465,6 @@ $(document).ready(function() {
   
    $("[id^='minus']").on('click', function(event){
     var cclass = this.id.replace('minus', 'highlighted'); 
-    
     var highlighted = [];
     d3.selectAll('circle.'+cclass).each(function(d) { highlighted.push(d.k); });
     
@@ -509,13 +473,11 @@ $(document).ready(function() {
     
     var dat= _.difference(highlighted,selected);
     d3.selectAll('circle.selected').attr('fill', undefined);
-      
+    d3.selectAll('circle.selected').classed(cclass, false);    
+    d3.selectAll('circle.selected').classed('selected', false);
     dat = _.uniq(dat);
     $('#'+cclass).val(dat.join(' '));
     $('.locate').change();
-    d3.selectAll('circle.selected').classed('selected', false);
-    d3.selectAll('circle.selected').classed(cclass, false);
-    
   });
   
   
@@ -523,7 +485,6 @@ $(document).ready(function() {
     var cclass = this.id.replace('tograph', 'highlighted'); 
     var dat =  $('#'+cclass).val().split(' ');
     var circles = d3.selectAll('circle'); 
-    //d3.selectAll('circle').classed(cclass, false);
     circles.filter(function(d, i) {return (_.contains(dat, d.k));})
       .classed('selected', true );
      _.each(dat, addInformation);
@@ -532,22 +493,28 @@ $(document).ready(function() {
   $("[id^='remove']").on('click', function(event){
     var cclass = this.id.replace('remove', 'highlighted'); 
     d3.selectAll('circle.'+cclass).attr('fill', undefined);
+    d3.selectAll('circle.'+cclass).attr('stroke', undefined);
+    d3.selectAll('circle.'+cclass).classed(cclass, false);   
     $('#'+cclass).val('');
     $('.locate').change();
-  
   });
 	
   $("[id^='spectrum']").on('click', function(event){
-    $(this).spectrum('set',(this.id.indexOf('stroke')!=-1 ? $(this).css('stroke'): $(this).css('fill') ));
+    var to = $(this).data().applyTo;
+    $(this).spectrum('set',(to=='stroke' ? $(this).css('stroke'): $(this).css('fill') ));
     $(this).show();
   });
   
 
   $('.locate').on('change', function(event){
     
+    var tag_entry = event.target.value.split(" ");
+    if (tag_entry.length==1 & tag_entry[0]=="") {
+        event.preventDefault();
+        return
+    }
+    
     var cclass = this.id;
-    var index = parseInt($(this).data()['index'])-1;
-  	var tag_entry = event.target.value.split(" ");
   	var circles = d3.selectAll('circle'); 
   	
   	var dat = [];
@@ -561,36 +528,41 @@ $(document).ready(function() {
     
   	var tag_valid = _.flatten(_.map(tag_entry, function(item) {return search(dat, item);}  ));
   	
-  	d3.selectAll('circle').classed(cclass, false);
-  	  	
 	circles = circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));});
-	console.debug(circles);
     circles.classed(cclass, !d3.select(this).classed(cclass));
 	
+	circles.attr('fill', undefined );
+    circles.attr('stroke', undefined);
+   
+	_.each(circles[0], function(c) {
+	       cls = $(c).attr('class').split(' ');
+	       cls.sort();
+	       cls = _.reject(cls, function(el) {return el=='selected'});
+	      
+	       _.each(cls, function(ll) {
+	         
+	           hls = highlights[ll];
+	         
+	           if (!_.isUndefined(hls.fill)) {
+	               $(c).attr('fill', hls.fill );
+	           }
+	           if (!_.isUndefined(hls.stroke)){
+                   $(c).attr('stroke', hls.stroke );
+                   $(c).attr('stroke-width', '2px');
+	           }
+	         });  
+	});
 	
-	var fills = _.pluck(highlights, 'fill').slice(0,index+1);
-	fills = _.without(fills, undefined);
 	
-	var strokes = _.pluck(highlights, 'stroke').slice(0,index+1);
-	strokes = _.filter(strokes, function(e) {return !_.isUndefined(e);});
-	
-	//var fillColor =    _.isUndefined(highlights[cclass].fill) ? fills.pop() : highlights[cclass].fill;  
-	//var strokeColor = _.isUndefined(highlights[cclass].stroke) ? strokes.pop() : highlights[cclass].stroke;
-
-    var fillColor =  highlights[cclass].fill;  
-    var strokeColor = highlights[cclass].stroke;
-
-    d3.selectAll('circle.'+cclass).attr('fill', fillColor );
-    d3.selectAll('circle.'+cclass).attr('stroke', strokeColor );
-    d3.selectAll('circle.'+cclass).attr('stroke-width', '2px');
-
 	clearInformation();
 	  _.each(tag_valid, addInformation);
   	
+  	// Update counts label (dataset, genes, samples)
   	var nplots = stats.sum(_.range(1,current_graph.data.length));
   	var nsamples = $("circle[class^='highlighted']").length/nplots;
   	if (_.isNaN(nsamples)) { nsamples=0;}
     $("#nb_samples").text('('+nsamples+')');
+    
   	event.preventDefault();
   	
  	});
@@ -600,7 +572,6 @@ $(document).ready(function() {
   $("#sample_selection").on("change", function(){
    
     var val = $(event.target).val().split('.');
-   
     var l1 = val[0];
     var l2 = val[1];
     
