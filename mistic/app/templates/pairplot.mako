@@ -13,11 +13,6 @@ import json
 
 <%block name="controls">
 
-<% 
-   ds = data.datasets.get(dataset)
-%>
-
-
 <div class="row-fluid">
    <div id="menu" class="span12"  >
 
@@ -101,13 +96,13 @@ import json
           %endfor
           
           </div>
-          
+         
           <hr>
-          
+            
               <select id="sample_selection" >
                 <option selected value="none">Select by characteristic</option>
               </select>
-
+         
         </div> 
       </div>
    
@@ -277,6 +272,7 @@ $(document).ready(function() {
       minimal_axes = !minimal_axes;
       current_graph.setMinimalAxes(minimal_axes);
       current_graph.draw()
+      $('.locate').change()
      
    });  
   
@@ -341,6 +337,11 @@ $(document).ready(function() {
    
     current_dataset = event.target.value;
     
+    $('#sample_selection').html('<option selected value="none">Select a characteristic</option>');
+    $("#nb_genes").text('(0)');
+    $("#nb_samples").text('(0)');
+    $(".locate").val('');
+    
     if (current_dataset === '') {
       current_dataset = null;
       gene_entry.url = null;
@@ -348,9 +349,7 @@ $(document).ready(function() {
       $("#gene").attr('disabled', true);
       $(".locate").attr('disabled', true);
       $("#nb_datasets").text('(0)');
-      $("#nb_genes").text('(0)');
-      $("#nb_samples").text('(0)');
-      $('#sample_selection').html('<option selected value="none">Select a characteristic</option>');
+      
     
      
     } else {
@@ -360,11 +359,12 @@ $(document).ready(function() {
      
      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
      
+     
      $.ajax({
       url:  "${request.route_url('mistic.json.cannotation.items', dataset='_dataset_')}".replace('_dataset_', current_dataset),
       dataype: 'json',
       success: function(data) {
-           
+            
             var options = $('#sample_selection');
             _.each(data, function(d) {
                 _.each(d, function(e,v) {
@@ -379,10 +379,10 @@ $(document).ready(function() {
         
         });
     }
+   
     gene_entry.$el.val('');
-    $(".locate").val('');
     info.clear();
-
+    
     $('#genelist').empty();
     current_graph.removeData(function() { return true; });
    

@@ -107,6 +107,8 @@ class ColAnnotation(object):
       
       k = []
       v = []
+      if not self.dataset.cannotation: 
+          return []
       anns = self.dataset.cannotation.attrs
       s =list(set(sum([e.items() for e in anns.values()], [])))
       k = list(set([x[0] for x in s]))

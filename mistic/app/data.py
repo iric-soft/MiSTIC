@@ -479,7 +479,9 @@ class DataSet(object):
     
     data =[]
     for i in range(len(self.samples)): 
-      dat =  self.cannotation.get(self.samples[i])
+      dat = {}
+      if self.cannotation: 
+        dat =  self.cannotation.get(self.samples[i])
       dat.update({'sample':self.samples[i], 'expr':expn[i]})
       data.append(dat) 
       
