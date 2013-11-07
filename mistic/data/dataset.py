@@ -5,6 +5,8 @@ import numpy
 import csv
 import itertools
 import exceptions
+import csv
+import pandas
 
 
 
@@ -43,98 +45,92 @@ class RankTransform(object):
 
 
 class DataSet(object):
-  def __init__(self, colnames, rownames, data):
-    self.colnames = colnames
-    self.rownames = rownames
-    self.data = numpy.array(data)
-    
-    self.colname_to_col = dict([ (k, i) for i, k in enumerate(self.colnames) ])
-    self.rowname_to_row = dict([ (k, i) for i, k in enumerate(self.rownames) ])
+  @property
+  def rownames(self):
+    return list(self.df.index)
+
+  @property
+  def colnames(self):
+    return list(self.df.columns)
+
+  def __init__(self, df):
+    self.df = df
 
   def filter(self, rowfilter):
-    keep = [ bool(rowfilter(row, name)) for row, name in zip(self.data, self.rownames) ]
-    self.data = self.data[numpy.array(keep),:]
-    self.rownames = [ name for name, flag in zip(self.rownames, keep) if flag ]
+    self.df = self.df[
+      [ bool(rowfilter(row, index)) for index, row in self.df.iterrows() ]
+    ]
 
   def _corr(self, transform = None):
     if transform is None:
-      data = self.data
+      data = self.df
     else:
-      data = transform(self.data)
-      
-    return numpy.corrcoef(data)
+      data = transform(self.df)
+
+    data = numpy.ma.masked_array(data, numpy.isnan(data))
+    return numpy.ma.corrcoef(data)
 
   def rowcorr(self, rownum, transform = None):
-    row = self.data[rownum,:]
-    
+    row = self.df.values[rownum,:]
+
     if transform is not None: row = transform(row)
+    row = numpy.ma.masked_array(row, numpy.isnan(row))
+
     out = []
-    for i, r in enumerate(self.rownames):
-      
-      row2 = self.data[i,:]
+
+    for i, r in enumerate(self.df.index):
+      row2 = self.df.values[i,:]
+
       if transform is not None: row2 = transform(row2)
-     
-      c = numpy.corrcoef(row, row2)[0,1]
-      
-      if math.isnan(c): c = 0.0
+      row2 = numpy.ma.masked_array(row2, numpy.isnan(row2))
+
+      z = numpy.ma.corrcoef(row, row2)
+
+      if z.mask[0,1] or numpy.isnan(z[0,1]):
+        c = 0.0
+      else:
+        c = z[0,1]
+
       out.append((i, r, c))
     return out
 
   def row(self, rownum, transform = None):
-    row = self.data[rownum,:]
-    if transform is not None: row = transform(row)
+    row = self.df.values[rownum,:]
+    if transform is not None:
+      row = transform(row)
     return row
 
+  def hascol(self, colname):
+    return colname in self.df.columns
+
+  def hasrow(self, rowname):
+    return rowname in self.df.index
+
   def r(self, rowname):
-    return self.rowname_to_row.get(rowname, -1)
+    try:
+      return self.df.index.get_loc(rowname)
+    except KeyError:
+      return -1
 
   def c(self, colname):
-    return self.colname_to_col.get(colname, -1)
-
-  def _write(self, csv_writer):
-    csv_writer.writerow([''] + self.colnames)
-    for rowname, vals in itertools.izip(self.rownames, self.data):
-      csv_writer.writerow([rowname] + map(repr, vals))
+    try:
+      return self.df.columns.get_loc(colname)
+    except KeyError:
+      return -1
 
   def writeTSV(self, file):
-    if isinstance(file, basestring):
-      file = open(file, 'wb')
-    return self._write(csv.writer(file, dialect = csv.excel_tab))
+    self.df.to_csv(file, mode='w', encoding='utf-8', sep='\t')
 
   def writeCSV(self, file):
-    if isinstance(file, basestring):
-      file = open(file, 'wb')
-    return self._write(csv.writer(file, dialect = csv.excel_tab))
-
-  @classmethod
-  def _read(cls, csv_reader):
-    def F(x):
-      try:
-        return float(x)
-      except:
-        return None
-
-    colnames = csv_reader.next()[1:]
-    rownames = []
-    vals = []
-    for row in csv_reader:
-      rownames.append(row[0])
-      vals.append(map(F, row[1:]))
-
-    return cls(colnames, rownames, vals)
+    self.df.to_csv(file, mode='w', encoding='utf-8', sep=',')
 
   @classmethod
   def readTSV(cls, file):
-    if isinstance(file, basestring):
-      file = open(file, 'rbU')
-    return cls._read(csv.reader(file, dialect = csv.excel_tab))
+    return cls(pandas.read_csv(file, header=0, index_col=0, sep='\t'))
 
   @classmethod
   def readCSV(cls, file):
-    if isinstance(file, basestring):
-      file = open(file, 'rbU')
-    return cls._read(csv.reader(file, dialect = csv.excel))
-
+    return cls(pandas.read_csv(file, header=0, index_col=0, sep=','))
 
 
 
