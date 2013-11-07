@@ -10,6 +10,12 @@ body {
   z-index:10;
 }
 
+form#pdfform {
+  margin: 0;
+  padding: 0;
+  border: 0;
+}
+
 input {
   width:230px;
 }
