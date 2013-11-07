@@ -534,11 +534,6 @@ def loadData(settings):
   for d in collectItems(settings, 'mistic.dataset.'):
     print ('Loading %s' % d['name'])
     datasets.add(DataSet(**d))
-     
-def loadData(settings):
-  for d in collectItems(settings, 'mistic.dataset.'):
-    print ('Loading %s' % d['name'])
-    datasets.add(DataSet(**d))
 
 def load(settings):
   logging.info('loading ontology')
