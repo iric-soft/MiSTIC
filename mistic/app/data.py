@@ -523,28 +523,24 @@ def loadOrthology(settings):
   orthology.load(settings['mistic.orthology'])
 
 def loadAnnotations(settings):
-    for d in collectItems(settings, 'mistic.annotation.'):
-        annotations.add(Annotation(**d))
+  for d in collectItems(settings, 'mistic.annotation.'):
+    annotations.add(Annotation(**d))
 
 def loadColAnnotations(settings):
-    
-    for d in collectItems(settings, 'mistic.col_annotation.'): 
-      colAnnotations.add(ColAnnotation(**d))
+  for d in collectItems(settings, 'mistic.col_annotation.'): 
+    colAnnotations.add(ColAnnotation(**d))
     
 def loadData(settings):
-    for d in collectItems(settings, 'mistic.dataset.'):
-      print ('Loading %s' % d['name'])
-      datasets.add(DataSet(**d))
+  for d in collectItems(settings, 'mistic.dataset.'):
+    print ('Loading %s' % d['name'])
+    datasets.add(DataSet(**d))
      
 def loadData(settings):
-    for d in collectItems(settings, 'mistic.dataset.'):
-      print ('Loading %s' % d['name'])
-      datasets.add(DataSet(**d))
-     
+  for d in collectItems(settings, 'mistic.dataset.'):
+    print ('Loading %s' % d['name'])
+    datasets.add(DataSet(**d))
 
 def load(settings):
-  
- 
   logging.info('loading ontology')
   loadOntology(settings)
   
