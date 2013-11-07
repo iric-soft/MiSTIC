@@ -133,8 +133,9 @@ mistic = {
 <script src="${request.static_url('mistic:app/static/js/lib/bootstrap-2.0.4.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/d3.v2.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/ColReorderWithResize.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.colReorderWithResize.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.scientific-sorting.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/spectrum.js')}" type="text/javascript"></script>
 
 <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
