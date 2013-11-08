@@ -313,8 +313,8 @@ class DatasetGene(Dataset):
     def index(self):
         return dict(
             id = self.gene,
-            go = sorted(self.dataset.annotation.go.get(self.gene)),
-            desc = self.dataset.annotation.desc.get(self.gene))
+            genesets = sorted(self.dataset.annotation.get_geneset_ids(self.gene)),
+            name = self.dataset.annotation.get_name(self.gene))
 
     @view_config(route_name="mistic.json.gene.utest", request_method="GET", renderer="json")
     def utest(self):
