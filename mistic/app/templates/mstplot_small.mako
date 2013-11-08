@@ -171,7 +171,7 @@ var thr = thead.selectAll("tr")
     .append("tr")
 
 var th = thr.selectAll('th')
-    .data([ 'P-value', 'Odds', 'Type', 'Cat', 'ID, 'Description' ])
+    .data([ 'P-value', 'Odds', 'Type', 'Cat', 'ID', 'Description' ])
     .enter()
     .append('th')
     .text(function(d) { return d; });
