@@ -194,29 +194,6 @@ orthology = Orthology()
 
 
 
-class Collection(object):
-  def __init__(self):
-    self.objects = []
-    self.id_to_index = {}
-
-  def add(self, obj):
-    self.id_to_index[obj.id] = len(self.objects)
-    self.objects.append(obj)
-
-  def get(self, id):
-    if id not in self.id_to_index: return None
-    return self.objects[self.id_to_index[id]]
-
-  def all(self):
-    return tuple(self.objects)
-
-annotations = Collection()
-datasets = Collection()
-colAnnotations = Collection ()
-
-
-
-
 class ColAnnotation (object):
   def __init__(self, **kw):
     self.id = kw.get('id', uuid.uuid4())
@@ -532,6 +509,28 @@ class DataSet(object):
   def getSamplesByCharacteristic (self, ki, vi):
     return [k for k,v in d.items() if v[ki]==vi]
     
+
+class Collection(object):
+  def __init__(self):
+    self.objects = []
+    self.id_to_index = {}
+
+  def add(self, obj):
+    self.id_to_index[obj.id] = len(self.objects)
+    self.objects.append(obj)
+
+  def get(self, id):
+    if id not in self.id_to_index: return None
+    return self.objects[self.id_to_index[id]]
+
+  def all(self):
+    return tuple(self.objects)
+
+annotations = Collection()
+datasets = Collection()
+colAnnotations = Collection ()
+
+
 
 def collectItems(settings, prefix):
   items = collections.defaultdict(dict)
