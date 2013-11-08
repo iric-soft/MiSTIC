@@ -18,9 +18,9 @@ for ds in data.datasets.all():
     if k not in terms:
       terms.append(k)
 
-  dds[ds.name] = dict(*ds_terms)
+  dds[ds.name] = dict(ds_terms)
 
-transforms = ('log', 'rank',  'none')
+transforms = ('log', 'rank', 'none')
 #transforms = ['log']
 %>
 
@@ -82,11 +82,8 @@ a#oo{
 %for term in terms :
   <th><a><i class="icon-th-list"></a></i>${term}</th>
 %endfor
-
 <th>n</th>
-<th></th>
-<th >Icicle</th>
-<th></th>
+<th colspan="3">Icicle</th>
 </tr>
 </thead>
 
