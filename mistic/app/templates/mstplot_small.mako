@@ -178,7 +178,7 @@ var th = thr.selectAll('th')
     .text(function(d) { return d; });
 
 var tr = tbody.selectAll('tr')
-    .data(json.enrichmenttab)
+    .data(json.gstab)
 
 tr.enter()
     .append('tr')
