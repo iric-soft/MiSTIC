@@ -203,7 +203,7 @@ var td = tr.selectAll('td')
       [ 'odds', d.odds.toFixed(2) ],
       [ 'type', d.gs ],
       [ 'category', d.cat ],
-      [ 'id, d.id ],
+      [ 'id', d.id ],
       [ 'desc', d.name ],
     ];});
 
