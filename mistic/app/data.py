@@ -94,19 +94,30 @@ def parse_obo(file):
 
 
 class OntologyNode(object):
+  __namespace_short = dict(
+    biological_process = 'BP',
+    cellular_component = 'CC',
+    molecular_function = 'MF'
+  )
+
+  @staticmethod
+  def transform_id(ident):
+    assert ident.startswith('GO:')
+    return ident[3:]
+
   def __init__(self, kv):
     self.parents = set()
     self.alt_ids = set()
     self.subsets = set()
     for tag, val in kv:
       if tag == 'id':
-        self.id = intern(val.strip())
+        self.id = self.transform_id(val.strip())
       elif tag == 'alt_id':
-        self.alt_ids.add(intern(val.strip()))
+        self.alt_ids.add(self.transform_id(val.strip()))
       elif tag == 'namespace':
         self.namespace = intern(val)
       elif tag == 'name':
-        self.desc = obo_unescape(val)
+        self.name = obo_unescape(val)
       elif tag == 'def':
         self.definition = obo_def(val)
       elif tag == 'is_a':
@@ -120,15 +131,20 @@ class OntologyNode(object):
     self.alt_ids = tuple(sorted(self.alt_ids))
     self.subsets = tuple(sorted(self.subsets))
 
+  @property
+  def namespace_short(self):
+    return self.__namespace_short[self.namespace]
+
 
 class Ontology(object):
-  def __init__(self):
+  def __init__(self, path, global_config):
     self.nodes = {}
 
-  def load(self, path):
     self.path = path
+
     obo = os.path.join(path, 'gene_ontology_ext.obo')
-    for rectype, kv in parse_obo(open(obo, 'rbU')):
+
+    for rectype, kv in parse_obo(open(global_config.file_path(obo), 'rbU')):
       if rectype == 'Term':
         n = OntologyNode(kv)
         self.nodes[n.id] = n
@@ -160,13 +176,13 @@ class Ontology(object):
 
 
 class Orthology(object):
-  def __init__(self):
+  def __init__(self, path, global_config):
     self.annot_id_to_og = {}
     self.og_to_annot_ids = collections.defaultdict(lambda: collections.defaultdict(set))
 
-  def load(self, path):
     self.path = path
-    for row in open(self.path):
+
+    for row in open(global_config.file_path(self.path), 'rbU'):
       row = row.split()
       og = row[0]
       items = [ tuple(x.split(':', 1)) for x in row[1:] ]
@@ -191,22 +207,15 @@ class Orthology(object):
 
 
 class ColAnnotation (object):
-  def __init__(self, **kw):
-    self.id = kw.get('id', uuid.uuid4())
-    self.name = kw.get('name', self.id)
-    self.description = kw.get('desc', '')
-    self.path = kw['path']
-    self.attrs = {}
-    
-    for row in open(self.path):
-      ident, row = row.split(None, 1)
-      
-      try:
-        attrs = json.loads(row)
-        self.attrs[ident] = attrs
-          
-      except: 
-        continue
+  def __init__(self, config, global_config):
+    self.config      = config
+
+    self.id          = self.config.get('id', uuid.uuid4())
+    self.name        = self.config.get('name', self.id)
+    self.description = self.config.get('desc', '')
+    self.path        = self.config['path']
+
+    self.attrs       = read_json_table(global_config.file_path(self.path))
 
   @property
   def info(self):
@@ -214,102 +223,240 @@ class ColAnnotation (object):
   
   def get(self, id):
     return self.attrs.get(id, {})
-    
+
+
 
 class Annotation(object):
-  def __init__(self, **kw):
-    self.id = kw.get('id', uuid.uuid4())
-    self.name = kw.get('name', self.id)
-    self.description = kw.get('desc', '')
-    self.path = kw['path']
-    self.desc = {}
-    self.symbol = {}
-    self.attrs = {}
+  def __init__(self, config, global_config):
+    self.config      = config
 
-    self.chr = {}
-    self.go = collections.defaultdict(set)
-    self.go_genes = collections.defaultdict(set)
-   
-    self.go_indirect = collections.defaultdict(set)
-    self.go_genes_indirect = collections.defaultdict(set)
-    
-    self.others = collections.defaultdict(list)
-    self.others_genes = collections.defaultdict(list)
+    self.id          = self.config.get('id', uuid.uuid4())
+    self.name        = self.config.get('name', self.id)
+    self.description = self.config.get('desc', '')
+    self.path        = self.config['path']
+    self.genesets    = {}
 
-    self.chr_genes = collections.defaultdict(set)
+    self.data = read_json_table(global_config.file_path(self.path))
+    self.genes = frozenset(self.data.index)
 
-    desc = {}
-    for rownum, row in enumerate(open(self.path)):
-      ident, row = row.split(None, 1)
-      try:
-        attrs = json.loads(row)
-      except ValueError:
-        logging.warn('failed to parse JSON data for identifier {0} on row {1}'.format(ident, rownum))
-        continue
+  def geneset_info(self, gsid):
+    gsid, ident = gsid.rsplit(':', 1)
+    gsid, gscat = gsid.split('.', 1)
 
-      self.attrs[ident] = attrs
-      self.desc[ident] = attrs.get('name', '')
-      self.chr[ident] = attrs.get('chr', '')
-      self.symbol[ident] = attrs.get('symbol', '')
-      self.go[ident] = set([ x[0] for x in attrs.get('go', []) ])
-      self.go_indirect[ident] = ontology.parents(self.go[ident])
-      
-      for ka in  attrs.keys():
-        if ka=="go": continue 
-        if not self.others.has_key(ka): 
-          self.others[ka] = collections.defaultdict(set)
-       
-        try: 
-          self.others[ka][ident].add(attrs.get(ka))
-        except :
-          self.others[ka][ident] = set(attrs.get(ka)) 
-        
-        for g in self.others[ka][ident]:
-          if not self.others_genes.has_key(ka): 
-            self.others_genes[ka] = collections.defaultdict(set)
-          self.others_genes[ka][g].add(ident)
-            
-      for g in self.go[ident]:
-        self.go_genes[g].add(ident)
-      for g in self.go_indirect[ident]:
-        self.go_genes_indirect[g].add(ident)
-      for g in self.chr[ident]:
-        self.chr_genes[g].add(ident)
+    gs = self.genesets.get(gsid)
+    if gs is None:
+      return None
+    try:
+      return gs.genesets.ix[ident]
+    except KeyError:
+      return None
 
-    self.genes = set(self.attrs.keys())
+  def all_genesets(self):
+    for gsid, gs in self.genesets.iteritems():
+      for gid, row in gs.annotations[self.id].geneset_to_gene.iterrows():
+        yield gs.full_geneset_id(gid), frozenset(row['ids'])
 
-  def gene_set(self, go = []):
-    if go == []:
+  def add_geneset(self, geneset):
+    self.genesets[geneset.id] = geneset
+
+  def _get_gene_ids(self, gsid = None):
+    '''
+    return a set of gene ids for this annotation, optionally filtered
+    by the intersection of one or more genesets, that are provided in
+    the form: geneset_id:identifier (e.g. go:0000007 - low-affinity
+    zinc ion transmembrane transporter activity)
+
+    other possibilities to consider allowing (not currently implemented):
+      *:*     (all genes that are part of a geneset)
+      go:*    (all genes with an assigned go term)
+      go.BP:* (all genes with an assigned go term in the biological_process namespace)
+    '''
+    if gsid is None or not len(gsid):
       return self.genes
+
+    elif isinstance(gsid, basestring):
+      geneset_id, ident = gsid.rsplit(':', 1)
+      geneset_id = geneset_id.split('.')
+      geneset_id, geneset_cat = geneset_id[0], geneset_id[1:]
+
+      geneset_list = []
+
+      if geneset_id == '*':
+        geneset_list = self.genesets.values()
+      else:
+        geneset = self.genesets.get(geneset_id)
+        if geneset is not None:
+          geneset_list.append(geneset)
+
+      s = set()
+
+      for geneset in geneset_list:
+        gsa = geneset.annotations[self.id]
+
+        if ident != '*':
+          s.update(gsa.geneset_to_gene.ix[ident, 'ids'])
+        else:
+          for gsid, gsrow in geneset.genesets.iterrows():
+            gscat = gsrow.get('cat', '').split('.')
+            for q, r in zip(geneset_cat, gscat):
+              if q != '*' and q != r:
+                break
+            else:
+              s.update(gsa.geneset_to_gene.ix[ident, 'ids'])
+
+      return frozenset(s)
+
+    elif isinstance(gsid, collections.Iterable):
+      s = set(self.data.index)
+      for g in gsid:
+        s.intersection_update(self.gene_set(g))
+      return frozenset(s)
+
+  def get_gene_ids(self, gsid = None, filt = None):
+    r = self._get_gene_ids(gsid)
+
+    if filt is not None:
+      r = frozenset([ x for x in r if filt(self.genes.ix[x]) ])
+
+    return r
+
+  def get_geneset_ids(self, gene, genesets = None):
+    def all(g):
+      return True
+
+    def make_pattern_match(genesets):
+      genesets = [ x.split('.') for x in genesets ]
+
+      def pattern_match(g):
+        gsid = g.rsplit(':', 1)[0]
+        gsid_path = gsid.split('.')
+
+        for p in genesets:
+          for q, r in zip(p, gsid_path):
+            if q != '*' and q != r:
+              break
+          else:
+            return True
+        return False
+
+      return pattern_match
+
+    if genesets is None or not len(genesets):
+      filt = all
     else:
-      go = set(go)
-      return [ gene for gene in self.genes if go <= self.go.get(gene, set()) ]
+      filt = make_pattern_match(genesets)
+
+    r = set()
+    for g in self.genesets.itervalues():
+      r.update([ x for x in g.get_genesets(self.id, gene) if filt(x) ])
+    return r
+
+  def get_symbol(self, gene, default = None):
+    try:
+      return self.data.ix[gene]['symbol']
+    except KeyError:
+      return default
+
+  def get_name(self, gene, default = None):
+    try:
+      return self.data.ix[gene]['name']
+    except KeyError:
+      return default
 
   @property
   def info(self):
-    return dict(id = self.id, name = self.name, desc = self.description)
+    return dict(id = self.id,
+                name = self.name,
+                desc = self.description,
+                gset = sorted(self.genesets.keys()))
+
+
+
+class GeneSetAnnotation(object):
+  def __init__(self, path, global_config):
+    self.geneset_to_gene = read_json_table(global_config.file_path(path))
+
+    self.gene_to_geneset = {}
+
+    for geneset_id, row in self.geneset_to_gene.iterrows():
+      for gene_id in row['ids']:
+        self.gene_to_geneset.setdefault(gene_id, set()).add(geneset_id)
+
+
+class GeneSet(object):
+  def __init__(self, config, global_config):
+    self.config      = config
+
+    self.id          = self.config.get('id', uuid.uuid4())
+    self.name        = self.config.get('name', self.id)
+    self.description = self.config.get('desc', '')
+
+    if self.id == 'go':
+      go_nodes = ontology.nodes.items()
+      self.path     = None
+      self.genesets = pandas.DataFrame(
+        [ dict(
+            cat = go.namespace_short,
+            name = go.name,
+            desc = go.definition
+          )
+          for go_id, go in go_nodes ],
+        index = [ go_id for go_id, go in go_nodes ]
+      )
+    else:
+      self.path     = self.config['path']
+      self.genesets = read_json_table(global_config.file_path(self.path))
+
+    self.annotations = dict([
+        (annotation, GeneSetAnnotation(path, global_config))
+        for annotation, path in self.config.get('anot', {}).iteritems() ])
+
+    for k in self.annotations.keys():
+      a = annotations.get(k)
+      a.add_geneset(self)
+
+  def full_geneset_id(self, gsid):
+    if 'cat' in self.genesets:
+      cat = self.genesets.ix[gsid, 'cat']
+      if cat:
+        return self.id + '.' + cat + ':' + gsid
+
+    return self.id + ':' + gsid
+
+  def get_genesets(self, annotation, gene):
+    ga = self.annotations.get(annotation)
+    if ga is None:
+      return set()
+    r = set()
+
+    for gsid in ga.gene_to_geneset.get(gene, set()):
+      r.add(self.full_geneset_id(gsid))
+    return r
+
+  @property
+  def info(self):
+    return dict(id = self.id,
+                name = self.name,
+                desc = self.description,
+                anot = sorted(self.annotations.keys()))
 
 
 
 class DataSet(object):
-  VALID_TRANSFORMATIONS = set(('log', 'rank', 'none'))
+  VALID_TRANSFORMATIONS = set(('log', 'rank', 'anscombe', 'none'))
 
-  def __init__(self, **kw):
-    self.config = kw
-    self.id = kw.get('id', uuid.uuid4())
-    self.name = kw.get('name', self.id)
-    self.description = kw.get('desc', '')
-    self.source = kw['file']
-    self.data = mistic.data.dataset.DataSet.readTSV(kw['file'])
-    self.type = kw.get('type', '')
-    self.tags = kw.get('tags', '')
-    self.experiment = kw.get('expt', '')
-    self.annotation = annotations.get(kw['annr'])
-    self.cannotation = colAnnotations.get(kw['annc'])
-   
-    self.transforms = []
-    for x in kw.get('xfrm', 'none').split(','):
-      x = x.strip()
+  def __init__(self, config, global_config):
+    self.config      = config
+
+    self.id          = self.config.get('id', uuid.uuid4())
+    self.name        = self.config.get('name', self.id)
+    self.description = self.config.get('desc', '')
+    self.source      = global_config.file_path(self.config['path'])
+    self.data        = mistic.data.dataset.DataSet.readTSV(self.source)
+    self.annotation  = annotations.get(self.config['anot'])
+    self.transforms  = []
+
+    for x in self.config.get('xfrm', ['none']):
       if x in self.VALID_TRANSFORMATIONS:
         self.transforms.append(x)
 
@@ -319,7 +466,7 @@ class DataSet(object):
       id = self.id,
       name = self.name,
       desc = self.description,
-      annotation = self.annotation.id)
+      anot = self.annotation.id)
 
   @property
   def genes(self):
@@ -349,7 +496,7 @@ class DataSet(object):
   @key_cache_region('mistic', 'genecorr', lambda args: (args[0].id,) + args[1:])
   def _genecorr(self, gene, xform, absthresh, thresh):
     result = self.data.rowcorr(self.data.r(gene), transform = self._makeTransform(xform))
-    
+
     if absthresh is not None:
       absthresh = float(absthresh)
       result = [ r for r in result if abs(r[2]) >= absthresh ]
@@ -360,8 +507,8 @@ class DataSet(object):
 
     return dict(
       gene = gene,
-      symbol = self.annotation.symbol.get(gene, ''),
-      desc = self.annotation.desc.get(gene, ''),
+      symbol = self.annotation.get_symbol(gene, ''),
+      name = self.annotation.get_name(gene, ''),
       dataset = self.id,
       row = self.data.r(gene),
       xform = xform,
@@ -369,8 +516,8 @@ class DataSet(object):
           dict(
             idx=a,
             gene=b,
-            symbol = self.annotation.symbol.get(b, ''),
-            desc = self.annotation.desc.get(b, ''),
+            symbol = self.annotation.get_symbol(b, ''),
+            name = self.annotation.get_name(b, ''),
             corr=c,
             ) for a,b,c in result ]))
 
@@ -383,7 +530,7 @@ class DataSet(object):
 
     if isinstance(pos, basestring):
       try:
-        pos = open(pos)
+        pos = open(pos, 'rbU')
       except IOError:
         return None
     pos_data = {}
@@ -421,12 +568,12 @@ class DataSet(object):
   @key_cache_region('mistic', 'mst', lambda args: (args[0].id,) + args[1:])
   def mst(self, xform):
     d, f = os.path.split(self.source)
-    
+
     g = os.path.join(d, 'transformed', xform, os.path.splitext(f)[0] + '.g')
     pos = os.path.join(d, 'transformed', xform, os.path.splitext(f)[0] + '.output.dot')
 
     try:
-      g = open(g)
+      g = open(g, 'rbU')
     except IOError:
       return None
 
@@ -482,34 +629,34 @@ class DataSet(object):
 
   def expndata(self, gene, xform = None):
     expn = self.data.row(self.data.r(gene), transform = self._makeTransform(xform))
-    
-    data =[]
-    for i in range(len(self.samples)): 
-      dat =  self.cannotation.get(self.samples[i])
-      dat.update({'sample':self.samples[i], 'expr':expn[i]})
-      data.append(dat) 
-      
-    data = tuple (data)
-    
+
     return dict(
       gene = gene,
-      symbol = self.annotation.symbol.get(gene, ''),
-      desc = self.annotation.desc.get(gene, ''),
+      symbol = self.annotation.get_symbol(gene, ''),
+      name = self.annotation.get_name(gene, ''),
       dataset = self.id,
       row = self.data.r(gene),
       xform = xform,
-      data = data
-    
+      data = tuple([ dict(sample=a, expr=float(b)) for a, b in zip(self.samples, expn) ])
     )
     
   def getSamplesByCharacteristic (self, ki, vi):
     return [k for k,v in d.items() if v[ki]==vi]
     
 
+
+
 class Collection(object):
-  def __init__(self):
+  def __init__(self, obj_cls):
+    self.obj_cls = obj_cls
     self.objects = []
     self.id_to_index = {}
+
+  def load(self, obj, *extra_args, **extra_kw):
+    if obj is not None:
+      for o in obj:
+        if self.get(o.get('id')) is None:
+          self.add(self.obj_cls(o, *extra_args, **extra_kw))
 
   def add(self, obj):
     self.id_to_index[obj.id] = len(self.objects)
@@ -522,59 +669,54 @@ class Collection(object):
   def all(self):
     return tuple(self.objects)
 
-ontology = Ontology()
-orthology = Orthology()
-annotations = Collection()
-datasets = Collection()
-colAnnotations = Collection ()
 
+ontology = None
+orthology = None
+annotations = Collection(Annotation)
+genesets = Collection(GeneSet)
+datasets = Collection(DataSet)
 
+class GlobalConfig(object):
+  def __init__(self, settings_json):
+    self.root_config = settings_json
+    self.root_path = os.path.split(os.path.abspath(settings_json))[0]
+    self.json_data = json.loads(re.sub(r'(?m)//.*$', '', open(self.root_config, 'rbU').read()))
 
-def collectItems(settings, prefix):
-  items = collections.defaultdict(dict)
+  def file_path(self, path):
+    if os.path.isabs(path):
+      return path
+    else:
+      return os.path.join(self.root_path, path)
 
-  for k, v in settings.iteritems():
-    if k.startswith(prefix) and k[len(prefix)] == '.':
-      k = k[len(prefix) + 1:].split('.', 1)
-      items[int(k[0])][k[1]] = v
+  def load_metadata(self):
+    global ontology
+    global annotations
+    global genesets
+    global orthology
 
-  return [ v for k,v in sorted(items.items()) ]
+    logging.info('loading ontology')
+    ontology = Ontology(self.json_data.get('ontology'), self)
+    logging.info('loading orthologs')
+    orthology = Orthology(self.json_data.get('orthology'), self)
+    logging.info('loading annotations')
+    annotations.load(self.json_data.get('annotations'), self)
+    logging.info('loading genesets')
+    genesets.load(self.json_data.get('genesets'), self)
+    logging.info('metadata loading done')
 
-def loadOntology(settings):
-  ontology.load(settings['mistic.ontology'])
+  def load(self, dataset = None):
+    global datasets
 
-def loadOrthology(settings):
-  orthology.load(settings['mistic.orthology'])
+    logging.info('loading data')
+    if dataset is None:
+      datasets.load(self.json_data.get('datasets'), self)
+    else:
+      datasets.load([ x for x in self.json_data.get('datasets') if x.get('id') == dataset ], self)
 
-def loadAnnotations(settings):
-  for d in collectItems(settings, 'mistic.annotation'):
-    annotations.add(Annotation(**d))
+    logging.info('data loading done')
 
-def loadColAnnotations(settings):
-  for d in collectItems(settings, 'mistic.col_annotation'): 
-    colAnnotations.add(ColAnnotation(**d))
-    
-def loadData(settings):
-  for d in collectItems(settings, 'mistic.dataset'):
-    print ('Loading %s' % d['name'])
-    datasets.add(DataSet(**d))
-
-def load(settings):
-  logging.info('loading ontology')
-  loadOntology(settings)
-  
-  logging.info('loading orthologs')
-  loadOrthology(settings)
-  
-  logging.info('loading annotations')
-  loadAnnotations(settings)
-  loadColAnnotations(settings)
-  
-  logging.info('loading data')
-  loadData(settings)
-  
-  logging.info('loading done')
-
-  # get corr for BAD and SLC39A13
-  #print [x for x in datasets.all()[0].genecorr('BAD', 'log', 0, 0)['data'] if x['symbol']=='SLC39A13']
-
+def load(settings_json):
+  gc = GlobalConfig(settings_json)
+  gc.load_metadata()
+  gc.load()
+  return gc
