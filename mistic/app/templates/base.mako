@@ -126,7 +126,7 @@ mistic = {
 <%block name="pagetail">
 <form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}">
 <input id="pdfdata" type="hidden" name="pdfdata" value=""></input></form>
- 
+
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/underscore-min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/backbone-min.js')}" type="text/javascript"></script>
