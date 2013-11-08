@@ -35,9 +35,8 @@ ${parent.pagetail()}
   a = ds.annotation
   info = dict([
    (g, dict(
-     sym = a.attrs.get(g, {}).get('symbol'),
-     name = a.attrs.get(g, {}).get('name'),
-     ch =  a.attrs.get(g, {}).get('chromosome')
+     sym = a.get_symbol(g),
+     name = a.get_name(g)
    )) for g in nodes ])
 %>
 
