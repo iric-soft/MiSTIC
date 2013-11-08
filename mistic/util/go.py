@@ -41,7 +41,7 @@ def goOverRepresentation(identifiers, go_to_identifiers, ontology):
     go_tab.append(dict(
       id = go,
       ns = ontology.nodes[go].namespace,
-      desc = ontology.nodes[go].desc,
+      name = ontology.nodes[go].name,
       tab = tab,
       p_val = p_val,
       odds = odds,

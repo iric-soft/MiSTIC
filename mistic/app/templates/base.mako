@@ -155,7 +155,7 @@ mistic = {
   });
 
   window.GeneItemView = DropdownItemView.extend({
-    template: _.template(<%text>"<span class='label'><%- get('id') %></span><%- get('desc') %>  "</%text>),
+    template: _.template(<%text>"<span class='label'><%- get('id') %></span><%- get('name') %>  "</%text>),
     itemClass: 'gene-item'
   });
 
@@ -164,7 +164,7 @@ mistic = {
 
     autofillText: function(model) {
       var symbol = model.get('symbol') ?  model.get('symbol') :  model.get('id')
-      return symbol  +" "+ model.get('desc');
+      return symbol  +" "+ model.get('name');
     },
 
     searchData: function() {
@@ -183,7 +183,7 @@ mistic = {
   window.go_cache = new GO();
 
   window.GOItemView = DropdownItemView.extend({
-    template: _.template(<%text>"<span class='label'><%- id %></span> <%- get('desc') %>"</%text>),
+    template: _.template(<%text>"<span class='label'><%- id %></span> <%- get('name') %>"</%text>),
     itemClass: function() { return 'go-'+this.model.get('namespace'); }
   });
 
@@ -194,7 +194,7 @@ mistic = {
     menu: '<ul class="typeahead dropdown-menu" style="max-width: 400px; max-height: 300px; overflow-x: hidden; overflow-y: auto"></ul>',
 
     autofillText: function(model) {
-      return model.id+'|'+model.get('desc');
+      return model.id+'|'+model.get('name');
     },
 
     searchData: function() {

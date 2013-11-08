@@ -179,8 +179,9 @@ def main(global_config, **settings):
     config.add_route('mistic.json.annotation.genes',       '/annotations/{annotation}/genes')
     config.add_route('mistic.json.annotation.gene_ids',    '/annotations/{annotation}/gene_ids')
     config.add_route('mistic.json.annotation.gene',        '/annotations/{annotation}/genes/{gene_id}')
-    config.add_route('mistic.json.annotation.gene.go',     '/annotations/{annotation}/genes/{gene_id}/go')
-    config.add_route('mistic.json.annotation.gene.desc',   '/annotations/{annotation}/genes/{gene_id}/desc')
+    config.add_route('mistic.json.annotation.gene.gs',     '/annotations/{annotation}/genes/{gene_id}/gs*gsid')
+    config.add_route('mistic.json.annotation.gene.name',   '/annotations/{annotation}/genes/{gene_id}/name')
+    config.add_route('mistic.json.annotation.gene.symbol', '/annotations/{annotation}/genes/{gene_id}/symbol')
 
     config.add_route('mistic.json.cannotation.items',  'cannotations/datasets/{dataset}')
 
@@ -208,7 +209,7 @@ def main(global_config, **settings):
     config.add_route('mistic.json.go',                     '/go')
     config.add_route('mistic.json.go.search',              '/go/search')
     config.add_route('mistic.json.go.id',                  '/go/{go_id}')
-    config.add_route('mistic.json.go.desc',                '/go/{go_id}/desc')
+    config.add_route('mistic.json.go.name',                '/go/{go_id}/name')
 
     config.add_route('mistic.template.corrgraph',          '/genecorr')
     config.add_route('mistic.template.corrgraph_static',   '/genecorr/{dataset}/{gene}')

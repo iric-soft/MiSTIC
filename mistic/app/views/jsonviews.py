@@ -65,15 +65,14 @@ class GO(object):
         for node_id, node in data.ontology.nodes.iteritems():
             r = dict(
                 id = node.id,
-                namespace = node.namespace,
-                desc = node.desc)
+                ns = node.namespace,
+                name = node.name)
 
             if (any([ q.match(r['id'])     is not None for q in query ]) or
-                all([ q.search(r['desc'])  is not None for q in query ])):
+                all([ q.search(r['name'])  is not None for q in query ])):
                 out.append(r)
         out.sort(key = lambda r: r['id'])
         out = out[:limit]
-        print out
         return out
 
 
@@ -89,12 +88,12 @@ class GOTerm(GO):
     def index(self):
         return dict(
             id = self.node.id,
-            namespace = self.node.namespace,
-            desc = self.node.desc)
+            ns = self.node.namespace,
+            name = self.node.name)
 
-    @view_config(route_name="mistic.json.go.desc", request_method="GET", renderer="json")
-    def desc(self):
-        return self.node.desc
+    @view_config(route_name="mistic.json.go.name", request_method="GET", renderer="json")
+    def name(self):
+        return self.node.name
 
 class ColAnnotation(object):
     def __init__(self, request):
@@ -117,6 +116,7 @@ class ColAnnotation(object):
        
       return [dict (zip(k,v))]
 
+
 class Annotation(object):
     def __init__(self, request):
         self.request = request
@@ -124,50 +124,78 @@ class Annotation(object):
         if self.annotation is None:
             raise HTTPNotFound()
 
+    def gene_record(self, gene, genesets = None):
+        '''
+        return a gene record as a dict.
+
+        if genesets is not None, it should be a list of geneset
+        identifiers in dot-separated form, with * being a wildcard.
+
+        in this case, the genesets key is populated with the geneset
+        identifiers associated with this gene, restricted to the
+        specified geneset identifiers.
+
+        if a geneset does not define a set of categories, then any
+        named category will match.
+        '''
+        record = dict(
+            id = gene,
+            symbol = self.annotation.get_symbol(gene),
+            name = self.annotation.get_name(gene)
+        )
+
+        if genesets is not None and len(genesets):
+            gene_geneset_ids = self.annotation.get_geneset_ids(gene, genesets)
+            record['genesets'] = sorted(gene_geneset_ids)
+
+        return record
+
     @view_config(route_name="mistic.json.annotation.gene_ids", request_method="GET", renderer="json")
     def gene_ids(self):
-        return self.annotation.gene_set(self.request.GET.getall('go'))
+        gs = self.request.GET.getall('filter_gsid')
+
+        if not len(gs):
+            return self.annotation.get_gene_ids()
+        else:
+            geneids_by_gs = [ self.annotation.get_gene_ids(x) for x in gs ]
+            s = set(geneids_by_gs[0])
+            for s2 in geneids_by_gs[1:]:
+                s.intersection_update(s2)
+            return sorted(s)
 
     @view_config(route_name="mistic.json.annotation.genes", request_method="GET", renderer="json")
     def genes(self):
-        result = self.annotation.gene_set(self.request.GET.getall('go'))
-        go_ns = set(self.request.GET.getall('go_ns'))
-        if len(go_ns) == 0:
-            go_ns = set(('biological_process', 'molecular_function', 'cellular_component'))
-
-        return [ dict(id = gene,
-                      symbol = self.annotation.symbol.get(gene),
-                      desc = self.annotation.desc.get(gene),
-                      go = sorted([
-                        go
-                        for go in self.annotation.go.get(gene, set())
-                        if data.ontology.nodes[go].namespace in go_ns
-                        # if go in data.ontology.nodes and data.ontology.nodes[go].namespace in go_ns
-                      ]))
-                 for gene in result ]
+        result = self.annotation.gene_set(self.request.GET.getall('filter_gsid'))
+        return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
 
 
 class AnnotationGene(Annotation):
     def __init__(self, request):
         super(AnnotationGene, self).__init__(request)
-        self.gene = self.request.matchdict['gene_id']
-        if self.gene not in self.annotation.genes:
+        self.gene_id = self.request.matchdict['gene_id']
+        if self.gene_id not in self.annotation.genes:
             raise HTTPNotFound()
 
     @view_config(route_name="mistic.json.annotation.gene", request_method="GET", renderer="json")
     def gene(self):
-        return dict(id = self.gene,
-                    desc = self.annotation.desc.get(self.gene),
-                    go = sorted(self.annotation.go.get(self.gene, ())))
+        return self.gene_record(self.gene_id, set(self.request.GET.getall('gs')))
 
-    @view_config(route_name="mistic.json.annotation.gene.desc", request_method="GET", renderer="json")
-    def desc(self):
-        return self.annotation.desc.get(self.gene)
+    @view_config(route_name="mistic.json.annotation.gene.name", request_method="GET", renderer="json")
+    def name(self):
+        return self.annotation.get_name(self.gene_id)
 
-    @view_config(route_name="mistic.json.annotation.gene.go", request_method="GET", renderer="json")
-    def go(self):
-        return sorted(self.annotation.go.get(self.gene, ()))
+    @view_config(route_name="mistic.json.annotation.gene.symbol", request_method="GET", renderer="json")
+    def symbol(self):
+        return self.annotation.get_symbol(self.gene_id)
+
+    @view_config(route_name="mistic.json.annotation.gene.gs", request_method="GET", renderer="json")
+    def gs(self):
+        gsid = self.request.matchdict['gsid']
+        if not len(gsid):
+            return sorted(self.annotation.get_geneset_ids(self.gene_id))
+        else:
+            return sorted(self.annotation.get_geneset_ids(self.gene_id, [ '.'.join(gsid) ]))
 
 
 
@@ -189,43 +217,69 @@ class Dataset(object):
     @view_config(route_name="mistic.json.dataset.samples", request_method="GET", renderer="json")
     def samples(self):
         return self.dataset.samples
-      
-       
+
     @view_config(route_name="mistic.json.dataset.search", request_method="GET", renderer="json")
     def search(self):
         query = self.request.GET.getall('q')
         query = sum([ q.split() for q in query ], [])
-        query = [ re.compile(re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q), re.I) for q in query if q != '' ]
+        query = [ re.compile(re.escape(q), re.I) for q in query if q != '' ]
 
         if query == []:
             return []
 
         limit = self.request.GET.get('l')
+
         try:
             limit = int(limit)
         except:
             limit = 100
         limit = min(limit, 100)
 
-        out = []
-        additional = []
+        def match_any(text):
+            if text is None: return False
+            for q in query:
+                if q.match(text) is not None: return True
+            return False
 
-        for i, gene in enumerate(self.dataset.genes):
-            r = dict(
-                id = gene,
-                idx = i,
-                symbol = self.dataset.annotation.symbol.get(gene, ''),
-                desc = self.dataset.annotation.desc.get(gene, '')
-            )
+        def match_all(text):
+            if text is None: return False
+            for q in query:
+                if q.match(text) is None: return False
+            return True
 
-            if (any([ q.match(r['symbol']) is not None for q in query ]) or
-                any([ q.match(r['id'])     is not None for q in query ])):
-                out.append(r)
-            elif all([ q.search(r['desc'])  is not None for q in query ]):
-                additional.append(r)
+        try:
+            symbol_matches = set(self.dataset.annotation.data.index[self.dataset.annotation.data['symbol'].map(match_any)])
+        except KeyError:
+            symbol_matches = set()
+
+        try:
+            id_matches = set(self.dataset.annotation.data.index[self.dataset.annotation.data.index.map(match_any)])
+        except KeyError:
+            id_matches = set()
+
+        try:
+            name_matches = set(self.dataset.annotation.data.index[self.dataset.annotation.data['name'].map(match_all)])
+        except KeyError:
+            name_matches = set()
+
+        out_ids = id_matches | symbol_matches
+        additional_ids = name_matches - out_ids
+
+        out = [
+            dict(id = i,
+                 symbol = self.dataset.annotation.get_symbol(i),
+                 name = self.dataset.annotation.get_name(i))
+            for i in out_ids ]
+
+        additional = [
+            dict(id = i,
+                 symbol = self.dataset.annotation.get_symbol(i),
+                 name = self.dataset.annotation.get_name(i))
+            for i in additional_ids ]
 
         out.sort(key = lambda r: r['symbol'])
         additional.sort(key = lambda r: r['symbol'])
+
         return (out + additional)[:limit]
 
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")
@@ -324,14 +378,13 @@ class DatasetGene(Dataset):
             print out[-1]
         out.sort()
         return out
-        
+
     @view_config(route_name="mistic.json.gene.corr", request_method="GET", renderer="json")
     def corr(self):
         absthresh = self.request.GET.get('a')
         thresh = self.request.GET.get('t')
-        
+
         return self.dataset.genecorr(self.gene, xform = self.x, absthresh = absthresh, thresh = thresh)
-        
 
     @view_config(route_name="mistic.json.gene.expr", request_method="GET", renderer="json")
     def expr(self):
