@@ -171,7 +171,7 @@ var thr = thead.selectAll("tr")
     .append("tr")
 
 var th = thr.selectAll('th')
-    .data([ 'P-value', 'Odds', 'Type', 'Cat', 'ID', 'Description' ])
+    .data([ 'P-value', 'Odds', 'Type', 'Cat', 'ID', 'Name' ])
     .enter()
     .append('th')
     .text(function(d) { return d; });
@@ -199,18 +199,19 @@ tr.enter()
 
 var td = tr.selectAll('td')
     .data(function(d) { return [
-      [ 'p_val', d.p_val.toExponential(2) ],
-      [ 'odds', d.odds.toFixed(2) ],
-      [ 'type', d.gs ],
-      [ 'category', d.cat ],
-      [ 'id', d.id ],
-      [ 'desc', d.name ],
+      { value: d.p_val.toExponential(2) },
+      { value: d.odds.toFixed(2) },
+      { value: d.gs },
+      { value: d.cat },
+      { value: d.id },
+      { value: d.name, title: d.desc },
     ];});
 
 td.enter()
     .append('td')
-    .text(function(d) { return d[1]; })
-    .attr('title', function(d) {return d[1];})
+    .text(           function(d) { return d.value; })
+    .attr('title,    function(d) {return d.title; })
+    .attr('classed', function(d) {return d.class; })
     ;
  
 var width =($(document).width()-60)/12*7; //was width:1024
