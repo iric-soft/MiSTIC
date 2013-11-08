@@ -157,8 +157,6 @@ class Ontology(object):
 
     return visited - set(terms)
 
-ontology = Ontology()
-
 
 
 class Orthology(object):
@@ -189,8 +187,6 @@ class Orthology(object):
       og = self.annot_id_to_og.get((src_annot, i))
       result.append(self.og_to_annot_ids.get(og, {}).get(tgt_annot, frozenset()))
     return result
-
-orthology = Orthology()
 
 
 
@@ -526,6 +522,8 @@ class Collection(object):
   def all(self):
     return tuple(self.objects)
 
+ontology = Ontology()
+orthology = Orthology()
 annotations = Collection()
 datasets = Collection()
 colAnnotations = Collection ()
