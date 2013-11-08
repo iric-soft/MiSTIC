@@ -4,11 +4,21 @@ import json
 import mistic.app.data as data
 terms = []
 dds = {}
-for ds in data.datasets.all() : 
-  terms += [term.split("=")[0].strip() for term in ds.tags.split(";")]
-  dds[ds.name] = dict([(term.split('=')[0].strip(), term.split('=')[1].strip()) for term in ds.tags.split(';')]) 
-  
-terms = reduce(lambda x, y: x if y in x else x + [y], terms, [])
+
+def parse_term(x):
+  x = x.split('=', 1)
+  return x[0].strip(), x[1].strip()
+
+terms = []
+
+for ds in data.datasets.all():
+  ds_terms = [ parse_term(term) for term in ds.tags.split(';') if len(term) ]
+
+  for k,v in ds_terms:
+    if k not in terms:
+      terms.append(k)
+
+  dds[ds.name] = dict(*ds_terms)
 
 transforms = ('log', 'rank',  'none')
 #transforms = ['log']
@@ -98,6 +108,7 @@ a#oo{
       
   </tr>
   %endfor
+</tbody>
 </table>
 </div>
 

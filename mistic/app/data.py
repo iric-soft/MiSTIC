@@ -453,6 +453,9 @@ class DataSet(object):
     self.description = self.config.get('desc', '')
     self.source      = global_config.file_path(self.config['path'])
     self.data        = mistic.data.dataset.DataSet.readTSV(self.source)
+    self.type        = self.config.get('type', '')
+    self.tags        = self.config.get('tags', '')
+    self.experiment  = self.config.get('expt', '')
     self.annotation  = annotations.get(self.config['anot'])
     self.transforms  = []
 
