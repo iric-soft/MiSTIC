@@ -1,4 +1,5 @@
 import sys
+import io
 import os
 import re
 import uuid
@@ -6,9 +7,32 @@ import collections
 import mistic.data.dataset
 import json
 import logging
+import exceptions
+import pandas
 
 from beaker.cache import *
 from cache_helpers import *
+
+
+
+def read_json_table(path, converters = {}):
+  rows = []
+  index = []
+  for row in io.open(path, 'rbU'):
+    ident, row = row.split(None, 1)
+    try:
+      row = json.loads(row)
+      for k in row.keys():
+        if k in converters:
+          row[k] = converters[k](row[k])
+    except ValueError:
+      logging.warn('failed to parse JSON data for identifier {0} on row {1} of {2}'.format(ident, rownum, path))
+      continue
+    index.append(ident)
+    rows.append(row)
+  return pandas.DataFrame(rows, index = index)
+
+
 
 __obo_unescape = {
   't': '\t',
