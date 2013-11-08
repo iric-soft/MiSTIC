@@ -56,7 +56,6 @@ ${parent.style()}
 
 #go_table {
   max-height: 400px;
-  max-width: 500px;
   overflow-y: visible;
   overflow-x: hidden;
   font-family: helvetica; 
@@ -172,7 +171,7 @@ var thr = thead.selectAll("tr")
     .append("tr")
 
 var th = thr.selectAll('th')
-    .data([ 'P-value', 'Odds', 'Type', 'Term', 'Description' ])
+    .data([ 'P-value', 'Odds', 'Type', 'Cat', 'ID, 'Description' ])
     .enter()
     .append('th')
     .text(function(d) { return d; });
@@ -202,10 +201,10 @@ var td = tr.selectAll('td')
     .data(function(d) { return [
       [ 'p_val', d.p_val.toExponential(2) ],
       [ 'odds', d.odds.toFixed(2) ],
-      [ 'type', d.kind ],
-      [ 'term', d.id ],
-      [ 'desc', d.desc +" "+d.ns],
-      
+      [ 'type', d.gs ],
+      [ 'category', d.cat ],
+      [ 'id, d.id ],
+      [ 'desc', d.name ],
     ];});
 
 td.enter()
