@@ -163,7 +163,10 @@ def main(global_config, **settings):
         return HTTPUnauthorized(headers = forget(request)) ## Response(body='hello world!', content_type='text/plain')
     config.add_view(authorize, context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
     
-    data.load(settings)
+    if 'mistic.data' not in settings:
+        raise exceptions.RuntimeError('no dataset configuration supplied')
+
+    data.load(settings['mistic.data'])
 
     if 'mistic.rsvg-convert' in settings:
         mistic.app.views.pdffile.PDFData.rsvg_convert = settings['mistic.rsvg-convert']
