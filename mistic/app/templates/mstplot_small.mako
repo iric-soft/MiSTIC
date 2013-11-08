@@ -128,99 +128,35 @@ ${parent.pagetail()}
 <%
   ds = data.datasets.get(dataset)
   a = ds.annotation
- 
-  enrichment_tab = []
-  for k in a.others.keys():
-    a_others = a.others.get(k)	
-    a_others_genes = a.others_genes.get(k)
-    all_terms = set()
- 
-    for n in nodes : 
-      all_terms.update(a_others.get(n, set()))
-   
-    for g in all_terms:
-      if g=="": continue
-      
-      genes_with_terms = [n for n in nodes if g in a_others.get(n, set()) ]
-      YY = len(genes_with_terms)
-      if YY == 1: continue
-      YN = len(nodes) - YY
-      NY = len(a_others_genes[g]) - YY
-      NN = len(a.genes) - YY - YN - NY
-      tab = [ [ YY, YN ], [ NY, NN ] ]
-             
-      odds, p_val = scipy.stats.fisher_exact(tab)
-      if odds < 1 or p_val > 0.05: continue
-  
-      enrichment_tab.append(dict(
-            id = g,
-            ns = "",
-            desc = "",
-            tab = tab,
-            p_val = p_val,
-            odds = odds,
-            genes = genes_with_terms,
-            kind = k
-        ))
 
-  
-  all_go = set()
-  for n in nodes:
-    all_go.update(a.go.get(n, set()))
-    
-  for g in all_go:
-    genes_with_go_term = [
-      n for n in nodes 
-      if g in a.go.get(n, set()) or g in a.go_indirect.get(n, set()) ]
-    
-    YY = len(genes_with_go_term)
-    if YY == 1: continue
-    YN = len(nodes) - YY
-    NY = len(a.go_genes[g] | a.go_genes_indirect[g]) - YY
-    NN = len(a.genes) - YY - YN - NY
-    tab = [ [ YY, YN ], [ NY, NN ] ]
-    
-  
-    odds, p_val = scipy.stats.fisher_exact(tab)
-    if odds < 1 or p_val > 0.05: continue
-    ns = data.ontology.nodes[g].namespace if g in data.ontology.nodes.keys() else ''
-    nsdict = {'molecular_function':'[MF]', 'biological_process':'[BP]', 'cellular_component':'[CC]', '':''}
-    
-    enrichment_tab.append(dict(
-          id = g,
-          ns = nsdict[ns],
-          desc = data.ontology.nodes[g].desc if g in data.ontology.nodes.keys() else '',
-          tab = tab,
-          p_val = p_val,
-          odds = odds,
-          genes = genes_with_go_term, 
-          kind = "GO" ))
+  from mistic.util import geneset
 
-
-  enrichment_tab.sort(key = lambda d: d['p_val'])
+  gs_tab = geneset.genesetOverRepresentation(nodes, a.genes, a.all_genesets())
+  for r in gs_tab:
+    x = r['id']
+    info = a.geneset_info(x)
+    r['name'] = info.get('name', '')
+    r['desc'] = info.get('desc', '')
+    x, r['id'] = x.rsplit(':', 1)
+    if '.' in x:
+      r['gs'], r['cat'] = x.split('.', 1)
+    else:
+      r['gs'], r['cat'] = x, ''
 
   E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
   V = [ dict(
     id    = n,
-    name  = a.attrs.get(n, {}).get('symbol') or n,
-    title = a.attrs.get(n, {}).get('name') or '',
-    chr = a.attrs.get(n, {}).get('chr') or '',
-    formula = a.attrs.get(n, {}).get('formula') or '',
-    can = a.attrs.get(n, {}).get('can') or '',
-    smile = a.attrs.get(n, {}).get('smi') or '',
-    actions = a.attrs.get(n, {}).get('actions') or '',
-    type = ds.type,
+    name  = a.get_symbol(n, n),
+    title = a.get_name(n, ''),
   ) for n in nodes ]
- 
 %>
 
 <script type="text/javascript">
 
-
 var json = {
   "nodes": ${json.dumps(V)|n},
   "links": ${json.dumps(E)|n},
-  "enrichmenttab": ${json.dumps(enrichment_tab)|n},
+  "gstab": ${json.dumps(gs_tab)|n},
 };
 
 var table = d3.select('#go_table').insert('table', ':first-child').attr('id', 'gotable');
