@@ -630,6 +630,16 @@ class DataSet(object):
   def expndata(self, gene, xform = None):
     expn = self.data.row(self.data.r(gene), transform = self._makeTransform(xform))
 
+    data = []
+    for i in range(len(self.samples)): 
+      dat = {}
+      if self.cannotation: 
+        dat = self.cannotation.get(self.samples[i])
+      dat.update({'sample':self.samples[i], 'expr':expn[i]})
+      data.append(dat) 
+
+    data = tuple(data)
+
     return dict(
       gene = gene,
       symbol = self.annotation.get_symbol(gene, ''),

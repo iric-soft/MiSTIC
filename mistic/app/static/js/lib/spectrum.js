@@ -309,6 +309,7 @@
             
             radioButton.bind("click.spectrum", function (e) {
               $(boundElement).data('applyTo',  e.target.value);
+              
             });
             
             draggable(alphaSlider, function (dragX, dragY, e) {
@@ -542,8 +543,8 @@
             replacer.removeClass("sp-active");
             container.addClass("sp-hidden");
 
-            var colorHasChanged = !tinycolor.equals(get(), colorOnShow);
-
+            //var colorHasChanged = !tinycolor.equals(get(), colorOnShow);
+            var colorHasChanged = true;
             if (colorHasChanged) {
                 if (clickoutFiresChange && e !== "cancel") {
                     updateOriginalInput(true);
@@ -702,7 +703,8 @@
                 boundElement.val(color.toString(currentPreferredFormat)).change();
             }
 
-            var hasChanged = !tinycolor.equals(color, colorOnShow);
+            //var hasChanged = !tinycolor.equals(color, colorOnShow);
+            var hasChanged  = true;
             colorOnShow = color;
 
             // Update the selection palette with the current color
@@ -969,7 +971,7 @@
                         returnValue = spect.get();
                     }
                     else if (opts == "container") {
-                        returnValue = spect.container;
+                        returnValue = spect.container; 
                     }
                     else if (opts == "option") {
                         returnValue = spect.option.apply(spect, args);

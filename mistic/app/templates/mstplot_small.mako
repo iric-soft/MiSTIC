@@ -416,8 +416,8 @@ $(document).keyup(function(e) {
 
 
 $(document).ready(function() {   
-$('#gotable').dataTable({"aaSorting": [[1,"asc"]],
-                          "sType": ['numeric','numeric','string','string','string'], 
+$('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": [ 0 ], 'aaSorting':["asc"] },
+                                           { "sType": "numeric", "aTargets": [ 1 ]}],
                           "bPaginate" : true,
                           "iDisplayLength": 10,
                           "sPaginationType": "full_numbers",
@@ -427,7 +427,10 @@ $('#gotable').dataTable({"aaSorting": [[1,"asc"]],
                           "bInfo": true,
           
     });    
-          
+    
+    
+console.debug($("#gotable"));
+console.debug($(window));      
 });    
 
 

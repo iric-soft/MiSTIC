@@ -95,11 +95,11 @@ circle  {
 
 
 
-.notselected {
+circle.notselected {
   fill : rgb(0, 0, 0); 
 }
 
-.selected  {
+circle.selected  {
   fill :rgb(20, 216, 28); 
 }
 
@@ -223,7 +223,6 @@ path.arc.highlight {
 }
 path.axis.selected {
   stroke-width:3.5;
-  fill :#A3A3C2; 
 }
 
 
