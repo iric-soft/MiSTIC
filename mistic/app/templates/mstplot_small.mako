@@ -210,7 +210,7 @@ var td = tr.selectAll('td')
 td.enter()
     .append('td')
     .text(           function(d) { return d.value; })
-    .attr('title,    function(d) {return d.title; })
+    .attr('title',   function(d) {return d.title; })
     .attr('classed', function(d) {return d.class; })
     ;
  
