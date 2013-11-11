@@ -126,16 +126,16 @@
                     //console.log(JSON.stringify(this.data[x].symbol));
                     
                      var fsize_symbol = 25-N;
-                     var desc_length = this.data[x].desc.length;
-                     var desc = this.data[x].desc  ?  this.data[x].desc  : this.data[x].gene;
-                     var desc_space = this.width/(N)-this.options.padding[3]*N*2 - 50;
+                     var name_length = this.data[x].name.length;
+                     var name = this.data[x].name  ?  this.data[x].name  : this.data[x].gene;
+                     var name_space = this.width/(N)-this.options.padding[3]*N*2 - 50;
                    
-                     if ((desc_space)<desc_length) { 
-                        if ((desc_space)>3) {   desc = desc.slice(1,desc_space)+'...';}
-                        else {desc = '';}
+                     if ((name_space)<name_length) { 
+                        if ((name_space)>3) {   name = name.slice(1,name_space)+'...';}
+                        else {name = '';}
                      } 
                      
-                     var fsize_desc = 16-N;
+                     var fsize_name = 16-N;
                      
                     
                      g.append('text')
@@ -147,21 +147,21 @@
                         .attr('id', 'text-symbol')
                         .text(this.data[x].symbol ? this.data[x].symbol : this.data[x].gene);
                      
-                     if (desc!='') {
+                     if (name!='') {
                      g.append('text')
                         .attr('x', (xhi-xlo)/2)
                         .attr('y', (yhi-ylo)/5+8)
                         .attr('dy', '12px')
                         .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: '+ fsize_desc +'px; font-weight: 600')
-                        .attr('id', 'text-desc') 
-                        .text(desc);
+                        .attr('style', 'font-family: helvetica; font-size: '+ fsize_name +'px; font-weight: 600')
+                        .attr('id', 'text-name') 
+                        .text(name);
                      }    
   
                      var fsize = 16-N, d=40, p=15;
                       
                      if (N>4){  p=11, d= 38;}                       
-                     if (desc=='') {d = d-10;}  
+                     if (name=='') {d = d-10;}  
                      
                      var expr = _.map(this.data[x].data, function(d) {return d.expr});
                    
