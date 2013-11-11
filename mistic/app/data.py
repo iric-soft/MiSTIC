@@ -217,6 +217,12 @@ class Annotation(object):
 
     self.data = read_json_table(global_config.file_path(self.path))
 
+  def get(self, id, default = None):
+    try:
+      return dict(self.data.ix[id])
+    except KeyError:
+      return default
+
 
 
 class DatasetAnnotation(Annotation):
@@ -225,11 +231,10 @@ class DatasetAnnotation(Annotation):
 
   @property
   def info(self):
-    return dict(id = self.id, name = self.name, desc = self.description)
+    return dict(id = self.id,
+                name = self.name,
+                desc = self.description)
   
-  def get(self, id):
-    return self.attrs.get(id, {})
-
 
 
 class GeneAnnotation(Annotation):
@@ -309,7 +314,7 @@ class GeneAnnotation(Annotation):
     elif isinstance(gsid, collections.Iterable):
       s = set(self.data.index)
       for g in gsid:
-        s.intersection_update(self.gene_set(g))
+        s.intersection_update(self._get_gene_ids(g))
       return frozenset(s)
 
   def get_gene_ids(self, gsid = None, filt = None):
@@ -458,6 +463,10 @@ class DataSet(object):
     self.experiment  = self.config.get('expt', '')
     self.annotation  = annotations.get(self.config['annr'])
     self.cannotation = dataset_annotations.get(self.config['annc'])
+    if self.cannotation is not None:
+      for sample in self.samples:
+        if sample not in self.cannotation.data.index:
+          logging.warn('no sample annotation for sample {0} in dataset {1} (sample annotation {2})'.format(sample, self.id, self.config['annc']))
     self.transforms  = []
 
     for x in self.config.get('xfrm', ['none']):
@@ -634,8 +643,8 @@ class DataSet(object):
     data = []
     for i in range(len(self.samples)): 
       dat = {}
-      if self.cannotation: 
-        dat = self.cannotation.get(self.samples[i])
+      if self.cannotation:
+        dat = self.cannotation.get(self.samples[i], default = {})
       dat.update({'sample':self.samples[i], 'expr':expn[i]})
       data.append(dat) 
 

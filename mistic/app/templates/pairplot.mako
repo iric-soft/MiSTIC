@@ -366,14 +366,12 @@ $(document).ready(function() {
       success: function(data) {
             
             var options = $('#sample_selection');
-            _.each(data, function(d) {
-                _.each(d, function(e,v) {
+            _.each(data, function(e,v) {
                 options.append('<optgroup label="'+v+'">');
                 _.each(e, function(l) {
                     options.append('<option value="'+v+'.'+l+'">'+l+'</options>');
                 });
                 options.append('</optgroup>');
-                });            
             });
        }
         
@@ -573,23 +571,20 @@ $(document).ready(function() {
 
   
   $("#sample_selection").on("change", function(){
-   
     var val = $(event.target).val().split('.');
     var l1 = val[0];
     var l2 = val[1];
-    
-    var tags = [];
-    _.each(current_graph.data, function (d) {_.each(d.data, function(e) {if (e[l1]==l2){tags.push(e.sample);}});});
-    tags = _.uniq(tags);
-    
-    var cclass = 'selected';
-    d3.selectAll('circle').classed(cclass, false);
-    d3.selectAll('circle').filter(function(d, i) {return (_.contains(tags, d.k));})
-      .classed(cclass, !d3.select(this).classed(cclass));
-  
+    var kv = {};
+    kv[l1] = l2;
+    $.ajax({
+      url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_dataset),
+      data: kv,
+      dataype: 'json',
+      success: function(data) {
+        d3.selectAll('circle').classed('selected', function(d) { return (_.contains(data, d.k)); });
+      }
+    });
   });
-        
-
 });
 </script>
 </%block>

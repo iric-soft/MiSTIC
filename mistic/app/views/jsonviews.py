@@ -106,17 +106,10 @@ class ColAnnotation(object):
       
       k = []
       v = []
-      if not self.dataset.cannotation: 
+      if not self.dataset.cannotation:
           return []
-      anns = self.dataset.cannotation.attrs
-      s =list(set(sum([e.items() for e in anns.values()], [])))
-      k = list(set([x[0] for x in s]))
-  
-      if 'sample' in k : k.remove('sample')
-      if 'expr' in k : k.remove('expr')
-      v = [list(set([x[1] for x in s if  x[0]==a])) for a in k]
-       
-      return [dict (zip(k,v))]
+      anns = self.dataset.cannotation.data
+      return { col: sorted(set(anns[col]) - set([""])) for col in anns.columns }
 
 
 class Annotation(object):
@@ -157,7 +150,7 @@ class Annotation(object):
         gs = self.request.GET.getall('filter_gsid')
 
         if not len(gs):
-            return self.annotation.get_gene_ids()
+            return sorted(self.annotation.get_gene_ids())
         else:
             geneids_by_gs = [ self.annotation.get_gene_ids(x) for x in gs ]
             s = set(geneids_by_gs[0])
@@ -167,7 +160,7 @@ class Annotation(object):
 
     @view_config(route_name="mistic.json.annotation.genes", request_method="GET", renderer="json")
     def genes(self):
-        result = self.annotation.gene_set(self.request.GET.getall('filter_gsid'))
+        result = self.annotation.get_gene_ids(self.request.GET.getall('filter_gsid'))
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
 
@@ -218,7 +211,12 @@ class Dataset(object):
 
     @view_config(route_name="mistic.json.dataset.samples", request_method="GET", renderer="json")
     def samples(self):
-        return self.dataset.samples
+        filters = self.request.GET.items()
+        samples = self.dataset.cannotation.data.index
+        for k,v in filters:
+            if k in self.dataset.cannotation.data.columns:
+                samples = [ s for s in samples if self.dataset.cannotation.data[k][s] == v ]
+        return sorted(samples)
 
     @view_config(route_name="mistic.json.dataset.search", request_method="GET", renderer="json")
     def search(self):
@@ -298,6 +296,20 @@ class Dataset(object):
         mapped_nodes = [ list(x)[0] if len(x) == 1 else None for x in mapped_nodes ]
 
         return mapped_nodes, edges, pos
+
+
+
+class DatasetSample(Dataset):
+    def __init__(self, request):
+        super(DatasetSample, self).__init__(request)
+        self.sample = request.matchdict['sample_id']
+        self.row = self.dataset.cannotation.get(self.sample)
+        if self.row is None:
+            raise HTTPNotFound()
+
+    @view_config(route_name="mistic.json.sample", request_method="GET", renderer="json")
+    def index(self):
+        return dict(self.row)
 
 
 
