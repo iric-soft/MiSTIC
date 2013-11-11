@@ -148,9 +148,6 @@ import json
 
 <%block name="style">
 ${parent.style()}
-
-
-
 </%block>
 
 <%block name="pagetail">
@@ -193,10 +190,7 @@ $(document).ready(function() {
                 
                 highlights[highlight]['stroke']=newColor;
                 highlights[highlight]['fill']=undefined;
-                
-              
-              }
-              else {
+              } else {
                 d3.select(this).attr('stroke', null);
                 d3.select(this).attr('stroke-width',null );
                 d3.select(this).attr('fill', newColor);
@@ -204,7 +198,7 @@ $(document).ready(function() {
                 highlights[highlight]['fill']=newColor;
                 highlights[highlight]['stroke']=undefined;
               }
-              
+
               $('.locate').change();
           }
     });
@@ -218,20 +212,17 @@ $(document).ready(function() {
   current_graph = new pairplot(undefined, undefined, $('#graph'));
   $("#options").css('display', 'none');
   
-   <%  
-   ds = data.datasets.get(dataset)
-   gene_data = [ds.expndata(gene) for gene in genes ]
-   
+  <%  
+    ds = data.datasets.get(dataset)
+    gene_data = [ds.expndata(gene) for gene in genes ]
   %>
   
-  %if not ds==None:
+  %if ds is not None:
     current_dataset = "${dataset}"; 
     $('#datasets').val(current_dataset);
    
     gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     $("#nb_datasets").text('(1)');
-    
-   
   %else:
     current_dataset = undefined;
     gene_entry.url = null;
@@ -239,7 +230,6 @@ $(document).ready(function() {
     $("#gene").attr('disabled', true);
     $("#tag").attr('disabled', true);
   %endif
-  
 
   //  Gene symbols were passed in the URL
   %if len(genes)>0:
@@ -248,15 +238,10 @@ $(document).ready(function() {
       // Selecting the first item corresponding to the gene symbol (no validation)
       gene = ${json.dumps(g)|n};
       gene_entry.$el.val(gene).select();
-    
     %endfor
   %endif 
-  
-  
-  
 
   $("#share_url").on('click', function(event){
-   
     var url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
               .replace('_dataset_', current_dataset);
          
@@ -273,7 +258,6 @@ $(document).ready(function() {
       current_graph.setMinimalAxes(minimal_axes);
       current_graph.draw()
       $('.locate').change()
-     
    });  
   
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
@@ -286,7 +270,7 @@ $(document).ready(function() {
     
     var badges = d3.selectAll('.badge');
     badges.each (function(d,i) {d3.select(this).attr('data-idx',i);});
-    if (current_graph.data.length<2) { 
+    if (current_graph.data.length<2) {
         $("#options").css('display', 'none');
     }
     info.clear();
@@ -296,16 +280,16 @@ $(document).ready(function() {
 
 
   gene_entry.on('change', function(item) {
-        
+
     if (item === null) return;
-    
+
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_dataset).replace('_gene_id_', item.id),
       dataype: 'json',
       success: function(data) {
-       
+
         current_graph.addData(data);
-        
+
         gene_entry.$el.val('');
         var label = $('<span>')
           .addClass('badge')
@@ -316,11 +300,11 @@ $(document).ready(function() {
           .addClass('icon-white icon-remove-sign')
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);
-       
+
         $("#nb_genes").text('('+current_graph.data.length+')');
         if(current_graph.data.length>=2) {
           $("#options").css('display', 'inline');
-         
+
         }
         $('.locate').change();
       },
@@ -328,43 +312,43 @@ $(document).ready(function() {
         // inform the user something went wrong.
       }
     });
-   
+
   });
 
-  
+
 
   $('#datasets').on('change custom', function(event) {
-   
+
     current_dataset = event.target.value;
-    
+
     $('#sample_selection').html('<option selected value="none">Select a characteristic</option>');
     $("#nb_genes").text('(0)');
     $("#nb_samples").text('(0)');
     $(".locate").val('');
-    
+
     if (current_dataset === '') {
       current_dataset = null;
       gene_entry.url = null;
-      
+
       $("#gene").attr('disabled', true);
       $(".locate").attr('disabled', true);
       $("#nb_datasets").text('(0)');
-      
-    
-     
+
+
+
     } else {
      $("#gene").attr('disabled', false);
      $(".locate").attr('disabled', false);
      $("#nb_datasets").text('(1)');
-     
+
      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
-     
-     
+
+
      $.ajax({
       url:  "${request.route_url('mistic.json.cannotation.items', dataset='_dataset_')}".replace('_dataset_', current_dataset),
       dataype: 'json',
       success: function(data) {
-            
+
             var options = $('#sample_selection');
             _.each(data, function(e,v) {
                 options.append('<optgroup label="'+v+'">');
@@ -374,16 +358,16 @@ $(document).ready(function() {
                 options.append('</optgroup>');
             });
        }
-        
+
         });
     }
-   
+
     gene_entry.$el.val('');
     info.clear();
-    
+
     $('#genelist').empty();
     current_graph.removeData(function() { return true; });
-   
+
   });
 
   $('#datasets').change();
@@ -401,12 +385,12 @@ $(document).ready(function() {
 
   resizeGraph();
   $(window).resize(resizeGraph);
-  
+
   $('#show_labels').on("click", function(event){
-    
+
     var selected = d3.selectAll("text.circlelabel").filter(function(){var c = $(this).siblings('circle'); return $(c)[0].className.baseVal=='selected';});
-    
-    if (selected[0].length>0 ) { 
+
+    if (selected[0].length>0 ) {
            selected.classed('invisible', !selected.classed('invisible'));
     }
     else {
@@ -421,9 +405,9 @@ $(document).ready(function() {
   	event.preventDefault();
   	
   });
-  
+
   $('#select_clear').on('click', function(event) {
-    
+
   	if (!d3.select(this).classed("active")){
   		d3.selectAll('circle').classed('selected', true);
   		var dat = [];
@@ -436,7 +420,7 @@ $(document).ready(function() {
   		d3.select(this).classed("active", true);
   	}
   	else {
-  	  
+  	
   		d3.selectAll('circle').classed('selected', false);
   		info.clear();
   		d3.select(this).text("Select all");
@@ -448,55 +432,55 @@ $(document).ready(function() {
 	
 
   $("[id^='add']").on('click', function(event) {
-    var cclass = this.id.replace('add', 'highlighted'); 
-      
+    var cclass = this.id.replace('add', 'highlighted');
+
     var dat = [];
     d3.selectAll('circle.selected').each(function(d) { dat.push(d.k); });
     d3.selectAll('circle.'+cclass).each(function(d) { dat.push(d.k); });
-    
+
     if (dat.length > 0 ) {
       dat = _.uniq(dat);
       $('#'+cclass).val(dat.join(' '));
       current_graph.draw()
       $('.locate').change();
-    } 
+    }
     $("#sample_selection > option").attr('selected', false);
     info.clear();
   });
-  
+
    $("[id^='minus']").on('click', function(event){
-    var cclass = this.id.replace('minus', 'highlighted'); 
+    var cclass = this.id.replace('minus', 'highlighted');
     var highlighted = [];
     d3.selectAll('circle.'+cclass).each(function(d) { highlighted.push(d.k); });
-    
+
     var selected = [];
     d3.selectAll('circle.selected').each(function(d) { selected.push(d.k); });
-    
+
     var dat= _.difference(highlighted,selected);
     d3.selectAll('circle.selected').attr('fill', undefined);
-    d3.selectAll('circle.selected').classed(cclass, false);    
+    d3.selectAll('circle.selected').classed(cclass, false);
     d3.selectAll('circle.selected').classed('selected', false);
     dat = _.uniq(dat);
     $('#'+cclass).val(dat.join(' '));
     $('.locate').change();
     info.clear();
   });
-  
-  
+
+
   $("[id^='tograph']").on('click', function(event){
-    var cclass = this.id.replace('tograph', 'highlighted'); 
+    var cclass = this.id.replace('tograph', 'highlighted');
     var dat =  $('#'+cclass).val().split(' ');
-    var circles = d3.selectAll('circle'); 
+    var circles = d3.selectAll('circle');
     circles.filter(function(d, i) {return (_.contains(dat, d.k));})
       .classed('selected', true );
      _.each(dat, info.add);
   });
-  
+
   $("[id^='remove']").on('click', function(event){
-    var cclass = this.id.replace('remove', 'highlighted'); 
+    var cclass = this.id.replace('remove', 'highlighted');
     d3.selectAll('circle.'+cclass).attr('fill', undefined);
     d3.selectAll('circle.'+cclass).attr('stroke', undefined);
-    d3.selectAll('circle.'+cclass).classed(cclass, false);   
+    d3.selectAll('circle.'+cclass).classed(cclass, false);
     $('#'+cclass).val('');
     $('.locate').change();
   });
@@ -506,18 +490,18 @@ $(document).ready(function() {
     $(this).spectrum('set',(to=='stroke' ? $(this).css('stroke'): $(this).css('fill') ));
     $(this).show();
   });
-  
+
 
   $('.locate').on('change', function(event){
-    
+
     var tag_entry = event.target.value.split(" ");
     if (tag_entry.length==1 & tag_entry[0]=="") {
         event.preventDefault();
         return
     }
-    
+
     var cclass = this.id;
-  	var circles = d3.selectAll('circle'); 
+  	var circles = d3.selectAll('circle');
   	
   	var dat = [];
   	circles.each(function(d) { dat.push(d.k);});
@@ -527,7 +511,7 @@ $(document).ready(function() {
   	  if (regex=='') { return (new Array());}
       return _.filter(list, function(obj){ return obj.match(regex);});
     };
-    
+
   	var tag_valid = _.flatten(_.map(tag_entry, function(item) {return search(dat, item);}  ));
   	
 	circles = circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));});
@@ -535,16 +519,16 @@ $(document).ready(function() {
 	
 	circles.attr('fill', undefined );
     circles.attr('stroke', undefined);
-   
+
 	_.each(circles[0], function(c) {
 	       cls = $(c).attr('class').split(' ');
 	       cls.sort();
 	       cls = _.reject(cls, function(el) {return el=='selected'});
-	      
+	
 	       _.each(cls, function(ll) {
-	         
+	
 	           hls = highlights[ll];
-	         
+	
 	           if (!_.isUndefined(hls.fill)) {
 	               $(c).attr('fill', hls.fill );
 	           }
@@ -552,7 +536,7 @@ $(document).ready(function() {
                    $(c).attr('stroke', hls.stroke );
                    $(c).attr('stroke-width', '2px');
 	           }
-	         });  
+	         });
 	});
 	
 	info.clear();
@@ -563,13 +547,13 @@ $(document).ready(function() {
   	var nsamples = $("circle[class^='highlighted']").length/nplots;
   	if (_.isNaN(nsamples)) { nsamples=0;}
     $("#nb_samples").text('('+nsamples+')');
-    
+
   	event.preventDefault();
   	
  	});
-  
 
-  
+
+
   $("#sample_selection").on("change", function(){
     var val = $(event.target).val().split('.');
     var l1 = val[0];
