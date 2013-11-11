@@ -8,7 +8,7 @@ def intOrNone(x):
         return None
     return int(x)
 
-doc = lxml.etree.parse(open('msigdb_v3.1.xml'))
+doc = lxml.etree.parse(open('msigdb_v4.0.xml'))
 root = doc.getroot()
 
 msigdb_info = open('info.txt', 'w')
