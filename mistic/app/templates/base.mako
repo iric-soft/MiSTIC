@@ -190,7 +190,6 @@ mistic = {
 
   window.GODropdown = Dropdown.extend({
     item_view: GOItemView,
-    url: "${request.route_url('mistic.json.go.search')}",
     max_items: 100,
     menu: '<ul class="typeahead dropdown-menu" style="max-width: 400px; max-height: 300px; overflow-x: hidden; overflow-y: auto"></ul>',
 

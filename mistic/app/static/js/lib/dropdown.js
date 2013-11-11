@@ -392,6 +392,10 @@
                 this.collection = new Backbone.Collection();
             }
 
+            if (this.options.url !== undefined) {
+                this.url = this.options.url;
+            }
+
             this.fetching_items = false;
             this.current_search = null;
             this.selected_item = null;

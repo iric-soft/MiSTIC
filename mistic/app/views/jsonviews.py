@@ -14,6 +14,11 @@ import re
 
 import pickle
 import os
+import logging
+
+from beaker.cache import *
+from mistic.app.cache_helpers import *
+
 
 
 def urank(ranks, N):
@@ -162,6 +167,41 @@ class Annotation(object):
     def genes(self):
         result = self.annotation.get_gene_ids(self.request.GET.getall('filter_gsid'))
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
+
+    @key_cache_region('mistic', 'jsonviews', lambda args: args[1])
+    def _genesets(self, query):
+        query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '' ]
+        query = [ re.compile(q, re.I) for q in query ]
+        out = []
+
+        for gsid in sorted(self.annotation.get_geneset_ids()):
+            geneset_id, ident = gsid.rsplit(':', 1)
+            geneset_id = geneset_id.split('.')
+            geneset_id, geneset_cat = geneset_id[0], geneset_id[1:]
+            geneset = self.annotation.genesets.get(geneset_id)
+            row = geneset.genesets.ix[ident]
+            name = row['name']
+            if (any([ q.match(gsid)  is not None for q in query ]) or
+                all([ q.search(name) is not None for q in query ])):
+                out.append(dict(name = name, id = gsid))
+        return out
+
+    @view_config(route_name="mistic.json.annotation.gs", request_method="GET", renderer="json")
+    def genesets(self):
+        query = self.request.GET.getall('q')
+        query = tuple(sum([ q.split() for q in query ], []))
+
+        limit = self.request.GET.get('l')
+        try:
+            limit = int(limit)
+        except:
+            limit = None
+
+        out = self._genesets(query)
+
+        if limit is not None:
+            out = out[:limit]
+        return out
 
 
 

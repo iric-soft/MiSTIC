@@ -135,7 +135,10 @@ $(document).ready(function() {
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset=dataset)}";
 
-  var go_entry = new GODropdown({ el: $("#goterm") });
+  var go_entry = new GODropdown({
+    el: $("#goterm"),
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
+  });
 
   go_entry.on('change', function(item) {
     if (item === null) {
@@ -143,7 +146,7 @@ $(document).ready(function() {
     } else {
       $.ajax({
         url: "${request.route_url('mistic.json.annotation.gene_ids', annotation=my_annotation)}",
-        data: { go: item.id },
+        data: { filter_gsid: item.id },
         dataype: 'json',
         success: function(data) {
           var gene_set = {};

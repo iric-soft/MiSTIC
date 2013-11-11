@@ -325,7 +325,7 @@ class GeneAnnotation(Annotation):
 
     return r
 
-  def get_geneset_ids(self, gene, genesets = None):
+  def get_geneset_ids(self, gene = None, genesets = None):
     def all(g):
       return True
 
@@ -432,11 +432,14 @@ class GeneSet(object):
     ga = self.annotations.get(annotation)
     if ga is None:
       return set()
-    r = set()
 
-    for gsid in ga.gene_to_geneset.get(gene, set()):
-      r.add(self.full_geneset_id(gsid))
-    return r
+    if gene is None:
+      return set(ga.geneset_to_gene.index.map(self.full_geneset_id))
+    else:
+      r = set()
+      for gsid in ga.gene_to_geneset.get(gene, set()):
+        r.add(self.full_geneset_id(gsid))
+      return r
 
   @property
   def info(self):
