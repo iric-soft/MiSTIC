@@ -705,8 +705,13 @@ datasets = Collection(DataSet)
 
 class GlobalConfig(object):
   def __init__(self, config_path):
+
     self.config_path = config_path
-    self.config = json.loads(re.sub(r'(?m)//.*$', '', open(self.config_path, 'rbU').read()))
+    if os.path.splitext(self.config_path)[1].lower() == '.yaml':
+      import yaml
+      self.config = yaml.load(open(self.config_path, 'rbU'))
+    else:
+      self.config = json.loads(re.sub(r'(?m)//.*$', '', open(self.config_path, 'rbU').read()))
 
   @property
   def config_dir(self):
