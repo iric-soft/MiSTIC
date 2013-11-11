@@ -18,7 +18,7 @@ from cache_helpers import *
 def read_json_table(path, converters = {}):
   rows = []
   index = []
-  for row in io.open(path, 'rbU'):
+  for rownum, row in enumerate(io.open(path, 'rbU')):
     ident, row = row.split(None, 1)
     try:
       row = json.loads(row)
@@ -206,7 +206,7 @@ class Orthology(object):
 
 
 
-class ColAnnotation (object):
+class Annotation(object):
   def __init__(self, config, global_config):
     self.config      = config
 
@@ -215,7 +215,13 @@ class ColAnnotation (object):
     self.description = self.config.get('desc', '')
     self.path        = self.config['path']
 
-    self.attrs       = read_json_table(global_config.file_path(self.path))
+    self.data = read_json_table(global_config.file_path(self.path))
+
+
+
+class DatasetAnnotation(Annotation):
+  def __init__(self, config, global_config):
+    super(DatasetAnnotation, self).__init__(config, global_config)
 
   @property
   def info(self):
@@ -226,17 +232,11 @@ class ColAnnotation (object):
 
 
 
-class Annotation(object):
+class GeneAnnotation(Annotation):
   def __init__(self, config, global_config):
-    self.config      = config
+    super(GeneAnnotation, self).__init__(config, global_config)
 
-    self.id          = self.config.get('id', uuid.uuid4())
-    self.name        = self.config.get('name', self.id)
-    self.description = self.config.get('desc', '')
-    self.path        = self.config['path']
-    self.genesets    = {}
-
-    self.data = read_json_table(global_config.file_path(self.path))
+    self.genesets = {}
     self.genes = frozenset(self.data.index)
 
   def geneset_info(self, gsid):
@@ -456,7 +456,8 @@ class DataSet(object):
     self.type        = self.config.get('type', '')
     self.tags        = self.config.get('tags', '')
     self.experiment  = self.config.get('expt', '')
-    self.annotation  = annotations.get(self.config['anot'])
+    self.annotation  = annotations.get(self.config['annr'])
+    self.cannotation = dataset_annotations.get(self.config['annc'])
     self.transforms  = []
 
     for x in self.config.get('xfrm', ['none']):
@@ -680,38 +681,48 @@ class Collection(object):
     return tuple(self.objects)
 
 
+
 ontology = None
 orthology = None
-annotations = Collection(Annotation)
+dataset_annotations = Collection(DatasetAnnotation)
+annotations = Collection(GeneAnnotation)
 genesets = Collection(GeneSet)
 datasets = Collection(DataSet)
 
+
+
 class GlobalConfig(object):
-  def __init__(self, settings_json):
-    self.root_config = settings_json
-    self.root_path = os.path.split(os.path.abspath(settings_json))[0]
-    self.json_data = json.loads(re.sub(r'(?m)//.*$', '', open(self.root_config, 'rbU').read()))
+  def __init__(self, config_path):
+    self.config_path = config_path
+    self.config = json.loads(re.sub(r'(?m)//.*$', '', open(self.config_path, 'rbU').read()))
+
+  @property
+  def config_dir(self):
+    return os.path.split(os.path.abspath(self.config_path))[0]
 
   def file_path(self, path):
     if os.path.isabs(path):
       return path
     else:
-      return os.path.join(self.root_path, path)
+      return os.path.join(self.config_dir, path)
 
   def load_metadata(self):
     global ontology
+    global col_annotations
     global annotations
     global genesets
     global orthology
 
     logging.info('loading ontology')
-    ontology = Ontology(self.json_data.get('ontology'), self)
+    ontology = Ontology(self.config.get('ontology'), self)
     logging.info('loading orthologs')
-    orthology = Orthology(self.json_data.get('orthology'), self)
+    orthology = Orthology(self.config.get('orthology'), self)
     logging.info('loading annotations')
-    annotations.load(self.json_data.get('annotations'), self)
+    annotations.load(self.config.get('annotations'), self)
+    logging.info('loading dataset annotations')
+    dataset_annotations.load(self.config.get('dataset_annotations'), self)
     logging.info('loading genesets')
-    genesets.load(self.json_data.get('genesets'), self)
+    genesets.load(self.config.get('genesets'), self)
     logging.info('metadata loading done')
 
   def load(self, dataset = None):
@@ -719,9 +730,9 @@ class GlobalConfig(object):
 
     logging.info('loading data')
     if dataset is None:
-      datasets.load(self.json_data.get('datasets'), self)
+      datasets.load(self.config.get('datasets'), self)
     else:
-      datasets.load([ x for x in self.json_data.get('datasets') if x.get('id') == dataset ], self)
+      datasets.load([ x for x in self.config.get('datasets') if x.get('id') == dataset ], self)
 
     logging.info('data loading done')
 
