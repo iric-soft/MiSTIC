@@ -144,7 +144,6 @@ def main(global_config, **settings):
     
     if 'mistic.datasets' in settings: 
       settings.update(load_datasets_settings (settings['mistic.datasets'], global_config))
-      
 
     config_args = dict(root_factory=Root,
                        settings=settings,
