@@ -250,6 +250,47 @@ class Dataset(object):
     def genes(self):
         return self.dataset.genes
 
+    @view_config(route_name="mistic.json.dataset.sampleinfo", request_method="GET", renderer="json")
+    def sample_info(self):
+        if not self.dataset.cannotation:
+            return []
+        anns = self.dataset.cannotation.data
+        return { col: sorted(set(anns[col]) - set([""])) for col in anns.columns }
+
+    @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
+    def sample_enrichment(self):
+        if not self.dataset.cannotation:
+            return []
+        anns = self.dataset.cannotation.data
+        samples = set(json.loads(self.request.POST['samples']))
+        out = []
+        for col in anns.columns:
+            all_samples = set(anns.index[anns[col].map(lambda x: x not in ("", None))])
+            tst_samples = samples & all_samples
+            col_vals = set(anns[col]) - set(("", None))
+            for val in col_vals:
+                val_samples = set(anns.index[anns[col] == val])
+
+                YY = len(val_samples & tst_samples)  #  samples with col == val
+                YN = len(tst_samples) - YY           #  samples with col != val
+                NY = len(val_samples - tst_samples)  # ~samples with col == val
+                NN = len(all_samples) - YY - YN - NY # ~samples with col != val
+
+                tab = [ [ YY, YN ], [ NY, NN ] ]
+                odds, p_val = scipy.stats.fisher_exact(tab)
+                if p_val > 0.05:
+                    continue
+                if math.isnan(odds) or math.isinf(odds): odds = str(odds)
+                out.append(dict(
+                    key = col,
+                    val = val,
+                    p_val = p_val,
+                    odds = odds,
+                    tab = tab
+                ))
+        out.sort(key = lambda x: x['p_val'])
+        return out
+
     @view_config(route_name="mistic.json.dataset.samples", request_method="GET", renderer="json")
     def samples(self):
         filters = self.request.GET.items()
