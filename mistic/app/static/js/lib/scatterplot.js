@@ -96,91 +96,84 @@
         if (redraw !== false) this.draw();
     };
 
-							 
-	scatterplot.prototype.highlightCircle = function (e){
-		//d3.selectAll('#graph svg').selectAll('circle').classed('notselected', true);
-		d3.selectAll('#graph svg').selectAll('circle')
-			.filter(function(d, i) {return (d.k==e.k);})
-			.classed('selected', !d3.select(this).classed('selected'));
-		info.toggle(e.k);
-		
-	};
+    scatterplot.prototype.highlightCircle = function (e) {
+        var current_selection = this.getSelection();
+        var is_selected = _.contains(current_selection, e.k);
+
+	info.toggle(e.k);
+        $(document.body).trigger('updateselection', [this.getSelection()]);
+    };
 	
-  scatterplot.prototype.brushstart= function () {
-    
-    //d3.selectAll('#graph svg').selectAll('circle').classed('notselected', true);
-    //d3.selectAll('.brush').selectAll('.extent').attr('width', '0').attr('height','0');
+    scatterplot.prototype.brushstart = function() {
+    };
 
-  };
-  
-  scatterplot.prototype.brushed= function () {
-   
-    var e = d3.event.target.extent();
-    var circles  = d3.select(this.parentNode).selectAll("circle")
-      .filter(function(d) { return e[0][0] <= d.x && d.x <= e[1][0] && e[0][1] <= d.y && d.y <= e[1][1] });
-    var selected =  _.map(circles.data(), function(c) {return c.k;});
-    d3.selectAll('#graph svg').selectAll("circle")
-      .classed('selected', function(d) {return _.contains(selected, d.k);  });
-      
-  };
+    scatterplot.prototype.getSelection = function() {
+        var circles = d3
+            .select(this.svg)
+            .selectAll("g.node.selected");
+        var selected = _.map(circles.data(), function(c) { return c.k; });
+        return selected;
+    };
 
-  scatterplot.prototype.brushend = function () {
-    
-    var circles = d3.select('#graph svg').selectAll("circle")
-          .filter(function() {return d3.select(this).classed('selected');});
-    
-    //d3.selectAll('#graph svg').selectAll('circle').classed('selected', false);
-    //d3.selectAll('#graph svg').selectAll('circle').classed('notselected', false);
-    var selected =  _.map(circles.data(), function(c) { return c.k;});
-    selected = _.uniq(selected);
-    
-    info.clear();
-    _.each(selected, info.add);
-    
-    
-   
-    
-    
-  };
+    scatterplot.prototype.brushed = function() {
+        var e = d3.event.target.extent();
+        var circles  = d3
+            .select(this.parentNode)
+            .selectAll("g.node")
+            .filter(function(d) {
+                return e[0][0] <= d.x && d.x <= e[1][0] &&
+                       e[0][1] <= d.y && d.y <= e[1][1]
+            });
+        var selected = _.map(circles.data(), function(c) {return c.k;});
+        $(document.body).trigger('updateselection', [selected]);
+    };
 
-	  scatterplot.prototype.makeMinimalAxes = function() {
-	      
-	    xmean = stats.average(_.values(this.xdata)); 
+    scatterplot.prototype.brushend = function() {
+        var circles = d3
+            .select(this.parentNode)
+            .selectAll("g.node.selected");
+
+        var selected = _.map(circles.data(), function(c) { return c.k;});
+    
+        info.clear();
+        _.each(selected, info.add);
+        $(document.body).trigger('updateselection', [selected]);
+    };
+
+    scatterplot.prototype.makeMinimalAxes = function() {
+	xmean = stats.average(_.values(this.xdata)); 
         ymean = stats.average(_.values(this.ydata)); 
         xrg = stats.range(_.values(this.xdata));
         yrg = stats.range(_.values(this.ydata));
       
        this.xAxis = d3.svg
             .axis()
-       .scale(this.xScale)
-       .orient("bottom")
-       .tickValues([xrg[0]+0.001, xmean, xrg[1]])
-       .tickFormat(d3.format(",.1f"));
+            .scale(this.xScale)
+            .orient("bottom")
+            .tickValues([xrg[0]+0.001, xmean, xrg[1]])
+            .tickFormat(d3.format(",.1f"));
        
       this.yAxis = d3.svg
             .axis()
-      .scale(this.yScale)
-      .orient("left")
-      .tickValues([yrg[0]+0.01, ymean, yrg[1]])
-      .tickFormat(d3.format(",.1f"));
-        
-	  };
+            .scale(this.yScale)
+            .orient("left")
+            .tickValues([yrg[0]+0.01, ymean, yrg[1]])
+            .tickFormat(d3.format(",.1f"));
+    };
 	  
-	  scatterplot.prototype.makeFullAxes = function() {
-	   
-      this.xAxis = d3.svg.axis()
-       .scale(this.xScale)
-       .orient("bottom")
-       .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
-       .ticks(5);
+    scatterplot.prototype.makeFullAxes = function() {
+        this.xAxis = d3.svg.axis()
+            .scale(this.xScale)
+            .orient("bottom")
+            .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
+            .ticks(5);
       
     
-      this.yAxis = d3.svg.axis()
-      .scale(this.yScale)
-      .orient("left")
-      .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
-      .ticks(5);
-
+        this.yAxis = d3.svg.axis()
+            .scale(this.yScale)
+            .orient("left")
+            .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
+            .ticks(5);
     };
 	
     scatterplot.prototype.makeAxes = function() {
@@ -408,7 +401,7 @@
             .attr('cy', function(d) { return self.yScale(d.y); })
             .attr('r',  this.options.pt_size)
            	.attr('opacity', 0.65)
-           	.on('click', this.highlightCircle);
+           	.on('click', _.bind(this.highlightCircle, this));
      
           node.append('title')
             .text(function(d) {return 'ID='+d.k+'  ('+d.x.toFixed(2)+', '+d.y.toFixed(2)+')';});

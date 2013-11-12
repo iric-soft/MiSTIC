@@ -93,13 +93,10 @@ circle  {
   stroke:rgb(155, 42, 141);
  }
 
-
-
-circle.notselected {
-  fill : rgb(0, 0, 0); 
+g.node.selected {
 }
 
-circle.selected  {
+g.node.selected circle {
   fill :rgb(20, 216, 28); 
 }
 
