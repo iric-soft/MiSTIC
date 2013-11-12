@@ -13,19 +13,19 @@
             axes: false,
             pt_size: 4,
             makeGridLine:false,
-            gridValue: 10, 
+            gridValue: 10,
             textOnly : false,
             minimal : true,
             clearBrush: false,
-           
+
         };
-      
+
         if (options !== undefined) {
             _.extend(this.options, options);
         }
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
- 
+
         this.width = this.options.width;
         this.height = this.options.height;
 
@@ -42,7 +42,7 @@
 
         this.setXData(xdata, false);
         this.setYData(ydata, false);
-      
+
         this.yAxis = undefined;
         this.xAxis = undefined;
 
@@ -59,7 +59,7 @@
                 .attr("height", height);
 
             this.draw();
-            
+
         }
     };
 
@@ -100,10 +100,10 @@
         var current_selection = this.getSelection();
         var is_selected = _.contains(current_selection, e.k);
 
-	info.toggle(e.k);
+        info.toggle(e.k);
         $(document.body).trigger('updateselection', [this.getSelection()]);
     };
-	
+
     scatterplot.prototype.brushstart = function() {
     };
 
@@ -122,7 +122,7 @@
             .selectAll("g.node")
             .filter(function(d) {
                 return e[0][0] <= d.x && d.x <= e[1][0] &&
-                       e[0][1] <= d.y && d.y <= e[1][1]
+                    e[0][1] <= d.y && d.y <= e[1][1]
             });
         var selected = _.map(circles.data(), function(c) {return c.k;});
         $(document.body).trigger('updateselection', [selected]);
@@ -134,90 +134,89 @@
             .selectAll("g.node.selected");
 
         var selected = _.map(circles.data(), function(c) { return c.k;});
-    
+
         info.clear();
         _.each(selected, info.add);
         $(document.body).trigger('updateselection', [selected]);
     };
 
     scatterplot.prototype.makeMinimalAxes = function() {
-	xmean = stats.average(_.values(this.xdata)); 
-        ymean = stats.average(_.values(this.ydata)); 
+        xmean = stats.average(_.values(this.xdata));
+        ymean = stats.average(_.values(this.ydata));
         xrg = stats.range(_.values(this.xdata));
         yrg = stats.range(_.values(this.ydata));
-      
-       this.xAxis = d3.svg
+
+        this.xAxis = d3.svg
             .axis()
             .scale(this.xScale)
             .orient("bottom")
             .tickValues([xrg[0]+0.001, xmean, xrg[1]])
             .tickFormat(d3.format(",.1f"));
-       
-      this.yAxis = d3.svg
+
+        this.yAxis = d3.svg
             .axis()
             .scale(this.yScale)
             .orient("left")
             .tickValues([yrg[0]+0.01, ymean, yrg[1]])
             .tickFormat(d3.format(",.1f"));
     };
-	  
+
     scatterplot.prototype.makeFullAxes = function() {
         this.xAxis = d3.svg.axis()
             .scale(this.xScale)
             .orient("bottom")
             .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
             .ticks(5);
-      
-    
+
+
         this.yAxis = d3.svg.axis()
             .scale(this.yScale)
             .orient("left")
             .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
             .ticks(5);
     };
-	
+
     scatterplot.prototype.makeAxes = function() {
-      
-    	if (this.options.minimal)  {  this.makeMinimalAxes(); }
-    	else { this.makeFullAxes();  }
 
-      var svg = d3.select(this.svg);
+        if (this.options.minimal) {
+            this.makeMinimalAxes();
+        } else {
+            this.makeFullAxes();
+        }
 
-       svg .append("g")
-	    .attr("class", "axis axis-x")
-	    .attr("transform", "translate(0," + (this.height - this.options.padding[2] + this.options.outer) + ")")
-	    .call(this.xAxis);
-     
-	    svg .append("g")
-	    .attr("class", "axis axis-y")
-	    .attr("transform", "translate(" + (this.options.padding[3] - this.options.outer) + ",0)")
-	    .call(this.yAxis);
-	    
+        var svg = d3.select(this.svg);
+
+        svg .append("g")
+            .attr("class", "axis axis-x")
+            .attr("transform", "translate(0," + (this.height - this.options.padding[2] + this.options.outer) + ")")
+            .call(this.xAxis);
+
+        svg .append("g")
+            .attr("class", "axis axis-y")
+            .attr("transform", "translate(" + (this.options.padding[3] - this.options.outer) + ",0)")
+            .call(this.yAxis);
+
         svg .selectAll('.axis path, .axis line')
             .attr('fill', 'none')
             .attr('stroke', 'black')
             .attr('opacity', .3)
             .attr('shape-rendering', 'crispEdges');
-            
+
 
         svg .selectAll('.axis text')
             .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
 
-		if (this.options.makeGridLine) {
-			svg.selectAll('.axis-x line')
-				.filter(function(d, i) {return d <= this.options.gridValue})
-				.attr('y1',-(this.height -this.options.padding[2] + this.options.outer)-this.yScale(d3.min([this.yScale.domain()[1],this.options.gridValue])));
-				
-			 svg.selectAll('.axis-y line')
-			 	.filter(function(d, i) {return d <= this.options.gridValue})
-			 	.attr('x2', this.xScale(this.xScale.domain()[1])-(this.options.padding[3] - this.options.outer));
-		}
-		
-	
-  
+        if (this.options.makeGridLine) {
+            svg.selectAll('.axis-x line')
+                .filter(function(d, i) { return d <= this.options.gridValue })
+                .attr('y1',-(this.height -this.options.padding[2] + this.options.outer)-this.yScale(d3.min([this.yScale.domain()[1],this.options.gridValue])));
 
-    
-    if (this.options.axis_labels) {
+            svg.selectAll('.axis-y line')
+                .filter(function(d, i) { return d <= this.options.gridValue })
+                .attr('x2', this.xScale(this.xScale.domain()[1])-(this.options.padding[3] - this.options.outer));
+        }
+
+        if (this.options.axis_labels) {
             svg .select('g.axis-x')
                 .append('g')
                 .attr('class', 'axis-label-x')
@@ -229,7 +228,6 @@
                 .attr('text-anchor', 'middle')
                 .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 600')
                 .text(this.xlab);
-            
 
             svg .select('g.axis-y')
                 .append('g')
@@ -245,10 +243,10 @@
         }
     };
 
-    
+
     scatterplot.prototype.draw = function(data) {
-    	info.clear();  //utils.js  
-    	 
+        info.clear();  //utils.js
+
         var self = this;
 
         if (this.xdata === undefined || this.ydata === undefined) {
@@ -267,112 +265,114 @@
         var v2 = [];
         var v1_anscombe = [];
         var v2_anscombe = [];
-		
+
         var xy = [];
-        
+
         var lg = true;
-        
+
         for (var i in keys) {
             var k = keys[i];
             var x = this.xdata[k];
             var y = this.ydata[k];
-            if  (x < 0.0 ||  y < 0.0) { lg=false; xy.push({x:x,y:y,k:k});  }
-            else {xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});}
-            //xy.push({ x: x >= 0.0 & x <0.0105 ? 0.01 : x, y: y >= 0.0 & y<0.0105 ? 0.01 : y , k: k});
-           
+            if  (x < 0.0 ||  y < 0.0) {
+                lg = false;
+                xy.push({x:x,y:y,k:k});
+            } else {
+                xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});
+            }
+
             v1.push(x);
             v2.push(y);
             v1_log.push(Math.log(x + 1/1024));
             v2_log.push(Math.log(y + 1/1024));
- 
         }
-        
-        var rr = Math.max((stats.range(v1)[1]-stats.range(v1)[0]), (stats.range(v2)[1]-stats.range(v2)[0]));     
-        if (rr<1) {lg=false;}
-        
+
+        var rr = Math.max(
+            stats.range(v1)[1]-stats.range(v1)[0],
+            stats.range(v2)[1]-stats.range(v2)[0]);
+        if (rr<1) {
+            lg = false;
+        }
+
         var r = stats.pearson(v1, v2);
         var r_log = stats.pearson(v1_log, v2_log);
-       
+
         var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
-       
+
         if (this.options.textOnly) {
-           var fsize = 12-100/width;
-           
-           svg .append('rect')
+            var fsize = 12-100/width;
+
+            svg .append('rect')
                 .attr('width', width)
                 .attr('height', height)
                 .attr('x', this.options.padding[3] - this.options.inner)
                 .attr('y', this.options.padding[0] - this.options.inner)
                 .attr('fill', 'white');
-            if (fsize>8) {
-            this.corr = svg .append('text')
-                .attr('x', this.options.padding[3]+ width/20)
-                .attr('y', this.options.padding[0]+ height/3)
-                .attr('text-anchor', 'left')
-                .attr('style', 'font-family: helvetica; font-size: '+ fsize+ 'px; font-weight: 300');
-            
-            
-             
-            if (lg) { 
-              var rtext = fsize>=11 ? 'r(log+k) = ' : '';
-              this.corr.text(rtext + r_log.toFixed(2));}
-            else {
-              var rtext = fsize>=11 ? 'r = ' : '';
-              this.corr.text(rtext + r.toFixed(2));}
+            if (fsize > 8) {
+                this.corr = svg .append('text')
+                    .attr('x', this.options.padding[3]+ width/20)
+                    .attr('y', this.options.padding[0]+ height/3)
+                    .attr('text-anchor', 'left')
+                    .attr('style', 'font-family: helvetica; font-size: '+ fsize+ 'px; font-weight: 300');
+                if (lg) {
+                    var rtext = fsize>=11 ? 'r(log+k) = ' : '';
+                    this.corr.text(rtext + r_log.toFixed(2));
+                } else {
+                    var rtext = fsize>=11 ? 'r = ' : '';
+                    this.corr.text(rtext + r.toFixed(2));
+                }
             }
-           
-        }
-  
-        else {
-          var dmx = d3.extent(xy, function(d) { return d.x; });
-          var dmy = d3.extent(xy, function(d) { return d.y; });
-          
-          if (lg) {
-            this.xScale = d3.scale.log();  
-		        this.yScale = d3.scale.log();
-		        
-          }
-          else {
-              this.xScale = d3.scale.linear();
-              this.yScale = d3.scale.linear();
-              //if (rr<1) {
-              //  dmx = [0,1];
-              //  dmy = [0,1];
-              //}
-          }
-          
-         
-          this.xScale.domain(dmx)
-               .range([ this.options.padding[3], this.width - this.options.padding[1] ])
-               .nice();
+        } else {
+            var dmx = d3.extent(xy, function(d) { return d.x; });
+            var dmy = d3.extent(xy, function(d) { return d.y; });
 
-          this.yScale.domain(dmy)
-              .range([ this.height - this.options.padding[2], this.options.padding[0] ])
-              .nice();         
-                
-        
-          var bkgx = this.options.padding[3]-this.options.inner;
-          var bkgy = this.options.padding[0]-this.options.inner;
-          this.xScaleBrush = this.xScale.copy();
-          this.yScaleBrush = this.yScale.copy();
-          this.xScaleBrush.range([ bkgx, bkgx+width ]);
-          this.yScaleBrush.range([ bkgy + height, bkgy ]);
-               
-        
-          this.brush = d3.svg.brush()
-              .x(this.xScaleBrush)
-              .y(this.yScaleBrush)
-              .on("brushstart", this.brushstart)
-              .on("brush", this.brushed)
-              .on("brushend", this.brushend);
-              
-              
-       
-           var color='transparent';
-           if (this.options.background) { color='white'; }
-       
-           svg .append('rect')
+            if (lg) {
+                this.xScale = d3.scale.log();
+                this.yScale = d3.scale.log();
+            } else {
+                this.xScale = d3.scale.linear();
+                this.yScale = d3.scale.linear();
+                //if (rr<1) {
+                //  dmx = [0,1];
+                //  dmy = [0,1];
+                //}
+            }
+
+            this.xScale.domain(dmx)
+                .range([ this.options.padding[3], this.width - this.options.padding[1] ])
+                .nice();
+
+            this.yScale.domain(dmy)
+                .range([ this.height - this.options.padding[2], this.options.padding[0] ])
+                .nice();
+
+            var bkgx = this.options.padding[3]-this.options.inner;
+            var bkgy = this.options.padding[0]-this.options.inner;
+
+            this.xScaleBrush = this.xScale.copy();
+            this.yScaleBrush = this.yScale.copy();
+
+            this.xScaleBrush.range([ bkgx, bkgx+width ]);
+            this.yScaleBrush.range([ bkgy + height, bkgy ]);
+
+            this.brush = d3.svg.brush()
+                .x(this.xScaleBrush)
+                .y(this.yScaleBrush)
+                .on("brushstart", this.brushstart)
+                .on("brush", this.brushed)
+                .on("brushend", this.brushend);
+
+            svg.append("g")
+                .classed("brush", true)
+                .call(this.brush);
+
+            var color = 'transparent';
+            if (this.options.background) {
+                color = 'white';
+            }
+
+            svg .append('rect')
                 .attr('width', width)
                 .attr('height',height)
                 .attr('x', bkgx)
@@ -382,45 +382,37 @@
                 .attr('stroke-width', '1')
                 .attr('shape-rendering', 'crispEdges');
 
-          svg.append("g")
-              .classed("brush", true)
-              .call(this.brush);
-            
-             
-           
-          if (this.options.axes) {  this.makeAxes();  }
-        
-    
-          node = svg .selectAll(".node")
-              .data(xy)
-              .enter().append("g")
-              .attr("class", "node");
-            
-          node.append('circle')
-            .attr('cx', function(d) { return self.xScale(d.x); })
-            .attr('cy', function(d) { return self.yScale(d.y); })
-            .attr('r',  this.options.pt_size)
-           	.attr('opacity', 0.65)
-           	.on('click', _.bind(this.highlightCircle, this));
-     
-          node.append('title')
-            .text(function(d) {return 'ID='+d.k+'  ('+d.x.toFixed(2)+', '+d.y.toFixed(2)+')';});
-           
-          var pt_size = this.options.pt_size;
-          var font_size = pt_size + 8; 
-     
-     	    node.append("text")
-           	.text(function(d) {return d.k;} )
-           	.attr('x', function(d) { return self.xScale(d.x)+pt_size; })
-           	.attr('y', function(d) { return self.yScale(d.y)+pt_size;})
-           	.attr('style', 'font-size:'+ font_size+"px;")
-           	.classed('circlelabel invisible', true); 
-        
+            if (this.options.axes) {
+                this.makeAxes();
+            }
 
-      
+            node = svg
+                .selectAll(".node")
+                .data(xy)
+                .enter().append("g")
+                .attr("class", "node");
 
-       }
-    
-        
+            node.append('circle')
+                .attr('cx', function(d) { return self.xScale(d.x); })
+                .attr('cy', function(d) { return self.yScale(d.y); })
+                .attr('r',  this.options.pt_size)
+                .attr('opacity', 0.65)
+                .on('click', _.bind(this.highlightCircle, this));
+
+            node.append('title')
+                .text(function(d) {
+                    return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
+                });
+
+            var pt_size = this.options.pt_size;
+            var font_size = pt_size + 8;
+
+            node.append("text")
+                .text(function(d) {return d.k;} )
+                .attr('x', function(d) { return self.xScale(d.x)+pt_size; })
+                .attr('y', function(d) { return self.yScale(d.y)+pt_size;})
+                .attr('style', 'font-size:'+ font_size+"px;")
+                .classed('circlelabel invisible', true);
+        }
     };
 })();
