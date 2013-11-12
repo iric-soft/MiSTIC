@@ -350,6 +350,21 @@
             var bkgx = this.options.padding[3]-this.options.inner;
             var bkgy = this.options.padding[0]-this.options.inner;
 
+            var color = 'transparent';
+            if (this.options.background) {
+                color = 'white';
+            }
+
+            svg .append('rect')
+                .attr('width', width)
+                .attr('height',height)
+                .attr('x', bkgx)
+                .attr('y', bkgy)
+                .attr('fill', color)
+                .attr('stroke', 'rgba(0,0,0,.2)')
+                .attr('stroke-width', '1')
+                .attr('shape-rendering', 'crispEdges');
+
             this.xScaleBrush = this.xScale.copy();
             this.yScaleBrush = this.yScale.copy();
 
@@ -366,21 +381,6 @@
             svg.append("g")
                 .classed("brush", true)
                 .call(this.brush);
-
-            var color = 'transparent';
-            if (this.options.background) {
-                color = 'white';
-            }
-
-            svg .append('rect')
-                .attr('width', width)
-                .attr('height',height)
-                .attr('x', bkgx)
-                .attr('y', bkgy)
-                .attr('fill', color)
-                .attr('stroke', 'rgba(0,0,0,.2)')
-                .attr('stroke-width', '1')
-                .attr('shape-rendering', 'crispEdges');
 
             if (this.options.axes) {
                 this.makeAxes();
