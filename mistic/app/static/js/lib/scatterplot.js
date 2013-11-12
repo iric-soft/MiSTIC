@@ -99,8 +99,6 @@
     scatterplot.prototype.highlightCircle = function (e) {
         var current_selection = this.getSelection();
         var is_selected = _.contains(current_selection, e.k);
-
-        info.toggle(e.k);
         $(document.body).trigger('updateselection', [this.getSelection()]);
     };
 
@@ -134,9 +132,6 @@
             .selectAll("g.node.selected");
 
         var selected = _.map(circles.data(), function(c) { return c.k;});
-
-        info.clear();
-        _.each(selected, info.add);
         $(document.body).trigger('updateselection', [selected]);
     };
 
@@ -245,8 +240,6 @@
 
 
     scatterplot.prototype.draw = function(data) {
-        info.clear();  //utils.js
-
         var self = this;
 
         if (this.xdata === undefined || this.ydata === undefined) {
