@@ -46,6 +46,8 @@
         this.yAxis = undefined;
         this.xAxis = undefined;
 
+        this.selection = [];
+
         this.draw();
     };
 
@@ -86,6 +88,14 @@
         if (redraw !== false) this.draw();
     };
 
+    scatterplot.prototype.notifySelectionChange = function(quiet) {
+        var selection = this.getSelection();
+        if (!_.isEqual(this.current_selection, selection)) {
+            this.current_selection = selection;
+            if (!quiet) $(this.svg).trigger('updateselection', [this.current_selection]);
+        }
+    };
+
     scatterplot.prototype.setYData = function(ydata, redraw) {
         if (ydata !== undefined) {
             this.ylab = ydata.symbol;
@@ -96,13 +106,17 @@
         if (redraw !== false) this.draw();
     };
 
-    scatterplot.prototype.highlightCircle = function (e) {
-        var current_selection = this.getSelection();
-        var is_selected = _.contains(current_selection, e.k);
-        $(document.body).trigger('updateselection', [this.getSelection()]);
+    scatterplot.prototype.highlightCircle = function(d, i) {
+        var current_selection = this.nodes[0][i];
+        d3.select(current_selection).classed('selected', !d3.select(current_selection).classed('selected'));
+        this.notifySelectionChange();
     };
 
-    scatterplot.prototype.brushstart = function() {
+    scatterplot.prototype.setSelection = function(selection, quiet) {
+        d3.select(this.svg)
+            .selectAll('g.node')
+            .classed('selected', function(d) { return _.contains(selection, d.k); });
+        this.notifySelectionChange(quiet);
     };
 
     scatterplot.prototype.getSelection = function() {
@@ -113,26 +127,23 @@
         return selected;
     };
 
+    scatterplot.prototype.brushstart = function() {
+    };
+
     scatterplot.prototype.brushed = function() {
         var e = d3.event.target.extent();
         var circles  = d3
-            .select(this.parentNode)
+            .select(this.svg)
             .selectAll("g.node")
             .filter(function(d) {
                 return e[0][0] <= d.x && d.x <= e[1][0] &&
                     e[0][1] <= d.y && d.y <= e[1][1]
             });
         var selected = _.map(circles.data(), function(c) {return c.k;});
-        $(document.body).trigger('updateselection', [selected]);
+        this.setSelection(selected);
     };
 
     scatterplot.prototype.brushend = function() {
-        var circles = d3
-            .select(this.parentNode)
-            .selectAll("g.node.selected");
-
-        var selected = _.map(circles.data(), function(c) { return c.k;});
-        $(document.body).trigger('updateselection', [selected]);
     };
 
     scatterplot.prototype.makeMinimalAxes = function() {
@@ -367,9 +378,9 @@
             this.brush = d3.svg.brush()
                 .x(this.xScaleBrush)
                 .y(this.yScaleBrush)
-                .on("brushstart", this.brushstart)
-                .on("brush", this.brushed)
-                .on("brushend", this.brushend);
+                .on("brushstart", _.bind(this.brushstart, this))
+                .on("brush",      _.bind(this.brushed,    this))
+                .on("brushend",   _.bind(this.brushend,   this));
 
             svg.append("g")
                 .classed("brush", true)
@@ -379,20 +390,20 @@
                 this.makeAxes();
             }
 
-            node = svg
+            this.nodes = svg
                 .selectAll(".node")
-                .data(xy)
-                .enter().append("g")
-                .attr("class", "node");
+                .data(xy);
 
-            node.append('circle')
+            var nodes = this.nodes.enter().append("g").classed('node', true);
+
+            nodes.append('circle')
                 .attr('cx', function(d) { return self.xScale(d.x); })
                 .attr('cy', function(d) { return self.yScale(d.y); })
                 .attr('r',  this.options.pt_size)
                 .attr('opacity', 0.65)
                 .on('click', _.bind(this.highlightCircle, this));
 
-            node.append('title')
+            nodes.append('title')
                 .text(function(d) {
                     return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
                 });
@@ -400,7 +411,7 @@
             var pt_size = this.options.pt_size;
             var font_size = pt_size + 8;
 
-            node.append("text")
+            nodes.append("text")
                 .text(function(d) {return d.k;} )
                 .attr('x', function(d) { return self.xScale(d.x)+pt_size; })
                 .attr('y', function(d) { return self.yScale(d.y)+pt_size;})

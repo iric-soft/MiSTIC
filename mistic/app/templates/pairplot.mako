@@ -7,7 +7,7 @@ import json
 <%block name="pagetitle">Multi-way scatterplot</%block>
 
 <%block name="actions">
-  ${parent.actions()} 
+  ${parent.actions()}
    <a id="share_url" href="#link_to_share" role="button" class="btn" data-toggle="modal">Link to share</a>
 </%block>
 
@@ -111,21 +111,36 @@ import json
      <div class="accordion-group">        
        <div class="accordion-heading">
          <h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a>
+           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a>
          </h4>
        </div>
     
-      <div id="options_menu" class="accordion-body collapse ">  
+      <div id="options_menu" class="accordion-body collapse ">
         <div class="accordion-inner">
            <ul id="options" class="nav nav-list">
             <li><a id='show_labels'  href="#">Show labels</a></li>
+            <li><a id='clear_labels' href="#">Clear labels</a></li>
             <li><a id='select_clear' href="#">Select all</a></li>
             <li class="divider"></li>
             <li><a id="change_axes"  href="#">Change axes</a></li>
           </ul>
-        </div> 
+        </div>
       </div>
-    </div>
+     </div>
+
+     <div class="accordion-group">        
+       <div class="accordion-heading">
+         <h4 class="accordion-title">
+           <a class="accordion-toggle" data-toggle="collapse" href="#sample_enrichment_panel">Sample term enrichment</a>
+         </h4>
+       </div>
+
+       <div id="sample_enrichment_panel" class="accordion-body collapse">
+         <div class="accordion-inner">
+           <div id="sample_enrichment"></div>
+         </div>
+       </div>
+     </div>
     </div>
        
   </div>	
@@ -139,10 +154,10 @@ import json
  ${parent.graph()}
  
   <div class="modal hide" id="link_to_share">
-  <div class='modal-body'>
-  <span id="share"></span>
-  </div> 
- </div>  
+    <div class='modal-body'>
+      <span id="share"></span>
+    </div>
+  </div>
 
 </%block>
 
@@ -184,22 +199,17 @@ $(document).ready(function() {
               }
               
               if (to=='stroke'){
-                d3.select(this).attr('stroke', newColor);
-                d3.select(this).attr('stroke-width', '4px' );
-                d3.select(this).attr('fill', 'white');
-                
-                highlights[highlight]['stroke']=newColor;
-                highlights[highlight]['fill']=undefined;
-              } else {
-                d3.select(this).attr('stroke', null);
-                d3.select(this).attr('stroke-width',null );
-                d3.select(this).attr('fill', newColor);
-                
-                highlights[highlight]['fill']=newColor;
-                highlights[highlight]['stroke']=undefined;
-              }
+                d3.select(this).attr('stroke', newColor).attr('stroke-width', '4px').attr('fill', 'white');
 
-              $('.locate').change();
+                highlights[highlight]['stroke']=newColor;
+                highlights[highlight]['fill']=null;
+              } else {
+                d3.select(this).attr('stroke', null).attr('stroke-width', null).attr('fill', newColor);
+
+                highlights[highlight]['fill']=newColor;
+                highlights[highlight]['stroke']=null;
+              }
+              updateStyles();
           }
     });
    });
@@ -214,7 +224,7 @@ $(document).ready(function() {
   
   <%  
     ds = data.datasets.get(dataset)
-    gene_data = [ds.expndata(gene) for gene in genes ]
+    gene_data = [ ds.expndata(gene) for gene in genes ]
   %>
   
   %if ds is not None:
@@ -232,7 +242,7 @@ $(document).ready(function() {
   %endif
 
   //  Gene symbols were passed in the URL
-  %if len(genes)>0:
+  %if len(genes) > 0:
     $("#nb_genes").text('(${len(genes)})');
     %for g in genes:      
       // Selecting the first item corresponding to the gene symbol (no validation)
@@ -251,15 +261,6 @@ $(document).ready(function() {
     $("span#share").html(url);
   });
   
-  
-  var minimal_axes = false;
-  $('#change_axes').on('click', function(event){  
-      minimal_axes = !minimal_axes;
-      current_graph.setMinimalAxes(minimal_axes);
-      current_graph.draw()
-      $('.locate').change()
-   });  
-  
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
     
     var badge = $(event.target).closest('span.badge');
@@ -277,7 +278,6 @@ $(document).ready(function() {
     $("#nb_genes").text('('+current_graph.data.length+')');
     $('.locate').change();
   });
-
 
   gene_entry.on('change', function(item) {
 
@@ -317,6 +317,103 @@ $(document).ready(function() {
 
 
 
+  var updateEnrichmentTable = function(data) {
+    $('#sample_enrichment').html('');
+    if (!data.length) return;
+
+    var table = d3
+      .select('#sample_enrichment')
+      .insert('table', ':first-child');
+
+    var thead = table.append('thead');
+    var tbody = table.append('tbody');
+
+    var thr = thead.selectAll("tr")
+      .data([ 1 ])
+      .enter()
+      .append("tr")
+
+    var th = thr.selectAll('th')
+      .data([ 'P-val', 'Odds', 'Key', 'Value' ])
+      .enter()
+      .append('th')
+      .text(function(d) { return d; });
+
+    var tr = tbody.selectAll('tr')
+      .data(data)
+
+    tr.enter()
+      .append('tr');
+
+    var td = tr.selectAll('td')
+      .data(function(d) { return [
+        { value: d.p_val.toExponential(1) },
+        { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) },
+        { value: d.key },
+        { value: d.val }
+      ];});
+
+    td.enter()
+      .append('td')
+      .text(           function(d) { return d.value; })
+      .attr('title',   function(d) {return d.title; })
+      .attr('classed', function(d) {return d.class; });
+
+    $('#sample_enrichment table')
+      .dataTable({
+        "aoColumnDefs": [
+          { "sType": "scientific", "aTargets": [ 0 ], 'aaSorting':["asc"] },
+          { "sType": "numeric", "aTargets": [ 1 ]}
+        ],
+        "bPaginate" : false,
+        "iDisplayLength": 10,
+        "sPaginationType": "full_numbers",
+        "bLengthChange": false,
+        "bFilter": false,
+        "bSort": true,
+        "bInfo": false
+    });    
+  }
+
+  var _selection = { active: false, pending: undefined };
+
+  var selectionSearch = function(selection) {
+    if (_selection.active) {
+      _selection.pending = selection;
+    } else {
+      if (!selection.length) {
+        updateEnrichmentTable([])
+        return;
+      }
+      _selection.active = true;
+      _selection.pending = undefined;
+      $.ajax({
+        url: "${request.route_url('mistic.json.dataset.samples.enrich', dataset='_dataset_')}".replace('_dataset_', current_dataset),
+        dataType: 'json',
+        type: 'POST',
+        data: { samples: JSON.stringify(selection) },
+        error: function(req, status, error) {
+          console.log('got an error', status, error);
+        },
+        success: function(data) {
+          updateEnrichmentTable(data);
+        },
+        complete: function() {
+          _selection.active = false;
+          window.setTimeout(function() {
+            if (!_selection.active && _selection.pending !== undefined) selectionSearch(_selection.pending);
+          }, 0);
+        }
+      });
+    }
+  }
+
+  $(current_graph.svg).on('updateselection', function(event, selection) {
+    info.clear();
+    _.each(selection, info.add);
+    selectionSearch(selection);
+  });
+
   $('#datasets').on('change custom', function(event) {
 
     current_dataset = event.target.value;
@@ -342,7 +439,6 @@ $(document).ready(function() {
      $("#nb_datasets").text('(1)');
 
      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
-
 
      $.ajax({
       url:  "${request.route_url('mistic.json.cannotation.items', dataset='_dataset_')}".replace('_dataset_', current_dataset),
@@ -387,172 +483,154 @@ $(document).ready(function() {
   $(window).resize(resizeGraph);
 
   $('#show_labels').on("click", function(event){
-
-    var selected = d3.selectAll("text.circlelabel").filter(function(){var c = $(this).siblings('circle'); return $(c)[0].className.baseVal=='selected';});
-
-    if (selected[0].length>0 ) {
-           selected.classed('invisible', !selected.classed('invisible'));
+    var selected;
+    selected = d3.select(current_graph.svg).selectAll("g.node.selected text.circlelabel");
+    if (selected[0].length == 0 ) {
+      selected = d3.select(current_graph.svg).selectAll("g.node text.circlelabel");
     }
-    else {
-  	     d3.selectAll("text.circlelabel").classed('invisible', !d3.selectAll("text.circlelabel").classed('invisible'));
-  	}
-  	if ($(this).text()=="Show labels"){
-  		$(this).text("Clear labels");
-  	}
-  	else {
-  		$(this).text("Show labels");
-  	}
-  	event.preventDefault();
-  	
+    selected.classed('invisible', false);
+    event.preventDefault();
+  });
+
+  $('#clear_labels').on("click", function(event){
+    var selected;
+    selected = d3.select(current_graph.svg).selectAll("g.node.selected text.circlelabel");
+    if (selected[0].length == 0 ) {
+      selected = d3.select(current_graph.svg).selectAll("g.node text.circlelabel");
+    }
+    selected.classed('invisible', true);
+    event.preventDefault();
   });
 
   $('#select_clear').on('click', function(event) {
-
-  	if (!d3.select(this).classed("active")){
-  		d3.selectAll('circle').classed('selected', true);
-  		var dat = [];
-  		d3.selectAll('circle.selected').each(function(d) {
-    		dat.push(d.k);
-  		});
-  		dat = _.uniq(dat);
-  		_.each(dat, info.add);
-  		d3.select(this).text("Clear all");
-  		d3.select(this).classed("active", true);
-  	}
-  	else {
-  	
-  		d3.selectAll('circle').classed('selected', false);
-  		info.clear();
-  		d3.select(this).text("Select all");
-  		d3.select(this).classed("active", false);
-  		
-	  	}
-	event.preventDefault();
-	});
+    if (!d3.select(this).classed("active")){
+      d3.selectAll('g.node').classed('selected', true);
+      var dat = {};
+      d3.selectAll('g.node.selected').each(function(d) { dat[d.k] = true; });
+      dat = _.keys(dat);
+      current_graph.setSelection(dat);
+      d3.select(this).text("Clear all");
+      d3.select(this).classed("active", true);
+    } else {
+      current_graph.setSelection([]);
+      $(document.body).trigger('updateselection', [[]]);
+      d3.select(this).text("Select all");
+      d3.select(this).classed("active", false);
+    }
+    event.preventDefault();
+  });
 	
+  var minimal_axes = false;
+  $('#change_axes').on('click', function(event){  
+      minimal_axes = !minimal_axes;
+      current_graph.setMinimalAxes(minimal_axes);
+      current_graph.draw()
+      $('.locate').change()
+   });  
 
   $("[id^='add']").on('click', function(event) {
+    // add the selection to the highlight group.
     var cclass = this.id.replace('add', 'highlighted');
+    d3.select(current_graph.svg).selectAll('g.node.selected').classed(cclass, true);
 
-    var dat = [];
-    d3.selectAll('circle.selected').each(function(d) { dat.push(d.k); });
-    d3.selectAll('circle.'+cclass).each(function(d) { dat.push(d.k); });
-
-    if (dat.length > 0 ) {
-      dat = _.uniq(dat);
-      $('#'+cclass).val(dat.join(' '));
-      current_graph.draw()
-      $('.locate').change();
-    }
-    $("#sample_selection > option").attr('selected', false);
-    info.clear();
-  });
-
-   $("[id^='minus']").on('click', function(event){
-    var cclass = this.id.replace('minus', 'highlighted');
-    var highlighted = [];
-    d3.selectAll('circle.'+cclass).each(function(d) { highlighted.push(d.k); });
-
-    var selected = [];
-    d3.selectAll('circle.selected').each(function(d) { selected.push(d.k); });
-
-    var dat= _.difference(highlighted,selected);
-    d3.selectAll('circle.selected').attr('fill', undefined);
-    d3.selectAll('circle.selected').classed(cclass, false);
-    d3.selectAll('circle.selected').classed('selected', false);
-    dat = _.uniq(dat);
+    var dat = getSamplesWithClass(cclass);
     $('#'+cclass).val(dat.join(' '));
-    $('.locate').change();
-    info.clear();
+    updateStyles();
+    updateInfo();
+    $("#sample_selection > option").attr('selected', false);
+    current_graph.setSelection([]);
   });
 
+  $("[id^='minus']").on('click', function(event){
+    // remove the selection from the highlight group.
+    var cclass = this.id.replace('minus', 'highlighted');
+    d3.select(current_graph.svg).selectAll('g.node.selected').classed(cclass, false);
+
+    var dat = getSamplesWithClass(cclass);
+    $('#'+cclass).val(dat.join(' '));
+    updateStyles();
+    updateInfo();
+    $("#sample_selection > option").attr('selected', false);
+    current_graph.setSelection([]);
+  });
 
   $("[id^='tograph']").on('click', function(event){
+    // copy the highlight group to the selection.
     var cclass = this.id.replace('tograph', 'highlighted');
-    var dat =  $('#'+cclass).val().split(' ');
-    var circles = d3.selectAll('circle');
-    circles.filter(function(d, i) {return (_.contains(dat, d.k));})
-      .classed('selected', true );
-     _.each(dat, info.add);
+    current_graph.setSelection(getSamplesWithClass(cclass));
   });
 
   $("[id^='remove']").on('click', function(event){
+    // clear the highlight group.
     var cclass = this.id.replace('remove', 'highlighted');
-    d3.selectAll('circle.'+cclass).attr('fill', undefined);
-    d3.selectAll('circle.'+cclass).attr('stroke', undefined);
-    d3.selectAll('circle.'+cclass).classed(cclass, false);
+    d3.selectAll('g.node.'+cclass).classed(cclass, false);
     $('#'+cclass).val('');
-    $('.locate').change();
+    updateStyles();
+    updateInfo();
   });
 	
   $("[id^='spectrum']").on('click', function(event){
+    // set the initial colour on the colorpicker.
     var to = $(this).data().applyTo;
     $(this).spectrum('set',(to=='stroke' ? $(this).css('stroke'): $(this).css('fill') ));
     $(this).show();
   });
 
-
   $('.locate').on('change', function(event){
+    // when a highlight group changes, restyle nodes.
 
     var tag_entry = event.target.value.split(" ");
+
     if (tag_entry.length==1 & tag_entry[0]=="") {
-        event.preventDefault();
-        return
+      event.preventDefault();
+      return;
     }
 
     var cclass = this.id;
-  	var circles = d3.selectAll('circle');
-  	
-  	var dat = [];
-  	circles.each(function(d) { dat.push(d.k);});
-  	dat = _.uniq(dat);
-  	
-  	search = function (list, regex) {
-  	  if (regex=='') { return (new Array());}
-      return _.filter(list, function(obj){ return obj.match(regex);});
-    };
+    var nodes = d3.select(current_graph.svg).selectAll('g.node');
 
-  	var tag_valid = _.flatten(_.map(tag_entry, function(item) {return search(dat, item);}  ));
-  	
-	circles = circles.filter(function(d, i) {return (_.contains(tag_valid, d.k));});
-    circles.classed(cclass, !d3.select(this).classed(cclass));
-	
-	circles.attr('fill', undefined );
-    circles.attr('stroke', undefined);
+    var dat = {};
+    nodes.each(function(d) { dat[d.k] = true;});
 
-	_.each(circles[0], function(c) {
-	       cls = $(c).attr('class').split(' ');
-	       cls.sort();
-	       cls = _.reject(cls, function(el) {return el=='selected'});
-	
-	       _.each(cls, function(ll) {
-	
-	           hls = highlights[ll];
-	
-	           if (!_.isUndefined(hls.fill)) {
-	               $(c).attr('fill', hls.fill );
-	           }
-	           if (!_.isUndefined(hls.stroke)){
-                   $(c).attr('stroke', hls.stroke );
-                   $(c).attr('stroke-width', '2px');
-	           }
-	         });
-	});
-	
-	info.clear();
-	  _.each(tag_valid, info.add);
-  	
-  	// Update counts label (dataset, genes, samples)
-  	var nplots = stats.sum(_.range(1,current_graph.data.length));
-  	var nsamples = $("circle[class^='highlighted']").length/nplots;
-  	if (_.isNaN(nsamples)) { nsamples=0;}
+    var matched = {};
+    _.each(_.keys(dat), function(sample) {
+      if (_.find(tag_entry, function(tag) { return sample.match(tag); }) !== undefined) {
+        matched[sample] = true;
+      }
+    });
+
+    nodes.classed(cclass, function(d) { return matched[d.k]; });
+
+    updateStyles();
+    updateInfo();
+    event.preventDefault();
+  });
+
+  var getSamplesWithClass = function(cclass) {
+    var dat = {};
+    d3.selectAll('g.node.'+cclass).each(function(d) { dat[d.k] = true; });
+    dat = _.keys(dat)
+    dat.sort();
+    return dat;
+  };
+
+  var updateStyles = function() {
+    d3.select(current_graph.svg).selectAll('g.node').selectAll('circle').attr('fill', null).attr('stroke', null);
+
+    _.each(highlights, function(hl, cclass) {
+      d3.select(current_graph.svg).selectAll('g.node.'+cclass).selectAll('circle').attr('fill', hl['fill']).attr('stroke', hl['stroke']);
+    });
+  };
+
+  var updateInfo = function() {	
+    // Update counts label (dataset, genes, samples)
+    var nplots = stats.sum(_.range(1,current_graph.data.length));
+    var nsamples = $("g.node[class*='highlighted']").length/nplots;
+    if (_.isNaN(nsamples)) {
+      nsamples=0;
+    }
     $("#nb_samples").text('('+nsamples+')');
-
-  	event.preventDefault();
-  	
- 	});
-
-
+  };
 
   $("#sample_selection").on("change", function(){
     var val = $(event.target).val().split('.');
@@ -565,7 +643,7 @@ $(document).ready(function() {
       data: kv,
       dataype: 'json',
       success: function(data) {
-        d3.selectAll('circle').classed('selected', function(d) { return (_.contains(data, d.k)); });
+        current_graph.setSelection(data);
       }
     });
   });

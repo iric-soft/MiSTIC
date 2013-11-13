@@ -23,6 +23,8 @@
             .attr('xmlns', 'http://www.w3.org/2000/svg');
 
         this.data = [];
+        this.current_selection = [];
+        this.subgraphs = [];
     };
     pairplot.prototype.setMinimalAxes = function(b) {
       this.options.minimalAxes = b;
@@ -57,9 +59,23 @@
         this.draw();
     };
 
+    pairplot.prototype.getSelection = function() {
+        return this.current_selection;
+    };
+
+    pairplot.prototype.setSelection = function(selection, quiet) {
+        if (!_.isEqual(this.current_selection, selection)) {
+            this.current_selection = selection;
+            _.each(this.subgraphs, function(g) { g.setSelection(selection, quiet); });
+            if (!quiet) $(this.svg).trigger('updateselection', [selection]);
+        }
+    };
+
+    pairplot.prototype.childSelectionUpdated = function(event, selection) {
+        this.setSelection(selection);
+    };
 
     pairplot.prototype.draw = function() {
-
         var svg = d3.select(this.svg)
 
         svg.selectAll('*').remove();
@@ -86,7 +102,10 @@
             minimal: this.options.minimalAxes,
             clearBrush : this.options.clearBrush,
         };
-		
+
+        this.current_selection = [];
+        this.subgraphs = []
+
         var sep = this.options.separation;
 
         if (this.options.axes && N < n_axis) {
@@ -106,7 +125,6 @@
 
                 var g = svg.append('g').attr('transform', 'translate(' + String(xlo) + ',' + String(ylo) +')');
 
-
                 if (x != y) {
                     _.extend(s_opts, { width: xhi - xlo, height: yhi - ylo });
 
@@ -120,6 +138,8 @@
                     var result = s.svg;
 
                     $(g[0]).append(result);
+
+                    this.subgraphs.push(s);
                 }
 
                 else {
@@ -200,7 +220,7 @@
                 }
             }
         }
-
+        $('svg', this.svg).on('updateselection', _.bind(this.childSelectionUpdated, this));
 
     };
 
