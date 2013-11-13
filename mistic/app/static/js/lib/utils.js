@@ -26,17 +26,12 @@
     };
     
      info.add = function(information) {
-    
         var info_div = $('div#more-information');
-        var info_span = info.find(information);
-       
+
         info_span = $(info.template({ info: information }));
         info_span.data('information', information);
         info_div.append(info_span);
-        
-    
     };
-
 })();
 
 
