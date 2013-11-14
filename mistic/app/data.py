@@ -36,6 +36,30 @@ def read_json_table(path, converters = {}):
   table = pandas.DataFrame(rows, index = pandas.Series(index, dtype=str), columns = columns)
   return table
 
+def write_json_table(path, table, converters = {}):
+  out = io.open(path, 'wb')
+
+  for ident in table.index:
+    row = collections.OrderedDict()
+    for col in table.columns:
+      try:
+        v = table.ix[ident, col]
+        if col in converters:
+          v = converters[col](v)
+        row[col] = v
+      except ValueError:
+        logging.warn('failed to convert value {0} on row {1} while writing to {2}'.format(repr(v), ident, path))
+    try:
+      row = json.dumps(row)
+      out.write(ident)
+      out.write(' ')
+      out.write(row)
+      out.write('\n')
+    except:
+      logging.warn('failed to serialize {0} on row {1} while writing to {2}'.format(repr(row), ident, path))
+
+  out.close()
+
 
 
 __obo_unescape = {
