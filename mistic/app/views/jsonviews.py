@@ -329,18 +329,20 @@ class Dataset(object):
                 if q.match(text) is None: return False
             return True
 
+        ann = self.dataset.annotation.data
+        ann_in_ds = self.dataset.annotation_in_ds
         try:
-            symbol_matches = set(self.dataset.annotation.data.index[self.dataset.annotation.data['symbol'].map(match_any)])
+            symbol_matches = set(ann.index[ann_in_ds & ann.symbol.map(match_any)])
         except KeyError:
             symbol_matches = set()
 
         try:
-            id_matches = set(self.dataset.annotation.data.index[self.dataset.annotation.data.index.map(match_any)])
+            id_matches = set(self.dataset.data.df.index[self.dataset.data.df.index.map(match_any)])
         except KeyError:
             id_matches = set()
 
         try:
-            name_matches = set(self.dataset.annotation.data.index[self.dataset.annotation.data['name'].map(match_all)])
+            name_matches = set(ann.index[ann_in_ds & ann.name.map(match_all)])
         except KeyError:
             name_matches = set()
 
