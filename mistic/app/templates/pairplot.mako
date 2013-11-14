@@ -220,10 +220,12 @@ $(document).ready(function() {
         current_dataset = dataset;
         gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
         var options = $('#sample_selection');
-        _.each(data, function(e,v) {
-          options.append('<optgroup label="'+v+'">');
-          _.each(e, function(l) {
-            options.append('<option value="'+v+'.'+l+'">'+l+'</options>');
+        _.each(data, function(kv) {
+          var k = kv[0];
+          var v = kv[1];
+          options.append('<optgroup label="'+k+'">');
+          _.each(v, function(v) {
+            options.append('<option value="'+k+'.'+v+'">'+v+'</options>');
           });
           options.append('</optgroup>');
         });
