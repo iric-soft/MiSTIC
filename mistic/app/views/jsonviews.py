@@ -12,7 +12,7 @@ import math
 import scipy.stats
 import re
 import json
-
+import collections
 import pickle
 import os
 import logging
@@ -255,7 +255,7 @@ class Dataset(object):
         if not self.dataset.cannotation:
             return []
         anns = self.dataset.cannotation.data
-        return { col: sorted(set(anns[col]) - set([""])) for col in anns.columns }
+        return collections.OrderedDict((col, sorted(set(anns[col]) - set([""]))) for col in anns.columns)
 
     @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
     def sample_enrichment(self):

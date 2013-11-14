@@ -18,11 +18,13 @@ from cache_helpers import *
 def read_json_table(path, converters = {}):
   rows = []
   index = []
+  col_order = collections.OrderedDict()
   for rownum, row in enumerate(io.open(path, 'rbU')):
     ident, row = row.split(None, 1)
     try:
-      row = json.loads(row)
+      row = json.loads(row, object_pairs_hook=collections.OrderedDict)
       for k in row.keys():
+        col_order[k] = 1
         if k in converters:
           row[k] = converters[k](row[k])
     except ValueError:
@@ -30,7 +32,9 @@ def read_json_table(path, converters = {}):
       continue
     index.append(ident)
     rows.append(row)
-  return pandas.DataFrame(rows, index = index)
+  columns = col_order.keys()
+  table = pandas.DataFrame(rows, index = pandas.Series(index, dtype=str), columns = columns)
+  return table
 
 
 
