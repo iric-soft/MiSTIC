@@ -155,11 +155,15 @@ class DataSet(object):
 
   @classmethod
   def readTSV(cls, file):
-    return cls(pandas.read_csv(file, header=0, index_col=0, sep='\t'))
+    x = pandas.read_table(file, header=0, converters={ 0: str })
+    y = pandas.DataFrame(x.values[:,1:], columns = x.columns[1:], index = x[x.columns[0]], dtype=float)
+    return cls(y)
 
   @classmethod
   def readCSV(cls, file):
-    return cls(pandas.read_csv(file, header=0, index_col=0, sep=','))
+    x = pandas.read_csv(file, header=0, converters={ 0: str })
+    y = pandas.DataFrame(x.values[:,1:], columns = x.columns[1:], index = x[x.columns[0]], dtype=float)
+    return cls(y)
 
 
 
