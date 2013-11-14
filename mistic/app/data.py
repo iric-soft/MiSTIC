@@ -495,12 +495,12 @@ class DataSet(object):
     self.annotation  = annotations.get(self.config['annr'])
     self.cannotation = dataset_annotations.get(self.config['annc'])
 
-    self.gene_has_annotation = self.data.df.index.map(lambda x: x in self.annotation.data.index)
-    annotated_genes = sum(self.gene_has_annotation)
+    self.annotation_in_ds = self.annotation.data.index.map(lambda x: x in self.data.df.index)
+    annotated_genes = sum(self.annotation_in_ds)
     logging.info('dataset {0} has {1} genes, {2} without annotations, {3} annotated genes do not appear in dataset'.format(
       self.id,
-      len(self.gene_has_annotation),
-      len(self.gene_has_annotation) - annotated_genes,
+      len(self.data.df.index),
+      len(self.data.df.index) - annotated_genes,
       len(self.annotation.data.index) - annotated_genes))
 
     if self.cannotation is not None:
