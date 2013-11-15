@@ -128,18 +128,18 @@
                 if (x != y) {
                     _.extend(s_opts, { width: xhi - xlo, height: yhi - ylo });
 
-                    if (x < y ) {  _.extend(s_opts, {textOnly:true });}
-                    if (x > y ) {  _.extend(s_opts, {textOnly:false });}
                     var d = x-y;
 
                     _.extend(s_opts, {axes:((d==1 && N < n_axis) ? true : false)});
 
-                    var s = new scatterplot(s_opts, this.data[x], this.data[y]);
-                    var result = s.svg;
-
-                    $(g[0]).append(result);
-
-                    this.subgraphs.push(s);
+                    var s;
+                    if (x < y ) {
+                        s = new textpanel(s_opts, this.data[x], this.data[y]);
+                    } else if (x > y ) {
+                        s = new scatterplot(s_opts, this.data[x], this.data[y]);
+                        this.subgraphs.push(s);
+                    }
+                    $(g[0]).append(s.svg);
                 }
 
                 else {

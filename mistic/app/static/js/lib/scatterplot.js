@@ -14,7 +14,6 @@
             pt_size: 4,
             makeGridLine:false,
             gridValue: 10,
-            textOnly : false,
             minimal : true,
             clearBrush: false,
 
@@ -304,119 +303,95 @@
         var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
 
-        if (this.options.textOnly) {
-            var fsize = 12-100/width;
+        var dmx = d3.extent(xy, function(d) { return d.x; });
+        var dmy = d3.extent(xy, function(d) { return d.y; });
 
-            svg .append('rect')
-                .attr('width', width)
-                .attr('height', height)
-                .attr('x', this.options.padding[3] - this.options.inner)
-                .attr('y', this.options.padding[0] - this.options.inner)
-                .attr('fill', 'white');
-            if (fsize > 8) {
-                this.corr = svg .append('text')
-                    .attr('x', this.options.padding[3]+ width/20)
-                    .attr('y', this.options.padding[0]+ height/3)
-                    .attr('text-anchor', 'left')
-                    .attr('style', 'font-family: helvetica; font-size: '+ fsize+ 'px; font-weight: 300');
-                if (lg) {
-                    var rtext = fsize>=11 ? 'r(log+k) = ' : '';
-                    this.corr.text(rtext + r_log.toFixed(2));
-                } else {
-                    var rtext = fsize>=11 ? 'r = ' : '';
-                    this.corr.text(rtext + r.toFixed(2));
-                }
-            }
+        if (lg) {
+            this.xScale = d3.scale.log();
+            this.yScale = d3.scale.log();
         } else {
-            var dmx = d3.extent(xy, function(d) { return d.x; });
-            var dmy = d3.extent(xy, function(d) { return d.y; });
-
-            if (lg) {
-                this.xScale = d3.scale.log();
-                this.yScale = d3.scale.log();
-            } else {
-                this.xScale = d3.scale.linear();
-                this.yScale = d3.scale.linear();
-                //if (rr<1) {
-                //  dmx = [0,1];
-                //  dmy = [0,1];
-                //}
-            }
-
-            this.xScale.domain(dmx)
-                .range([ this.options.padding[3], this.width - this.options.padding[1] ])
-                .nice();
-
-            this.yScale.domain(dmy)
-                .range([ this.height - this.options.padding[2], this.options.padding[0] ])
-                .nice();
-
-            var bkgx = this.options.padding[3]-this.options.inner;
-            var bkgy = this.options.padding[0]-this.options.inner;
-
-            var color = 'transparent';
-            if (this.options.background) {
-                color = 'white';
-            }
-
-            svg .append('rect')
-                .attr('width', width)
-                .attr('height',height)
-                .attr('x', bkgx)
-                .attr('y', bkgy)
-                .attr('fill', color)
-                .attr('stroke', 'rgba(0,0,0,.2)')
-                .attr('stroke-width', '1')
-                .attr('shape-rendering', 'crispEdges');
-
-            this.xScaleBrush = this.xScale.copy();
-            this.yScaleBrush = this.yScale.copy();
-
-            this.xScaleBrush.range([ bkgx, bkgx+width ]);
-            this.yScaleBrush.range([ bkgy + height, bkgy ]);
-
-            this.brush = d3.svg.brush()
-                .x(this.xScaleBrush)
-                .y(this.yScaleBrush)
-                .on("brushstart", _.bind(this.brushstart, this))
-                .on("brush",      _.bind(this.brushed,    this))
-                .on("brushend",   _.bind(this.brushend,   this));
-
-            svg.append("g")
-                .classed("brush", true)
-                .call(this.brush);
-
-            if (this.options.axes) {
-                this.makeAxes();
-            }
-
-            this.nodes = svg
-                .selectAll(".node")
-                .data(xy);
-
-            var nodes = this.nodes.enter().append("g").classed('node', true);
-
-            nodes.append('circle')
-                .attr('cx', function(d) { return self.xScale(d.x); })
-                .attr('cy', function(d) { return self.yScale(d.y); })
-                .attr('r',  this.options.pt_size)
-                .attr('opacity', 0.65)
-                .on('click', _.bind(this.highlightCircle, this));
-
-            nodes.append('title')
-                .text(function(d) {
-                    return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
-                });
-
-            var pt_size = this.options.pt_size;
-            var font_size = pt_size + 8;
-
-            nodes.append("text")
-                .text(function(d) {return d.k;} )
-                .attr('x', function(d) { return self.xScale(d.x)+pt_size; })
-                .attr('y', function(d) { return self.yScale(d.y)+pt_size;})
-                .attr('style', 'font-size:'+ font_size+"px;")
-                .classed('circlelabel invisible', true);
+            this.xScale = d3.scale.linear();
+            this.yScale = d3.scale.linear();
+            //if (rr<1) {
+            //  dmx = [0,1];
+            //  dmy = [0,1];
+            //}
         }
+
+        this.xScale.domain(dmx)
+            .range([ this.options.padding[3], this.width - this.options.padding[1] ])
+            .nice();
+
+        this.yScale.domain(dmy)
+            .range([ this.height - this.options.padding[2], this.options.padding[0] ])
+            .nice();
+
+        var bkgx = this.options.padding[3]-this.options.inner;
+        var bkgy = this.options.padding[0]-this.options.inner;
+
+        var color = 'transparent';
+        if (this.options.background) {
+            color = 'white';
+        }
+
+        svg .append('rect')
+            .classed('background', true)
+            .attr('width', width)
+            .attr('height',height)
+            .attr('x', bkgx)
+            .attr('y', bkgy)
+            .attr('fill', color)
+            .attr('stroke', 'rgba(0,0,0,.2)')
+            .attr('stroke-width', '1')
+            .attr('shape-rendering', 'crispEdges');
+
+        this.xScaleBrush = this.xScale.copy();
+        this.yScaleBrush = this.yScale.copy();
+
+        this.xScaleBrush.range([ bkgx, bkgx+width ]);
+        this.yScaleBrush.range([ bkgy + height, bkgy ]);
+
+        this.brush = d3.svg.brush()
+            .x(this.xScaleBrush)
+            .y(this.yScaleBrush)
+            .on("brushstart", _.bind(this.brushstart, this))
+            .on("brush",      _.bind(this.brushed,    this))
+            .on("brushend",   _.bind(this.brushend,   this));
+
+        svg.append("g")
+            .classed("brush", true)
+            .call(this.brush);
+
+        if (this.options.axes) {
+            this.makeAxes();
+        }
+
+        this.nodes = svg
+            .selectAll(".node")
+            .data(xy);
+
+        var nodes = this.nodes.enter().append("g").classed('node', true);
+
+        nodes.append('circle')
+            .attr('cx', function(d) { return self.xScale(d.x); })
+            .attr('cy', function(d) { return self.yScale(d.y); })
+            .attr('r',  this.options.pt_size)
+            .attr('opacity', 0.65)
+            .on('click', _.bind(this.highlightCircle, this));
+
+        nodes.append('title')
+            .text(function(d) {
+                return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
+            });
+
+        var pt_size = this.options.pt_size;
+        var font_size = pt_size + 8;
+
+        nodes.append("text")
+            .text(function(d) {return d.k;} )
+            .attr('x', function(d) { return self.xScale(d.x)+pt_size; })
+            .attr('y', function(d) { return self.yScale(d.y)+pt_size;})
+            .attr('style', 'font-size:'+ font_size+"px;")
+            .classed('circlelabel invisible', true);
     };
 })();
