@@ -212,11 +212,16 @@ for ds in data.datasets.all():
 
 <%block name="style">
 ${parent.style()}
-#dataset-table tbody tr {
+#dataset-table tbody {
   cursor: pointer;
+  color: #aaa;
 }
 
-#dataset-table tbody tr:hover {
+#dataset-table tbody tr.selectable {
+  color: #000;
+}
+
+#dataset-table tbody tr.selectable:hover {
   background-color: #ffa;
 }
 
@@ -701,9 +706,11 @@ $(document).ready(function() {
     bsc = bsc.concat([true]);
 
     $('#dataset-table tbody tr').on('click', function(event) {
-      var dataset_id = $('td', this)[0].innerHTML;
-      addDataset(dataset_id);
-      $('#dataset-modal').modal('hide');
+      if ($(this).hasClass('selectable')) {
+        var dataset_id = $('td', this)[0].innerHTML;
+        addDataset(dataset_id);
+        $('#dataset-modal').modal('hide');
+      }
     });
 
     return $('#dataset-table').dataTable( {
@@ -719,6 +726,13 @@ $(document).ready(function() {
 
   initTable();
   $('#add_dataset').on('click', function(event) {
+    $('#dataset-table tbody tr').each(function(row) {
+      if (_.contains(current_datasets, $('td', this)[0].innerHTML)) {
+        $(this).removeClass('selectable');
+      } else {
+        $(this).addClass('selectable');
+      }
+    });
     $('#dataset-modal').modal();
     event.preventDefault();
   });
