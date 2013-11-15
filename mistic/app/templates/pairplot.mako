@@ -1,6 +1,24 @@
 <%!
 import mistic.app.data as data
 import json
+
+terms = []
+dds = {}
+
+def parse_term(x):
+  x = x.split('=', 1)
+  return x[0].strip(), x[1].strip()
+
+terms = []
+
+for ds in data.datasets.all():
+  ds_terms = [ parse_term(term) for term in ds.tags.split(';') if len(term) ]
+
+  for k,v in ds_terms:
+    if k not in terms:
+      terms.append(k)
+
+  dds[ds.name] = dict(ds_terms)
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -12,6 +30,44 @@ import json
 </%block>
 
 <%block name="controls">
+
+<div class="modal hide" id="dataset-modal">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Dataset selector</h4>
+      </div>
+      <div class="modal-body">
+        <table id="dataset-table">
+          <thead>
+            <tr>
+              <th></th>
+%for term in terms:
+              <th>${term}</th>
+%endfor
+              <th>n</th>
+            </tr>
+          </thead>
+          <tbody>
+%for ds in data.datasets.all():
+            <tr>
+              <td>${ds.id}</td>
+%for term in terms:
+              <td>${dds[ds.name].get(term, '')}</td>
+%endfor
+              <td>${ds.numberSamples}</td>
+            </tr>
+%endfor
+          </tbody>
+        </table>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <div class="row-fluid">
    <div id="menu" class="span12"  >
@@ -28,16 +84,9 @@ import json
 
               <div id="dataset_menu" class="accordion-body collapse in">
                 <div class="accordion-inner">
-
-
-
-                  <select id="datasets">
-                    <option value="">Select a dataset</option>
-                    %for d in data.datasets.all():
-                      <option value="${d.id}">${d.name}</option>
-                    %endfor
-                 </select>
-
+                  <ul id="current_datasets">
+                  </ul>
+                  <a id="add_dataset">Choose dataset</a>
               </div>
             </div>
           </div>
@@ -163,6 +212,17 @@ import json
 
 <%block name="style">
 ${parent.style()}
+#dataset-table tbody tr {
+  cursor: pointer;
+}
+
+#dataset-table tbody tr:hover {
+  background-color: #ffa;
+}
+
+#dataset-table td {
+  white-space: nowrap;
+}
 </%block>
 
 <%block name="pagetail">
@@ -195,6 +255,8 @@ $(document).ready(function() {
     if (_.isNaN(nsamples)) {
       nsamples=0;
     }
+    $("#nb_datasets").text('('+current_datasets.length+')');
+
     $("#nb_samples").text('('+nsamples+')');
 
     $("#nb_genes").text('('+current_graph.data.length+')');
@@ -218,8 +280,8 @@ $(document).ready(function() {
       dataype: 'json',
       async: !sync,
       success: function(data) {
-        current_dataset = dataset;
-        gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
+        current_datasets = [dataset];
+        gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]);
         var options = $('#sample_selection');
         _.each(data, function(kv) {
           var k = kv[0];
@@ -232,26 +294,27 @@ $(document).ready(function() {
         });
         $("#gene").attr('disabled', false);
         $(".locate").attr('disabled', false);
+        $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
       },
       error: function() {
-        current_dataset = null;
+        current_dataset = [];
         gene_entry.url = null;
         $("#gene").attr('disabled', true);
         $(".locate").attr('disabled', true);
       },
       complete: function() {
-        updateInfo();
         gene_entry.$el.val('');
         info.clear();
         $('#genelist').empty();
         current_graph.removeData(function() { return true; });
+        updateInfo();
       }
     });
   };
 
   var addGene = function(gene_id, gene_symbol, sync) {
     $.ajax({
-      url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_dataset).replace('_gene_id_', gene_id),
+      url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_datasets[0]).replace('_gene_id_', gene_id),
       dataype: 'json',
       async: !sync,
       success: function(data) {
@@ -346,7 +409,7 @@ $(document).ready(function() {
       _selection.active = true;
       _selection.pending = undefined;
       $.ajax({
-        url: "${request.route_url('mistic.json.dataset.samples.enrich', dataset='_dataset_')}".replace('_dataset_', current_dataset),
+        url: "${request.route_url('mistic.json.dataset.samples.enrich', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
         dataType: 'json',
         type: 'POST',
         data: { samples: JSON.stringify(selection) },
@@ -413,6 +476,8 @@ $(document).ready(function() {
     gene_data = [ ds.expndata(gene) for gene in genes ]
   %>
 
+    current_datasets = [];
+
   %if ds is not None:
     addDataset("${dataset}", true);
     // Gene symbols were passed in the URL
@@ -420,7 +485,6 @@ $(document).ready(function() {
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
   %else:
-    current_dataset = undefined;
     gene_entry.url = null;
 
     $("#gene").attr('disabled', true);
@@ -429,7 +493,7 @@ $(document).ready(function() {
 
   $("#share_url").on('click', function(event){
     var url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
-              .replace('_dataset_', current_dataset);
+              .replace('_dataset_', current_datasets[0]);
 
     if (current_graph.data.length>0){
         _.each(current_graph.data, function(x) { url += '/' + x.gene;console.debug(x.gene); });
@@ -488,9 +552,9 @@ $(document).ready(function() {
 
   $('#show_labels').on("click", function(event){
     var selected;
-    selected = d3.select(current_graph.svg).selectAll("g.node.selected text.circlelabel");
+    selected = d3.select(current_graph.svg).selectAll("g.node.selected .circlelabel");
     if (selected[0].length == 0 ) {
-      selected = d3.select(current_graph.svg).selectAll("g.node text.circlelabel");
+      selected = d3.select(current_graph.svg).selectAll("g.node .circlelabel");
     }
     selected.classed('invisible', false);
     event.preventDefault();
@@ -498,9 +562,9 @@ $(document).ready(function() {
 
   $('#clear_labels').on("click", function(event){
     var selected;
-    selected = d3.select(current_graph.svg).selectAll("g.node.selected text.circlelabel");
+    selected = d3.select(current_graph.svg).selectAll("g.node.selected .circlelabel");
     if (selected[0].length == 0 ) {
-      selected = d3.select(current_graph.svg).selectAll("g.node text.circlelabel");
+      selected = d3.select(current_graph.svg).selectAll("g.node .circlelabel");
     }
     selected.classed('invisible', true);
     event.preventDefault();
@@ -617,13 +681,46 @@ $(document).ready(function() {
     var kv = {};
     kv[l1] = l2;
     $.ajax({
-      url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_dataset),
+      url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
       data: kv,
       dataype: 'json',
       success: function(data) {
         current_graph.setSelection(data);
       }
     });
+  });
+
+  function initTable() {
+    var aoc = [null];
+    var bsc = [true];
+    for (var i=0; i<${len(terms)}; i++) {
+      aoc.push(null);
+      bsc.push(true);
+    }
+    aoc = aoc.concat([null]);
+    bsc = bsc.concat([true]);
+
+    $('#dataset-table tbody tr').on('click', function(event) {
+      var dataset_id = $('td', this)[0].innerHTML;
+      addDataset(dataset_id);
+      $('#dataset-modal').modal('hide');
+    });
+
+    return $('#dataset-table').dataTable( {
+      "aoColumns": aoc,
+      "bSearch": bsc,
+      "bPaginate": false,
+      "bSort":true,
+      "bProcessing": false,
+      "sDom": 'Rlfrtip',
+      "bRetrieve":true,
+    });
+  }
+
+  initTable();
+  $('#add_dataset').on('click', function(event) {
+    $('#dataset-modal').modal();
+    event.preventDefault();
   });
 });
 </script>
