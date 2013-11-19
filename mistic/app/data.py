@@ -519,7 +519,12 @@ class DataSet(object):
       id = self.id,
       name = self.name,
       desc = self.description,
-      anot = self.annotation.id)
+      anot = self.annotation.id,
+      type = self.type,
+      tags = self.tags,
+      expt = self.experiment,
+      xfrm = self.transforms
+    )
 
   @property
   def genes(self):
