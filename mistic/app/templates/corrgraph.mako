@@ -211,7 +211,7 @@ $(document).ready(function() {
           current_graph.annotation = current_dataset.genes;
           current_graph.setLabelNb(nlabel);
           
-          if (expt=='hts' || expt=='ngs,hts') { current_graph.setDescAsLabel (true); }
+          if (expt=='hts' || expt=='ngs,hts') { current_graph.setNameAsLabel (true); }
           
           current_graph.setData(data.data);
           
