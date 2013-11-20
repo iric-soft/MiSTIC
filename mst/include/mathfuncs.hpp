@@ -22,7 +22,7 @@ namespace {
       rank_offset = 0.0;
       rank_scale = 1.0;
     } else {
-      rank_offset = -(N-1)/2.0;
+      rank_offset = (N-1)/2.0;
       rank_scale = 1.0 / sqrt((N*N - 1)/12.0);
     }
 
@@ -33,6 +33,7 @@ namespace {
       while (j < N && a[indices[j]] == a[indices[i]]) {
         val += rv;
         rv += 1.0;
+        ++j;
       }
 
       val /= j-i;
