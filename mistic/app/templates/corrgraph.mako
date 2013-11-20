@@ -163,7 +163,7 @@ $(document).ready(function() {
     } else {
       $.ajax({
         url: "${request.route_url('mistic.json.annotation.gene_ids', annotation='_annotation_')}".replace('_annotation_', dataset_annotation[current_dataset]),
-        data: { go: current_go_term.id },
+        data: { filter_gsid: item.id },
         dataype: 'json',
         success: function(data) {
           current_graph.markGenes(data);
@@ -178,6 +178,7 @@ $(document).ready(function() {
   var addDataset = function(dataset, sync) {
     var disable = function() {
       dataset_info = {};
+      go_entry.url = null;
       current_dataset = null;
       gene_entry.url = null;
       $("#gene").attr('disabled', true);
@@ -187,6 +188,7 @@ $(document).ready(function() {
 
     var enable = function(data) {
       dataset_info = data;
+      go_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation='_annotation_')}".replace('_annotation_', dataset_info.anot);
       current_dataset = dataset;
       gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
       $("#gene").attr("disabled", false);
