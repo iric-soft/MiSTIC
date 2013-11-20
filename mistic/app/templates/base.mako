@@ -165,8 +165,11 @@ mistic = {
     item_view: GeneItemView,
 
     autofillText: function(model) {
-      var symbol = model.get('symbol') ?  model.get('symbol') :  model.get('id')
-      return symbol  +" "+ model.get('name');
+      if (model !== undefined && model !== null) {
+        var symbol = model.get('symbol') ? model.get('symbol') : model.get('id')
+        return symbol + ' ' + model.get('name');
+      }
+      return '';
     },
 
     searchData: function() {
@@ -195,7 +198,11 @@ mistic = {
     menu: '<ul class="typeahead dropdown-menu" style="max-width: 400px; max-height: 300px; overflow-x: hidden; overflow-y: auto"></ul>',
 
     autofillText: function(model) {
-      return model.id+'|'+model.get('name');
+      console.log(typeof(model))
+      if (model !== undefined && model !== null) {
+        return model.id + ' ' + model.get('name');
+      }
+      return '';
     },
 
     searchData: function() {
