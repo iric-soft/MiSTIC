@@ -10,72 +10,72 @@ ${parent.style()}
 <%block name="actions">
   <button class="btn" id="download">CSV</button>
   <button class="btn" id="download-all">CSV [all]</button>${parent.actions()}
-  
+
 </%block>
 
 
 <%block name="controls">
   <form class="form-inline">
 
- <div class="accordion" id="accordion">
+<div class="accordion" id="accordion">
+  <div class="accordion-group">
+    <div class="accordion-heading"><h4 class="accordion-title">
+        <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset </a></h4>
+    </div>
 
-    <div class="accordion-group">     
-       <div class="accordion-heading"><h4 class="accordion-title">
-            <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset </a></h4>
-       </div>
-       
-       <div id="dataset_menu" class="accordion-body collapse in">
-         <div class="accordion-inner">    
-           
-                <select id="datasets">
-                    <option value="">Select a dataset</option>
-                    %for d in data.datasets.all():
-                    <option value="${d.id}">${d.name}</option>
-        %endfor
+    <div id="dataset_menu" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <select id="datasets">
+          <option value="">Select a dataset</option>
+%for d in data.datasets.all():
+          <option value="${d.id}">${d.name}</option>
+%endfor
+        </select>
+      </div>
+    </div>
+  </div>
 
-    </select>
-                 
-              </div>
-            </div>
-          </div>
-          
-      <div class="accordion-group">     
-       <div class="accordion-heading"><h4 class="accordion-title">
-            <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Gene </a></h4>
-       </div>
-       
-       <div id="gene_menu" class="accordion-body collapse in">
-         <div class="accordion-inner">    
-        <input type="text" id="gene"></input></label>
+  <div class="accordion-group">
+    <div class="accordion-heading"><h4 class="accordion-title">
+        <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Gene </a></h4>
+    </div>
+
+    <div id="gene_menu" class="accordion-body collapse in">
+      <div class="accordion-inner">
+        <input type="text" id="gene">
         <button class="btn" id="plot">Plot</button>
-          </div>
-        </div>
-       </div> 
-       
-      <div class="accordion-group">     
-       <div class="accordion-heading"><h4 class="accordion-title">
-            <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a></h4>
-       </div>
-      <div id="options_menu" class="accordion-body collapse ">
-         <div class="accordion-inner">     
-          <label for="nlabel">Display </label> 
-          <input type="text" style="width:20px;" id="nlabel"  autocomplete='off' value=10></input></label>
-           labels 
-         <br>
-         <hr>
-          <label for="goterm">Show GO term members </label> <input type="text" autocomplete='off' id="goterm"></input></label>
-   </div>
-        </div>
-       </div> 
+      </div>
+    </div>
+  </div>
 
+  <div class="accordion-group">
+    <div class="accordion-heading"><h4 class="accordion-title">
+        <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a></h4>
+    </div>
+    <div id="options_menu" class="accordion-body collapse ">
+      <div class="accordion-inner">
+        <ul id="options" class="nav nav-list">
+          <li>
+            <label for="nlabel">Display </label>
+            <input type="text" style="width:20px;" id="nlabel"  autocomplete='off' value=10>
+            labels
+          </li>
+          <li>
+            <label for="goterm">Show GO term members </label>
+            <input type="text" autocomplete='off' id="goterm">
+          </li>
+          <li>
+            Transformation:
+            <div class="btn-group btn-group-justified" data-toggle="buttons-radio" id="transform-buttons">
+            </div>
+          </li>
+        </ul>
+      </div>
+    </div>
+  </div>
 </div>
 
-    
-    
-   
-    
-   
-  </form>
+</form>
 </%block>
 
 <%block name="pagetail">
@@ -106,12 +106,12 @@ $(document).ready(function() {
           .replace('_dataset_', opts.dataset)
           .replace('_gene_', opts.gene);
         url_button($('#download'), url);
-        
+
         url = "${request.route_url('mistic.csv.corrds',  dataset = '_dataset_', gene = '_gene_')}"
           .replace('_dataset_', opts.dataset)
           .replace('_gene_', opts.gene);
         url_button($('#download-all'), url);
-        
+
         url = "${request.route_url('mistic.template.corrgraph_static', dataset = '_dataset_', gene = '_gene_')}"
           .replace('_dataset_', opts.dataset)
           .replace('_gene_', opts.gene);
@@ -128,20 +128,22 @@ $(document).ready(function() {
   })();
 
   var dataset_annotation = ${json.dumps(dict([ (ds.id, ds.annotation.id) for ds in data.datasets.all() ]))|n};
-  
+
   var current_dataset = null;
+  var dataset_info = {};
+  var current_transform = 'none';
   var current_gene = null;
   var current_go_term = null;
   var current_graph = new corrgraph([], $('#graph'));
-  
+
   resizeGraph = function() {
     current_graph.elem.height($(window).height() -248 );
     current_graph.resize();
   };
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
-  
-  
+
+
   gene_entry.on('change', function(item) {
     current_gene = item;
     gene_entry.$el.toggleClass('valid', item !== null);
@@ -173,58 +175,94 @@ $(document).ready(function() {
     }
   });
 
-  $('#datasets').on('change', function(event) {
-    current_dataset = event.target.value;
-    if (current_dataset === '') {
+  var addDataset = function(dataset, sync) {
+    var disable = function() {
+      dataset_info = {};
       current_dataset = null;
       gene_entry.url = null;
-      $("#gene").attr("disabled", true);
+      $("#gene").attr('disabled', true);
       $("#goterm").attr("disabled", true);
-      
-    } 
-    else {
+      gene_entry.$el.val('');
+    };
+
+    var enable = function(data) {
+      dataset_info = data;
+      current_dataset = dataset;
+      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
       $("#gene").attr("disabled", false);
       $("#goterm").attr("disabled", false);
-      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
+      gene_entry.$el.val('');
+    };
+
+    if (dataset == '') {
+      disable();
+      return;
     }
-    gene_entry.$el.val('');
+
+    $.ajax({
+      url: "${request.route_url('mistic.json.dataset', dataset='_dataset_')}".replace('_dataset_', dataset),
+      dataype: 'json',
+      async: !sync,
+      success: function(data) {
+        var xf = $('#transform-buttons');
+        xf.empty();
+        current_transform = data['xfrm'][0];
+        _.each(data['xfrm'], function(val) {
+          var btn = $('<button class="btn btn-default">');
+          btn.on('click', function(event) {
+            current_transform = $(this).text();
+            if (current_dataset !== null && current_gene !== null) {
+              var expt = dataset_info['expt']
+              plot(current_dataset, current_gene.id, (expt=='hts' || expt=='ngs,hts'));
+            }
+            event.preventDefault();
+          });
+          btn.toggleClass('active', current_transform == val);
+          btn.text(val);
+          xf.append(btn);
+        });
+        enable(data);
+      },
+      error: disable,
+    });
+  };
+
+  $('#datasets').on('change', function(event) {
+    addDataset(event.target.value);
   });
 
+  var plot = function(dataset, gene, name_labels) {
+    $('#plot').button('loading');
+
+    var req = $.ajax({
+      url: "${request.route_url('mistic.json.gene.corr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', dataset).replace('_gene_id_', gene),
+      data: {x: current_transform},
+      dataype: 'json',
+
+      success: function(data) {
+        var nlabel = $("#nlabel").val();
+        current_graph.annotation = current_dataset.genes;
+        current_graph.setLabelNb(nlabel);
+
+        current_graph.setNameAsLabel(name_labels);
+        current_graph.setData(data.data);
+
+        current_graph.draw();
+        updateURLTarget({ dataset: dataset, gene: gene });
+      },
+      error: function() {
+        // inform the user something went wrong.
+      },
+      complete: function() {
+        req.done(function() { $('#plot').button('reset'); });
+      }
+    });
+  };
+
   $('#plot').click(function (event) {
-   
     if (current_dataset !== null && current_gene !== null) {
-      $('#plot').button('loading');
-      
-      var dataset_expt = ${json.dumps(dict([ (ds.id, ds.experiment) for ds in data.datasets.all() ]))|n};
-      var expt = dataset_expt[current_dataset]
-      var xform  = 'none'
-      
-      if (expt=='ngs') {xform='log'}
-      
-      var req = $.ajax({
-        url: mistic.url + '/datasets/' + current_dataset + '/genes/' + current_gene.id + '/corr',
-        data: {x: xform},
-        dataype: 'json',
-        
-        success: function(data) {
-          var nlabel = $("#nlabel").val();
-          current_graph.annotation = current_dataset.genes;
-          current_graph.setLabelNb(nlabel);
-          
-          if (expt=='hts' || expt=='ngs,hts') { current_graph.setNameAsLabel (true); }
-          
-          current_graph.setData(data.data);
-          
-          current_graph.draw();
-          updateURLTarget({ dataset: current_dataset, gene: current_gene.id });
-         
-          
-        },
-        error: function() {
-          // inform the user something went wrong.
-        }
-      });
-      req.done(function() { $('#plot').button('reset'); });
+      var expt = dataset_info['expt']
+      plot(current_dataset, current_gene.id, (expt=='hts' || expt=='ngs,hts'));
     }
     event.preventDefault();
   });
