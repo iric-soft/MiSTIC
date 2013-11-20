@@ -177,7 +177,7 @@
             if (!this.shown) {
                 var pos = _.extend(
                     {},
-                    this.$el.position(),
+                    this.$el.offset(),
                     { height: this.$el[0].offsetHeight }
                 );
 
