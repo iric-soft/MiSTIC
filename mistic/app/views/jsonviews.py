@@ -277,7 +277,7 @@ class Dataset(object):
                 NN = len(all_samples) - YY - YN - NY # ~samples with col != val
 
                 tab = [ [ YY, YN ], [ NY, NN ] ]
-                odds, p_val = scipy.stats.fisher_exact(tab)
+                odds, p_val = scipy.stats.fisher_exact(tab, alternative='greater')
                 if p_val > 0.05:
                     continue
                 if math.isnan(odds) or math.isinf(odds): odds = str(odds)
