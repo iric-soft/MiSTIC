@@ -64,7 +64,6 @@
         
         _.each(this.data,              function(d) { d.labelled = false; });
         _.each(_.first(this.data, this.options.show), function(d) { d.labelled = true; });
-        // _.each(_.first(_.last(this.data, 9490), 80), function(d) { d.labelled = true; });
         _.each( _.last(this.data, this.options.show), function(d) { d.labelled = true; });
     }
 
