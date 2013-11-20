@@ -86,7 +86,7 @@ for ds in data.datasets.all():
                 <div class="accordion-inner">
                   <ul id="current_datasets">
                   </ul>
-                  <a id="add_dataset">Choose dataset</a>
+                  <a class='btn' id="add_dataset">Choose dataset</a>
               </div>
             </div>
           </div>
@@ -212,6 +212,10 @@ for ds in data.datasets.all():
 
 <%block name="style">
 ${parent.style()}
+#dataset-modal{
+ min-width:600px;
+} 
+
 #dataset-table tbody {
   cursor: pointer;
   color: #aaa;
