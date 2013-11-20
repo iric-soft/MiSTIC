@@ -132,14 +132,12 @@
 
       
         selectItem: function(item) {
-            
             if (item === this.selected_item) {
-           
-            return;
+                return;
             }
+
             if (item !== null) {
                 var txt = this.autofillText(item);
-              
                 this.$el.val(txt);
                 this.selected_item = item;
                 this.selected_text = txt;
@@ -153,24 +151,18 @@
             this.hide();
         },
         
-
-        selectManual : function(event) {
+        selectManual: function(event) {
+            var url = this.searchURL();
+            var data =  this.searchData();
+            var self = this;
            
-           var url = this.searchURL();
-           var data =  this.searchData();
-           var self = this;
-           
-           this.collection.fetch({
-              data: data, 
-              url : url,
-              success: function(collection){
+            this.collection.fetch({
+                data: data, 
+                url : url,
+                success: function(collection){
                     self.selectItem(collection.get(data.q));  
-                    }
-                   
-             
-              });
-          
-          
+                }
+            });
         },
         
         show: function() {
