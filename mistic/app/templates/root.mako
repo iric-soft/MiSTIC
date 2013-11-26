@@ -11,6 +11,8 @@ def parse_term(x):
 
 terms = []
 
+transforms = []
+
 for ds in data.datasets.all():
   ds_terms = [ parse_term(term) for term in ds.tags.split(';') if len(term) ]
 
@@ -18,10 +20,10 @@ for ds in data.datasets.all():
     if k not in terms:
       terms.append(k)
 
+  for t in ds.transforms:
+   if t not in transforms:
+     transforms.append(t)
   dds[ds.name] = dict(ds_terms)
-
-transforms = ('log', 'rank', 'none')
-#transforms = ['log']
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -83,26 +85,26 @@ a#oo{
   <th><a><i class="icon-th-list"></a></i>${term}</th>
 %endfor
 <th>n</th>
-<th colspan="3">Icicle</th>
+<th>Icicle</th>
 </tr>
 </thead>
 
 <tbody>
   %for ds in data.datasets.all() :
   <tr>
-   %for term in terms :
+%for term in terms:
     <td>${dds[ds.name].get(term, '')}</td>
-   %endfor
-   <td>${ds.numberSamples}</td>
-    %for i, tf in enumerate(transforms):
-      %if tf in ds.transforms:
-      <td><a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a></td>
-     %else:
-      <td></td>
+%endfor
+    <td>${ds.numberSamples}</td>
+    <td>
+%for i, tf in enumerate(transforms):
+  <span style="display: inline-block; width: 4em;">
+  %if tf in ds.transforms:
+      <a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a>
   %endif
-  %endfor
-   
-      
+  </span>
+%endfor
+    </td>
   </tr>
   %endfor
 </tbody>
@@ -134,8 +136,8 @@ ${parent.pagetail()}
             aoc.push(null);
             bsc.push(true);
         }
-        aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": false }, { "bSortable": false } ]);
-        bsc = bsc.concat([true, null, null, null ]);
+        aoc = aoc.concat([null, { "bSortable": false } ]);
+        bsc = bsc.concat([true, null, null ]);
   
         return $('#datasets-table').dataTable( {  
                         "aoColumns": aoc  ,   
