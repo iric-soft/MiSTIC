@@ -229,3 +229,20 @@ path.axis.selected {
 }
 
 
+
+.dataset-table tbody {
+  cursor: pointer;
+  color: #aaa;
+}
+
+.dataset-table tbody tr.selectable {
+  color: #000;
+}
+
+.dataset-table tbody tr.selectable:hover {
+  background-color: #ffa;
+}
+
+.dataset-table td {
+  white-space: nowrap;
+}

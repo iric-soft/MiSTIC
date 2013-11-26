@@ -1,24 +1,6 @@
 <%!
 import mistic.app.data as data
 import json
-
-terms = []
-dds = {}
-
-def parse_term(x):
-  x = x.split('=', 1)
-  return x[0].strip(), x[1].strip()
-
-terms = []
-
-for ds in data.datasets.all():
-  ds_terms = [ parse_term(term) for term in ds.tags.split(';') if len(term) ]
-
-  for k,v in ds_terms:
-    if k not in terms:
-      terms.append(k)
-
-  dds[ds.name] = dict(ds_terms)
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -30,44 +12,6 @@ for ds in data.datasets.all():
 </%block>
 
 <%block name="controls">
-
-<div class="modal hide" id="dataset-modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Dataset selector</h4>
-      </div>
-      <div class="modal-body">
-        <table id="dataset-table">
-          <thead>
-            <tr>
-              <th></th>
-%for term in terms:
-              <th>${term}</th>
-%endfor
-              <th>n</th>
-            </tr>
-          </thead>
-          <tbody>
-%for ds in data.datasets.all():
-            <tr>
-              <td>${ds.id}</td>
-%for term in terms:
-              <td>${dds[ds.name].get(term, '')}</td>
-%endfor
-              <td>${ds.numberSamples}</td>
-            </tr>
-%endfor
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
 
 <div class="row-fluid">
    <div id="menu" class="span12"  >
@@ -212,22 +156,6 @@ for ds in data.datasets.all():
 
 <%block name="style">
 ${parent.style()}
-#dataset-table tbody {
-  cursor: pointer;
-  color: #aaa;
-}
-
-#dataset-table tbody tr.selectable {
-  color: #000;
-}
-
-#dataset-table tbody tr.selectable:hover {
-  background-color: #ffa;
-}
-
-#dataset-table td {
-  white-space: nowrap;
-}
 </%block>
 
 <%block name="pagetail">
@@ -236,6 +164,7 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/scatterplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/textpanel.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/dataset_selector.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
@@ -695,45 +624,13 @@ $(document).ready(function() {
     });
   });
 
-  function initTable() {
-    var aoc = [null];
-    var bsc = [true];
-    for (var i=0; i<${len(terms)}; i++) {
-      aoc.push(null);
-      bsc.push(true);
-    }
-    aoc = aoc.concat([null]);
-    bsc = bsc.concat([true]);
-
-    $('#dataset-table tbody tr').on('click', function(event) {
-      if ($(this).hasClass('selectable')) {
-        var dataset_id = $('td', this)[0].innerHTML;
-        addDataset(dataset_id);
-        $('#dataset-modal').modal('hide');
-      }
-    });
-
-    return $('#dataset-table').dataTable( {
-      "aoColumns": aoc,
-      "bSearch": bsc,
-      "bPaginate": false,
-      "bSort":true,
-      "bProcessing": false,
-      "sDom": 'Rlfrtip',
-      "bRetrieve":true,
-    });
-  }
-
-  initTable();
   $('#add_dataset').on('click', function(event) {
-    $('#dataset-table tbody tr').each(function(row) {
-      if (_.contains(current_datasets, $('td', this)[0].innerHTML)) {
-        $(this).removeClass('selectable');
-      } else {
-        $(this).addClass('selectable');
-      }
+    var ds_sel = new DatasetSelector();
+    ds_sel.disable_rows(current_datasets);
+    ds_sel.show();
+    ds_sel.$el.on('select-dataset', function(event, dataset_id) {
+      addDataset(dataset_id);
     });
-    $('#dataset-modal').modal();
     event.preventDefault();
   });
 });
