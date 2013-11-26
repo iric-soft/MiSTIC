@@ -2,28 +2,18 @@
 <%!
 import json
 import mistic.app.data as data
-terms = []
-dds = {}
-
-def parse_term(x):
-  x = x.split('=', 1)
-  return x[0].strip(), x[1].strip()
 
 terms = []
-
 transforms = []
 
 for ds in data.datasets.all():
-  ds_terms = [ parse_term(term) for term in ds.tags.split(';') if len(term) ]
-
-  for k,v in ds_terms:
+  for k,v in ds.tags.iteritems():
     if k not in terms:
       terms.append(k)
 
   for t in ds.transforms:
    if t not in transforms:
      transforms.append(t)
-  dds[ds.name] = dict(ds_terms)
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -93,7 +83,7 @@ a#oo{
   %for ds in data.datasets.all() :
   <tr>
 %for term in terms:
-    <td>${dds[ds.name].get(term, '')}</td>
+    <td>${ds.tags.get(term, '')}</td>
 %endfor
     <td>${ds.numberSamples}</td>
     <td>
