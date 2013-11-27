@@ -627,7 +627,7 @@ $(document).ready(function() {
   $('#add_dataset').on('click', function(event) {
     var ds_sel = new DatasetSelector();
     ds_sel.disable_rows(current_datasets);
-    ds_sel.show();
+    ds_sel.show(event.currentTarget);
     ds_sel.$el.on('select-dataset', function(event, dataset_id) {
       addDataset(dataset_id);
     });
