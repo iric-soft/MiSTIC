@@ -196,7 +196,9 @@ def main(global_config, **settings):
     config.add_route('mistic.json.dataset.samples',        '/datasets/{dataset}/samples')
     config.add_route('mistic.json.dataset.samples.enrich', '/datasets/{dataset}/samples/enrichment')
     config.add_route('mistic.json.sample',                 '/datasets/{dataset}/samples/{sample_id}')
-
+    
+    config.add_route('mistic.json.dataset.sampleinfo.search',     '/datasets/{dataset}/sampleinfo/search')
+    
     config.add_route('mistic.json.dataset.mst',            '/datasets/{dataset}/mst/{xform}')
     config.add_route('mistic.json.dataset.mapped_mst',     '/datasets/{dataset}/mst/{xform}/{tgt_annotation}')
 
@@ -222,6 +224,7 @@ def main(global_config, **settings):
     config.add_route('mistic.template.scatterplot',        '/scatterplot')
     config.add_route('mistic.template.scatterplot_static', '/scatterplot/{dataset}/{gene1}/{gene2}')
     config.add_route('mistic.template.pairplot',           '/pairplot/{dataset}*genes')
+    
    
 
     config.add_route('mistic.csv.root',                    '/csv/root')
