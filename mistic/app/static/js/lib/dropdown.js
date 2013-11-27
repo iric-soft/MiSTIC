@@ -76,7 +76,6 @@
         attributes: { type: 'text' },
 
         events: {
-            'select' :  'selectManual',
             'change':   'update',
             'keydown':  'keydown',
             'keyup':    'keyup',
@@ -149,20 +148,6 @@
            
             this.trigger('change', this.selected_item);
             this.hide();
-        },
-        
-        selectManual: function(event) {
-            var url = this.searchURL();
-            var data =  this.searchData();
-            var self = this;
-           
-            this.collection.fetch({
-                data: data, 
-                url : url,
-                success: function(collection){
-                    self.selectItem(collection.get(data.q));  
-                }
-            });
         },
         
         show: function() {
