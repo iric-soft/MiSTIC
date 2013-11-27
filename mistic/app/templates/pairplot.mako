@@ -503,9 +503,10 @@ $(document).ready(function() {
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
     %for e in [(o,others[o]) for o in others.keys() if 'highlighted' in o]:
-      $(${e[0]}).val("${e[1]}");
-      
+      $(${e[0]}).val("${e[1]}"); 
     %endfor
+    
+  
    
     
   %else:
@@ -523,16 +524,16 @@ $(document).ready(function() {
         _.each(current_graph.data, function(x) { url += '/' + x.gene;});
     }
 
-    url += '/?';
-    
+    url += '/?o=';
+    var s = '';
     _.each(_.keys(highlights), function(k) {
-        url += k+'=';
-        _.each(getSamplesWithClass(k), function(x) { url += x +' '; });
-        url = $.trim(url);
-        url += ';';
+        s += k+'=';
+        _.each(getSamplesWithClass(k), function(x) { s += x +' '; });
+        s = $.trim(s);
+        s += ';';
    });     
      
-    
+    url += Base64.encode(s);
     $("span#share").html(url);
     
   });
