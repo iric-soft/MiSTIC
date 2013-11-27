@@ -58,8 +58,22 @@
             return this;
         },
 
-        show: function() {
-            this.$el.appendTo($('body')).modal({ backdrop: false, keyboard: false });
+        show: function(pos_elem) {
+            this.$el.appendTo($('body')).modal({ backdrop: false });
+
+            if (pos_elem !== undefined) {
+                var pos = _.extend(
+                    {},
+                    $(pos_elem).offset(),
+                    { height: $(pos_elem)[0].offsetHeight }
+                );
+
+                this.$el.css({
+                    top: pos.top + pos.height + 5,
+                    left: pos.left,
+                    margin: 0
+                })
+            }
         },
 
         select: function(event) {
