@@ -114,7 +114,7 @@
     scatterplot.prototype.setSelection = function(selection, quiet) {
         d3.select(this.svg)
             .selectAll('g.node')
-            .classed('selected', function(d) { return _.contains(selection, d.k); });
+            .classed('selected', function(d) { return _.contains(selection, d.s); });
         this.notifySelectionChange(quiet);
     };
 
@@ -122,7 +122,7 @@
         var circles = d3
             .select(this.svg)
             .selectAll("g.node.selected");
-        var selected = _.map(circles.data(), function(c) { return c.k; });
+        var selected = _.map(circles.data(), function(c) { return c.s; });
         return selected;
     };
 
@@ -138,7 +138,7 @@
                 return e[0][0] <= d.x && d.x <= e[1][0] &&
                     e[0][1] <= d.y && d.y <= e[1][1]
             });
-        var selected = _.map(circles.data(), function(c) {return c.k;});
+        var selected = _.map(circles.data(), function(c) {return c.s;});
         this.setSelection(selected);
     };
 
@@ -275,13 +275,19 @@
 
         for (var i in keys) {
             var k = keys[i];
+            var p = k.split('-')
+            var s = k;
+            if (p.length>1){
+                var s = p[0]+'-'+p[1]+'-'+p[2];
+            }
+            
             var x = this.xdata[k];
             var y = this.ydata[k];
             if  (x < 0.0 ||  y < 0.0) {
                 lg = false;
-                xy.push({x:x,y:y,k:k});
+                xy.push({x:x,y:y,k:k,s:s});
             } else {
-                xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});
+                xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k, s:s});
             }
 
             v1.push(x);
@@ -289,7 +295,7 @@
             v1_log.push(Math.log(x + 1/1024));
             v2_log.push(Math.log(y + 1/1024));
         }
-
+       
         var rr = Math.max(
             stats.range(v1)[1]-stats.range(v1)[0],
             stats.range(v2)[1]-stats.range(v2)[0]);
@@ -388,7 +394,7 @@
         var font_size = pt_size + 8;
 
         nodes.append("text")
-            .text(function(d) {return d.k;} )
+            .text(function(d) {return d.s;} )
             .attr('x', function(d) { return self.xScale(d.x)+pt_size; })
             .attr('y', function(d) { return self.yScale(d.y)+pt_size;})
             .attr('style', 'font-size:'+ font_size+"px;")
