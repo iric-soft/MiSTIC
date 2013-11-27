@@ -25,7 +25,7 @@ select {
 }
 
 select[name$="_length"] {
-width:10px;
+    width: 8ex;
 }
 
 input.valid {
@@ -50,7 +50,6 @@ div#graph text {
   font-family: helvetica; 
 }
 
-
 .circlelabel .invisible {
   pointer-events : none;
 }
@@ -59,18 +58,17 @@ circle  {
   pointer-events : auto;
 }
 
-
 .color0 {
-  fill : rgb(252, 132, 3);
- }
-.color1{
-  fill : #0BBEDE; 
+  fill: rgb(252, 132, 3);
 }
-.color2  {
-  fill : rgb(36, 153, 36); 
+.color1 {
+  fill: #0BBEDE; 
 }
-.color3  {
-  fill :rgb(155, 42, 141); 
+.color2 {
+  fill: rgb(36, 153, 36); 
+}
+.color3 {
+  fill: rgb(155, 42, 141); 
 }
 
 .stroke0, .stroke1,
@@ -82,16 +80,15 @@ circle  {
 .stroke0 {
   stroke:rgb(252, 132, 3);
 }
-
 .stroke1 {
   stroke: #0BBEDE;
 }
 .stroke2 {
   stroke: rgb(36, 153, 36);
-  }
+}
 .stroke3 {
   stroke:rgb(155, 42, 141);
- }
+}
 
 g.node.selected {
 }
@@ -123,6 +120,7 @@ div#more-information {
    padding: 10px 0px 0px 0px;
    overflow:hidden;
 }
+
 div#more-information a,
 div#more-information a:hover
 {
@@ -130,6 +128,7 @@ div#more-information a:hover
   color : rgb(58, 55, 55);
   pointer-events : none;
 }
+
 
 
 .go-cellular_component span.label,
@@ -143,19 +142,20 @@ div#more-information a:hover
   border: 1px solid white;
   font-weight: inherit;
 }
+
 .go-cellular_component span.label { background-color: #800; }
 .go-biological_process span.label { background-color: #080; }
 .go-molecular_function span.label { background-color: #008; }
 
-.gene-item  span.label { color: black; background-color: #ddd; }
+
+
+.gene-item span.label { color: black; background-color: #ddd; }
 
 
 .label,
 .badge {
   display: inline-block;
-  
 }
-
 
 
 
@@ -173,7 +173,6 @@ div#more-information a:hover
    
 }
 
-
 .accordion-toggle, .accordion-toggle:hover,
 .accordion-toggle:focus  {
   cursor: pointer;
@@ -182,13 +181,15 @@ div#more-information a:hover
   
 }
 
+
+
 div#sample_enrichment {
   font-size: 80%;
   max-height: 200px;
   overflow-y: auto;
 }
 
-ul#menu1{
+ul#menu1 {
   position:relative;
 }
 
@@ -204,19 +205,19 @@ ul#menu1{
 
 
 .dropdown-submenu {
-    
     position:absolute;
     display: none;
     left: 50%;
     top:-1px;
-    
-
 }
 
 .dropdown-menu li:hover .dropdown-submenu {
     display: block;
    
 }
+
+
+
 path.arc:hover {
   fill: #346;
 }
