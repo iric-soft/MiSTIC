@@ -30,7 +30,7 @@ import json
                 <div class="accordion-inner">
                   <ul id="current_datasets">
                   </ul>
-                  <a id="add_dataset">Choose dataset</a>
+                  <a class='btn' id="add_dataset">Choose dataset</a>
               </div>
             </div>
           </div>
