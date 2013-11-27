@@ -126,12 +126,9 @@ for ds in data.datasets.all():
 
           %for i in range(0,4) :
             <br>
-            <label style="display:inline;" for="highlighted${i}" size="8px">
-
-
+            <label style="display:inline;cursor:pointer;" for="highlighted${i}" size="8px">
             <svg height='10' width="10">
             <rect id="spectrum${i}" width="10" height="10" class="highlighted${i} color${i}" />
-
             </label>
             <input type="text" class="locate" id="highlighted${i}" autocomplete="off" data-index='${i}' />
             <div style="display:inline;">
@@ -147,10 +144,11 @@ for ds in data.datasets.all():
           </div>
 
           <hr>
-
-              <select id="sample_selection" >
-                <option selected value="none">Select by characteristic</option>
-              </select>
+             
+             
+               <input id='sample_annotation' type=text autocomplete="off" value='Select a characteristic'></input>
+               <a id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+               <span class="caret"></span></a>
 
         </div>
       </div>
@@ -232,6 +230,9 @@ ${parent.style()}
 #dataset-table td {
   white-space: nowrap;
 }
+#current_datasets {
+ cursor : default;
+}
 </%block>
 
 <%block name="pagetail">
@@ -244,16 +245,26 @@ ${parent.pagetail()}
 <script type="text/javascript">
 $(document).ready(function() {
   var gene_entry = new GeneDropdown({ el: $("#gene") });
+  var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
+  
   current_graph = new pairplot(undefined, undefined, $('#graph'));
   $("#options").css('display', 'none');
 
-
-
   var updateStyles = function() {
+    
     d3.select(current_graph.svg).selectAll('g.node').selectAll('circle').attr('fill', null).attr('stroke', null);
-
     _.each(highlights, function(hl, cclass) {
-      d3.select(current_graph.svg).selectAll('g.node.'+cclass).selectAll('circle').attr('fill', hl['fill']).attr('stroke', hl['stroke']);
+    
+      var nodes = d3.select(current_graph.svg).selectAll('g.node.'+cclass);
+           
+      if (!_.isNull(hl.fill) & !_.isUndefined(hl.fill)) {
+           nodes.selectAll('circle').attr('fill', hl.fill );
+      }
+      if (!_.isNull(hl.stroke) & !_.isUndefined(hl.stroke)){
+           nodes.selectAll('circle').attr('stroke', hl.stroke );
+           nodes.selectAll('circle').attr('stroke-width', '2px');
+       }
+     
     });
   };
 
@@ -276,14 +287,14 @@ $(document).ready(function() {
 
   var getSamplesWithClass = function(cclass) {
     var dat = {};
-    d3.selectAll('g.node.'+cclass).each(function(d) { dat[d.k] = true; });
+    d3.selectAll('g.node.'+cclass).each(function(d) { dat[d.s] = true; });
     dat = _.keys(dat)
     dat.sort();
     return dat;
   };
 
   var addDataset = function(dataset, sync) {
-    $('#sample_selection').html('<option selected value="none">Select a characteristic</option>');
+   
     $.ajax({
       url: "${request.route_url('mistic.json.dataset.sampleinfo', dataset='_dataset_')}".replace('_dataset_', dataset),
       dataype: 'json',
@@ -291,16 +302,8 @@ $(document).ready(function() {
       success: function(data) {
         current_datasets = [dataset];
         gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]);
-        var options = $('#sample_selection');
-        _.each(data, function(kv) {
-          var k = kv[0];
-          var v = kv[1];
-          options.append('<optgroup label="'+k+'">');
-          _.each(v, function(v) {
-            options.append('<option value="'+k+'.'+v+'">'+v+'</options>');
-          });
-          options.append('</optgroup>');
-        });
+        sample_annotation_entry.url = "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset);
+
         $("#gene").attr('disabled', false);
         $(".locate").attr('disabled', false);
         $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
@@ -313,7 +316,9 @@ $(document).ready(function() {
       },
       complete: function() {
         gene_entry.$el.val('');
+        
         info.clear();
+        $(".locate").val('');
         $('#genelist').empty();
         current_graph.removeData(function() { return true; });
         updateInfo();
@@ -327,7 +332,9 @@ $(document).ready(function() {
       dataype: 'json',
       async: !sync,
       success: function(data) {
+        
         current_graph.addData(data);
+        
         var label = $('<span>')
           .addClass('badge')
           .css({ 'margin': '0px 5px' })
@@ -337,7 +344,7 @@ $(document).ready(function() {
           .addClass('icon-white icon-remove-sign')
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);
-
+        $('.locate').change();
         updateStyles();
         updateInfo();
       },
@@ -364,7 +371,7 @@ $(document).ready(function() {
       .append("tr")
 
     var th = thr.selectAll('th')
-      .data([ 'P-val', 'Odds', 'Key', 'Value' ])
+      .data([ 'P-val', 'Odds', 'Key : Value' ])
       .enter()
       .append('th')
       .text(function(d) { return d; });
@@ -379,8 +386,8 @@ $(document).ready(function() {
       .data(function(d) { return [
         { value: d.p_val.toExponential(1) },
         { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) },
-        { value: d.key },
-        { value: d.val }
+        { value: d.key +' : '+d.val }
+        
       ];});
 
     td.enter()
@@ -445,7 +452,7 @@ $(document).ready(function() {
   for (i = 0; i < 4; ++i)  {
 
     highlights['highlighted'+i] = {'fill':$("rect#spectrum"+i).css('fill'), 'stroke':$("rect#spectrum"+i+"-stroke").css('stroke')};
-
+  
    _.each($("[id ^='spectrum_i']".replace('_i', i)), function(event) {
         $(event).spectrum({
             showButtons: false,
@@ -478,11 +485,13 @@ $(document).ready(function() {
           }
     });
    });
+  
   }
 
   <%
     ds = data.datasets.get(dataset)
     gene_data = [ ds.expndata(gene) for gene in genes ]
+        
   %>
 
     current_datasets = [];
@@ -493,6 +502,12 @@ $(document).ready(function() {
     %for g in genes:
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
+    %for e in [(o,others[o]) for o in others.keys() if 'highlighted' in o]:
+      $(${e[0]}).val("${e[1]}");
+      
+    %endfor
+   
+    
   %else:
     gene_entry.url = null;
 
@@ -503,11 +518,23 @@ $(document).ready(function() {
   $("#share_url").on('click', function(event){
     var url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
               .replace('_dataset_', current_datasets[0]);
-
+    
     if (current_graph.data.length>0){
-        _.each(current_graph.data, function(x) { url += '/' + x.gene;console.debug(x.gene); });
+        _.each(current_graph.data, function(x) { url += '/' + x.gene;});
     }
+
+    url += '/?';
+    
+    _.each(_.keys(highlights), function(k) {
+        url += k+'=';
+        _.each(getSamplesWithClass(k), function(x) { url += x +' '; });
+        url = $.trim(url);
+        url += ';';
+   });     
+     
+    
     $("span#share").html(url);
+    
   });
 
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
@@ -524,6 +551,7 @@ $(document).ready(function() {
         $("#options").css('display', 'none');
     }
     info.clear();
+    $('.locate').change();
     updateStyles();
     updateInfo();
   });
@@ -538,6 +566,8 @@ $(document).ready(function() {
     info.clear();
     _.each(selection, info.add);
     selectionSearch(selection);
+    $('#sample_enrichment_panel').collapse('show');
+   
   });
 
   $('#datasets').on('change custom', function(event) {
@@ -655,9 +685,8 @@ $(document).ready(function() {
 
   $('.locate').on('change', function(event){
     // when a highlight group changes, restyle nodes.
-
+   
     var tag_entry = event.target.value.split(" ");
-
     if (tag_entry.length==1 & tag_entry[0]=="") {
       event.preventDefault();
       return;
@@ -665,7 +694,6 @@ $(document).ready(function() {
 
     var cclass = this.id;
     var nodes = d3.select(current_graph.svg).selectAll('g.node');
-
     var dat = {};
     nodes.each(function(d) { dat[d.k] = true;});
 
@@ -677,18 +705,25 @@ $(document).ready(function() {
     });
 
     nodes.classed(cclass, function(d) { return matched[d.k]; });
-
     updateStyles();
     updateInfo();
     event.preventDefault();
   });
 
-  $("#sample_selection").on("change", function(){
-    var val = $(event.target).val().split('.');
+  $('#sample_annotation_drop').on('click', function() {
+    sample_annotation_entry.$el.val('');
+    sample_annotation_entry.update();
+    sample_annotation_entry.$el.focus();
+  });
+ 
+  sample_annotation_entry.on("change", function(item){
+    if (item === null) return;
+    var val = item.id.split('.');
     var l1 = val[0];
     var l2 = val[1];
     var kv = {};
     kv[l1] = l2;
+   
     $.ajax({
       url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
       data: kv,
@@ -697,8 +732,10 @@ $(document).ready(function() {
         current_graph.setSelection(data);
       }
     });
+  
   });
-
+  
+ 
   function initTable() {
     var aoc = [null];
     var bsc = [true];
@@ -740,6 +777,8 @@ $(document).ready(function() {
     $('#dataset-modal').modal();
     event.preventDefault();
   });
+  $('.locate').change();
+  
 });
 </script>
 </%block>
