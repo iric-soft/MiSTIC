@@ -14,20 +14,22 @@ for ds in datasets:
 <table class="dataset-table">
   <thead>
     <tr>
-      %for term in terms:
+      <th>Dataset</th>
+%for term in terms:
       <th>${term}</th>
-      %endfor
+%endfor
       <th>n</th>
     </tr>
   </thead>
   <tbody>
-    %for ds in datasets:
+%for ds in datasets:
     <tr data-dataset="${ds.id}">
-      %for term in terms:
+    <td>${ds.name}</td>
+  %for term in terms:
       <td>${ds.tags.get(term, '')}</td>
-      %endfor
+  %endfor
       <td>${ds.numberSamples}</td>
     </tr>
-    %endfor
+%endfor
   </tbody>
 </table>
