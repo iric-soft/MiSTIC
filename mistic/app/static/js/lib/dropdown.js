@@ -76,6 +76,7 @@
         attributes: { type: 'text' },
 
         events: {
+            'click':    'empty',
             'change':   'update',
             'keydown':  'keydown',
             'keyup':    'keyup',
@@ -333,6 +334,7 @@
         },
 
         blur: function(event) {
+          
             if (this.cancel_blur) {
                 delete this.cancel_blur;
                 return;
@@ -361,7 +363,11 @@
 
         render: function() {
         },
-      
+        
+        empty: function(event){
+            $(event.target).val('');
+        },
+        
         initialize: function() {
             var self = this;
 
