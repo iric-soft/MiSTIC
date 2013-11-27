@@ -59,6 +59,7 @@
         },
 
         show: function(pos_elem) {
+            var self = this;
             this.$el.appendTo($('body')).modal({ backdrop: false });
 
             if (pos_elem !== undefined) {
@@ -69,10 +70,16 @@
                 );
 
                 this.$el.css({
+                    width: 'auto',
                     top: pos.top + pos.height + 5,
                     left: pos.left,
                     margin: 0
                 })
+            } else {
+                this.$el.css({
+                    width: 'auto',
+                    'margin-left': function () { return -self.$el.width() / 2; }
+                });
             }
         },
 
