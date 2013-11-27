@@ -164,7 +164,7 @@ $(document).ready(function() {
       $.ajax({
         url: "${request.route_url('mistic.json.annotation.gene_ids', annotation='_annotation_')}".replace('_annotation_', dataset_annotation[current_dataset]),
         data: { filter_gsid: item.id },
-        dataype: 'json',
+        dataType: 'json',
         success: function(data) {
           current_graph.markGenes(data);
         },
@@ -203,7 +203,7 @@ $(document).ready(function() {
 
     $.ajax({
       url: "${request.route_url('mistic.json.dataset', dataset='_dataset_')}".replace('_dataset_', dataset),
-      dataype: 'json',
+      dataType: 'json',
       async: !sync,
       success: function(data) {
         var xf = $('#transform-buttons');
@@ -239,7 +239,7 @@ $(document).ready(function() {
     var req = $.ajax({
       url: "${request.route_url('mistic.json.gene.corr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', dataset).replace('_gene_id_', gene),
       data: {x: current_transform},
-      dataype: 'json',
+      dataType: 'json',
 
       success: function(data) {
         var nlabel = $("#nlabel").val();
