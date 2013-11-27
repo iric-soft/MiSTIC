@@ -114,6 +114,13 @@ circle {
   fill-opacity: 1;
 }
 
+
+#sample_menu [class^="icon-"] {
+   cursor:pointer;
+ 
+}
+
+
 div#more-information {
    font-family: helvetica,arial,sans-serif;
    font-size: 11px; 
