@@ -47,6 +47,8 @@ mistic = {
   <div class="navbar navbar-fixed-top navbar-inverse">
     <div class="navbar-inner">
       <div class="container-fluid">
+      <a href="#" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
+       <span class="icon-th-list icon-white"></span></a>
         <a class="brand" href="${request.route_url('mistic.template.root')}">[MiSTIC]</a>
         <div class="nav-collapse">
           <ul class="nav">
@@ -141,6 +143,7 @@ mistic = {
 
 <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/math.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/base64.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/transform.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/ontology.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/datasets.js')}" type="text/javascript"></script>
@@ -177,7 +180,8 @@ mistic = {
     }
   });
 
-
+ 
+ 
   window.GOTerm = Backbone.Model.extend();
 
   window.GO = Backbone.Collection.extend({
@@ -195,7 +199,7 @@ mistic = {
   window.GODropdown = Dropdown.extend({
     item_view: GOItemView,
     max_items: 100,
-    menu: '<ul class="typeahead dropdown-menu" style="max-width: 400px; max-height: 300px; overflow-x: hidden; overflow-y: auto"></ul>',
+    menu: '<ul class="typeahead dropdown-menu" style="max-width: 600px; max-height: 400px; overflow-x: hidden; overflow-y: auto"></ul>',
 
     autofillText: function(model) {
       console.log(typeof(model))
@@ -206,6 +210,40 @@ mistic = {
     },
 
     searchData: function() {
+      return { q: this.$el.val() };
+    }
+  });
+  
+
+  window.SampleFeature = Backbone.Model.extend();
+
+  window.SampleAnnotation = Backbone.Collection.extend({
+    model: window.SampleFeature
+  });
+
+  window.sample_annotation_cache = new SampleAnnotation();
+
+  window.SampleAnnotationItemView = DropdownItemView.extend({
+    
+    template: _.template(<%text>"<span class='label label-inverse'><%- get('key') %></span> <%- get('values') %>"</%text>),
+    itemClass: function() {return this.model.get('key'); }
+  });
+
+  window.SampleAnnotationDropdown = Dropdown.extend({
+    item_view: SampleAnnotationItemView,
+    max_items: 100,
+    menu: '<ul class="typeahead dropdown-menu" style="max-width: 600px; max-height: 400px; overflow-x: hidden; overflow-y: auto"></ul>',
+
+    autofillText: function(model) {
+    
+      if (model !== undefined && model !== null) {
+        return model.get('key') + ' : ' + model.get('values');
+      }
+      return '';
+    },
+
+    searchData: function() {
+      
       return { q: this.$el.val() };
     }
   });

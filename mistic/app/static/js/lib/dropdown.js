@@ -76,7 +76,7 @@
         attributes: { type: 'text' },
 
         events: {
-            'select' :  'selectManual',
+            'click':    'empty',
             'change':   'update',
             'keydown':  'keydown',
             'keyup':    'keyup',
@@ -151,19 +151,7 @@
             this.hide();
         },
         
-        selectManual: function(event) {
-            var url = this.searchURL();
-            var data =  this.searchData();
-            var self = this;
-           
-            this.collection.fetch({
-                data: data, 
-                url : url,
-                success: function(collection){
-                    self.selectItem(collection.get(data.q));  
-                }
-            });
-        },
+       
         
         show: function() {
             if (!this.shown) {
@@ -348,6 +336,7 @@
         },
 
         blur: function(event) {
+          
             if (this.cancel_blur) {
                 delete this.cancel_blur;
                 return;
@@ -376,7 +365,11 @@
 
         render: function() {
         },
-      
+        
+        empty: function(event){
+            $(event.target).val('');
+        },
+        
         initialize: function() {
             var self = this;
 
