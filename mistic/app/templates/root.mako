@@ -71,6 +71,7 @@ a#oo{
 <table id="datasets-table" style="width:850px;">
 <thead>
 <tr>
+  <th>Dataset</th>
 %for term in terms :
   <th><a><i class="icon-th-list"></a></i>${term}</th>
 %endfor
@@ -82,6 +83,7 @@ a#oo{
 <tbody>
   %for ds in data.datasets.all() :
   <tr>
+    <td>${ds.name}</td>
 %for term in terms:
     <td>${ds.tags.get(term, '')}</td>
 %endfor
@@ -115,34 +117,29 @@ ${parent.pagetail()}
 
  $(document).ready(function() {
       var oTable = initTable();
-      
-    });
+});
     
-  function initTable() {
-        
-        var aoc = new Array();
-        var bsc = new Array();
-        for (var i=0; i<${len(terms)}; i++) {
-            aoc.push(null);
-            bsc.push(true);
-        }
-        aoc = aoc.concat([null, { "bSortable": false } ]);
-        bsc = bsc.concat([true, null, null ]);
+function initTable() {
+  var aoc = [null];
+  var bsc = [true];
+  for (var i=0; i<${len(terms)}; i++) {
+    aoc.push(null);
+    bsc.push(true);
+  }
+  aoc = aoc.concat([null, { "bSortable": false } ]);
+  bsc = bsc.concat([true, false ]);
   
-        return $('#datasets-table').dataTable( {  
-                        "aoColumns": aoc  ,   
-                        "bSearch": bsc  ,
-                        "bPaginate": false, 
-                        "bSort":true,
-                        "bProcessing": false ,
-                        "sDom": 'Rlfrtip',
-                        "bRetrieve":true,
-                      });    
-                      
-                      
-               
-  }    
-  
+  return $('#datasets-table').dataTable({
+    "aoColumns": aoc,
+    "bSearch": bsc,
+    "bPaginate": false, 
+    "bSort":true,
+    "bProcessing": false,
+    "sDom": 'Rlfrtip',
+    "bRetrieve":true,
+  });
+}
+
 $('#datasets-table th a i').on('click', function(event) { 
     
     event.stopPropagation();
