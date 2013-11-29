@@ -149,6 +149,10 @@
     };
 
     scatterplot.prototype._transform = function(v, scale) {
+        var d = scale.domain();
+        var r = scale.range();
+        if (d[0] > v) return r[0];
+        if (d[1] < v) return r[1];
         return scale(v);
     };
 
