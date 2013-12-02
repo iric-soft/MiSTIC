@@ -212,7 +212,8 @@ for ds in data.datasets.all():
 <%block name="style">
 ${parent.style()}
 #dataset-modal{
- min-width:600px;
+ min-width:960px;
+ 
 } 
 
 #dataset-table tbody {
