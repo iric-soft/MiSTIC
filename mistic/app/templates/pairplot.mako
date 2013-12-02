@@ -94,7 +94,8 @@ for ds in data.datasets.all():
           <div class="accordion-group">
             <div class="accordion-heading">
                <h4 class="accordion-title">
-                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Genes <div id="nb_genes" class='text-info' style='display:inline;'>(0)</div></a>
+                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Genes 
+                  <div id="nb_genes" class='text-info' style='display:inline;'>(0)</div></a>
                </h4>
             </div>
 
@@ -306,6 +307,7 @@ $(document).ready(function() {
 
         $("#gene").attr('disabled', false);
         $(".locate").attr('disabled', false);
+        $("#sample_annotation").attr('disabled', false);
         $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
       },
       error: function() {
@@ -313,6 +315,7 @@ $(document).ready(function() {
         gene_entry.url = null;
         $("#gene").attr('disabled', true);
         $(".locate").attr('disabled', true);
+        $("#sample_annotation").attr('disabled', true);
       },
       complete: function() {
         gene_entry.$el.val('');
@@ -494,8 +497,9 @@ $(document).ready(function() {
         
   %>
 
-    current_datasets = [];
-
+   current_datasets = [];
+   $("#sample_annotation").attr('disabled', true);
+   $(".locate").attr('disabled', true);
   %if ds is not None:
     addDataset("${dataset}", true);
     // Gene symbols were passed in the URL
