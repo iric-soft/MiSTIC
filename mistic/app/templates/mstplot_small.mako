@@ -129,19 +129,27 @@ ${parent.pagetail()}
   a = ds.annotation
 
   from mistic.util import geneset
-
+  import time
+  start = time.time()
   gs_tab = geneset.genesetOverRepresentation(nodes, a.genes, a.all_genesets())
+  print 'Geneset over representation running time : ' , time.time()-start
+  
+  infos = {}
+  
   for r in gs_tab:
     x = r['id']
     info = a.geneset_info(x)
+    infos[r['id']] = dict(info)
     r['name'] = info.get('name', '')
     r['desc'] = info.get('desc', '')
     x, r['id'] = x.rsplit(':', 1)
+   
     if '.' in x:
       r['gs'], r['cat'] = x.split('.', 1)
     else:
       r['gs'], r['cat'] = x, ''
-
+    
+  
   E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
   V = [ dict(
     id    = n,
@@ -156,6 +164,7 @@ var json = {
   "nodes": ${json.dumps(V)|n},
   "links": ${json.dumps(E)|n},
   "gstab": ${json.dumps(gs_tab)|n},
+  "infos": ${json.dumps(infos)|n},
 };
 
 var table = d3.select('#go_table').insert('table', ':first-child').attr('id', 'gotable');
@@ -182,6 +191,8 @@ var tr = tbody.selectAll('tr')
 tr.enter()
     .append('tr')
     .on('click', function(d) {
+      
+      getAnnotationContent(d);
       var self = this;
       d3.selectAll('tr').classed('selected', function(d2) { return this === self; });
       var sel = {}
@@ -328,10 +339,43 @@ node.append("rect")
 
 <%block name="getExtraContent">
 getContent = function(d) {
+  d3.select('#part2').html("<h4>"+d.name+" :  "+d.title +"</h4>"+
+           '<p>'+
+           '<a href="http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+'" target="_blank">GeneCards</a>'+
+           '&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/'+d.name+'" target="_blank">Wikipedia</a>'+
+           '&nbsp;&nbsp;<a href="http://www.ncbi.nlm.nih.gov/gene?cmd=search&term='+d.name+'[sym] AND human[ORGN]" target="_blank">Entrez Gene</a>'
+           );
+};
+
+getAnnotationContent = function(d) {  
+  var a = json.infos[d.gs+"."+d.cat+":"+d.id];
+  var h = "";
  
-  d3.select('#part2').html("<h4>"+d.title +"</h4>"+
-           '<p><a href=http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+' target="_blank">GeneCards</a>'+
-           '&nbsp;&nbsp;<a href=http://en.wikipedia.org/wiki/'+d.name+' target="_blank">Wikipedia</a>');
+  _.each(_.pairs(a), function(i) {
+             if (i[0]=='name'){
+             h = "<span style='font-weight:bold'>"+i[0] + "</span>: " + i[1]+'<br>' + h;
+             }
+             else {
+           
+                h = h + "<span style='font-weight:bold'>"+i[0] + "</span>: " ;
+                if (i[0]=='image'){ 
+                    h = h +"<img  src='"+i[1]+"' alt='[structure not found/available]'>";
+                }
+                else {
+                  if (i[0]=='url'){ 
+                    h = h +"<a href='"+i[1]+"'>"+i[1] +"</a>";
+                  }
+                  else {
+                    h = h + i[1];
+                  }
+               }
+               h = h +"<br>"
+             }
+            
+             ;});
+             
+  h = "<h4>"+d.id +"</h4><p>" + h ; 
+  d3.select('#part2').html(h) ;
 };
 
 </%block>
@@ -429,8 +473,6 @@ $('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": 
     });    
     
     
-console.debug($("#gotable"));
-console.debug($(window));      
 });    
 
 
