@@ -1,2 +1,21 @@
+.circlelabel {
+  font-family: helvetica; 
+}
+
+.circlelabel .invisible {
+  pointer-events : none;
+}
+
+g.node path {
+  pointer-events : auto;
+}
+
 g.node {
+}
+
+g.node.selected {
+}
+
+g.node.selected path {
+  fill: rgb(20, 216, 28); 
 }

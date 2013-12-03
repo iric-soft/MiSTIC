@@ -45,59 +45,6 @@ div#graph text {
   pointer-events : none;
 }
 
-
-.circlelabel {
-  font-family: helvetica; 
-}
-
-.circlelabel .invisible {
-  pointer-events : none;
-}
-
-circle  {
-  pointer-events : auto;
-}
-
-.color0 {
-  fill: rgb(252, 132, 3);
-}
-.color1 {
-  fill: #0BBEDE; 
-}
-.color2 {
-  fill: rgb(36, 153, 36); 
-}
-.color3 {
-  fill: rgb(155, 42, 141); 
-}
-
-.stroke0, .stroke1,
-.stroke2, .stroke3 {
-  stroke-width : 4px;
-  fill:white;
-}
-
-.stroke0 {
-  stroke:rgb(252, 132, 3);
-}
-.stroke1 {
-  stroke: #0BBEDE;
-}
-.stroke2 {
-  stroke: rgb(36, 153, 36);
-}
-.stroke3 {
-  stroke:rgb(155, 42, 141);
-}
-
-g.node.selected {
-}
-
-g.node.selected circle {
-  fill :rgb(20, 216, 28); 
-}
-
-
 .extent {
   fill-opacity: .125;
   fill: 'black';
