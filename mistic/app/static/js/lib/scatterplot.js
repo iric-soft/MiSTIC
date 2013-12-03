@@ -73,7 +73,7 @@
 
     scatterplot.prototype.addPointGroup = function(pg) {
         this.point_groups.push(pg);
-        pg.on('change', this.updatePoints, this);
+        pg.on('change change:style', this.updatePoints, this);
 
         this.updatePoints();
     };

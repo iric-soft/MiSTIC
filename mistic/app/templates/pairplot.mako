@@ -63,11 +63,12 @@ import json
 
       <div id="sample_menu" class="accordion-body collapse in ">
         <div class="accordion-inner">
-
-
-          <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Selected samples</a></h5>
+          <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Highlight groups</a></h5>
           <div id="current_selection" class="accordion-body collapse in ">
           </div>
+
+          <br>
+          <a class='btn' id="new_group">New group</a>
 
           <hr>
 
@@ -83,7 +84,7 @@ import json
      <div class="accordion-group">
        <div class="accordion-heading">
          <h4 class="accordion-title">
-           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a>
+           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
          </h4>
        </div>
 
@@ -155,25 +156,30 @@ $(document).ready(function() {
   current_graph = new pairplot(undefined, undefined, $('#graph'));
   $("#options").css('display', 'none');
 
-  var point_group_0 = new point_group({
-    group_id: 'g1',
-    style: { fill: "#fc8403", stroke: null }
-  });
 
 
-// g1: { fill: "#fc8403", stroke: null },
-// g2: { fill: "#0bbede", stroke: null },
-// g3: { fill: "#249924", stroke: null },
-// g4: { fill: "#9b2a8d", stroke: null },
+  var group_colours = [ "#fc8403", "#0bbede", "#249924", "#9b2a8d" ];
+  var next_group = 0;
 
-  var point_group_0_view = new PointGroupView({
-    group: point_group_0,
-    graph: current_graph,
-  });
+  var newGroup = function() {
+    var pg = new point_group({
+      group_id: 'g' + String(next_group),
+      style: { fill: group_colours[next_group % 4], stroke: null }
+    });
 
-  current_graph.addPointGroup(point_group_0);
+    var pg_view = new PointGroupView({
+      group: pg,
+      graph: current_graph,
+    });
 
-  $("#current_selection").append(point_group_0_view.render().el);
+    current_graph.addPointGroup(pg);
+
+    $("#current_selection").append(pg_view.render().el);
+    ++next_group;
+  };
+
+  newGroup();
+  $('#new_group').on('click', function(event) { newGroup(); event.preventDefault(); });
 
   var updateStyles = function() {
     d3.select(current_graph.svg).selectAll('g.node').selectAll('circle').attr('fill', null).attr('stroke', null);

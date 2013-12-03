@@ -122,6 +122,24 @@
         _.each(this.subgraphs, function(s) { s.remPointGroup(pg); });
     };
 
+    pairplot.prototype.legendSymbol = function(node, pg) {
+        var attrs = {};
+
+        _.extend(attrs, this.options.base_attrs);
+        _.extend(attrs, pg.style);
+
+        var g = node
+            .append('g')
+            .classed('node', true);
+
+        g.append('path')
+            .each(function(d, i) {
+                for (var i in attrs) {
+                    d3.select(this).attr(i, attrs[i]);
+                }
+            });
+    };
+
     pairplot.prototype.draw = function() {
         var svg = d3.select(this.svg)
 

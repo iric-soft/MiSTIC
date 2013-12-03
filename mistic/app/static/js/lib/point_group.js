@@ -2,9 +2,26 @@
     point_group = function(options) {
         this.group_id = options.group_id;
         this.style = options.style;
+        this.name = options.name;
         this.point_ids = {};
         _.extend(this, Backbone.Events);
     }
+
+    point_group.unserialize = function() {
+    };
+
+    point_group.prototype.serialize = function() {
+    };
+
+    point_group.prototype.setStyle = function(style) {
+        this.style = style;
+        this.trigger('change:style');
+    };
+
+    point_group.prototype.setName = function(name) {
+        this.name = name;
+        this.trigger('change:name');
+    };
 
     point_group.prototype.all = function() {
         var ids = _.keys(this.point_ids);

@@ -201,3 +201,16 @@ path.axis.selected {
 .dataset-table td {
   white-space: nowrap;
 }
+
+div#point-group-settings label.control-label {
+    width: 8ex;
+}
+
+div#point-group-settings div.controls {
+    margin-left: 9ex;
+}
+
+div#point-group-settings div.control-group {
+    margin-bottom: 5px;
+}
+
