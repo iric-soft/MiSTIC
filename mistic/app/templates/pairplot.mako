@@ -67,25 +67,6 @@ import json
 
           <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Selected samples</a></h5>
           <div id="current_selection" class="accordion-body collapse in ">
-
-          %for i in range(0,4) :
-            <br>
-            <div class="sample-group" data-groupid="g${i+1}">
-              <label style="display:inline;" for="highlighted${i}" size="8px">
-                <svg height='10' width="10">
-                  <rect id="spectrum${i}" width="10" height="10" class="highlighted${i} color${i}" />
-                </svg>
-              </label>
-              <input type="text" class="locate" id="highlighted${i}" autocomplete="off" data-index='${i}' />
-              <div style="display:inline;">
-                <i id="add${i}" class="icon-plus "></i>
-                <i id="minus${i}" class="icon-minus "></i>
-                <i id="remove${i}" class="icon-remove"></i>
-                <i id="tograph${i}" class="icon-share-alt"></i>
-              </div>
-            </div>
-          %endfor
-
           </div>
 
           <hr>
@@ -157,8 +138,12 @@ ${parent.style()}
 </%block>
 
 <%block name="pagetail">
+<%include file="mistic:app/templates/fragments/tmpl_point_group.mako"/>
+
 ${parent.pagetail()}
 
+<script src="${request.static_url('mistic:app/static/js/lib/point_group.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/point_group_view.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/scatterplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/textpanel.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
@@ -170,7 +155,25 @@ $(document).ready(function() {
   current_graph = new pairplot(undefined, undefined, $('#graph'));
   $("#options").css('display', 'none');
 
+  var point_group_0 = new point_group({
+    group_id: 'g1',
+    style: { fill: "#fc8403", stroke: null }
+  });
 
+
+// g1: { fill: "#fc8403", stroke: null },
+// g2: { fill: "#0bbede", stroke: null },
+// g3: { fill: "#249924", stroke: null },
+// g4: { fill: "#9b2a8d", stroke: null },
+
+  var point_group_0_view = new PointGroupView({
+    group: point_group_0,
+    graph: current_graph,
+  });
+
+  current_graph.addPointGroup(point_group_0);
+
+  $("#current_selection").append(point_group_0_view.render().el);
 
   var updateStyles = function() {
     d3.select(current_graph.svg).selectAll('g.node').selectAll('circle').attr('fill', null).attr('stroke', null);
@@ -459,7 +462,6 @@ $(document).ready(function() {
     current_graph.resize(
       $('div#graph').width(),
       $('div#graph').height());
-    $('.locate').change();
   };
 
   $('div#graph').append(current_graph.svg);
@@ -510,95 +512,13 @@ $(document).ready(function() {
       minimal_axes = !minimal_axes;
       current_graph.setMinimalAxes(minimal_axes);
       current_graph.draw()
-      $('.locate').change()
    });
 
-  $("[id^='add']").on('click', function(event) {
-    // add the selection to the highlight group.
-    var group = $(this).closest('.sample-group');
-    var group_id = group.data('groupid');
-
-    current_graph.addPointClass(current_graph.getSelection(), group_id);
-
-    var dat = current_graph.pointsWithClass(group_id);
-    $('input', group).val(dat.join(' '));
-    updateInfo();
-    $("#sample_selection > option").attr('selected', false);
-    current_graph.setSelection([]);
-  });
-
-  $("[id^='minus']").on('click', function(event){
-    // remove the selection from the highlight group.
-    var group = $(this).closest('.sample-group');
-    var group_id = group.data('groupid');
-
-    current_graph.remPointClass(current_graph.getSelection(), group_id);
-
-    var dat = current_graph.pointsWithClass(group_id);
-    $('input', group).val(dat.join(' '));
-    updateInfo();
-    $("#sample_selection > option").attr('selected', false);
-    current_graph.setSelection([]);
-  });
-
-  $("[id^='tograph']").on('click', function(event){
-    // copy the highlight group to the selection.
-    var group = $(this).closest('.sample-group');
-    var group_id = group.data('groupid');
-
-    var dat = current_graph.pointsWithClass(group_id);
-    current_graph.setSelection(dat);
-  });
-
-  $("[id^='remove']").on('click', function(event){
-    // clear the highlight group.
-    var group = $(this).closest('.sample-group');
-    var group_id = group.data('groupid');
-
-    var dat = current_graph.pointsWithClass(group_id);
-    current_graph.remPointClass(dat, group_id);
-
-    $('input', group).val('');
-    updateInfo();
-    $("#sample_selection > option").attr('selected', false);
-    current_graph.setSelection([]);
-  });
-	
   $("[id^='spectrum']").on('click', function(event){
     // set the initial colour on the colorpicker.
     var to = $(this).data().applyTo;
     $(this).spectrum('set',(to=='stroke' ? $(this).css('stroke'): $(this).css('fill') ));
     $(this).show();
-  });
-
-  $('.locate').on('change', function(event){
-    // when a highlight group changes, restyle nodes.
-
-    var tag_entry = event.target.value.split(" ");
-
-    if (tag_entry.length==1 & tag_entry[0]=="") {
-      event.preventDefault();
-      return;
-    }
-
-    var cclass = this.id;
-    var nodes = d3.select(current_graph.svg).selectAll('g.node');
-
-    var dat = {};
-    nodes.each(function(d) { dat[d.k] = true;});
-
-    var matched = {};
-    _.each(_.keys(dat), function(sample) {
-      if (_.find(tag_entry, function(tag) { return sample.match(tag); }) !== undefined) {
-        matched[sample] = true;
-      }
-    });
-
-    nodes.classed(cclass, function(d) { return matched[d.k]; });
-
-    updateStyles();
-    updateInfo();
-    event.preventDefault();
   });
 
   $("#sample_selection").on("change", function(){

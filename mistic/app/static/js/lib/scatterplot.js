@@ -21,15 +21,6 @@
             stroke:  null,
             opacity: 0.65,
         },
-
-        class_attrs: {
-            g1: { fill: "#fc8403", stroke: null },
-            g2: { fill: "#0bbede", stroke: null },
-            g3: { fill: "#249924", stroke: null },
-            g4: { fill: "#9b2a8d", stroke: null },
-        },
-
-        class_order: [ 'g1', 'g2', 'g3', 'g4' ],
     };
 
     scatterplot = function(options, xdata, ydata) {
@@ -42,7 +33,6 @@
         }
 
         this.options.base_attrs = _.clone(this.options.base_attrs)
-        this.options.class_attrs = _.clone(this.options.class_attrs)
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
@@ -66,7 +56,7 @@
 
         this.current_selection = [];
 
-        this.point_class = {};
+        this.point_groups = [];
 
         this.setXData(xdata, false);
         this.setYData(ydata, false);
@@ -78,59 +68,21 @@
         this.options.base_attrs = {};
         _.extend(this.options.base_attrs, cls);
 
-        var xy = this.getXYData();
-        this.updatePoints(xy);
+        this.updatePoints();
     };
 
-    scatterplot.prototype.setClassAttrs = function(grp, cls) {
-        this.options.class_attrs[grp] = cls;
+    scatterplot.prototype.addPointGroup = function(pg) {
+        this.point_groups.push(pg);
+        pg.on('change', this.updatePoints, this);
 
-        var xy = this.getXYData();
-        this.updatePoints(xy);
+        this.updatePoints();
     };
 
-    scatterplot.prototype.pointsWithClass = function(cls) {
-        var self = this;
-        return _.filter(_.keys(this.point_class), function(key) { return !!self.point_class[key][cls]; });
-    };
+    scatterplot.prototype.remPointGroup = function(pg) {
+        this.point_groups = _.without(this.point_groups, pg);
+        pg.off(null, null, this);
 
-    scatterplot.prototype.hasPointClass = function(key, cls) {
-        return !!this.pointclass[key][cls]
-    };
-
-    scatterplot.prototype.setPointClasses = function(clsdata) {
-        this.point_class = {};
-        for (var i in clsdata) {
-            this.point_class[i] = _.clone(clsdata[i]);
-        }
-
-        var xy = this.getXYData();
-        this.updatePoints(xy);
-    };
-
-    scatterplot.prototype.addPointClass = function(keys, cls) {
-        var self = this;
-        _.each(keys, function(k) {
-            if (self.point_class[k] === undefined) {
-                self.point_class[k] = {};
-            }
-            self.point_class[k][cls] = true;
-        });
-
-        var xy = this.getXYData();
-        this.updatePoints(xy);
-    };
-
-    scatterplot.prototype.remPointClass = function(keys, cls) {
-        var self = this;
-        _.each(keys, function(k) {
-            if (self.point_class[k] !== undefined) {
-                delete self.point_class[k][cls];
-            }
-        });
-
-        var xy = this.getXYData();
-        this.updatePoints(xy);
+        this.updatePoints();
     };
 
     scatterplot.prototype.resize = function(width, height) {
@@ -168,8 +120,7 @@
             this.xdata = undefined;
         }
         if (redraw !== false) {
-            var xy = this.getXYData();
-            this.updatePoints(xy);
+            this.update();
         }
     };
 
@@ -182,9 +133,12 @@
             this.ydata = undefined;
         }
         if (redraw !== false) {
-            var xy = this.getXYData();
-            this.updatePoints(xy);
+            this.update();
         }
+    };
+
+    scatterplot.prototype.pointIDs = function() {
+        return _.intersection(_.keys(this.xdata), _.keys(this.ydata));
     };
 
     scatterplot.prototype.notifySelectionChange = function(quiet) {
@@ -378,20 +332,19 @@
         var result = {};
 
         _.extend(result, this.options.base_attrs);
-        if (d.cls !== undefined) {
-            _.each(this.options.class_order, function(cls) {
-                if (d.cls[cls]) {
-                    _.extend(result, self.options.class_attrs[cls]);
-                }
-            });
-        }
+        _.each(this.point_groups, function(pg) {
+            if (pg.has(d.k)) {
+                _.extend(result, pg.style);
+            }
+        });
         _.extend(result, d.attrs);
 
         return result;
     };
 
-    scatterplot.prototype.updatePoints = function(xy) {
+    scatterplot.prototype.updatePoints = function() {
         var self = this;
+        var xy = this.getXYData();
 
         var pt_size = this.options.pt_size;
         var font_size = pt_size + 8;
@@ -464,7 +417,6 @@
             var k = keys[i];
             xy.push({
                 k:   k,
-                cls: this.point_class[k],
                 x:   this.xdata[k],
                 y:   this.ydata[k] 
             });
@@ -474,8 +426,7 @@
     };
 
     scatterplot.prototype.update = function() {
-        var xy = this.getXYData();
-        this.updatePoints(xy);
+        this.updatePoints();
         this.updateAxes();
     };
 
@@ -579,6 +530,6 @@
 
         if (this.options.axes) this.makeAxes();
 
-        this.updatePoints(xy);
+        this.updatePoints();
     };
 })();

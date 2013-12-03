@@ -13,13 +13,6 @@
             stroke:  null,
             opacity: 0.65,
         },
-
-        class_attrs: {
-            g1: { fill: "#fc8403", stroke: null },
-            g2: { fill: "#0bbede", stroke: null },
-            g3: { fill: "#249924", stroke: null },
-            g4: { fill: "#9b2a8d", stroke: null },
-        }
     };
 
     pairplot = function(xdata, ydata, elem, options) {
@@ -32,7 +25,6 @@
         }
 
         this.options.base_attrs = _.clone(this.options.base_attrs)
-        this.options.class_attrs = _.clone(this.options.class_attrs)
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
@@ -48,7 +40,7 @@
             .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink")
             .classed('pairplot', true);
 
-        this.point_class = {};
+        this.point_groups = [];
 
         this.data = [];
         this.current_selection = [];
@@ -82,6 +74,17 @@
         this.draw();
     };
 
+    pairplot.prototype.pointIDs = function() {
+        var ids = {};
+        for (var i in this.data) {
+            var d = this.data[i].data;
+            for (var j in d) {
+                ids[d[j].sample] = true;
+            }
+        }
+        return _.keys(ids);
+    };
+
     pairplot.prototype.getSelection = function() {
         return this.current_selection;
     };
@@ -107,56 +110,16 @@
         });
     };
 
-    pairplot.prototype.setClassAttrs = function(grp, cls) {
-        this.options.class_attrs[grp] = cls;
+    pairplot.prototype.addPointGroup = function(pg) {
+        this.point_groups.push(pg);
 
-        _.each(this.subgraphs, function(s) {
-            s.setClassAttrs(this.options.class_attrs);
-        });
+        _.each(this.subgraphs, function(s) { s.addPointGroup(pg); });
     };
 
-    pairplot.prototype.pointsWithClass = function(cls) {
-        var self = this;
-        return _.filter(_.keys(this.point_class), function(key) { return !!self.point_class[key][cls]; });
-    };
+    pairplot.prototype.remPointGroup = function(pg) {
+        this.point_groups = _.without(this.point_groups, pg);
 
-    pairplot.prototype.hasPointClass = function(key, cls) {
-        return !!this.pointclass[key][cls]
-    };
-
-    pairplot.prototype.setPointClasses = function(clsdata) {
-        this.point_class = {};
-        for (var i in clsdata) {
-            this.point_class[i] = _.clone(clsdata[i]);
-        }
-        _.each(this.subgraphs, function(s) {
-            s.setPointClasses(clsdata);
-        });
-    };
-
-    pairplot.prototype.addPointClass = function(keys, cls) {
-        var self = this;
-        _.each(keys, function(k) {
-            if (self.point_class[k] === undefined) {
-                self.point_class[k] = {};
-            }
-            self.point_class[k][cls] = true;
-        });
-        _.each(this.subgraphs, function(s) {
-            s.addPointClass(keys, cls);
-        });
-    };
-
-    pairplot.prototype.remPointClass = function(keys, cls) {
-        var self = this;
-        _.each(keys, function(k) {
-            if (self.point_class[k] !== undefined) {
-                delete self.point_class[k][cls];
-            }
-        });
-        _.each(this.subgraphs, function(s) {
-            s.remPointClass(keys, cls);
-        });
+        _.each(this.subgraphs, function(s) { s.remPointGroup(pg); });
     };
 
     pairplot.prototype.draw = function() {
@@ -222,7 +185,7 @@
                     } else if (x > y ) {
                         s = new scatterplot(s_opts, this.data[x], this.data[y]);
                         s.setSelection(this.current_selection, true);
-                        s.setPointClasses(this.point_class);
+                        _.each(this.point_groups, function(pg) { s.addPointGroup(pg); });
                         this.subgraphs.push(s);
                     }
                     $(g[0]).append(s.svg);
