@@ -70,22 +70,20 @@ import json
 
           %for i in range(0,4) :
             <br>
-            <label style="display:inline;" for="highlighted${i}" size="8px">
-
-
-            <svg height='10' width="10">
-            <rect id="spectrum${i}" width="10" height="10" class="highlighted${i} color${i}" />
-
-            </label>
-            <input type="text" class="locate" id="highlighted${i}" autocomplete="off" data-index='${i}' />
-            <div style="display:inline;">
-              <i id="add${i}" class="icon-plus "></i>
-              <i id="minus${i}" class="icon-minus "></i>
-              <i id="remove${i}" class="icon-remove"></i>
-              <i id="tograph${i}" class="icon-share-alt"></i>
-
+            <div class="sample-group" data-groupid="g${i+1}">
+              <label style="display:inline;" for="highlighted${i}" size="8px">
+                <svg height='10' width="10">
+                  <rect id="spectrum${i}" width="10" height="10" class="highlighted${i} color${i}" />
+                </svg>
+              </label>
+              <input type="text" class="locate" id="highlighted${i}" autocomplete="off" data-index='${i}' />
+              <div style="display:inline;">
+                <i id="add${i}" class="icon-plus "></i>
+                <i id="minus${i}" class="icon-minus "></i>
+                <i id="remove${i}" class="icon-remove"></i>
+                <i id="tograph${i}" class="icon-share-alt"></i>
+              </div>
             </div>
-
           %endfor
 
           </div>
@@ -372,36 +370,21 @@ $(document).ready(function() {
     highlights['highlighted'+i] = {'fill':$("rect#spectrum"+i).css('fill'), 'stroke':$("rect#spectrum"+i+"-stroke").css('stroke')};
 
    _.each($("[id ^='spectrum_i']".replace('_i', i)), function(event) {
-        $(event).spectrum({
-            showButtons: false,
-            showRadio: true,
-
-            change : function(event){
-              var newColor = event.toHexString();
-              var classes = $(this).attr('class').split(' ');
-              var id = this.id;
-              var to = $(this).data().applyTo;
-
-              var highlight = classes[0];
-              if (classes.length>1) {
-                 var cssColor = classes[1];
-                 d3.select(this).classed(cssColor,false);
-              }
-
-              if (to=='stroke'){
-                d3.select(this).attr('stroke', newColor).attr('stroke-width', '4px').attr('fill', 'white');
-
-                highlights[highlight]['stroke']=newColor;
-                highlights[highlight]['fill']=null;
-              } else {
-                d3.select(this).attr('stroke', null).attr('stroke-width', null).attr('fill', newColor);
-
-                highlights[highlight]['fill']=newColor;
-                highlights[highlight]['stroke']=null;
-              }
-              updateStyles();
-          }
-    });
+     $(event).spectrum({
+       showButtons: false,
+       showRadio: true,
+       change : function(event){
+         var newColor = event.toHexString();
+         var to = $(this).data().applyTo;
+         var attrs = {};
+         if (to === 'stroke') {
+           attrs = { stroke: newColor, 'stroke-width': '4px', fill: 'white' };
+         } else {
+           attrs = { stroke: null, 'stroke-width': null, fill: newColor };
+         }
+         current_graph.setClassAttrs('g' + String(i+1), attrs);
+       }
+     });
    });
   }
 
@@ -532,12 +515,13 @@ $(document).ready(function() {
 
   $("[id^='add']").on('click', function(event) {
     // add the selection to the highlight group.
-    var cclass = this.id.replace('add', 'highlighted');
-    d3.select(current_graph.svg).selectAll('g.node.selected').classed(cclass, true);
+    var group = $(this).closest('.sample-group');
+    var group_id = group.data('groupid');
 
-    var dat = getSamplesWithClass(cclass);
-    $('#'+cclass).val(dat.join(' '));
-    updateStyles();
+    current_graph.addPointClass(current_graph.getSelection(), group_id);
+
+    var dat = current_graph.pointsWithClass(group_id);
+    $('input', group).val(dat.join(' '));
     updateInfo();
     $("#sample_selection > option").attr('selected', false);
     current_graph.setSelection([]);
@@ -545,12 +529,13 @@ $(document).ready(function() {
 
   $("[id^='minus']").on('click', function(event){
     // remove the selection from the highlight group.
-    var cclass = this.id.replace('minus', 'highlighted');
-    d3.select(current_graph.svg).selectAll('g.node.selected').classed(cclass, false);
+    var group = $(this).closest('.sample-group');
+    var group_id = group.data('groupid');
 
-    var dat = getSamplesWithClass(cclass);
-    $('#'+cclass).val(dat.join(' '));
-    updateStyles();
+    current_graph.remPointClass(current_graph.getSelection(), group_id);
+
+    var dat = current_graph.pointsWithClass(group_id);
+    $('input', group).val(dat.join(' '));
     updateInfo();
     $("#sample_selection > option").attr('selected', false);
     current_graph.setSelection([]);
@@ -558,17 +543,25 @@ $(document).ready(function() {
 
   $("[id^='tograph']").on('click', function(event){
     // copy the highlight group to the selection.
-    var cclass = this.id.replace('tograph', 'highlighted');
-    current_graph.setSelection(getSamplesWithClass(cclass));
+    var group = $(this).closest('.sample-group');
+    var group_id = group.data('groupid');
+
+    var dat = current_graph.pointsWithClass(group_id);
+    current_graph.setSelection(dat);
   });
 
   $("[id^='remove']").on('click', function(event){
     // clear the highlight group.
-    var cclass = this.id.replace('remove', 'highlighted');
-    d3.selectAll('g.node.'+cclass).classed(cclass, false);
-    $('#'+cclass).val('');
-    updateStyles();
+    var group = $(this).closest('.sample-group');
+    var group_id = group.data('groupid');
+
+    var dat = current_graph.pointsWithClass(group_id);
+    current_graph.remPointClass(dat, group_id);
+
+    $('input', group).val('');
     updateInfo();
+    $("#sample_selection > option").attr('selected', false);
+    current_graph.setSelection([]);
   });
 	
   $("[id^='spectrum']").on('click', function(event){

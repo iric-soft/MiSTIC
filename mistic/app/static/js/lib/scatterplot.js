@@ -1,27 +1,48 @@
 (function() {
-    scatterplot = function(options, xdata, ydata) {
-        this.options = {
-            padding: [ 20,20,60,60 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
-            inner: 10,   // amount that the plot background is expanded by.
-            outer: 15,   // amount that the plot axes are moved by.
-            xlab_offset: 36,
-            ylab_offset: -38,
-            width: 1000,
-            height: 1000,
-            axis_labels: false,
-            background: true,
-            axes: false,
-            pt_size: 4,
-            makeGridLine:false,
-            gridValue: 10,
-            minimal : true,
-            clearBrush: false,
+    var defaults = {
+        padding: [ 20,20,60,60 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
+        inner: 10,   // amount that the plot background is expanded by.
+        outer: 15,   // amount that the plot axes are moved by.
+        xlab_offset: 36,
+        ylab_offset: -38,
+        width: 1000,
+        height: 1000,
+        axis_labels: false,
+        background: true,
+        axes: false,
+        pt_size: 4,
+        makeGridLine: false,
+        gridValue: 10,
+        minimal: true,
 
-        };
+        base_attrs: {
+            d:       d3.svg.symbol().type("circle")(),
+            fill:    "#000",
+            stroke:  null,
+            opacity: 0.65,
+        },
+
+        class_attrs: {
+            g1: { fill: "#fc8403", stroke: null },
+            g2: { fill: "#0bbede", stroke: null },
+            g3: { fill: "#249924", stroke: null },
+            g4: { fill: "#9b2a8d", stroke: null },
+        },
+
+        class_order: [ 'g1', 'g2', 'g3', 'g4' ],
+    };
+
+    scatterplot = function(options, xdata, ydata) {
+        this.options = {}
+
+        _.extend(this.options, defaults);
 
         if (options !== undefined) {
             _.extend(this.options, options);
         }
+
+        this.options.base_attrs = _.clone(this.options.base_attrs)
+        this.options.class_attrs = _.clone(this.options.class_attrs)
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
@@ -33,11 +54,9 @@
             .attr("height", this.height)
             .attr('version', '1.1')
             .attr('baseProfile', 'full')
-            .attr('xmlns', 'http://www.w3.org/2000/svg')
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink")
             .classed('scatterplot', true);
-
-        this.setXData(xdata, false);
-        this.setYData(ydata, false);
 
         this.xScale = undefined;
         this.yScale = undefined;
@@ -47,7 +66,71 @@
 
         this.current_selection = [];
 
+        this.point_class = {};
+
+        this.setXData(xdata, false);
+        this.setYData(ydata, false);
+
         this.draw();
+    };
+
+    scatterplot.prototype.setBaseAttrs = function(cls) {
+        this.options.base_attrs = {};
+        _.extend(this.options.base_attrs, cls);
+
+        var xy = this.getXYData();
+        this.updatePoints(xy);
+    };
+
+    scatterplot.prototype.setClassAttrs = function(grp, cls) {
+        this.options.class_attrs[grp] = cls;
+
+        var xy = this.getXYData();
+        this.updatePoints(xy);
+    };
+
+    scatterplot.prototype.pointsWithClass = function(cls) {
+        var self = this;
+        return _.filter(_.keys(this.point_class), function(key) { return !!self.point_class[key][cls]; });
+    };
+
+    scatterplot.prototype.hasPointClass = function(key, cls) {
+        return !!this.pointclass[key][cls]
+    };
+
+    scatterplot.prototype.setPointClasses = function(clsdata) {
+        this.point_class = {};
+        for (var i in clsdata) {
+            this.point_class[i] = _.clone(clsdata[i]);
+        }
+
+        var xy = this.getXYData();
+        this.updatePoints(xy);
+    };
+
+    scatterplot.prototype.addPointClass = function(keys, cls) {
+        var self = this;
+        _.each(keys, function(k) {
+            if (self.point_class[k] === undefined) {
+                self.point_class[k] = {};
+            }
+            self.point_class[k][cls] = true;
+        });
+
+        var xy = this.getXYData();
+        this.updatePoints(xy);
+    };
+
+    scatterplot.prototype.remPointClass = function(keys, cls) {
+        var self = this;
+        _.each(keys, function(k) {
+            if (self.point_class[k] !== undefined) {
+                delete self.point_class[k][cls];
+            }
+        });
+
+        var xy = this.getXYData();
+        this.updatePoints(xy);
     };
 
     scatterplot.prototype.resize = function(width, height) {
@@ -60,7 +143,6 @@
                 .attr("height", height);
 
             this.draw();
-
         }
     };
 
@@ -85,7 +167,10 @@
         } else {
             this.xdata = undefined;
         }
-        if (redraw !== false) this.draw();
+        if (redraw !== false) {
+            var xy = this.getXYData();
+            this.updatePoints(xy);
+        }
     };
 
     scatterplot.prototype.setYData = function(ydata, redraw) {
@@ -96,7 +181,10 @@
         } else {
             this.ydata = undefined;
         }
-        if (redraw !== false) this.draw();
+        if (redraw !== false) {
+            var xy = this.getXYData();
+            this.updatePoints(xy);
+        }
     };
 
     scatterplot.prototype.notifySelectionChange = function(quiet) {
@@ -107,7 +195,7 @@
         }
     };
 
-    scatterplot.prototype.highlightCircle = function(d, i) {
+    scatterplot.prototype.toggleSelected = function(d, i) {
         var current_selection = this.nodes[0][i];
         d3.select(current_selection).classed('selected', !d3.select(current_selection).classed('selected'));
         this.notifySelectionChange();
@@ -121,10 +209,10 @@
     };
 
     scatterplot.prototype.getSelection = function() {
-        var circles = d3
+        var nodes = d3
             .select(this.svg)
             .selectAll("g.node.selected");
-        var selected = _.map(circles.data(), function(c) { return c.k; });
+        var selected = _.map(nodes.data(), function(d) { return d.k; });
         return selected;
     };
 
@@ -141,7 +229,7 @@
                 var t = self.transform(d);
                 return e[0][0] <= t.x && t.x <= e[1][0] && e[0][1] <= t.y && t.y <= e[1][1]
             });
-        var selected = _.map(circles.data(), function(c) {return c.k;});
+        var selected = _.map(circles.data(), function(d) { return d.k; });
         this.setSelection(selected);
     };
 
@@ -285,6 +373,23 @@
         }
     };
 
+    scatterplot.prototype.pointAttrs = function(d, i) {
+        var self = this;
+        var result = {};
+
+        _.extend(result, this.options.base_attrs);
+        if (d.cls !== undefined) {
+            _.each(this.options.class_order, function(cls) {
+                if (d.cls[cls]) {
+                    _.extend(result, self.options.class_attrs[cls]);
+                }
+            });
+        }
+        _.extend(result, d.attrs);
+
+        return result;
+    };
+
     scatterplot.prototype.updatePoints = function(xy) {
         var self = this;
 
@@ -306,8 +411,9 @@
                 return "translate(" + [t.x, t.y] + ")";
             });
 
-        g.append('circle')
-            .on('click', _.bind(this.highlightCircle, this));
+        g.append('path')
+            .on('click', _.bind(this.toggleSelected, this));
+
         g.append("text")
             .attr('style', 'font-size:'+ font_size+"px;")
             .classed('circlelabel invisible', true);
@@ -322,9 +428,14 @@
             });
 
         transition
-          .select('circle')
-            .attr('r',  this.options.pt_size)
-            .attr('opacity', 0.65);
+          .select('path')
+            .each(function(d, i) {
+                var a = self.pointAttrs(d, i);
+                // this can be done better in d3 v3
+                for (var i in a) {
+                    d3.select(this).attr(i, a[i]);
+                }
+            });
 
         transition
           .select('text')
@@ -351,9 +462,12 @@
 
         for (var i in keys) {
             var k = keys[i];
-            var x = this.xdata[k];
-            var y = this.ydata[k];
-            xy.push({ k:k, x:x, y:y });
+            xy.push({
+                k:   k,
+                cls: this.point_class[k],
+                x:   this.xdata[k],
+                y:   this.ydata[k] 
+            });
         }
 
         return xy;
