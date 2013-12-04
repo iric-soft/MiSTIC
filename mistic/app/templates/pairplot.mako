@@ -198,14 +198,6 @@ $(document).ready(function() {
     }
   };
 
-  var getSamplesWithClass = function(cclass) {
-    var dat = {};
-    d3.selectAll('g.node.'+cclass).each(function(d) { dat[d.k] = true; });
-    dat = _.keys(dat)
-    dat.sort();
-    return dat;
-  };
-
   var addDataset = function(dataset, sync) {
     $('#sample_selection').html('<option selected value="none">Select a characteristic</option>');
     $.ajax({
