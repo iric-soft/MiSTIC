@@ -466,10 +466,10 @@ $(document).ready(function() {
 	
   var minimal_axes = false;
   $('#change_axes').on('click', function(event){
-      minimal_axes = !minimal_axes;
-      current_graph.setMinimalAxes(minimal_axes);
-      current_graph.draw()
-   });
+    minimal_axes = !minimal_axes;
+    current_graph.setMinimalAxes(minimal_axes);
+    current_graph.draw()
+  });
 
   $("#sample_selection").on("change", function(){
     var val = $(event.target).val().split('.');
