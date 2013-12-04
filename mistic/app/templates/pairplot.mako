@@ -358,7 +358,7 @@ $(document).ready(function() {
     gene_data = [ ds.expndata(gene) for gene in genes ]
   %>
 
-    current_datasets = [];
+  current_datasets = [];
 
   %if ds is not None:
     addDataset("${dataset}", true);
