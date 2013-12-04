@@ -413,11 +413,6 @@ $(document).ready(function() {
     selectionSearch(selection);
   });
 
-  $('#datasets').on('change custom', function(event) {
-    var dataset = $(event.target).val();
-    addDataset(dataset, false);
-  });
-
   resizeGraph = function() {
     $('div#graph').height($(window).height() - 124);
 
