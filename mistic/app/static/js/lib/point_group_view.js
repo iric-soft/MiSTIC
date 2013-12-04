@@ -92,17 +92,13 @@
         render: function() {
             var self = this;
 
-            this.$el.html(this.template());
-
-            var _state = function(x) {
-                return x === null ? 'disable' : x === undefined ? 'inherit' : 'enable';
-            }
-
-            this.$('.group-fill .state').val(_state(this.group.style.fill));
-            this.$('.group-stroke .state').val(_state(this.group.style.stroke));
-
-            this.$('.group-fill .colour span').css('background-color', this.group.style.fill);
-            this.$('.group-stroke .colour span').css('background-color', this.group.style.stroke);
+            this.$el.html(this.template({
+                capitalize: function(x) { return x.charAt(0).toUpperCase() + x.slice(1) },
+                get_state:  function(x) { return x === null ? 'disable' : x === undefined ? 'inherit' : 'enable'; },
+                selected:   function(x) { return x ? ' selected' : '' },
+                active:     function(x) { return x ? ' active' : '' },
+                style:      this.group.style
+            }));
 
             this.$('.colour').spectrum({
                 change: function(colour) {
@@ -119,30 +115,6 @@
 
             this.toggle_fill();
             this.toggle_stroke();
-
-            var options = d3.select(this.$('.group-shape .state')[0])
-                .selectAll('span')
-                .data(d3.svg.symbolTypes);
-
-            options
-                .enter()
-                .append('span')
-                .classed('btn', true)
-                .classed('active', function(d) { self.group.style._shape === d; })
-                .attr('data-value', function(d) { return d; })
-                .style('padding', '2px 3px')
-                .append('svg')
-                .attr('width', 16)
-                .attr('height', 17)
-                .append('g')
-                .attr('transform', 'translate(8,10)')
-                .append('path')
-                .attr('fill', '#000')
-                .attr('d', function(d) { return d3.svg.symbol().type(d)() });
-
-            if (this.group.style._shape === undefined) {
-                this.$('.group-shape .state a').addClass('active')
-            }
 
             this.$('.group-shape .state').button();
 

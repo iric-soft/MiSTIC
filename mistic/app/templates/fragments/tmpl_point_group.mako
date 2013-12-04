@@ -1,3 +1,4 @@
+<%text>
 <script type="text/template" id="tmpl-point-group">
   <span class="well sg-style" style="position: absolute; left: 0px; padding: 3px; width: 16px; height: 16px; display: inline-block; margin: 0px;">
     <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
@@ -12,24 +13,36 @@
 
   <input style="display: inline-block; width: auto; position: absolute; left: 26px; right: 78px;" type="text" autocomplete="off"></input>
 </script>
+
+
+
 <script type="text/template" id="tmpl-point-group-settings">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title">Group settings</h4>
       </div>
       <div class="modal-body">
         <form class="form-horizontal">
           <div class="control-group">
             <label class="control-label" for="input-group-name"><b>Label:</b></label>
-            <div class="controls"><input type="text" class="group-name"></div>
+            <div class="controls"><input type="text" class="group-name" placeholder="Label" value="<%- style.name %>"></input></div>
           </div>
           <div class="control-group group-shape">
             <label class="control-label"><b>Shape:</b></label>
             <div class="controls">
               <div class="btn-group state" data-toggle="buttons-radio">
-                <a class="btn" data-value="inherit">Inherit</a>
+                <span class="btn<%= active(style._shape===undefined)%>" data-value="inherit">Inherit</span>
+<% _.each(d3.svg.symbolTypes, function(symbol) { %>
+                <span class="btn<%= active(style._shape===symbol)%>" data-value="<%= symbol %>" style="padding: 2px 3px;">
+                  <svg width="16" height="17">
+                    <g transform="translate(8,10)">
+                      <path fill="#000" d="<%- d3.svg.symbol().type(symbol)() %>"></path>
+                    </g>
+                  </svg>
+                </span>
+<% }); %>
               </div>
             </div>
           </div>
@@ -37,14 +50,14 @@
             <label class="control-label"><b>Fill:</b></label>
             <span  style="float: right;">
               <span class="btn colour" style="position: relative;">&nbsp;
-                <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background-color: #fff;"></span>
+                <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background-color: <%- style.fill %>;"></span>
               </span>
             </span>
             <div class="controls">
               <select class="state">
-                <option value="enabled">Enabled</option>
-                <option value="disabled">Disabled</option>
-                <option value="inherit">Inherit</option>
+<% _.each(['enabled', 'disabled', 'inherit'], function(state) { var curr = get_state(style.fill); %>
+                <option value="<%- state %>"<%= selected(state===curr) %>><%- capitalize(state) %></option>
+<% }); %>
               </select>
             </div>
           </div>
@@ -58,14 +71,14 @@
                 <option value="5">4px</option>
               </select>
               <span class="btn colour" style="position: relative;">&nbsp;
-                <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background-color: #fff;"></span>
+                <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background-color: <%- style.stroke %>;"></span>
               </span>
             </span>
             <div class="controls">
               <select class="state">
-                <option value="enabled">Enabled</option>
-                <option value="disabled">Disabled</option>
-                <option value="inherit">Inherit</option>
+<% _.each(['enabled', 'disabled', 'inherit'], function(state) { var curr = get_state(style.stroke); %>
+                <option value="<%- state %>"<%= selected(state===curr) %>><%- capitalize(state) %></option>
+<% }); %>
               </select>
             </div>
           </div>
@@ -78,3 +91,4 @@
     </div>
   </div>
 </script>
+</%text>
