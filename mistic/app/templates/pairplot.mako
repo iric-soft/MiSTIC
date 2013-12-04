@@ -181,14 +181,6 @@ $(document).ready(function() {
   newGroup();
   $('#new_group').on('click', function(event) { newGroup(); event.preventDefault(); });
 
-  var updateStyles = function() {
-    d3.select(current_graph.svg).selectAll('g.node').selectAll('circle').attr('fill', null).attr('stroke', null);
-
-    _.each(highlights, function(hl, cclass) {
-      d3.select(current_graph.svg).selectAll('g.node.'+cclass).selectAll('circle').attr('fill', hl['fill']).attr('stroke', hl['stroke']);
-    });
-  };
-
   var updateInfo = function() {	
     // Update counts label (dataset, genes, samples)
     var nplots = stats.sum(_.range(1,current_graph.data.length));
@@ -270,7 +262,6 @@ $(document).ready(function() {
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);
 
-        updateStyles();
         updateInfo();
       },
       error: function() {
@@ -370,33 +361,6 @@ $(document).ready(function() {
     }
   }
 
-
-
-  var highlights = {};
-
-  for (i = 0; i < 4; ++i)  {
-
-    highlights['highlighted'+i] = {'fill':$("rect#spectrum"+i).css('fill'), 'stroke':$("rect#spectrum"+i+"-stroke").css('stroke')};
-
-   _.each($("[id ^='spectrum_i']".replace('_i', i)), function(event) {
-     $(event).spectrum({
-       showButtons: false,
-       showRadio: true,
-       change : function(event){
-         var newColor = event.toHexString();
-         var to = $(this).data().applyTo;
-         var attrs = {};
-         if (to === 'stroke') {
-           attrs = { stroke: newColor, 'stroke-width': '4px', fill: 'white' };
-         } else {
-           attrs = { stroke: null, 'stroke-width': null, fill: newColor };
-         }
-         current_graph.setClassAttrs('g' + String(i+1), attrs);
-       }
-     });
-   });
-  }
-
   <%
     ds = data.datasets.get(dataset)
     gene_data = [ ds.expndata(gene) for gene in genes ]
@@ -441,7 +405,7 @@ $(document).ready(function() {
         $("#options").css('display', 'none');
     }
     info.clear();
-    updateStyles();
+
     updateInfo();
   });
 
@@ -519,13 +483,6 @@ $(document).ready(function() {
       current_graph.setMinimalAxes(minimal_axes);
       current_graph.draw()
    });
-
-  $("[id^='spectrum']").on('click', function(event){
-    // set the initial colour on the colorpicker.
-    var to = $(this).data().applyTo;
-    $(this).spectrum('set',(to=='stroke' ? $(this).css('stroke'): $(this).css('fill') ));
-    $(this).show();
-  });
 
   $("#sample_selection").on("change", function(){
     var val = $(event.target).val().split('.');
