@@ -35,6 +35,12 @@
                 break;
             }
 
+            var shape = this.$('.group-shape .state .active').data('value');
+            if (shape !== 'inherit') {
+                attrs._shape = shape;
+                attrs.d = d3.svg.symbol().type(shape)();
+            }
+
             this.group.setStyle(attrs);
         },
 
@@ -84,6 +90,8 @@
         },
 
         render: function() {
+            var self = this;
+
             this.$el.html(this.template());
 
             var _state = function(x) {
@@ -111,6 +119,32 @@
 
             this.toggle_fill();
             this.toggle_stroke();
+
+            var options = d3.select(this.$('.group-shape .state')[0])
+                .selectAll('span')
+                .data(d3.svg.symbolTypes);
+
+            options
+                .enter()
+                .append('span')
+                .classed('btn', true)
+                .classed('active', function(d) { self.group.style._shape === d; })
+                .attr('data-value', function(d) { return d; })
+                .style('padding', '2px 3px')
+                .append('svg')
+                .attr('width', 16)
+                .attr('height', 17)
+                .append('g')
+                .attr('transform', 'translate(8,10)')
+                .append('path')
+                .attr('fill', '#000')
+                .attr('d', function(d) { return d3.svg.symbol().type(d)() });
+
+            if (this.group.style._shape === undefined) {
+                this.$('.group-shape .state a').addClass('active')
+            }
+
+            this.$('.group-shape .state').button();
 
             return this;
         },

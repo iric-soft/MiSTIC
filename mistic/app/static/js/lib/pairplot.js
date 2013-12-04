@@ -8,6 +8,7 @@
         minimalAxes: false,
 
         base_attrs: {
+            _shape:  'circle',
             d:       d3.svg.symbol().type("circle")(),
             fill:    "#000",
             stroke:  null,

@@ -25,6 +25,14 @@
             <label class="control-label" for="input-group-name"><b>Label:</b></label>
             <div class="controls"><input type="text" class="group-name"></div>
           </div>
+          <div class="control-group group-shape">
+            <label class="control-label"><b>Shape:</b></label>
+            <div class="controls">
+              <div class="btn-group state" data-toggle="buttons-radio">
+                <a class="btn" data-value="inherit">Inherit</a>
+              </div>
+            </div>
+          </div>
           <div class="control-group group-fill">
             <label class="control-label"><b>Fill:</b></label>
             <span  style="float: right;">
