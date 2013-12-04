@@ -164,7 +164,7 @@ $(document).ready(function() {
   var newGroup = function() {
     var pg = new point_group({
       group_id: 'g' + String(next_group),
-      style: { fill: group_colours[next_group % 4], stroke: null }
+      style: { fill: group_colours[next_group % 4] }
     });
 
     var pg_view = new PointGroupView({

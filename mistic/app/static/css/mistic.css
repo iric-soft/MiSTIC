@@ -32,10 +32,6 @@ input.valid {
   color: blue;
 }
 
-input.locate {
-  width:145px;
-}
-
 div#graph {
   margin-top: 5px;
   border: 1px solid #aaa;
@@ -202,6 +198,21 @@ path.axis.selected {
   white-space: nowrap;
 }
 
+div.point-group {
+  position: relative;
+  width: 100%;
+  height: 30px;
+}
+
+div.point-group {
+  white-space: nowrap;
+}
+
+div.point-group .sg-style,
+div.point-group .sg-ops i {
+    cursor: pointer;
+}
+
 div#point-group-settings label.control-label {
     width: 8ex;
 }
@@ -214,3 +225,14 @@ div#point-group-settings div.control-group {
     margin-bottom: 5px;
 }
 
+div#point-group-settings select.stroke-width {
+    width: 8ex;
+}
+
+div#point-group-settings select.state {
+    width: 13ex;
+}
+
+div#point-group-settings .colour.disabled span {
+    background: transparent !important;
+}

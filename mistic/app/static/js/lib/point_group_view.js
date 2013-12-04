@@ -7,30 +7,47 @@
 
         events: {
             'hidden':                            'remove',
-            'change  .group-fill .is-enabled':   'toggle_fill',
-            'change  .group-stroke .is-enabled': 'toggle_stroke',
+            'change  .group-fill .state':        'toggle_fill',
+            'change  .group-stroke .state':      'toggle_stroke',
             'click   .action-save':              'save',
         },
 
         save: function() {
-            var attrs = { stroke: null, 'stroke-width': null, fill: null };
-            if (this.$('.group-fill .is-enabled')[0].checked) {
-                attrs.fill = this.$('.group-fill .colour').spectrum('get').toHexString();
+            var attrs = {};
+
+            switch (this.$('.group-fill .state').val()) {
+            case 'enabled':
+                attrs.fill = this.$('.group-fill .colour span').css('background-color');
+                break;
+            case 'disabled':
+                attrs.fill = null;
+                break;
             }
-            if (this.$('.group-stroke .is-enabled')[0].checked) {
-                attrs['stroke-width'] = '4px';
-                attrs.stroke = this.$('.group-stroke .colour').spectrum('get').toHexString();
+
+            switch (this.$('.group-stroke .state').val()) {
+            case 'enabled':
+                attrs.stroke = this.$('.group-stroke .colour span').css('background-color');
+                attrs['stroke-width'] = this.$('.group-stroke .stroke-width').val();
+                break;
+            case 'disabled':
+                attrs.stroke = null;
+                attrs['stroke-width'] = null;
+                break;
             }
+
             this.group.setStyle(attrs);
         },
 
         // XXX: re-enabling the colour picker control doesn't work.
         toggle_fill: function() {
-            // this.$('.group-fill .colour').spectrum({ disabled: !this.$('.group-fill .is-enabled')[0].checked });
+            var state = this.$('.group-fill .state').val();
+            this.$('.group-fill .colour').toggleClass('disabled', state != 'enabled');
         },
 
         toggle_stroke: function() {
-            // this.$('.group-stroke .colour').spectrum({ disabled: !this.$('.group-stroke .is-enabled')[0].checked });
+            var state = this.$('.group-stroke .state').val();
+            this.$('.group-stroke .colour').toggleClass('disabled', state != 'enabled');
+            this.$('.group-stroke .stroke-width').prop('disabled', state != 'enabled');
         },
 
         remove: function() {
@@ -69,16 +86,32 @@
         render: function() {
             this.$el.html(this.template());
 
-            this.$('.group-fill .is-enabled')[0].checked = this.group.style.fill !== null;
-            // this.$('.group-fill .colour').spectrum({ disabled: this.group.style.fill === null });
+            var _state = function(x) {
+                return x === null ? 'disable' : x === undefined ? 'inherit' : 'enable';
+            }
 
-            this.$('.group-stroke .is-enabled')[0].checked = this.group.style.stroke !== null;
-            // this.$('.group-stroke .colour').spectrum({ disabled: this.group.style.stroke === null });
+            this.$('.group-fill .state').val(_state(this.group.style.fill));
+            this.$('.group-stroke .state').val(_state(this.group.style.stroke));
 
-            this.$('.colour').spectrum({ showInput: false, showButtons: false });
+            this.$('.group-fill .colour span').css('background-color', this.group.style.fill);
+            this.$('.group-stroke .colour span').css('background-color', this.group.style.stroke);
 
-            this.$('.group-fill .colour').spectrum('set', this.group.style.fill);
-            this.$('.group-stroke .colour').spectrum('set', this.group.style.stroke);
+            this.$('.colour').spectrum({
+                change: function(colour) {
+                    $('span', this).css('background-color', $(this).spectrum('get').toHexString());
+                },
+                beforeShow: function(colour) {
+                    if ($(this).hasClass('disabled')) return false;
+                    $(this).spectrum('set', $('span', this).css('background-color'));
+                    console.log(this);
+                },
+                showInput: false,
+                showButtons: false
+            });
+
+            this.toggle_fill();
+            this.toggle_stroke();
+
             return this;
         },
 
@@ -97,7 +130,7 @@
             'click  .sg-remove':        'remove',
             'click  .sg-clear':         'clear',
             'click  .sg-set-selection': 'set_selection',
-            'click  svg':               'settings',
+            'click  .sg-style':         'settings',
         },
 
         settings: function() {
@@ -149,7 +182,7 @@
             var svg = d3.select(this.$('svg')[0]);
             svg.selectAll('*').remove();
             this.graph.legendSymbol(svg, this.group);
-            svg.select('g').attr('transform', 'translate(8,11)');
+            svg.select('g').attr('transform', 'translate(8,10)');
         },
 
         update: function() {
