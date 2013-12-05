@@ -43,8 +43,8 @@
                 attrs.d = d3.svg.symbol().type(shape)();
             }
 
-            this.group.setName($('.group-name').val());
-            this.group.setStyle(attrs);
+            this.group.set('name', $('.group-name').val());
+            this.group.set('style', attrs);
         },
 
         // XXX: re-enabling the colour picker control doesn't work.
@@ -104,7 +104,7 @@
                 active:     function(x) { return x ? ' active' : ''; },
                 colour:     function(x) { return x ? x : 'transparent'; },
                 group:      this.group,
-                style:      this.group.style,
+                style:      this.group.get('style'),
             }));
 
             this.$('.colour').spectrum({
@@ -163,28 +163,28 @@
                 var sel = _.filter(all, function(id) {
                     return _.find(curr_val, function(val) { return id.match(val); }) !== undefined;
                 });
-                this.group.set(sel);
+                this.group.setPoints(sel);
             }
         },
 
         value: function() {
-            return this.group.all();
+            return this.group.get('point_ids');
         },
 
         add: function() {
             var sel = this.graph.getSelection();
             this.graph.setSelection([]);
-            this.group.add(sel);
+            this.group.addPoints(sel);
         },
 
         remove: function() {
             var sel = this.graph.getSelection();
             this.graph.setSelection([]);
-            this.group.rem(sel);
+            this.group.removePoints(sel);
         },
 
         clear: function() {
-            this.group.clear();
+            this.group.clearPoints();
         },
 
         set_selection: function() {
@@ -207,11 +207,10 @@
         },
 
         groupNameChanged: function() {
-            this.$('.header span').text(this.group.name);
+            this.$('.header span').text(this.group.get('name'));
         },
 
         groupStyleChanged: function() {
-            console.log(this.group.style);
             this.createLegend();
         },
 
@@ -222,7 +221,7 @@
         render: function() {
             this.$el.html(this.template({
                 group: this.group,
-                style: this.group.style,
+                style: this.group.get('style'),
             }));
             this.createLegend();
             return this;
@@ -231,9 +230,9 @@
         initialize: function(options) {
             this.group = options.group;
             this.graph = options.graph;
-            this.group.on('change',       _.bind(this.groupChanged,      this));
-            this.group.on('change:name',  _.bind(this.groupNameChanged,  this));
-            this.group.on('change:style', _.bind(this.groupStyleChanged, this));
+            this.group.on('change:point_ids', _.bind(this.groupChanged,      this));
+            this.group.on('change:name',      _.bind(this.groupNameChanged,  this));
+            this.group.on('change:style',     _.bind(this.groupStyleChanged, this));
         },
     });
 })();

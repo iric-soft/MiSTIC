@@ -133,7 +133,7 @@
         var attrs = {};
 
         _.extend(attrs, this.options.base_attrs);
-        _.extend(attrs, pg.style);
+        _.extend(attrs, pg.get('style'));
 
         var g = node
             .append('g')

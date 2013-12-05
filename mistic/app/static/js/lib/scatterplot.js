@@ -75,14 +75,14 @@
     scatterplot.prototype.setPointGroups = function(pgs) {
         _.each(this.point_groups, function(pg) { pg.off(null, null, this); });
         this.point_groups = _.clone(pgs);
-        _.each(this.point_groups, function(pg) { pg.on('change change:style', this.updatePoints, this); });
+        _.each(this.point_groups, function(pg) { pg.on('change:point_ids change:style', this.updatePoints, this); });
 
         this.updatePoints();
     };
 
     scatterplot.prototype.addPointGroup = function(pg) {
         this.point_groups.push(pg);
-        pg.on('change change:style', this.updatePoints, this);
+        pg.on('change:point_ids change:style', this.updatePoints, this);
 
         this.updatePoints();
     };
@@ -342,8 +342,8 @@
 
         _.extend(result, this.options.base_attrs);
         _.each(this.point_groups, function(pg) {
-            if (pg.has(d.k)) {
-                _.extend(result, pg.style);
+            if (pg.hasPoint(d.k)) {
+                _.extend(result, pg.get('style'));
             }
         });
         _.extend(result, d.attrs);
