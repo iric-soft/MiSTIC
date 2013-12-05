@@ -9,7 +9,8 @@ import pybel
 
 <%block name="controls_buttons">
  ${parent.controls_buttons()}
-    <a href="#document-tanimoto" role="button" class="btn" data-toggle="modal">Tanimoto</a>
+
+    <a id='tanimoto-button' href="#document-tanimoto" role="button" class="btn" data-toggle="modal">Tanimoto</a>
 </%block>
 
 <%block name="style">
@@ -86,59 +87,14 @@ ${parent.style()}
 
 </%block>
 
-
-<%block name="graph">
-
-<%
-  ds = data.datasets.get(dataset)
-  a = ds.annotation
-  
-  molecules = []
-  names = {}
- 
-  for n in nodes: 
-    try:
-      molecules.append(pybel.readstring( 'smi', str(a.attrs.get(n, {}).get('smi'))))
-    except:
-      print a.attrs.get(n, {})  
-      
-  tanimoto =  [[ mol1.calcfp() | mol2.calcfp() for mol1 in molecules] for mol2 in molecules]
-  d = dict(zip(nodes,tanimoto))
-  d.update({'header': nodes})
-  tanimoto_tab = d 
-  
-  A = [ dict(
-    id    = n,
-    name  = a.attrs.get(n, {}).get('name') or n,
-    #formula = a.attrs.get(n, {}).get('formula') or '',
-    #can = a.attrs.get(n, {}).get('can') or '',
-    #smile = a.attrs.get(n, {}).get('smi') or '',
-    index = nodes.index(n),
-    mean = numpy.mean(tanimoto[nodes.index(n)]),
-    sum = numpy.sum(tanimoto[nodes.index(n)]),
-  ) for n in nodes if n in tanimoto_tab.keys()]
-%>
+<%block name="subcontent">
 
 
- <div class="row-fluid">
-   <div class="span12" id="more-information"></div>
- </div>
- 
- <div class="row-fluid" id="document-graph">
-   <div class="span7" id="graph"></div>
-   <div class="span5" id="graph-right">
-      <div class="span12" id="go_table"></div>
-      <div class="span12" id="spacer" style='height:100px;'></div>
-      <div class="span12" id="part2"></div>
-   </div>
- </div>
-  
-
- <div class="modal hide fade" id="document-tanimoto">
+ <div class="modal hide fade " id="document-tanimoto">
   <div class='modal-body'>
      <div class="row-fluid" id="document-tanimoto">
-    <div class="span5" id="tanimoto_table" ></div>
-    <div class="span1" id="tanimoto_search" ></div>
+     <div class="span5" id="tanimoto_table" ></div>
+     <div class="span1" id="tanimoto_search" ></div>
      <form class="form-inline">
        <label for="search1">Compound1:</label>
        <input type="text" id="search1" >
@@ -147,25 +103,13 @@ ${parent.style()}
        <span id="tanimoto-value"></span>
      </form>
     <div class="span6" id="tanimoto_chord" ></div>
-  </div>
+   </div>
    </div>
   </div>
  </div>
 
-
-<script>
-
-var matrix=${[[(tanimoto[i][j] if i!=j else 0) for j in range(len(tanimoto[i]))] for i in range(len(tanimoto))]};
-var title= ${json.dumps(nodes)|n};
-var ann= ${json.dumps(A)|n};
-var range = ["#000000", "#e3dfd3", "#93b8a9", "#4c7869", "#FFDD89", "#ba873f", "#5aa3bd", "#e34245",
-             "#383535", "#d6a446", "#8596ab", "#b54536", "#13213b", "#b53f86", "#4a4948", "#8f332c",
-             "#ed7e3d", "#8a728f", "#413f57",  "#e68384", "#e6eda4","#8bb056", "#cc3535", "#4ea7ad",
-             "#f2a69e", "#8cc9b3", "#806667", "#3260ba", "#8a7c6e", "#f26671", "#583059", "#59280e",
-             "#a17b55", "#b06e3f", "#558dad", "#e8e099", "#d9b571", "#cc9c82", "#73877b", "#995057",
-             ];
-
-</script>
+ </div>
+ </div>
 
 </%block>
 
@@ -223,6 +167,55 @@ getContent = function(d) {
 
 <%block name="pagetail">
 ${parent.pagetail()} 
+
+
+<%
+  ds = data.datasets.get(dataset)
+  a = ds.annotation
+    
+  molecules = []
+  names = {}
+
+  for n in nodes: 
+   
+    try:
+      molecules.append(pybel.readstring( 'smi', str(a.data.ix[n].get('smi', {}))))
+    except:
+      print a.data.ix[n].get('smi', {})
+      
+  tanimoto =  [[ mol1.calcfp() | mol2.calcfp() for mol1 in molecules] for mol2 in molecules]
+  d = dict(zip(nodes,tanimoto))
+  d.update({'header': nodes})
+  tanimoto_tab = d 
+  
+  A = [ dict(
+    id    = n,
+    name  = a.data.ix[n].get('name', n) or '',
+    #formula = a.attrs.get(n, {}).get('formula') or '',
+    #can = a.attrs.get(n, {}).get('can') or '',
+    #smile = a.attrs.get(n, {}).get('smi') or '',
+    index = nodes.index(n),
+    mean = numpy.mean(tanimoto[nodes.index(n)]),
+    sum = numpy.sum(tanimoto[nodes.index(n)]),
+  ) for n in nodes if n in tanimoto_tab.keys()]
+  
+%>
+
+
+<script>
+
+var matrix=${[[(tanimoto[i][j] if i!=j else 0) for j in range(len(tanimoto[i]))] for i in range(len(tanimoto))]};
+var title= ${json.dumps(nodes)|n};
+var ann= ${json.dumps(A)|n};
+var range = ["#000000", "#e3dfd3", "#93b8a9", "#4c7869", "#FFDD89", "#ba873f", "#5aa3bd", "#e34245",
+             "#383535", "#d6a446", "#8596ab", "#b54536", "#13213b", "#b53f86", "#4a4948", "#8f332c",
+             "#ed7e3d", "#8a728f", "#413f57",  "#e68384", "#e6eda4","#8bb056", "#cc3535", "#4ea7ad",
+             "#f2a69e", "#8cc9b3", "#806667", "#3260ba", "#8a7c6e", "#f26671", "#583059", "#59280e",
+             "#a17b55", "#b06e3f", "#558dad", "#e8e099", "#d9b571", "#cc9c82", "#73877b", "#995057",
+             ];
+
+</script>
+
 
 
 <script>
