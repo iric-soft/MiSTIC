@@ -225,14 +225,6 @@ div#point-group-settings div.control-group {
     margin-bottom: 5px;
 }
 
-div#point-group-settings select.stroke-width {
-    width: 8ex;
-}
-
-div#point-group-settings select.state {
-    width: 13ex;
-}
-
 div#point-group-settings .colour.disabled span {
     background: transparent !important;
 }

@@ -12,6 +12,7 @@
     <meta name="keywords" content="">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap.min.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-responsive.min.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/bootstrap-select.min.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/jquery.dataTables.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
@@ -134,6 +135,7 @@ mistic = {
 <script src="${request.static_url('mistic:app/static/js/lib/underscore-min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/backbone-min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/bootstrap.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/bootstrap-select.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/d3.v2.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.colReorderWithResize.js')}" type="text/javascript"></script>

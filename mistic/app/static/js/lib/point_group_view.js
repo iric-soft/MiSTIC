@@ -27,7 +27,9 @@
             switch (this.$('.group-stroke .state').val()) {
             case 'enabled':
                 attrs.stroke = this.$('.group-stroke .colour span').css('background-color');
-                attrs['stroke-width'] = this.$('.group-stroke .stroke-width').val();
+                if (this.$('.group-stroke .stroke-width').val() !== 'inherit') {
+                    attrs['stroke-width'] = this.$('.group-stroke .stroke-width').val();
+                }
                 break;
             case 'disabled':
                 attrs.stroke = null;
@@ -41,6 +43,7 @@
                 attrs.d = d3.svg.symbol().type(shape)();
             }
 
+            this.group.setName($('.group-name').val());
             this.group.setStyle(attrs);
         },
 
@@ -48,12 +51,14 @@
         toggle_fill: function() {
             var state = this.$('.group-fill .state').val();
             this.$('.group-fill .colour').toggleClass('disabled', state != 'enabled');
+            this.$('.selectpicker').selectpicker('refresh');
         },
 
         toggle_stroke: function() {
             var state = this.$('.group-stroke .state').val();
             this.$('.group-stroke .colour').toggleClass('disabled', state != 'enabled');
             this.$('.group-stroke .stroke-width').prop('disabled', state != 'enabled');
+            this.$('.selectpicker').selectpicker('refresh');
         },
 
         remove: function() {
@@ -93,11 +98,13 @@
             var self = this;
 
             this.$el.html(this.template({
-                capitalize: function(x) { return x.charAt(0).toUpperCase() + x.slice(1) },
+                capitalize: function(x) { return x.charAt(0).toUpperCase() + x.slice(1); },
                 get_state:  function(x) { return x === null ? 'disable' : x === undefined ? 'inherit' : 'enable'; },
-                selected:   function(x) { return x ? ' selected' : '' },
-                active:     function(x) { return x ? ' active' : '' },
-                style:      this.group.style
+                selected:   function(x) { return x ? ' selected' : ''; },
+                active:     function(x) { return x ? ' active' : ''; },
+                colour:     function(x) { return x ? x : 'transparent'; },
+                group:      this.group,
+                style:      this.group.style,
             }));
 
             this.$('.colour').spectrum({
@@ -117,7 +124,7 @@
             this.toggle_stroke();
 
             this.$('.group-shape .state').button();
-
+            this.$('.selectpicker').selectpicker();
             return this;
         },
 

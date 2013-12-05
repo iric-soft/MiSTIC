@@ -1,17 +1,21 @@
 <%text>
 <script type="text/template" id="tmpl-point-group">
-  <span class="well sg-style" style="position: absolute; left: 0px; padding: 3px; width: 16px; height: 16px; display: inline-block; margin: 0px;">
-    <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
-  </span>
-
-  <span class="well sg-ops" style="position: absolute; right: 0px; padding: 3px; width: 68px; height: 16px; display: inline-block; margin: 0px;">
-    <i class="sg-add           icon-plus"     ></i>
-    <i class="sg-remove        icon-minus"    ></i>
-    <i class="sg-clear         icon-trash"    ></i>
-    <i class="sg-set-selection icon-share-alt"></i>
-  </span>
-
-  <input style="display: inline-block; width: auto; position: absolute; left: 26px; right: 78px;" type="text" autocomplete="off"></input>
+  <div class="content">
+    <div class="widgets">
+      <a class="shift-up">&#x25B2;</a><a class="shift-dn">&#x25BC;</a><a class="close">&times;</a>
+    </div>
+    <div class="header"><span><% if (group.name !== undefined) { %><%- group.name %><% } else { %><i>Group <%- group.group_id %></i><% } %></span></div>
+    <span class="control-group sg-style" style="position: absolute; left: 2px; width: 16px;">
+      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
+    </span>
+    <span class="control-group sg-ops" style="position: absolute; right: 2px; width: 68px; padding-top: 5px; padding-bottom: 1px">
+      <i class="sg-add           icon-plus"     ></i>
+      <i class="sg-remove        icon-minus"    ></i>
+      <i class="sg-clear         icon-trash"    ></i>
+      <i class="sg-set-selection icon-share-alt"></i>
+    </span>
+    <input style="display: inline-block; width: auto; position: absolute; left: 28px; right: 80px;" type="text" autocomplete="off">
+  </div>
 </script>
 
 
@@ -27,7 +31,7 @@
         <form class="form-horizontal">
           <div class="control-group">
             <label class="control-label" for="input-group-name"><b>Label:</b></label>
-            <div class="controls"><input type="text" class="group-name" placeholder="Label" value="<%- style.name %>"></input></div>
+            <div class="controls"><input type="text" class="group-name" placeholder="Label" value="<%- group.name %>"></input></div>
           </div>
           <div class="control-group group-shape">
             <label class="control-label"><b>Shape:</b></label>
@@ -48,13 +52,13 @@
           </div>
           <div class="control-group group-fill">
             <label class="control-label"><b>Fill:</b></label>
-            <span  style="float: right;">
-              <span class="btn colour" style="position: relative;">&nbsp;
-                <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background-color: <%- style.fill %>;"></span>
-              </span>
-            </span>
             <div class="controls">
-              <select class="state">
+              <span  style="float: right;">
+                <span class="btn colour" style="position: relative;">&nbsp;
+                  <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background: <%- colour(style.fill) %>;"></span>
+                </span>
+              </span>
+              <select class="state selectpicker" style="width: 14ex" data-width="14ex" data-container="body">
 <% _.each(['enabled', 'disabled', 'inherit'], function(state) { var curr = get_state(style.fill); %>
                 <option value="<%- state %>"<%= selected(state===curr) %>><%- capitalize(state) %></option>
 <% }); %>
@@ -63,19 +67,22 @@
           </div>
           <div class="control-group group-stroke">
             <label class="control-label"><b>Stroke:</b></label>
-            <span  style="float: right; white-space: nowrap;">
-              <select class="stroke-width">
-                <option value="1">1px</option>
-                <option value="2">2px</option>
-                <option value="3">3px</option>
-                <option value="5">4px</option>
-              </select>
-              <span class="btn colour" style="position: relative;">&nbsp;
-                <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background-color: <%- style.stroke %>;"></span>
-              </span>
-            </span>
             <div class="controls">
-              <select class="state">
+              <span style="float: right; white-space: nowrap;">
+                <select class="stroke-width selectpicker" style="width: 11ex" data-width="11ex" data-container="body">
+                  <option value="inherit">Inherit</option>
+                  <option value="1px">1px</option>
+                  <option value="2px">2px</option>
+                  <option value="3px">3px</option>
+                  <option value="4px">4px</option>
+                </select>
+                <div class="btn-group" style="display: inline-block">
+                  <span class="btn colour" style="position: relative;">&nbsp;
+                    <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background: <%- colour(style.stroke) %>;"></span>
+                  </span>
+                </div>
+              </span>
+              <select class="state selectpicker" style="width: 14ex" data-width="14ex" data-container="body">
 <% _.each(['enabled', 'disabled', 'inherit'], function(state) { var curr = get_state(style.stroke); %>
                 <option value="<%- state %>"<%= selected(state===curr) %>><%- capitalize(state) %></option>
 <% }); %>
