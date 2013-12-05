@@ -144,6 +144,10 @@
             'click  .sg-clear':         'clear',
             'click  .sg-set-selection': 'set_selection',
             'click  .sg-style':         'settings',
+            'click  .close':            'remove',
+        },
+
+        remove: function() {
         },
 
         settings: function() {
@@ -203,6 +207,7 @@
         },
 
         groupNameChanged: function() {
+            this.$('.header span').text(this.group.name);
         },
 
         groupStyleChanged: function() {
@@ -215,7 +220,10 @@
         },
 
         render: function() {
-            this.$el.html(this.template());
+            this.$el.html(this.template({
+                group: this.group,
+                style: this.group.style,
+            }));
             this.createLegend();
             return this;
         },
