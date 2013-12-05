@@ -15,12 +15,12 @@
 
     point_group.prototype.setStyle = function(style) {
         this.style = style;
-        this.trigger('change:style');
+        this.trigger('change:style', this);
     };
 
     point_group.prototype.setName = function(name) {
         this.name = name;
-        this.trigger('change:name');
+        this.trigger('change:name', this);
     };
 
     point_group.prototype.all = function() {
@@ -32,7 +32,7 @@
     point_group.prototype.clear = function(id) {
         if (!_.isEqual(this.point_ids, {})) {
             this.point_ids = {};
-            this.trigger('change');
+            this.trigger('change', this);
         }
     };
 
@@ -48,7 +48,7 @@
                 changed = true;
             }
         });
-        this.trigger('change');
+        this.trigger('change', this);
     };
 
     point_group.prototype.rem = function(ids) {
@@ -60,7 +60,7 @@
                 changed = true;
             }
         });
-        if (changed) this.trigger('change');
+        if (changed) this.trigger('change', this);
     };
 
     point_group.prototype.set = function(ids) {
