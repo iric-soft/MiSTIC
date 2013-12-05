@@ -16,8 +16,6 @@ import json
 <div class="row-fluid">
    <div id="menu" class="span12"  >
 
-      <form class="form-inline">
-
         <div class="accordion" id="accordion">
             <div class="accordion-group">
               <div class="accordion-heading">
@@ -118,8 +116,6 @@ import json
 
   </div>	
 </div>
-
-</form>
 
 </%block>
 
