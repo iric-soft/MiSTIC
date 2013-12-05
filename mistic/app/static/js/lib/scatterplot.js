@@ -72,6 +72,14 @@
         this.updatePoints();
     };
 
+    scatterplot.prototype.setPointGroups = function(pgs) {
+        _.each(this.point_groups, function(pg) { pg.off(null, null, this); });
+        this.point_groups = _.clone(pgs);
+        _.each(this.point_groups, function(pg) { pg.on('change change:style', this.updatePoints, this); });
+
+        this.updatePoints();
+    };
+
     scatterplot.prototype.addPointGroup = function(pg) {
         this.point_groups.push(pg);
         pg.on('change change:style', this.updatePoints, this);

@@ -111,6 +111,12 @@
         });
     };
 
+    scatterplot.prototype.setPointGroups = function(pgs) {
+        this.point_groups = _.clone(pgs);
+
+        _.each(this.subgraphs, function(s) { s.setPointGroups(pgs); });
+    };
+
     pairplot.prototype.addPointGroup = function(pg) {
         this.point_groups.push(pg);
 
