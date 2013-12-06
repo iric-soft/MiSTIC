@@ -104,7 +104,13 @@
 
             this.$el.html(this.template({
                 capitalize: function(x) { return x.charAt(0).toUpperCase() + x.slice(1); },
-                get_state:  function(x) { return x === null ? 'disable' : x === undefined ? 'inherit' : 'enable'; },
+                get_state:  function(x) {
+                    switch (x) {
+                    case null:      return 'disabled';
+                    case undefined: return 'inherit';
+                    default:        return 'enabled';
+                    }
+                },
                 selected:   function(x) { return x ? ' selected' : ''; },
                 active:     function(x) { return x ? ' active' : ''; },
                 colour:     function(x) { return x ? x : 'transparent'; },
