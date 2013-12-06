@@ -152,10 +152,32 @@
             'click  .sg-set-selection': 'set_selection',
             'click  .sg-style':         'settings',
             'click  .close':            'remove',
+            'click  .shift-up':         'shift_up',
+            'click  .shift-dn':         'shift_dn',
         },
 
         remove: function() {
             this.group.collection.remove(this.group);
+        },
+
+        shift_up: function() {
+            var col = this.group.collection;
+            var index = col.indexOf(this.group);
+            if (index > 0) {
+                col.remove(this.group, { silent: true });
+                col.add(this.group, { at: index - 1, silent: true });
+                col.trigger('sort', col, {});
+            }
+        },
+
+        shift_dn: function() {
+            var col = this.group.collection;
+            var index = col.indexOf(this.group);
+            if (index < col.length - 1) {
+                col.remove(this.group, { silent: true });
+                col.add(this.group, { at: index + 1, silent: true });
+                col.trigger('sort', col, {});
+            }
         },
 
         settings: function() {
@@ -281,7 +303,11 @@
         },
 
         groupsReordered: function() {
-            _.each(this.model_views, function (v) { v.updateName(); });
+            var self = this;
+            var new_order = [];
+            _.each(this.model_views, function (v) { new_order[self.groups.indexOf(v.group)] = v; });
+            this.model_views = new_order;
+            _.each(this.model_views, function (v) { v.updateName(); self.$el.append(v.el); });
         },
 
         groupsReset: function() {
