@@ -18,9 +18,8 @@
         base_attrs: {
             _shape:  'circle',
             d:       d3.svg.symbol().type("circle")(),
-            fill:    "#000",
+            fill:    "rgba(0,0,0,.65)",
             stroke:  null,
-            opacity: 0.65,
         },
     };
 
