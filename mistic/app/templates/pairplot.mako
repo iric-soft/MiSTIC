@@ -159,19 +159,15 @@ $(document).ready(function() {
   var pgs = new PointGroupCollection();
   current_graph.setPointGroups(pgs);
 
+  var pgs_view = new PointGroupListView({ groups: pgs, graph: current_graph, el: $("#current_selection") })
+
   var newGroup = function() {
     var pg = new PointGroup({
       style: { fill: group_colours[next_group % 4] }
     });
 
-    var pg_view = new PointGroupView({
-      group: pg,
-      graph: current_graph,
-    });
-
     pgs.add(pg);
 
-    $("#current_selection").append(pg_view.render().el);
     ++next_group;
   };
 

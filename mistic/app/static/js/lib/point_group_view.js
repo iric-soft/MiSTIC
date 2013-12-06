@@ -249,5 +249,66 @@
             this.group.on('change:style',     _.bind(this.updateStyle, this));
         },
     });
+
+
+
+    PointGroupListView = Backbone.View.extend({
+        tagName: 'div',
+        className: 'point-group-list',
+        events: {
+        },
+
+        groupAdded: function(group) {
+            var view = new PointGroupView({ group: group, graph: this.graph });
+            var index = this.groups.indexOf(group);
+            if (index == this.model_views.length) {
+                this.model_views.push(view);
+                this.$el.append(view.render().el);
+            } else {
+                var insert_before = this.model_views[index];
+                this.model_views.splice(index, 0, view);
+                insert_before.$el.before(view.render().el);
+            }
+            _.each(this.model_views, function (v) { v.updateName(); });
+        },
+
+        groupRemoved: function(group, collection, options) {
+            console.log('got to here');
+            var index = options.index;
+            var view = this.model_views.splice(index, 1)[0];
+            view.$el.remove();
+            _.each(this.model_views, function (v) { v.updateName(); });
+        },
+
+        groupsReordered: function() {
+            _.each(this.model_views, function (v) { v.updateName(); });
+        },
+
+        groupsReset: function() {
+            this.model_views = [];
+            this.$el.empty();
+
+            for (var i = 0; i < this.groups.length; ++i) {
+                var view = new PointGroupView({ group: group, graph: this.graph });
+                this.model_views.push(view);
+                this.$el.append(view.render().el);
+            }
+            _.each(this.model_views, function (v) { v.updateName(); });
+        },
+
+        initialize: function(options) {
+            this.groups = options.groups;
+            this.graph = options.graph;
+
+            this.model_views = [];
+
+            this.groupsReset();
+
+            this.groups.on('add',    _.bind(this.groupAdded, this));
+            this.groups.on('remove', _.bind(this.groupRemoved, this));
+            this.groups.on('reset',  _.bind(this.groupsReset, this));
+            this.groups.on('sort',   _.bind(this.groupsReordered, this));
+        },
+    });
 })();
 
