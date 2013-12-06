@@ -4,7 +4,7 @@
     <div class="widgets">
       <a class="shift-up">&#x25B2;</a><a class="shift-dn">&#x25BC;</a><a class="close">&times;</a>
     </div>
-    <div class="header"><span><% if (group.name !== undefined) { %><%- group.name %><% } else { %><i>Group <%- group.group_id %></i><% } %></span></div>
+    <div class="header"><span><% if (group.get('name') !== undefined) { %><%- group.get('name') %><% } else { %><i>Group <%- group.collection.indexOf(group)+1 %></i><% } %></span></div>
     <span class="control-group sg-style" style="position: absolute; left: 2px; width: 16px;">
       <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
     </span>

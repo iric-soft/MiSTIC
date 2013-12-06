@@ -56,4 +56,8 @@
             this.set('point_ids', point_ids);
         },
     });
+
+    PointGroupCollection = Backbone.Collection.extend({
+        model: PointGroup,
+    });
 })();

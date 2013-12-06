@@ -57,7 +57,7 @@
 
         this.current_selection = [];
 
-        this.point_groups = [];
+        this.point_groups = null;
 
         this.setXData(xdata, false);
         this.setYData(ydata, false);
@@ -73,23 +73,13 @@
     };
 
     scatterplot.prototype.setPointGroups = function(pgs) {
-        _.each(this.point_groups, function(pg) { pg.off(null, null, this); });
-        this.point_groups = _.clone(pgs);
-        _.each(this.point_groups, function(pg) { pg.on('change:point_ids change:style', this.updatePoints, this); });
-
-        this.updatePoints();
-    };
-
-    scatterplot.prototype.addPointGroup = function(pg) {
-        this.point_groups.push(pg);
-        pg.on('change:point_ids change:style', this.updatePoints, this);
-
-        this.updatePoints();
-    };
-
-    scatterplot.prototype.remPointGroup = function(pg) {
-        this.point_groups = _.without(this.point_groups, pg);
-        pg.off(null, null, this);
+        if (this.point_groups !== null) {
+            this.point_groups.off(null, null, this);
+        }
+        this.point_groups = pgs;
+        if (this.point_groups !== null) {
+            this.point_groups.on('change:point_ids change:style add remove reset', this.updatePoints, this);
+        }
 
         this.updatePoints();
     };
@@ -341,11 +331,13 @@
         var result = {};
 
         _.extend(result, this.options.base_attrs);
-        _.each(this.point_groups, function(pg) {
-            if (pg.hasPoint(d.k)) {
-                _.extend(result, pg.get('style'));
-            }
-        });
+        if (this.point_groups !== null) {
+            this.point_groups.each(function(pg) {
+                if (pg.hasPoint(d.k)) {
+                    _.extend(result, pg.get('style'));
+                }
+            });
+        }
         _.extend(result, d.attrs);
 
         return result;

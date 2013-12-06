@@ -153,9 +153,11 @@ $(document).ready(function() {
   $("#options").css('display', 'none');
 
 
-
   var group_colours = [ "#fc8403", "#0bbede", "#249924", "#9b2a8d" ];
   var next_group = 0;
+
+  var pgs = new PointGroupCollection();
+  current_graph.setPointGroups(pgs);
 
   var newGroup = function() {
     var pg = new PointGroup({
@@ -167,7 +169,7 @@ $(document).ready(function() {
       graph: current_graph,
     });
 
-    current_graph.addPointGroup(pg);
+    pgs.add(pg);
 
     $("#current_selection").append(pg_view.render().el);
     ++next_group;

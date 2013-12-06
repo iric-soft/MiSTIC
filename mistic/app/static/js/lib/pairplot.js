@@ -111,22 +111,10 @@
         });
     };
 
-    scatterplot.prototype.setPointGroups = function(pgs) {
-        this.point_groups = _.clone(pgs);
+    pairplot.prototype.setPointGroups = function(pgs) {
+        this.point_groups = pgs;
 
         _.each(this.subgraphs, function(s) { s.setPointGroups(pgs); });
-    };
-
-    pairplot.prototype.addPointGroup = function(pg) {
-        this.point_groups.push(pg);
-
-        _.each(this.subgraphs, function(s) { s.addPointGroup(pg); });
-    };
-
-    pairplot.prototype.remPointGroup = function(pg) {
-        this.point_groups = _.without(this.point_groups, pg);
-
-        _.each(this.subgraphs, function(s) { s.remPointGroup(pg); });
     };
 
     pairplot.prototype.legendSymbol = function(node, pg) {
@@ -210,7 +198,7 @@
                     } else if (x > y ) {
                         s = new scatterplot(s_opts, this.data[x], this.data[y]);
                         s.setSelection(this.current_selection, true);
-                        _.each(this.point_groups, function(pg) { s.addPointGroup(pg); });
+                        s.setPointGroups(this.point_groups);
                         this.subgraphs.push(s);
                     }
                     $(g[0]).append(s.svg);
