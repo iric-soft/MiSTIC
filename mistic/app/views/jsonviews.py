@@ -105,10 +105,10 @@ class ColAnnotation(object):
         self.request = request
         #self.cannotation = data.annotations.get(request.matchdict['cannotation'])
         self.dataset = data.datasets.get(request.matchdict['dataset'])
-       
+
     @view_config(route_name="mistic.json.cannotation.items", request_method="GET", renderer="json")
     def items(self):
-      
+
       k = []
       v = []
       if not self.dataset.cannotation:
@@ -255,8 +255,8 @@ class Dataset(object):
             return []
         anns = self.dataset.cannotation.data
         return [ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ]
-  
-  
+
+
     @view_config(route_name="mistic.json.dataset.sampleinfo.search", request_method="GET", renderer="json")
     def sample_info_search(self):
       if not self.dataset.cannotation:
@@ -265,43 +265,43 @@ class Dataset(object):
       anns = self.dataset.cannotation.data
       d = dict([ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ])
       query = self.request.GET.getall('q')
-     
+
       if query ==['']:
-        for k,v in d.items() :
-          for e in v :  
+        for k,v in d.items():
+          for e in v:
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
-        return out 
-        
-        
+        return out
+
+
       query = sum([ q.split() for q in query ], [])
       query = [ re.compile(re.escape(q), re.I) for q in query if q != '' ]
-      
+
       if query == []:
         return []
 
-      for q in query : 
-        for k,v in d.items() :
-          keyFound = False 
-          if q.match(k): 
+      for q in query:
+        for k,v in d.items():
+          keyFound = False
+          if q.match(k):
               keyFound = True
-          for e in v : 
-            if q.match(e) or keyFound: 
+          for e in v:
+            if q.match(e) or keyFound:
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
-  
+
       return out
-        
-        
+
+
     @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
     def sample_enrichment(self):
         if not self.dataset.cannotation:
             return []
         anns = self.dataset.cannotation.data
         samples = set(json.loads(self.request.POST['samples']))
-        
+
         out = []
-        
+
         for col in anns.columns:
-         
+
             all_samples = set(anns.index[anns[col].map(lambda x: x not in ("", None))])
             tst_samples = samples & all_samples
 
@@ -333,7 +333,7 @@ class Dataset(object):
     def samples(self):
         filters = self.request.GET.items()
         samples = self.dataset.cannotation.data.index
-        
+
         for k,v in filters:
             if k in self.dataset.cannotation.data.columns:
                 samples = [ s for s in samples if self.dataset.cannotation.data[k][s] == v ]
@@ -403,7 +403,7 @@ class Dataset(object):
 
         out.sort(key = lambda r: r['symbol'])
         additional.sort(key = lambda r: r['symbol'])
-        
+
         return (out + additional)[:limit]
 
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")

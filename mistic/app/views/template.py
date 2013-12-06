@@ -95,7 +95,7 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.pairplot")
   def pairplot(self):
-    
+
     dataset = self.request.matchdict.get('dataset', None)
     genes = self.request.matchdict.get('genes', [])
     others = dict(self.request.GET)
@@ -104,7 +104,7 @@ class Graph(object):
       genes = genes,
       others = others,
     )
-     
+
     return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)
 
 
@@ -113,16 +113,16 @@ class Graph(object):
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
 
-    
+
     _dataset = data.datasets.get(dataset)
-    
+
     if _dataset is None:
       print 'Not found'
-      
+
       raise HTTPNotFound()
 
     mst = _dataset.mst(xform)
-   
+
     if mst is None:
       raise HTTPNotFound()
 
@@ -159,15 +159,15 @@ class Graph(object):
       edges = mst[1],
       pos = mst[2]
     )
-   
+
     if len(mst[0]) < 200:
-     
+
       if _dataset.experiment=="ngs":
         return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
-      else : 
+      else:
         if _dataset.experiment=="hts":
           return render_to_response('mistic:app/templates/mstplot_small_chemical.mako', args, request = self.request)
-        else : 
+        else:
           return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
     else:
       return render_to_response('mistic:app/templates/mstplot.mako', args, request = self.request)
