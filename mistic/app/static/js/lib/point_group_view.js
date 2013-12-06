@@ -10,6 +10,11 @@
             'change  .group-fill .state':        'toggle_fill',
             'change  .group-stroke .state':      'toggle_stroke',
             'click   .action-save':              'save',
+            'keypress':                          'squashSubmit',
+        },
+
+        squashSubmit: function(e) {
+            if (e.keyCode == 13) e.preventDefault();
         },
 
         save: function() {
