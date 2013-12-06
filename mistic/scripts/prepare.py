@@ -253,7 +253,7 @@ def run(args):
   GRAPH_TO_DOT = tuple(PREPARE['graph-to-dot'].split())
   LAYOUT =       tuple(PREPARE['layout'].split())
 
-  for dataset in APP_DATA.json_data.get('datasets'):
+  for dataset in APP_DATA.config['datasets']:
     if 'path' not in dataset:
       raise exceptions.RuntimeError('no path for dataset ' + dataset.get('id', '????'))
 
