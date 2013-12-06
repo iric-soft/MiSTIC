@@ -37,9 +37,9 @@
             <label class="control-label"><b>Shape:</b></label>
             <div class="controls">
               <div class="btn-group state" data-toggle="buttons-radio">
-                <button class="btn<%= active(style._shape===undefined)%>" data-value="inherit">Inherit</button>
+                <button type="button" class="btn<%= active(style._shape===undefined)%>" data-value="inherit">Inherit</button>
 <% _.each(d3.svg.symbolTypes, function(symbol) { %>
-                <button class="btn<%= active(style._shape===symbol)%>" data-value="<%= symbol %>" style="padding: 2px 3px;">
+                <button type="button" class="btn<%= active(style._shape===symbol)%>" data-value="<%= symbol %>" style="padding: 2px 3px;">
                   <svg width="16" height="17">
                     <g transform="translate(8,10)">
                       <path fill="#000" d="<%- d3.svg.symbol().type(symbol)() %>"></path>
