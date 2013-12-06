@@ -307,6 +307,27 @@ div#point-group-settings div.control-group {
     margin-bottom: 5px;
 }
 
-div#point-group-settings .colour.disabled span {
+div#point-group-settings .colour.disabled span,
+div#point-group-settings .colour.disabled div.alpha-image {
     background: transparent !important;
+}
+
+div#point-group-settings .colour span {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    bottom: 3px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+div#point-group-settings .colour div.alpha-image {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    bottom: 3px;
+    display: inline-block;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
 }

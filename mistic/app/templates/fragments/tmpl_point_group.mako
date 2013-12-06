@@ -55,7 +55,8 @@
             <div class="controls">
               <span  style="float: right;">
                 <span class="btn colour" style="position: relative;">&nbsp;
-                  <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background: <%- colour(style.fill) %>;"></span>
+                  <div class="alpha-image"></div>
+                  <span style="background: <%- colour(style.fill) %>;"></span>
                 </span>
               </span>
               <select class="state selectpicker" style="width: 14ex" data-width="14ex" data-container="body">
@@ -78,7 +79,8 @@
                 </select>
                 <div class="btn-group" style="display: inline-block">
                   <span class="btn colour" style="position: relative;">&nbsp;
-                    <span style="position: absolute; left: 3px; right: 3px; top: 3px; bottom: 3px; border: 1px solid black; display: inline-block; background: <%- colour(style.stroke) %>;"></span>
+                  <div class="alpha-image"></div>
+                  <span style="background: <%- colour(style.stroke) %>;"></span>
                   </span>
                 </div>
               </span>

@@ -113,16 +113,17 @@
             }));
 
             this.$('.colour').spectrum({
+                showInput: false,
+                showButtons: false,
+                showAlpha: true,
                 change: function(colour) {
-                    $('span', this).css('background-color', $(this).spectrum('get').toHexString());
+                    $('span', this).css('background-color', $(this).spectrum('get').toRgbString());
                 },
                 beforeShow: function(colour) {
                     if ($(this).hasClass('disabled')) return false;
                     $(this).spectrum('set', $('span', this).css('background-color'));
                     console.log(this);
                 },
-                showInput: false,
-                showButtons: false
             });
 
             this.toggle_fill();
