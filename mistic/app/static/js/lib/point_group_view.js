@@ -138,21 +138,24 @@
         }
     });
 
+
+
     PointGroupView = Backbone.View.extend({
         tagName: 'div',
         className: 'point-group',
         template: _.template($('#tmpl-point-group').html()),
         events: {
             'change input':             'change',
-            'click  .sg-add':           'add',
-            'click  .sg-remove':        'remove',
-            'click  .sg-clear':         'clear',
+            'click  .sg-add':           'add_points',
+            'click  .sg-remove':        'remove_points',
+            'click  .sg-clear':         'clear_points',
             'click  .sg-set-selection': 'set_selection',
             'click  .sg-style':         'settings',
             'click  .close':            'remove',
         },
 
         remove: function() {
+            this.group.collection.remove(this.group);
         },
 
         settings: function() {
@@ -176,19 +179,19 @@
             return this.group.get('point_ids');
         },
 
-        add: function() {
+        add_points: function() {
             var sel = this.graph.getSelection();
             this.graph.setSelection([]);
             this.group.addPoints(sel);
         },
 
-        remove: function() {
+        remove_points: function() {
             var sel = this.graph.getSelection();
             this.graph.setSelection([]);
             this.group.removePoints(sel);
         },
 
-        clear: function() {
+        clear_points: function() {
             this.group.clearPoints();
         },
 
