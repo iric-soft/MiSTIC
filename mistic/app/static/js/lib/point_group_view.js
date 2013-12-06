@@ -210,24 +210,29 @@
             svg.select('g').attr('transform', 'translate(8,10)');
         },
 
-        update: function() {
-            this.$('input').val(this.value().join(' '));
+        name: function() {
+            if (this.group.get('name') !== undefined) {
+                return this.group.get('name')
+            } else {
+                return $('<i>').text('Group ' + (this.group.collection.indexOf(this.group)+1));
+            }
         },
 
-        groupNameChanged: function() {
-            this.$('.header span').text(this.group.get('name'));
+        updateName: function() {
+            this.$('.header span').html(this.name());
         },
 
-        groupStyleChanged: function() {
+        updateStyle: function() {
             this.createLegend();
         },
 
-        groupChanged: function() {
-            this.update();
+        updatePoints: function() {
+            this.$('input').val(this.value().join(' '));
         },
 
         render: function() {
             this.$el.html(this.template({
+                view:  this,
                 group: this.group,
                 style: this.group.get('style'),
             }));
@@ -238,9 +243,10 @@
         initialize: function(options) {
             this.group = options.group;
             this.graph = options.graph;
-            this.group.on('change:point_ids', _.bind(this.groupChanged,      this));
-            this.group.on('change:name',      _.bind(this.groupNameChanged,  this));
-            this.group.on('change:style',     _.bind(this.groupStyleChanged, this));
+
+            this.group.on('change:point_ids', _.bind(this.updatePoints, this));
+            this.group.on('change:name',      _.bind(this.updateName, this));
+            this.group.on('change:style',     _.bind(this.updateStyle, this));
         },
     });
 })();

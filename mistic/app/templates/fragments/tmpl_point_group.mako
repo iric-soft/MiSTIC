@@ -4,7 +4,7 @@
     <div class="widgets">
       <a class="shift-up">&#x25B2;</a><a class="shift-dn">&#x25BC;</a><a class="close">&times;</a>
     </div>
-    <div class="header"><span><% if (group.get('name') !== undefined) { %><%- group.get('name') %><% } else { %><i>Group <%- group.collection.indexOf(group)+1 %></i><% } %></span></div>
+    <div class="header"><span><% view.name() %></span></div>
     <span class="control-group sg-style" style="position: absolute; left: 2px; width: 16px;">
       <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
     </span>
@@ -31,7 +31,7 @@
         <form class="form-horizontal">
           <div class="control-group">
             <label class="control-label" for="input-group-name"><b>Label:</b></label>
-            <div class="controls"><input type="text" class="group-name" placeholder="Label" value="<%- group.name %>"></input></div>
+            <div class="controls"><input type="text" class="group-name" placeholder="Label" value="<%- group.get('name') %>"></input></div>
           </div>
           <div class="control-group group-shape">
             <label class="control-label"><b>Shape:</b></label>
