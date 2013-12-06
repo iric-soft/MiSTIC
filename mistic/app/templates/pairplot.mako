@@ -194,7 +194,6 @@ $(document).ready(function() {
   };
 
   var addDataset = function(dataset, sync) {
-    $('#sample_selection').html('<option selected value="none">Select a characteristic</option>');
     $.ajax({
       url: "${request.route_url('mistic.json.dataset.sampleinfo', dataset='_dataset_')}".replace('_dataset_', dataset),
       dataype: 'json',
