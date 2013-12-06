@@ -70,9 +70,10 @@ import json
 
           <hr>
 
-              <select id="sample_selection" >
-                <option selected value="none">Select by characteristic</option>
-              </select>
+          <input id='sample_annotation' type=text autocomplete="off" placeholder='Select a characteristic'></input>
+          <a id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+            <span class="caret"></span>
+          </a>
 
         </div>
       </div>
@@ -148,7 +149,9 @@ ${parent.pagetail()}
 
 <script type="text/javascript">
 $(document).ready(function() {
-  var gene_entry = new GeneDropdown({ el: $("#gene") });
+  var gene_entry = new GeneDropdown({ el: $("x#gene") });
+  var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
+
   current_graph = new pairplot(undefined, undefined, $('#graph'));
   $("#options").css('display', 'none');
 
@@ -199,16 +202,8 @@ $(document).ready(function() {
       success: function(data) {
         current_datasets = [dataset];
         gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]);
-        var options = $('#sample_selection');
-        _.each(data, function(kv) {
-          var k = kv[0];
-          var v = kv[1];
-          options.append('<optgroup label="'+k+'">');
-          _.each(v, function(v) {
-            options.append('<option value="'+k+'.'+v+'">'+v+'</options>');
-          });
-          options.append('</optgroup>');
-        });
+        sample_annotation_entry.url = "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset);
+
         $("#gene").attr('disabled', false);
         $(".locate").attr('disabled', false);
         $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
@@ -463,8 +458,15 @@ $(document).ready(function() {
     current_graph.draw()
   });
 
-  $("#sample_selection").on("change", function(){
-    var val = $(event.target).val().split('.');
+  $('#sample_annotation_drop').on('click', function() {
+    sample_annotation_entry.$el.val('');
+    sample_annotation_entry.update();
+    sample_annotation_entry.$el.focus();
+  });
+ 
+  sample_annotation_entry.on("change", function(item){
+    if (item === null) return;
+    var val = item.id.split('.');
     var l1 = val[0];
     var l2 = val[1];
     var kv = {};
