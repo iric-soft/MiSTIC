@@ -48,7 +48,7 @@
                 attrs.d = d3.svg.symbol().type(shape)();
             }
 
-            this.group.set('name', $('.group-name').val());
+            this.group.set('name', $('.group-name').val() || undefined);
             this.group.set('style', attrs);
         },
 
