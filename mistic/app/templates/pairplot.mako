@@ -152,8 +152,7 @@ $(document).ready(function() {
   current_graph = new pairplot(undefined, undefined, $('#graph'));
   $("#options").css('display', 'none');
 
-
-  var group_colours = [ "#fc8403", "#0bbede", "#249924", "#9b2a8d" ];
+  var group_colours = [ "rgba(252,132,3,.65)", "rgba(11,190,222,.65)", "rgba(36,153,36,.65)", "rgba(155,42,141,.65)" ];
   var next_group = 0;
 
   var pgs = new PointGroupCollection();
