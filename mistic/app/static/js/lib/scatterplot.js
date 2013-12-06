@@ -339,7 +339,7 @@
             });
         }
         _.extend(result, d.attrs);
-
+        if (!result.fill) result.fill = 'none';
         return result;
     };
 

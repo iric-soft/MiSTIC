@@ -122,6 +122,8 @@
 
         _.extend(attrs, this.options.base_attrs);
         _.extend(attrs, pg.get('style'));
+        if (attrs.fill === null) attrs.fill = 'none';
+        if (attrs.fill === undefined) attrs.fill = '#aaa';
 
         var g = node
             .append('g')
