@@ -78,7 +78,7 @@
         }
         this.point_groups = pgs;
         if (this.point_groups !== null) {
-            this.point_groups.on('change:point_ids change:style add remove reset', this.updatePoints, this);
+            this.point_groups.on('change:point_ids change:style add remove reset sort', this.updatePoints, this);
         }
 
         this.updatePoints();
