@@ -397,6 +397,7 @@ $(document).ready(function() {
     info.clear();
     _.each(selection, info.add);
     selectionSearch(selection);
+    $('#sample_enrichment_panel').collapse('show');
   });
 
   resizeGraph = function() {
