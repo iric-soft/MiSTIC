@@ -28,7 +28,7 @@
         <h4 class="modal-title">Group settings</h4>
       </div>
       <div class="modal-body">
-        <form class="form-horizontal">
+        <div class="form-horizontal">
           <div class="control-group">
             <label class="control-label" for="input-group-name"><b>Label:</b></label>
             <div class="controls"><input type="text" class="group-name" placeholder="Label" value="<%- group.get('name') %>"></input></div>
@@ -89,7 +89,7 @@
               </select>
             </div>
           </div>
-        </form>
+        </div>
       </div>
       <div class="modal-footer">
         <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
