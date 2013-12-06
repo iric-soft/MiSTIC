@@ -365,7 +365,7 @@ $(document).ready(function() {
               .replace('_dataset_', current_datasets[0]);
 
     if (current_graph.data.length>0){
-        _.each(current_graph.data, function(x) { url += '/' + x.gene;console.debug(x.gene); });
+        _.each(current_graph.data, function(x) { url += '/' + x.gene; });
     }
     $("span#share").html(url);
   });
