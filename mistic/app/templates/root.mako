@@ -188,15 +188,9 @@ $('#csv-button').on('click', function(event){
 });
       
 $('#datasets-table tbody tr ').on('click', function(event){
-    var values = _.map(this.cells, function(d){return(d.innerText);});
-    
-    var i = _.indexOf(values, 'log');
-    if (i==-1) { i = _.indexOf(values, 'rank');} 
-    else { if (i==-1) { i = _.indexOf(values, 'none');}} 
-    
-    var link = this.cells[i].innerHTML;
+    var link = $(this.cells).find('span > a')[0];
     window.open ($(link).attr("href"));
-    
+  
 });
       
 </script>
