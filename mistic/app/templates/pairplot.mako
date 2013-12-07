@@ -66,7 +66,7 @@ import json
           </div>
 
           <br>
-          <a class='btn' id="new_group">New group</a>
+          <button type="button" class='btn' id="new_group">New group</button>
 
           <hr>
 
