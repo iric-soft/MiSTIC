@@ -23,7 +23,10 @@ from pyramid.authorization import ACLAuthorizationPolicy
 
 from pyramid_beaker import set_cache_regions_from_settings
 
+from sqlalchemy import engine_from_config
+
 import mistic.app.views.pdffile
+import mistic.app.tables
 
 def _get_basicauth_credentials(request):
     authorization = AUTHORIZATION(request.environ)
@@ -143,6 +146,10 @@ def main(global_config, **settings):
     """
     set_cache_regions_from_settings(settings)
 
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    mistic.app.tables.create(engine)
+    mistic.app.tables.Base.metadata.create_all(engine)
+
     if 'mistic.datasets' in settings:
       settings.update(load_datasets_settings (settings['mistic.datasets'], global_config))
 
@@ -214,6 +221,9 @@ def main(global_config, **settings):
     config.add_route('mistic.json.go.search',              '/go/search')
     config.add_route('mistic.json.go.id',                  '/go/{go_id}')
     config.add_route('mistic.json.go.name',                '/go/{go_id}/name')
+
+    config.add_route('mistic.json.attr.set',               '/attr')
+    config.add_route('mistic.json.attr.get',               '/attr/{id}')
 
     config.add_route('mistic.template.corrgraph',          '/genecorr')
     config.add_route('mistic.template.corrgraph_static',   '/genecorr/{dataset}/{gene}')

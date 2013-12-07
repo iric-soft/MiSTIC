@@ -19,6 +19,7 @@ import logging
 
 from beaker.cache import *
 from mistic.app.cache_helpers import *
+from mistic.app.tables import *
 
 
 
@@ -527,3 +528,27 @@ class DatasetGene(Dataset):
     @view_config(route_name="mistic.json.gene.expr", request_method="GET", renderer="json")
     def expr(self):
         return self.dataset.expndata(self.gene, self.x)
+
+
+
+class Attr(object):
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(route_name="mistic.json.attr.set", request_method="POST", renderer="json")
+    def set(self):
+        session = DBSession()
+        data = self.request.json_body
+        row = JSONStore(val = json.dumps(data))
+        session.add(row)
+        row = session.merge(row)
+
+        return row.client_id
+
+    @view_config(route_name="mistic.json.attr.get", request_method="GET")
+    def get(self):
+        session = DBSession()
+        val = JSONStore.val_for_cid(DBSession(), self.request.matchdict['id'])
+        if val is None:
+            raise HTTPNotFound()
+        return Response(val, content_type='application/json')
