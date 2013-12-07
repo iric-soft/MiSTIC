@@ -128,8 +128,20 @@ import json
  ${parent.graph()}
 
   <div class="modal hide" id="link_to_share">
-    <div class='modal-body'>
-      <span id="share"></span>
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Permanent link for this plot</h4>
+        </div>
+        <div class="modal-body">
+          <span id="share"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-clipboard-target="share" id="copy-to-clipboard">Copy to clipboard</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+      </div>
     </div>
   </div>
 
@@ -150,9 +162,14 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/textpanel.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/dataset_selector.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/ZeroClipboard.min.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
+  var clip = new ZeroClipboard($("#copy-to-clipboard"), {
+    moviePath: "${request.static_url('mistic:app/static/swf/ZeroClipboard.swf')}"
+  });
+
   var gene_entry = new GeneDropdown({ el: $("x#gene") });
   var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
 
