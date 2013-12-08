@@ -302,7 +302,6 @@
         },
 
         groupRemoved: function(group, collection, options) {
-            console.log('got to here');
             var index = options.index;
             var view = this.model_views.splice(index, 1)[0];
             view.$el.remove();
