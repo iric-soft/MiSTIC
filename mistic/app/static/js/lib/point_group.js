@@ -6,7 +6,9 @@
             point_ids: []
         },
         initialize: function() {
+            var self = this;
             this.point_ids = {};
+            _.each(this.get('point_ids'), function(i) { self.point_ids[i] = true; });
         },
         clearPoints: function() {
             this.point_ids = {};
