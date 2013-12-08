@@ -265,7 +265,8 @@
                 group: this.group,
                 style: this.group.get('style'),
             }));
-            this.createLegend();
+            this.updateStyle();
+            this.updatePoints();
             return this;
         },
 
