@@ -40,7 +40,7 @@ import scipy.stats
    <div class="span7" id="graph"></div>
    <div class="span5" id="graph-right">
       <div class="span12" id="go_table"></div>
-      <div class="span12" id="spacer" style='height:100px;'></div>
+
       <div class="span12" id="part2"></div>
    </div>
  </div>
@@ -61,8 +61,9 @@ ${parent.style()}
   font-family: helvetica; 
   font-size: 10.5px; 
   float: right;
+  padding-bottom:10px;
+  border-bottom : 1px solid #ddd;
 }
-
 
 
 div#more-information, .information{
@@ -104,17 +105,7 @@ rect.selected {
   fill: #cc7400;
 }
 
-#part2 {
-  overflow-y: hidden;
-  overflow-x: hidden;
-  font-family: helvetica; 
-  font-size: 10.5px; 
-  width: 400px;
-}
 </%block>
-
-
-
 
 <%block name="pagetail">
 ${parent.pagetail()}
@@ -123,33 +114,10 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
 
-
 <%
   ds = data.datasets.get(dataset)
   a = ds.annotation
 
-  from mistic.util import geneset
-  import time
-  start = time.time()
-  gs_tab = geneset.genesetOverRepresentation(nodes, a.genes, a.all_genesets())
-  print 'Geneset over representation running time : ' , time.time()-start
-  
-  infos = {}
-  
-  for r in gs_tab:
-    x = r['id']
-    info = a.geneset_info(x)
-    infos[r['id']] = dict(info)
-    r['name'] = info.get('name', '')
-    r['desc'] = info.get('desc', '')
-    x, r['id'] = x.rsplit(':', 1)
-   
-    if '.' in x:
-      r['gs'], r['cat'] = x.split('.', 1)
-    else:
-      r['gs'], r['cat'] = x, ''
-    
-  
   E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
   V = [ dict(
     id    = n,
@@ -163,68 +131,86 @@ ${parent.pagetail()}
 var json = {
   "nodes": ${json.dumps(V)|n},
   "links": ${json.dumps(E)|n},
-  "gstab": ${json.dumps(gs_tab)|n},
-  "infos": ${json.dumps(infos)|n},
+  "gstab": {},
 };
 
-var table = d3.select('#go_table').insert('table', ':first-child').attr('id', 'gotable');
+var updateEnrichmentTable = function() {
+    
+    $('#go_table').html('');
+    
+    var table = d3.select('#go_table')
+                .insert('table', ':first-child')
+                .attr('id', 'gotable');
 
-var thead = table.append('thead');
-var tbody = table.append('tbody');
+    var thead = table.append('thead');
+    var tbody = table.append('tbody');
 
+    var thr = thead.selectAll("tr")
+        .data([ 1 ])
+        .enter()
+        .append("tr");
 
+    var th = thr.selectAll('th')
+        .data([ 'P-value', 'Odds',  'Type', 'Cat', 'ID', 'Name' ])
+        .enter()
+        .append('th')
+        .text(function(d) { return d; });
 
-var thr = thead.selectAll("tr")
-    .data([ 1 ])
-    .enter()
-    .append("tr")
+   
+    var tr = tbody.selectAll('tr')
+        .data(json.gstab);
+    
+   
+    tr.enter()
+        .append('tr')
+        .on('click', function(d) {
+           
+            getAnnotationContent(d);
+            var self = this;
+            d3.selectAll('tr').classed('selected', function(d2) { return this === self; });
+            var sel = {}
+            for (var i = 0; i < d.genes.length; ++i) {
+                sel[d.genes[i]] = true;
+            }
+            graph.selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
+            info.clear();
+            graph.selectAll('rect.selected').each(function(d) {
+            info.toggle(d.name); 
+       });
+    });
 
-var th = thr.selectAll('th')
-    .data([ 'P-value', 'Odds', 'Type', 'Cat', 'ID', 'Name' ])
-    .enter()
-    .append('th')
-    .text(function(d) { return d; });
+    var td = tr.selectAll('td')
+        .data(function(d) { return [
+        { value: d.p_val.toExponential(2) },
+        { value: d.odds.toFixed(2) },
+        { value: d.gs },
+        { value: d.cat },
+        { value: d.id },
+        { value: d.name, title: d.desc },
+        ];});
 
-var tr = tbody.selectAll('tr')
-    .data(json.gstab)
-
-tr.enter()
-    .append('tr')
-    .on('click', function(d) {
-      
-      getAnnotationContent(d);
-      var self = this;
-      d3.selectAll('tr').classed('selected', function(d2) { return this === self; });
-      var sel = {}
-      for (var i = 0; i < d.genes.length; ++i) {
-        sel[d.genes[i]] = true;
-      }
-      graph.selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
-      info.clear();
-      graph.selectAll('rect.selected').each(function(d) {
-          info.toggle(d.name);
-         
-          } );
-    })
-    ;
-
-var td = tr.selectAll('td')
-    .data(function(d) { return [
-      { value: d.p_val.toExponential(2) },
-      { value: d.odds.toFixed(2) },
-      { value: d.gs },
-      { value: d.cat },
-      { value: d.id },
-      { value: d.name, title: d.desc },
-    ];});
-
-td.enter()
-    .append('td')
-    .text(           function(d) { return d.value; })
-    .attr('title',   function(d) {return d.title; })
-    .attr('classed', function(d) {return d.class; })
-    ;
- 
+    td.enter()
+        .append('td')
+        .text(function(d) { return d.value; })
+        .attr('title',   function(d) {return d.title; })
+        .attr('classed', function(d) {return d.class; })
+        ;
+    $('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": [ 0 ], 'aaSorting':["asc"] },
+                                           { "sType": "numeric", "aTargets": [ 1 ]}],
+                          "bPaginate" : true,
+                          "iDisplayLength": 10,
+                          "sPaginationType": "full_numbers",
+                          "bLengthChange": false,
+                          "bFilter": true,
+                          "bSort": true,
+                          "bInfo": true,
+          
+    });    
+    
+    }
+    
+   
+   
 var width =($(document).width()-60)/12*7; //was width:1024
 var height =($(document).height()-($(document).height()/5));  //was width:780
 
@@ -300,8 +286,6 @@ var link = graph.selectAll(".link")
        url += '/' + d.source.id;
        url += '/' + d.target.id;
        window.open(url);  
-       
-     
     });
 
 var node = graph.selectAll(".node")
@@ -337,23 +321,109 @@ node.append("rect")
     .append("title")
     .text(function(d) { return d.title+" "+d.chr; });
 
+
+getAccordionGroup = function(parentId, id, title, content) {
+  h = '<div class="accordion-group">';
+  h = h + '<div class="accordion-heading">';
+  h = h + '<a class="accordion-toggle" data-toggle="collapse" data-parent="#'+parentId+'" href="#a'+id+'">';
+  h = h + '<div id="title">'+title+'</div>';
+  h = h + '</a></div><div id="a'+id+'" class="accordion-body collapse"><div class="accordion-inner">';
+  h = h + content;
+  h = h + '</div></div></div>'
+  
+  return h; 
+}
+
+
 <%block name="getExtraContent">
 getContent = function(d) {
-  d3.select('#part2').html("<h4>"+d.name+" :  "+d.title +"</h4>"+
-           '<p>'+
-           '<a href="http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+'" target="_blank">GeneCards</a>'+
-           '&nbsp;&nbsp;<a href="http://en.wikipedia.org/wiki/'+d.name+'" target="_blank">Wikipedia</a>'+
-           '&nbsp;&nbsp;<a href="http://www.ncbi.nlm.nih.gov/gene?cmd=search&term='+d.name+'[sym] AND human[ORGN]" target="_blank">Entrez Gene</a>'
-           );
+
+  var ebLink = 'http://www.ensembl.org/Human/Search/Results?q='+d.name+';facet_feature_type=;site=ensembl;facet_species=Human';
+  var gcLink = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+'';
+  var egLink = 'http://www.ncbi.nlm.nih.gov/gene?cmd=search&term='+d.name+'[sym] AND human[ORGN]';
+  var wkLink = 'http://en.wikipedia.org/wiki/'+d.name;
+  
+  var links = {'Ensembl':ebLink, 'GeneCards':gcLink, 'EntrezGene': egLink, 'Wikipedia': wkLink};
+  
+  
+  var part2 = $("#part2");
+  part2.html('');
+  part2.append('<p>');
+  part2.append('<div class="accordion" id="info"></div>');
+  
+  _.each(_.pairs(links), function(p) {
+      
+       h = '<h4>'+ d.name +'   '+d.title+ '</h4><p>';
+       h = h +'<a href="'+p[1]+'" target="_blank">  Go to '+p[0]+'</a>';
+       $('#part2 > .accordion').append(getAccordionGroup('info',p[0], p[0], h))
+  }); 
+  $('.accordion-body:first').addClass('collapse in');
+
+ 
+  var urlEnsembl = 'http://beta.rest.ensembl.org/lookup/symbol/homo_sapiens/'+d.name+'?content-type=application/json';
+  var urlNCBI  = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=2&retmode=txt'; 
+  var urlEnsemblId = 'http://beta.rest.ensembl.org/xrefs/id/_id_?content-type=application/json';
+  
+  var xrefs = {};
+  $.ajax({type: 'GET',
+         url: urlEnsembl ,
+         success: function(data) {        
+            console.debug($('#Ensembl').html());
+            console.debug(data);
+            var eid = data['id']
+            p = '<table class="table table-condensed">';
+            _.each(_.pairs(data), function(a) {
+                p = p + '<tr><td>'+a[0]+'</td><td>'+a[1]+'</td></tr>';
+            });
+            p = p + '</table>';
+           
+            $('#aEnsembl').append(p); 
+           
+            
+            $.ajax({type: 'GET',
+                url: urlEnsemblId.replace('_id_', eid) ,
+                 success: function(data) {        
+                    xref = data;
+                    console.debug(xrefs);
+           
+            },
+             
+            error: function() {},
+            dataType: 'json',
+            async: true
+            });
+            
+ 
+        },
+         beforeSend : function() {
+            $("#aEnsembl").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
+            },
+        complete: function() {
+        $("div#loading").remove();
+          
+        },
+        error: function() {},
+        dataType: 'json',
+        async: true
+   });
+           
+   //d3.select('#part2').html (h);    
+ 
+
+ 
 };
 
+
+
 getAnnotationContent = function(d) {  
-  var a = json.infos[d.gs+"."+d.cat+":"+d.id];
-  var h = "";
- 
+  var a = d.info;
+  $('#part2').html('');
+  $('#part2').append('<div class="accordion" id="info"></div>');
+  
+  h = "<h4>"+d.id +"</h4><p>" ;
   _.each(_.pairs(a), function(i) {
              if (i[0]=='name'){
-             h = "<span style='font-weight:bold'>"+i[0] + "</span>: " + i[1]+'<br>' + h;
+             h = h + "<span style='font-weight:bold'>"+i[0] + "</span>: " + i[1]+'<br>' ;
              }
              else {
            
@@ -374,9 +444,25 @@ getAnnotationContent = function(d) {
             
              ;});
              
-  h = "<h4>"+d.id +"</h4><p>" + h ; 
-  d3.select('#part2').html(h) ;
+  
+  h = h + "<p>";
+  h = h + '<table class="table table-condensed" <thead><tr>';
+  h = h + '<th></th><th>Cluster nodes</th><th>All genes</th>';
+  h = h + '</tr></thead>';
+  h = h + '<tbody>';
+  h = h + '<tr><td>In</td><td>'+d.tab[0][0]+'</td> <td>'+d.tab[1][0]+'</td></tr>';
+  h = h + '<tr><td>Not</td><td>'+d.tab[0][1]+'</td> <td>'+d.tab[1][1]+'</td></tr>';
+  h = h + '</tbody>';
+  h = h + '</table></div></div>';
+  $('#part2 > .accordion').append(getAccordionGroup('info', '1', 'Information', h))
+  $('.accordion-body:first').addClass('collapse in');
+  
 };
+
+
+
+
+
 
 </%block>
 
@@ -459,19 +545,30 @@ $(document).keyup(function(e) {
 });
 
 
-$(document).ready(function() {   
-$('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": [ 0 ], 'aaSorting':["asc"] },
-                                           { "sType": "numeric", "aTargets": [ 1 ]}],
-                          "bPaginate" : true,
-                          "iDisplayLength": 10,
-                          "sPaginationType": "full_numbers",
-                          "bLengthChange": false,
-                          "bFilter": true,
-                          "bSort": true,
-                          "bInfo": true,
+$(document).ready(function() {
+
+    updateEnrichmentTable();   
+    $.ajax({
+        url: "${request.route_url('mistic.json.dataset.geneset.enrich', dataset=dataset)}",
+        dataType: 'json',
+        type: 'POST',
+        data: { genes: JSON.stringify(_.pluck(json.nodes, 'name')) },
+        error: function(req, status, error) {
+          console.log('got an error', status, error);
+        },
+        beforeSend : function() {
+        $("#go_table .dataTables_empty").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
+        },
+        success: function(data) {
+          console.debug(data);
+          json.gstab = data;
+          updateEnrichmentTable();
+        },
+        complete: function() {
+        $("div#loading").remove();
           
-    });    
-    
+        }
+      });
     
 });    
 

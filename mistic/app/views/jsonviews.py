@@ -204,7 +204,9 @@ class Annotation(object):
             out = out[:limit]
         return out
 
-
+   
+    
+  
 
 class AnnotationGene(Annotation):
     def __init__(self, request):
@@ -328,6 +330,7 @@ class Dataset(object):
                     tab = tab
                 ))
         out.sort(key = lambda x: x['p_val'])
+        
         return out
 
     @view_config(route_name="mistic.json.dataset.samples", request_method="GET", renderer="json")
@@ -421,7 +424,40 @@ class Dataset(object):
         mapped_nodes = [ list(x)[0] if len(x) == 1 else None for x in mapped_nodes ]
 
         return mapped_nodes, edges, pos
+        
+    @view_config(route_name="mistic.json.dataset.geneset.enrich", request_method="POST", renderer="json")
+    def genesets_enrichment (self):
+     
+     
+     genes = set(json.loads(self.request.POST['genes']))
+     a = self.dataset.annotation
 
+     from mistic.util import geneset
+     import time
+     #import cProfile as profile
+  
+     #profile.runctx('print geneset.genesetOverRepresentation(genes, a.genes, a.all_genesets()); print', 
+     #                globals(), {'geneset':geneset, 'genes':genes, 'a': a})
+  
+     start = time.time()
+     gs_tab = geneset.genesetOverRepresentation(genes, a.genes, a.all_genesets())
+     print 'Geneset over representation running time : ' , time.time()-start
+    
+     for r in gs_tab:
+         x = r['id']
+         info = a.geneset_info(x)
+         r['info'] = dict(info)
+         r['name'] = info.get('name', '')
+         r['desc'] = info.get('desc', '')
+         x, r['id'] = x.rsplit(':', 1)
+   
+         if '.' in x:
+           r['gs'], r['cat'] = x.split('.', 1)
+         else:
+           r['gs'], r['cat'] = x, ''
+     
+     
+     return gs_tab
 
 
 class DatasetSample(Dataset):

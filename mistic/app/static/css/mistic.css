@@ -364,3 +364,43 @@ div#sample_characteristic a{
     display: inline;  
     position : absolute;
 }
+
+
+
+#part2 {
+  overflow-y: hidden;
+  overflow-x: hidden;
+  font-family: helvetica; 
+  font-size: 10.5px; 
+  margin : 0px;
+  padding-right:10px;
+  padding-top:10px;
+}
+
+
+#part2 > .tab-content > .tab-pane{
+  background-color:#fff;
+  border: 1px solid #ddd;
+  padding : 10px;
+  border-top-color: transparent;
+}
+
+#part2 > .nav-tabs {
+  margin-bottom : 0px;
+ 
+
+}
+
+#part2.nav-tabs > .active > a,
+#part2.nav-tabs > .active > a:hover {
+  color: #555555;
+  cursor: default;
+  background-color:white;
+  border: 1px solid #ddd;
+ 
+}
+#part2.nav-tabs > li > a {
+  border : 1px solid #555; 
+  border-bottom-color: transparent;
+}
+
