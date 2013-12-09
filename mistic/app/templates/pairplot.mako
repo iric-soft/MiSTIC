@@ -37,8 +37,7 @@ import json
           <div class="accordion-group">
             <div class="accordion-heading">
                <h4 class="accordion-title">
-                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Genes 
-                  <div id="nb_genes" class='text-info' style='display:inline;'>(0)</div></a>
+                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Genes <div id="nb_genes" class='text-info' style='display:inline;'>(0)</div></a>
                </h4>
             </div>
 
@@ -237,7 +236,6 @@ $(document).ready(function() {
 
         $("#gene").attr('disabled', false);
         $(".locate").attr('disabled', false);
-        $("#sample_annotation").attr('disabled', false);
         $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
       },
       error: function() {
@@ -245,13 +243,10 @@ $(document).ready(function() {
         gene_entry.url = null;
         $("#gene").attr('disabled', true);
         $(".locate").attr('disabled', true);
-        $("#sample_annotation").attr('disabled', true);
       },
       complete: function() {
         gene_entry.$el.val('');
-        
         info.clear();
-        $(".locate").val('');
         $('#genelist').empty();
         current_graph.removeData(function() { return true; });
         updateInfo();
@@ -265,9 +260,7 @@ $(document).ready(function() {
       dataype: 'json',
       async: !sync,
       success: function(data) {
-        
         current_graph.addData(data);
-        
         var label = $('<span>')
           .addClass('badge')
           .css({ 'margin': '0px 5px' })
@@ -380,7 +373,6 @@ $(document).ready(function() {
   <%
     ds = data.datasets.get(dataset)
     gene_data = [ ds.expndata(gene) for gene in genes ]
-        
   %>
 
   current_datasets = [];
@@ -391,13 +383,6 @@ $(document).ready(function() {
     %for g in genes:
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
-    %for e in [(o,others[o]) for o in others.keys() if 'highlighted' in o]:
-      $(${e[0]}).val("${e[1]}"); 
-    %endfor
-    
-  
-   
-    
   %else:
     gene_entry.url = null;
 
@@ -408,7 +393,7 @@ $(document).ready(function() {
   $("#share_url").on('click', function(event){
     var url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
               .replace('_dataset_', current_datasets[0]);
-    
+
     if (current_graph.data.length>0){
         _.each(current_graph.data, function(x) { url += '/' + x.gene; });
     }
@@ -531,7 +516,6 @@ $(document).ready(function() {
     var l2 = val[1];
     var kv = {};
     kv[l1] = l2;
-   
     $.ajax({
       url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
       data: kv,
@@ -540,7 +524,6 @@ $(document).ready(function() {
         current_graph.setSelection(data);
       }
     });
-  
   });
 
   $('#add_dataset').on('click', function(event) {
@@ -552,8 +535,6 @@ $(document).ready(function() {
     });
     event.preventDefault();
   });
-  $('.locate').change();
-  
 });
 </script>
 </%block>

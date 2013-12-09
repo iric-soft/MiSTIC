@@ -101,8 +101,6 @@ class GOTerm(GO):
     def name(self):
         return self.node.name
 
-
-
 class ColAnnotation(object):
     def __init__(self, request):
         self.request = request
@@ -118,7 +116,6 @@ class ColAnnotation(object):
           return []
       anns = self.dataset.cannotation.data
       return { col: sorted(set(anns[col]) - set([""])) for col in anns.columns }
-
 
 
 class Annotation(object):
@@ -260,6 +257,7 @@ class Dataset(object):
         anns = self.dataset.cannotation.data
         return [ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ]
 
+
     @view_config(route_name="mistic.json.dataset.sampleinfo.search", request_method="GET", renderer="json")
     def sample_info_search(self):
       if not self.dataset.cannotation:
@@ -274,6 +272,7 @@ class Dataset(object):
           for e in v:
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
         return out
+
 
       query = sum([ q.split() for q in query ], [])
       query = [ re.compile(re.escape(q), re.I) for q in query if q != '' ]
@@ -291,6 +290,7 @@ class Dataset(object):
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
 
       return out
+
 
     @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
     def sample_enrichment(self):
@@ -404,7 +404,7 @@ class Dataset(object):
 
         out.sort(key = lambda r: r['symbol'])
         additional.sort(key = lambda r: r['symbol'])
-        
+
         return (out + additional)[:limit]
 
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")

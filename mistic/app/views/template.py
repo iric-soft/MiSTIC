@@ -6,7 +6,6 @@ from pyramid.renderers import render_to_response
 from mistic.app import data
 
 import json
-import base64
 
 
 
@@ -102,8 +101,8 @@ class Graph(object):
     args = dict(
       dataset = dataset,
       genes = genes,
-      others = others,
     )
+
     return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)
 
 

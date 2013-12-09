@@ -193,6 +193,8 @@ def main(global_config, **settings):
 
     config.add_route('mistic.json.annotation.gs',          '/annotations/{annotation}/gs')
 
+    config.add_route('mistic.json.cannotation.items',      '/cannotations/datasets/{dataset}')
+
     config.add_route('mistic.json.datasets',               '/datasets')
     config.add_route('mistic.json.dataset',                '/datasets/{dataset}')
     config.add_route('mistic.json.dataset.search',         '/datasets/{dataset}/search')

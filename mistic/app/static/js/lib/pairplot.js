@@ -59,24 +59,19 @@
             d3.select(this.svg)
                 .attr("width", width)
                 .attr("height", height);
-            current_selection = this.getSelection(); 
+
             this.draw();
-            this.setSelection(current_selection);
         }
     };
 
     pairplot.prototype.removeData = function(matcher) {
         this.data = _.reject(this.data, matcher);
-        current_selection = this.getSelection(); 
         this.draw();
-        this.setSelection(current_selection);
     };
 
     pairplot.prototype.addData = function(data) {
         this.data.push(data);
-        current_selection = this.getSelection(); 
         this.draw();
-        this.setSelection(current_selection);
     };
 
     pairplot.prototype.pointIDs = function() {

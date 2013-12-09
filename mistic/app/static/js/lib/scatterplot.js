@@ -156,7 +156,7 @@
     scatterplot.prototype.setSelection = function(selection, quiet) {
         d3.select(this.svg)
             .selectAll('g.node')
-            .classed('selected', function(d) { return _.contains(selection, d.s); });
+            .classed('selected', function(d) { return _.contains(selection, d.k); });
         this.notifySelectionChange(quiet);
     };
 
