@@ -10,6 +10,7 @@ import logging
 import exceptions
 import pandas
 import yaml
+import copy
 
 from beaker.cache import *
 from cache_helpers import *
@@ -513,6 +514,34 @@ class GeneSet(object):
 
 
 
+def make_id_map(x, y, matcher):
+  r = {}
+  for i in x:
+    l = [ j for j in y if matcher(i, j) ]
+    if len(l) > 1:
+      # mapping must not be ambiguous
+      return None
+    elif len(l) == 0:
+      # mapping may skip source ids
+      continue
+    r[i] = l[0]
+  if not len(r):
+    # mapping must not be empty
+    return None
+  if len(set(r.values())) != len(r):
+    # mapping must be 1:1
+    return None
+  if set(r.values()) != set(y):
+    # mapping must cover all target ids
+    return None
+  return r
+
+def prefix_map(x, y):
+  return make_id_map(x, y, lambda i, j: j.startswith(i))
+
+def rev_prefix_map(x, y):
+  return make_id_map(x, y, lambda i, j: i.startswith(j))
+
 class DataSet(object):
   VALID_TRANSFORMATIONS = set(('log', 'rank', 'anscombe', 'none'))
 
@@ -538,15 +567,48 @@ class DataSet(object):
       len(self.data.df.index) - annotated_genes,
       len(self.annotation.data.index) - annotated_genes))
 
-    if self.cannotation is not None:
-      for sample in self.samples:
-        if sample not in self.cannotation.data.index:
-          logging.warn('no sample annotation for sample {0} in dataset {1} (sample annotation {2})'.format(sample, self.id, self.config['annc']))
+    if self.cannotation is None:
+      logging.warn('dataset {0} does not have a sample annotation record'.format(self.id))
+    else:
+      self.catchMappedSampleIDs()
+      self.checkAllSamplesHaveAnnotations()
+
     self.transforms  = []
 
     for x in self.config.get('xfrm', ['none']):
       if x in self.VALID_TRANSFORMATIONS:
         self.transforms.append(x)
+
+  def checkAllSamplesHaveAnnotations(self):
+    sample_set = set(self.samples)
+    cann_set = set(self.cannotation.data.index)
+    samples_without_annotation = sorted(sample_set - cann_set)
+    if len(samples_without_annotation):
+      logging.warn('no sample annotation for samples [{0}] in dataset {1} (sample annotation {2})'.format(
+        ', '.join(samples_without_annotation),
+        self.id,
+        self.config['annc']))
+
+  def catchMappedSampleIDs(self):
+    sample_set = set(self.samples)
+    cann_set = set(self.cannotation.data.index)
+
+    if len(sample_set & cann_set):
+      return
+
+    logging.warn('sample annotation IDs do not match dataset IDs for dataset {0} (sample annotation {1}). Trying to recover.'.format(
+      self.id,
+      self.config['annc']))
+    for mapper in (prefix_map, rev_prefix_map):
+      cann_map = mapper(cann_set, sample_set)
+      if cann_map is not None:
+        logging.warn('mapping found: {0}'.format(mapper.__name__))
+        self.cannotation = copy.copy(self.cannotation)
+        self.cannotation.data = self.cannotation.data.copy()
+        self.cannotation.data.index = self.cannotation.data.index.map(cann_map.get)
+        break
+    else:
+      logging.warn('no mapping found, no annotation information will be available.')
 
   @property
   def info(self):
