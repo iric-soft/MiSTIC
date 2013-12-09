@@ -322,7 +322,7 @@
             this.$el.empty();
 
             for (var i = 0; i < this.groups.length; ++i) {
-                var view = new PointGroupView({ group: group, graph: this.graph });
+                var view = new PointGroupView({ group: this.groups.at(i), graph: this.graph });
                 this.model_views.push(view);
                 this.$el.append(view.render().el);
             }
