@@ -61,8 +61,6 @@
 
         this.setXData(xdata, false);
         this.setYData(ydata, false);
-
-        this.draw();
     };
 
     scatterplot.prototype.setBaseAttrs = function(cls) {
@@ -78,7 +76,7 @@
         }
         this.point_groups = pgs;
         if (this.point_groups !== null) {
-            this.point_groups.on('change:point_ids change:style add remove reset sort', this.updatePoints, this);
+            this.point_groups.on('change:point_ids change:style add remove reset sort', function() { this.updatePoints(); }, this);
         }
 
         this.updatePoints();
@@ -480,8 +478,8 @@
 
     scatterplot.prototype.update = function() {
         var xy = this.getXYData();
-        this.updateScales();
-        this.updatePoints();
+        this.updateScales(xy);
+        this.updatePoints(xy);
         this.updateAxes();
     };
 
