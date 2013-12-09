@@ -479,16 +479,11 @@ $(document).ready(function() {
 
   $('#select_clear').on('click', function(event) {
     if (!d3.select(this).classed("active")){
-      d3.selectAll('g.node').classed('selected', true);
-      var dat = {};
-      d3.selectAll('g.node.selected').each(function(d) { dat[d.k] = true; });
-      dat = _.keys(dat);
-      current_graph.setSelection(dat);
+      current_graph.setSelection(current_graph.pointIDs());
       d3.select(this).text("Clear all");
       d3.select(this).classed("active", true);
     } else {
       current_graph.setSelection([]);
-      $(document.body).trigger('updateselection', [[]]);
       d3.select(this).text("Select all");
       d3.select(this).classed("active", false);
     }
