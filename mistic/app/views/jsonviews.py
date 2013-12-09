@@ -19,6 +19,7 @@ import logging
 
 from beaker.cache import *
 from mistic.app.cache_helpers import *
+from mistic.app.tables import *
 
 
 
@@ -99,6 +100,25 @@ class GOTerm(GO):
     @view_config(route_name="mistic.json.go.name", request_method="GET", renderer="json")
     def name(self):
         return self.node.name
+
+
+
+class ColAnnotation(object):
+    def __init__(self, request):
+        self.request = request
+        #self.cannotation = data.annotations.get(request.matchdict['cannotation'])
+        self.dataset = data.datasets.get(request.matchdict['dataset'])
+
+    @view_config(route_name="mistic.json.cannotation.items", request_method="GET", renderer="json")
+    def items(self):
+
+      k = []
+      v = []
+      if not self.dataset.cannotation:
+          return []
+      anns = self.dataset.cannotation.data
+      return { col: sorted(set(anns[col]) - set([""])) for col in anns.columns }
+
 
 
 class Annotation(object):
@@ -239,8 +259,7 @@ class Dataset(object):
             return []
         anns = self.dataset.cannotation.data
         return [ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ]
-  
-  
+
     @view_config(route_name="mistic.json.dataset.sampleinfo.search", request_method="GET", renderer="json")
     def sample_info_search(self):
       if not self.dataset.cannotation:
@@ -249,43 +268,41 @@ class Dataset(object):
       anns = self.dataset.cannotation.data
       d = dict([ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ])
       query = self.request.GET.getall('q')
-     
+
       if query ==['']:
-        for k,v in d.items() :
-          for e in v :  
+        for k,v in d.items():
+          for e in v:
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
-        return out 
-        
-        
+        return out
+
       query = sum([ q.split() for q in query ], [])
       query = [ re.compile(re.escape(q), re.I) for q in query if q != '' ]
-      
+
       if query == []:
         return []
 
-      for q in query : 
-        for k,v in d.items() :
-          keyFound = False 
-          if q.match(k): 
+      for q in query:
+        for k,v in d.items():
+          keyFound = False
+          if q.match(k):
               keyFound = True
-          for e in v : 
-            if q.match(e) or keyFound: 
+          for e in v:
+            if q.match(e) or keyFound:
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
-  
+
       return out
-        
-        
+
     @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
     def sample_enrichment(self):
         if not self.dataset.cannotation:
             return []
         anns = self.dataset.cannotation.data
         samples = set(json.loads(self.request.POST['samples']))
-        
+
         out = []
-        
+
         for col in anns.columns:
-         
+
             all_samples = set(anns.index[anns[col].map(lambda x: x not in ("", None))])
             tst_samples = samples & all_samples
 
@@ -317,7 +334,7 @@ class Dataset(object):
     def samples(self):
         filters = self.request.GET.items()
         samples = self.dataset.cannotation.data.index
-        
+
         for k,v in filters:
             if k in self.dataset.cannotation.data.columns:
                 samples = [ s for s in samples if self.dataset.cannotation.data[k][s] == v ]
@@ -511,3 +528,20 @@ class DatasetGene(Dataset):
     @view_config(route_name="mistic.json.gene.expr", request_method="GET", renderer="json")
     def expr(self):
         return self.dataset.expndata(self.gene, self.x)
+
+
+
+class Attr(object):
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(route_name="mistic.json.attr.set", request_method="POST", renderer="json")
+    def set(self):
+        return JSONStore.store(DBSession(), json.dumps(self.request.json_body))
+
+    @view_config(route_name="mistic.json.attr.get", request_method="GET")
+    def get(self):
+        val = JSONStore.fetch(DBSession(), self.request.matchdict['id'])
+        if val is None:
+            raise HTTPNotFound()
+        return Response(val, content_type='application/json')

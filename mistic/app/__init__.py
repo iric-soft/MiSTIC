@@ -23,7 +23,10 @@ from pyramid.authorization import ACLAuthorizationPolicy
 
 from pyramid_beaker import set_cache_regions_from_settings
 
+from sqlalchemy import engine_from_config
+
 import mistic.app.views.pdffile
+import mistic.app.tables
 
 def _get_basicauth_credentials(request):
     authorization = AUTHORIZATION(request.environ)
@@ -106,7 +109,7 @@ class BasicAuthenticationPolicy(object):
 
 
 def http_basic_authenticator(auth):
-    
+
     auths = dict([tuple([x  for x  in a.split(':')]) for a in auth.split(' ')])
     isSHA = all(['{SHA}' in x for x in auths.values()])
     if isSHA:
@@ -125,25 +128,29 @@ def http_basic_authenticator(auth):
 
 
 def load_datasets_settings (configurationFile, global_config):
-    
+
     defaultByKey = {'here' : global_config['here']}
     configParser = ConfigParser.ConfigParser(defaultByKey)
-    
+
     if not configParser.read(configurationFile):
         raise ConfigParser.Error('Could not open %s' % configurationFile)
     datasets_settings = {}
     for key, value in configParser.items('datasets:mistic'):
       datasets_settings[key] = value
-   
+
     return datasets_settings
-  
+
 
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
     set_cache_regions_from_settings(settings)
-    
-    if 'mistic.datasets' in settings: 
+
+    engine = engine_from_config(settings, 'sqlalchemy.')
+    mistic.app.tables.create(engine)
+    mistic.app.tables.Base.metadata.create_all(engine)
+
+    if 'mistic.datasets' in settings:
       settings.update(load_datasets_settings (settings['mistic.datasets'], global_config))
 
     config_args = dict(root_factory=Root,
@@ -162,7 +169,7 @@ def main(global_config, **settings):
     def authorize(request):
         return HTTPUnauthorized(headers = forget(request)) ## Response(body='hello world!', content_type='text/plain')
     config.add_view(authorize, context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
-    
+
     if 'mistic.data' not in settings:
         raise exceptions.RuntimeError('no dataset configuration supplied')
 
@@ -175,6 +182,7 @@ def main(global_config, **settings):
 
     config.add_route('mistic.template.root',               '/')
 
+    config.add_route('mistic.modal.datasets',              '/modal/datasets')
     # params: go=GO_ID - filter the list of returned genes by GO term.
     config.add_route('mistic.json.annotation.genes',       '/annotations/{annotation}/genes')
     config.add_route('mistic.json.annotation.gene_ids',    '/annotations/{annotation}/gene_ids')
@@ -188,14 +196,14 @@ def main(global_config, **settings):
     config.add_route('mistic.json.datasets',               '/datasets')
     config.add_route('mistic.json.dataset',                '/datasets/{dataset}')
     config.add_route('mistic.json.dataset.search',         '/datasets/{dataset}/search')
-   
+
     config.add_route('mistic.json.dataset.sampleinfo',     '/datasets/{dataset}/sampleinfo')
     config.add_route('mistic.json.dataset.samples',        '/datasets/{dataset}/samples')
     config.add_route('mistic.json.dataset.samples.enrich', '/datasets/{dataset}/samples/enrichment')
     config.add_route('mistic.json.sample',                 '/datasets/{dataset}/samples/{sample_id}')
-    
+
     config.add_route('mistic.json.dataset.sampleinfo.search',     '/datasets/{dataset}/sampleinfo/search')
-    
+
     config.add_route('mistic.json.dataset.mst',            '/datasets/{dataset}/mst/{xform}')
     config.add_route('mistic.json.dataset.mapped_mst',     '/datasets/{dataset}/mst/{xform}/{tgt_annotation}')
 
@@ -207,35 +215,30 @@ def main(global_config, **settings):
     config.add_route('mistic.json.gene.utest',             '/datasets/{dataset}/genes/{gene_id}/utest')
     config.add_route('mistic.json.gene.gorilla',           '/datasets/{dataset}/genes/{gene_id}/gorilla')
 
-    
-
-
-
     config.add_route('mistic.json.go',                     '/go')
     config.add_route('mistic.json.go.search',              '/go/search')
     config.add_route('mistic.json.go.id',                  '/go/{go_id}')
     config.add_route('mistic.json.go.name',                '/go/{go_id}/name')
+
+    config.add_route('mistic.json.attr.set',               '/attr')
+    config.add_route('mistic.json.attr.get',               '/attr/{id}')
 
     config.add_route('mistic.template.corrgraph',          '/genecorr')
     config.add_route('mistic.template.corrgraph_static',   '/genecorr/{dataset}/{gene}')
     config.add_route('mistic.template.scatterplot',        '/scatterplot')
     config.add_route('mistic.template.scatterplot_static', '/scatterplot/{dataset}/{gene1}/{gene2}')
     config.add_route('mistic.template.pairplot',           '/pairplot/{dataset}*genes')
-    
-   
 
     config.add_route('mistic.csv.root',                    '/csv/root')
     config.add_route('mistic.pdf.fromsvg',                 '/pdf')
     config.add_route('mistic.csv.corr',                    '/csv/genecorr/{dataset}/{gene}')
     config.add_route('mistic.csv.corrds',                  '/csv/genecorr/{dataset}/{gene}/all')
-    
 
     config.add_route('mistic.template.clustering',         '/clustering/{dataset}/{xform}')
     config.add_route('mistic.template.mstplot',            '/mstplot/{dataset}/{xform}')
 
     config.add_static_view('static', 'mistic:app/static', cache_max_age=3600)
     config.add_static_view('images', 'mistic:resources/images', cache_max_age=3600)
-   
 
     config.scan()
 

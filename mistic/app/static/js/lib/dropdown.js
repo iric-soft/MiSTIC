@@ -150,9 +150,7 @@
             this.trigger('change', this.selected_item);
             this.hide();
         },
-        
-       
-        
+
         show: function() {
             if (!this.shown) {
                 var pos = _.extend(

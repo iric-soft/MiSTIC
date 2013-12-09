@@ -1,24 +1,7 @@
 <%!
 import mistic.app.data as data
+import mistic.app.tables as tables
 import json
-
-terms = []
-dds = {}
-
-def parse_term(x):
-  x = x.split('=', 1)
-  return x[0].strip(), x[1].strip()
-
-terms = []
-
-for ds in data.datasets.all():
-  ds_terms = [ parse_term(term) for term in ds.tags.split(';') if len(term) ]
-
-  for k,v in ds_terms:
-    if k not in terms:
-      terms.append(k)
-
-  dds[ds.name] = dict(ds_terms)
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -31,48 +14,8 @@ for ds in data.datasets.all():
 
 <%block name="controls">
 
-<div class="modal hide" id="dataset-modal">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
-        <h4 class="modal-title">Dataset selector</h4>
-      </div>
-      <div class="modal-body">
-        <table id="dataset-table">
-          <thead>
-            <tr>
-              <th></th>
-%for term in terms:
-              <th>${term}</th>
-%endfor
-              <th>n</th>
-            </tr>
-          </thead>
-          <tbody>
-%for ds in data.datasets.all():
-            <tr>
-              <td>${ds.id}</td>
-%for term in terms:
-              <td>${dds[ds.name].get(term, '')}</td>
-%endfor
-              <td>${ds.numberSamples}</td>
-            </tr>
-%endfor
-          </tbody>
-        </table>
-      </div>
-      <div class="modal-footer">
-        <button type="button" class="btn btn-default" data-dismiss="modal">Cancel</button>
-      </div>
-    </div>
-  </div>
-</div>
-
 <div class="row-fluid">
    <div id="menu" class="span12"  >
-
-      <form class="form-inline">
 
         <div class="accordion" id="accordion">
             <div class="accordion-group">
@@ -86,7 +29,7 @@ for ds in data.datasets.all():
                 <div class="accordion-inner">
                   <ul id="current_datasets">
                   </ul>
-                  <a class='btn' id="add_dataset">Choose dataset</a>
+                  <button class='btn' id="add_dataset">Choose dataset</button>
               </div>
             </div>
           </div>
@@ -120,37 +63,24 @@ for ds in data.datasets.all():
 
       <div id="sample_menu" class="accordion-body collapse in ">
         <div class="accordion-inner">
-
-
-          <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Selected samples</a></h5>
+          <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Highlight groups</a></h5>
           <div id="current_selection" class="accordion-body collapse in ">
-
-          %for i in range(0,4) :
-            <br>
-            <label style="display:inline;cursor:pointer;" for="highlighted${i}" size="8px">
-            <svg height='10' width="10">
-            <rect id="spectrum${i}" width="10" height="10" class="highlighted${i} color${i}" />
-            </label>
-            <input type="text" class="locate" id="highlighted${i}" autocomplete="off" data-index='${i}' />
-            <div style="display:inline;">
-              <i id="add${i}" class="icon-plus "></i>
-              <i id="minus${i}" class="icon-minus "></i>
-              <i id="remove${i}" class="icon-remove"></i>
-              <i id="tograph${i}" class="icon-share-alt"></i>
-
-            </div>
-
-          %endfor
-
           </div>
 
-          <hr>
-             
-             
-               <input id='sample_annotation' type=text autocomplete="off" value='Select a characteristic'></input>
-               <a id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-               <span class="caret"></span></a>
+          <br>
+          <button type="button" class='btn' id="new_group">New group</button>
 
+          <hr>
+
+          <div id='sample_characteristic'>
+          <div class="btn-group">
+          <input id='sample_annotation' type=text autocomplete="off" placeholder='Select a characteristic'></input>
+          <a id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <span class="caret"></span>
+          </a>
+          </div>
+          </div>
+          
         </div>
       </div>
 
@@ -159,7 +89,7 @@ for ds in data.datasets.all():
      <div class="accordion-group">
        <div class="accordion-heading">
          <h4 class="accordion-title">
-           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a>
+           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
          </h4>
        </div>
 
@@ -194,16 +124,26 @@ for ds in data.datasets.all():
   </div>	
 </div>
 
-</form>
-
 </%block>
 
 <%block name="graph">
  ${parent.graph()}
 
   <div class="modal hide" id="link_to_share">
-    <div class='modal-body'>
-      <span id="share"></span>
+    <div class="modal-dialog">
+      <div class="modal-content">
+        <div class="modal-header">
+          <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+          <h4 class="modal-title">Permanent link for this plot</h4>
+        </div>
+        <div class="modal-body">
+          <span id="share"></span>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn" data-clipboard-target="share" id="copy-to-clipboard">Copy to clipboard</button>
+        <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+      </div>
     </div>
   </div>
 
@@ -211,64 +151,62 @@ for ds in data.datasets.all():
 
 <%block name="style">
 ${parent.style()}
-#dataset-modal{
- min-width:960px;
- 
-} 
-
-#dataset-table tbody {
-  cursor: pointer;
-  color: #aaa;
-}
-
-#dataset-table tbody tr.selectable {
-  color: #000;
-}
-
-#dataset-table tbody tr.selectable:hover {
-  background-color: #ffa;
-}
-
-#dataset-table td {
-  white-space: nowrap;
-}
-#current_datasets {
- cursor : default;
-}
 </%block>
 
 <%block name="pagetail">
+<%include file="mistic:app/templates/fragments/tmpl_point_group.mako"/>
+
 ${parent.pagetail()}
 
+<script src="${request.static_url('mistic:app/static/js/lib/point_group.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/point_group_view.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/scatterplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/textpanel.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/dataset_selector.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/ZeroClipboard.min.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
-  var gene_entry = new GeneDropdown({ el: $("#gene") });
+  var clip = new ZeroClipboard($("#copy-to-clipboard"), {
+    moviePath: "${request.static_url('mistic:app/static/swf/ZeroClipboard.swf')}"
+  });
+
+  var gene_entry = new GeneDropdown({ el: $("x#gene") });
   var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
-  
+
   current_graph = new pairplot(undefined, undefined, $('#graph'));
   $("#options").css('display', 'none');
 
-  var updateStyles = function() {
-    
-    d3.select(current_graph.svg).selectAll('g.node').selectAll('circle').attr('fill', null).attr('stroke', null);
-    _.each(highlights, function(hl, cclass) {
-    
-      var nodes = d3.select(current_graph.svg).selectAll('g.node.'+cclass);
-           
-      if (!_.isNull(hl.fill) & !_.isUndefined(hl.fill)) {
-           nodes.selectAll('circle').attr('fill', hl.fill );
-      }
-      if (!_.isNull(hl.stroke) & !_.isUndefined(hl.stroke)){
-           nodes.selectAll('circle').attr('stroke', hl.stroke );
-           nodes.selectAll('circle').attr('stroke-width', '2px');
-       }
-     
+  var group_colours = [ "rgba(252,132,3,.65)", "rgba(11,190,222,.65)", "rgba(36,153,36,.65)", "rgba(155,42,141,.65)" ];
+  var next_group = 0;
+
+  var pgs = new PointGroupCollection();
+  current_graph.setPointGroups(pgs);
+
+  var pgs_view = new PointGroupListView({ groups: pgs, graph: current_graph, el: $("#current_selection") })
+
+  var newGroup = function() {
+    var pg = new PointGroup({
+      style: { fill: group_colours[next_group % 4] }
     });
+
+    pgs.add(pg);
+
+    ++next_group;
   };
+
+<%
+  hl = request.GET.get('hl')
+  if hl is not None:
+    hl = tables.JSONStore.fetch(tables.DBSession(), hl)
+%>
+%if hl is not None:
+  pgs.reset(${hl|n});
+%else:
+  newGroup();
+%endif
+  $('#new_group').on('click', function(event) { newGroup(); event.preventDefault(); });
 
   var updateInfo = function() {	
     // Update counts label (dataset, genes, samples)
@@ -287,16 +225,7 @@ $(document).ready(function() {
     }
   };
 
-  var getSamplesWithClass = function(cclass) {
-    var dat = {};
-    d3.selectAll('g.node.'+cclass).each(function(d) { dat[d.s] = true; });
-    dat = _.keys(dat)
-    dat.sort();
-    return dat;
-  };
-
   var addDataset = function(dataset, sync) {
-   
     $.ajax({
       url: "${request.route_url('mistic.json.dataset.sampleinfo', dataset='_dataset_')}".replace('_dataset_', dataset),
       dataype: 'json',
@@ -348,8 +277,7 @@ $(document).ready(function() {
           .addClass('icon-white icon-remove-sign')
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);
-        $('.locate').change();
-        updateStyles();
+
         updateInfo();
       },
       error: function() {
@@ -449,58 +377,14 @@ $(document).ready(function() {
     }
   }
 
-
-
-  var highlights = {};
-
-  for (i = 0; i < 4; ++i)  {
-
-    highlights['highlighted'+i] = {'fill':$("rect#spectrum"+i).css('fill'), 'stroke':$("rect#spectrum"+i+"-stroke").css('stroke')};
-  
-   _.each($("[id ^='spectrum_i']".replace('_i', i)), function(event) {
-        $(event).spectrum({
-            showButtons: false,
-            showRadio: true,
-
-            change : function(event){
-              var newColor = event.toHexString();
-              var classes = $(this).attr('class').split(' ');
-              var id = this.id;
-              var to = $(this).data().applyTo;
-
-              var highlight = classes[0];
-              if (classes.length>1) {
-                 var cssColor = classes[1];
-                 d3.select(this).classed(cssColor,false);
-              }
-
-              if (to=='stroke'){
-                d3.select(this).attr('stroke', newColor).attr('stroke-width', '4px').attr('fill', 'white');
-
-                highlights[highlight]['stroke']=newColor;
-                highlights[highlight]['fill']=null;
-              } else {
-                d3.select(this).attr('stroke', null).attr('stroke-width', null).attr('fill', newColor);
-
-                highlights[highlight]['fill']=newColor;
-                highlights[highlight]['stroke']=null;
-              }
-              updateStyles();
-          }
-    });
-   });
-  
-  }
-
   <%
     ds = data.datasets.get(dataset)
     gene_data = [ ds.expndata(gene) for gene in genes ]
         
   %>
 
-   current_datasets = [];
-   $("#sample_annotation").attr('disabled', true);
-   $(".locate").attr('disabled', true);
+  current_datasets = [];
+
   %if ds is not None:
     addDataset("${dataset}", true);
     // Gene symbols were passed in the URL
@@ -526,21 +410,22 @@ $(document).ready(function() {
               .replace('_dataset_', current_datasets[0]);
     
     if (current_graph.data.length>0){
-        _.each(current_graph.data, function(x) { url += '/' + x.gene;});
+        _.each(current_graph.data, function(x) { url += '/' + x.gene; });
     }
 
-    url += '/?o=';
-    var s = '';
-    _.each(_.keys(highlights), function(k) {
-        s += k+'=';
-        _.each(getSamplesWithClass(k), function(x) { s += x +' '; });
-        s = $.trim(s);
-        s += ';';
-   });     
-     
-    url += Base64.encode(s);
-    $("span#share").html(url);
-    
+    $.ajax({
+      url: "${request.route_url('mistic.json.attr.set')}",
+      dataType: 'json',
+      type: 'POST',
+      data: JSON.stringify(pgs.toJSON()),
+      error: function(req, status, error) {
+        console.log('failed to construct a URL');
+      },
+      success: function(data) {
+        $("span#share").html(url + '?hl=' + data);
+      },
+    });
+
   });
 
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
@@ -557,8 +442,7 @@ $(document).ready(function() {
         $("#options").css('display', 'none');
     }
     info.clear();
-    $('.locate').change();
-    updateStyles();
+
     updateInfo();
   });
 
@@ -573,12 +457,6 @@ $(document).ready(function() {
     _.each(selection, info.add);
     selectionSearch(selection);
     $('#sample_enrichment_panel').collapse('show');
-   
-  });
-
-  $('#datasets').on('change custom', function(event) {
-    var dataset = $(event.target).val();
-    addDataset(dataset, false);
   });
 
   resizeGraph = function() {
@@ -587,7 +465,6 @@ $(document).ready(function() {
     current_graph.resize(
       $('div#graph').width(),
       $('div#graph').height());
-    $('.locate').change();
   };
 
   $('div#graph').append(current_graph.svg);
@@ -635,89 +512,14 @@ $(document).ready(function() {
 	
   var minimal_axes = false;
   $('#change_axes').on('click', function(event){
-      minimal_axes = !minimal_axes;
-      current_graph.setMinimalAxes(minimal_axes);
-      current_graph.draw()
-      $('.locate').change()
-   });
-
-  $("[id^='add']").on('click', function(event) {
-    // add the selection to the highlight group.
-    var cclass = this.id.replace('add', 'highlighted');
-    d3.select(current_graph.svg).selectAll('g.node.selected').classed(cclass, true);
-
-    var dat = getSamplesWithClass(cclass);
-    $('#'+cclass).val(dat.join(' '));
-    updateStyles();
-    updateInfo();
-    $("#sample_selection > option").attr('selected', false);
-    current_graph.setSelection([]);
-  });
-
-  $("[id^='minus']").on('click', function(event){
-    // remove the selection from the highlight group.
-    var cclass = this.id.replace('minus', 'highlighted');
-    d3.select(current_graph.svg).selectAll('g.node.selected').classed(cclass, false);
-
-    var dat = getSamplesWithClass(cclass);
-    $('#'+cclass).val(dat.join(' '));
-    updateStyles();
-    updateInfo();
-    $("#sample_selection > option").attr('selected', false);
-    current_graph.setSelection([]);
-  });
-
-  $("[id^='tograph']").on('click', function(event){
-    // copy the highlight group to the selection.
-    var cclass = this.id.replace('tograph', 'highlighted');
-    current_graph.setSelection(getSamplesWithClass(cclass));
-  });
-
-  $("[id^='remove']").on('click', function(event){
-    // clear the highlight group.
-    var cclass = this.id.replace('remove', 'highlighted');
-    d3.selectAll('g.node.'+cclass).classed(cclass, false);
-    $('#'+cclass).val('');
-    updateStyles();
-    updateInfo();
-  });
-	
-  $("[id^='spectrum']").on('click', function(event){
-    // set the initial colour on the colorpicker.
-    var to = $(this).data().applyTo;
-    $(this).spectrum('set',(to=='stroke' ? $(this).css('stroke'): $(this).css('fill') ));
-    $(this).show();
-  });
-
-  $('.locate').on('change', function(event){
-    // when a highlight group changes, restyle nodes.
-   
-    var tag_entry = event.target.value.split(" ");
-    if (tag_entry.length==1 & tag_entry[0]=="") {
-      event.preventDefault();
-      return;
-    }
-
-    var cclass = this.id;
-    var nodes = d3.select(current_graph.svg).selectAll('g.node');
-    var dat = {};
-    nodes.each(function(d) { dat[d.k] = true;});
-
-    var matched = {};
-    _.each(_.keys(dat), function(sample) {
-      if (_.find(tag_entry, function(tag) { return sample.match(tag); }) !== undefined) {
-        matched[sample] = true;
-      }
-    });
-
-    nodes.classed(cclass, function(d) { return matched[d.k]; });
-    updateStyles();
-    updateInfo();
-    event.preventDefault();
+    minimal_axes = !minimal_axes;
+    current_graph.setMinimalAxes(minimal_axes);
+    current_graph.draw()
   });
 
   $('#sample_annotation_drop').on('click', function() {
     sample_annotation_entry.$el.val('');
+    console.debug(sample_annotation_entry);
     sample_annotation_entry.update();
     sample_annotation_entry.$el.focus();
   });
@@ -740,47 +542,14 @@ $(document).ready(function() {
     });
   
   });
-  
- 
-  function initTable() {
-    var aoc = [null];
-    var bsc = [true];
-    for (var i=0; i<${len(terms)}; i++) {
-      aoc.push(null);
-      bsc.push(true);
-    }
-    aoc = aoc.concat([null]);
-    bsc = bsc.concat([true]);
 
-    $('#dataset-table tbody tr').on('click', function(event) {
-      if ($(this).hasClass('selectable')) {
-        var dataset_id = $('td', this)[0].innerHTML;
-        addDataset(dataset_id);
-        $('#dataset-modal').modal('hide');
-      }
-    });
-
-    return $('#dataset-table').dataTable( {
-      "aoColumns": aoc,
-      "bSearch": bsc,
-      "bPaginate": false,
-      "bSort":true,
-      "bProcessing": false,
-      "sDom": 'Rlfrtip',
-      "bRetrieve":true,
-    });
-  }
-
-  initTable();
   $('#add_dataset').on('click', function(event) {
-    $('#dataset-table tbody tr').each(function(row) {
-      if (_.contains(current_datasets, $('td', this)[0].innerHTML)) {
-        $(this).removeClass('selectable');
-      } else {
-        $(this).addClass('selectable');
-      }
+    var ds_sel = new DatasetSelector();
+    ds_sel.disable_rows(current_datasets);
+    ds_sel.show(event.currentTarget);
+    ds_sel.$el.on('select-dataset', function(event, dataset_id) {
+      addDataset(dataset_id);
     });
-    $('#dataset-modal').modal();
     event.preventDefault();
   });
   $('.locate').change();

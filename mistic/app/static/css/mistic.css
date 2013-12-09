@@ -25,15 +25,11 @@ select {
 }
 
 select[name$="_length"] {
-width:10px;
+    width: 8ex;
 }
 
 input.valid {
   color: blue;
-}
-
-input.locate {
-  width:145px;
 }
 
 div#graph {
@@ -44,62 +40,6 @@ div#graph {
 div#graph text {
   pointer-events : none;
 }
-
-
-.circlelabel {
-  font-family: helvetica; 
-}
-
-
-.circlelabel .invisible {
-  pointer-events : none;
-}
-
-circle  {
-  pointer-events : auto;
-}
-
-
-.color0 {
-  fill : rgb(252, 132, 3);
- }
-.color1{
-  fill : #0BBEDE; 
-}
-.color2  {
-  fill : rgb(36, 153, 36); 
-}
-.color3  {
-  fill :rgb(155, 42, 141); 
-}
-
-.stroke0, .stroke1,
-.stroke2, .stroke3 {
-  stroke-width : 4px;
-  fill:white;
-}
-
-.stroke0 {
-  stroke:rgb(252, 132, 3);
-}
-
-.stroke1 {
-  stroke: #0BBEDE;
-}
-.stroke2 {
-  stroke: rgb(36, 153, 36);
-  }
-.stroke3 {
-  stroke:rgb(155, 42, 141);
- }
-
-g.node.selected {
-}
-
-g.node.selected circle {
-  fill :rgb(20, 216, 28); 
-}
-
 
 .extent {
   fill-opacity: .125;
@@ -130,6 +70,7 @@ div#more-information {
    padding: 10px 0px 0px 0px;
    overflow:hidden;
 }
+
 div#more-information a,
 div#more-information a:hover
 {
@@ -137,6 +78,7 @@ div#more-information a:hover
   color : rgb(58, 55, 55);
   pointer-events : none;
 }
+
 
 
 .go-cellular_component span.label,
@@ -150,19 +92,20 @@ div#more-information a:hover
   border: 1px solid white;
   font-weight: inherit;
 }
+
 .go-cellular_component span.label { background-color: #800; }
 .go-biological_process span.label { background-color: #080; }
 .go-molecular_function span.label { background-color: #008; }
 
-.gene-item  span.label { color: black; background-color: #ddd; }
+
+
+.gene-item span.label { color: black; background-color: #ddd; }
 
 
 .label,
 .badge {
   display: inline-block;
-  
 }
-
 
 
 
@@ -180,7 +123,6 @@ div#more-information a:hover
    
 }
 
-
 .accordion-toggle, .accordion-toggle:hover,
 .accordion-toggle:focus  {
   cursor: pointer;
@@ -189,13 +131,15 @@ div#more-information a:hover
   
 }
 
+
+
 div#sample_enrichment {
   font-size: 80%;
   max-height: 200px;
   overflow-y: auto;
 }
 
-ul#menu1{
+ul#menu1 {
   position:relative;
 }
 
@@ -211,19 +155,19 @@ ul#menu1{
 
 
 .dropdown-submenu {
-    
     position:absolute;
     display: none;
     left: 50%;
     top:-1px;
-    
-
 }
 
 .dropdown-menu li:hover .dropdown-submenu {
     display: block;
    
 }
+
+
+
 path.arc:hover {
   fill: #346;
 }
@@ -236,3 +180,187 @@ path.axis.selected {
 }
 
 
+
+.dataset-table tbody {
+  cursor: pointer;
+  color: #aaa;
+}
+
+.dataset-table tbody tr.selectable {
+  color: #000;
+}
+
+.dataset-table tbody tr.selectable:hover {
+  background-color: #ffa;
+}
+
+.dataset-table td {
+  white-space: nowrap;
+}
+
+.btn.zeroclipboard-is-active {
+    background-color: #e6e6e6;
+    background-color: #d9d9d9 \9;
+    background-image: none;
+    outline: 0;
+    -webkit-box-shadow: inset 0 2px 4px rgba(0,0,0,0.15),0 1px 2px rgba(0,0,0,0.05);
+    -moz-box-shadow: inset 0 2px 4px rgba(0,0,0,0.15),0 1px 2px rgba(0,0,0,0.05);
+    box-shadow: inset 0 2px 4px rgba(0,0,0,0.15),0 1px 2px rgba(0,0,0,0.05);
+}
+
+.btn.zeroclipboard-is-hover {
+    color: #333;
+    text-decoration: none;
+    background-color: #e6e6e6;
+    background-color: #d9d9d9 \9;
+    background-position: 0 -15px;
+    -webkit-transition: background-position .1s linear;
+    -moz-transition: background-position .1s linear;
+    -ms-transition: background-position .1s linear;
+    -o-transition: background-position .1s linear;
+    transition: background-position .1s linear;
+}
+
+div.point-group {
+    position: relative;
+    width: 100%;
+    height: 54px;
+    white-space: nowrap;
+    margin-bottom: 2px;
+}
+
+div.point-group .widgets {
+    float: right;
+    margin-right: 3px;
+    white-space: nowrap;
+}
+
+div.point-group .widgets a {
+    padding: 0px 2px;
+    font-weight: bold;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .2;
+    filter: alpha(opacity=20);
+}
+
+div.point-group .widgets a:hover {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    opacity: .4;
+    filter: alpha(opacity=40);
+}
+
+div.point-group .widgets a.disabled:hover {
+    color: #000;
+    text-decoration: none;
+    cursor: default;
+    opacity: .2;
+    filter: alpha(opacity=20);
+}
+
+div.point-group div.content {
+    position: absolute;
+    padding: 2px;
+    top: 1px;
+    left: 1px;
+    bottom: 1px;
+    right: 1px;
+    background-color: #f5f5f5;
+    -webkit-border-radius: 6px;
+    -moz-border-radius: 6px;
+    border-radius: 6px;
+    border: 1px solid #d8d8d8;
+    border: 1px solid rgba(0,0,0,0.1);
+}
+
+div.point-group .header {
+    height: 18px;
+    display: block;
+    overflow: hidden;
+}
+
+div.point-group .header i {
+    font-weight: 100;
+    color: #aaa;
+}
+
+div.point-group .header span {
+    padding: 1px 4px;
+    font-weight: normal;
+    white-space: nowrap;
+    color: #222;
+}
+
+div.point-group .header span {
+    vertical-align: top;
+}
+
+div.point-group .control-group {
+    padding: 3px;
+    height: 20px;
+    display: inline-block;
+    margin: 0px;
+    background-color: #fff;
+    border: 1px solid #ccc;
+    border: 1px solid rgba(0,0,0,0.2);
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+    border-radius: 4px;
+    -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+    -moz-box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+    box-shadow: inset 0 1px 1px rgba(0,0,0,0.05);
+}
+
+div.point-group .sg-style,
+div.point-group .sg-ops i {
+    cursor: pointer;
+}
+
+div#point-group-settings label.control-label {
+    width: 8ex;
+}
+
+div#point-group-settings div.controls {
+    margin-left: 9ex;
+}
+
+div#point-group-settings div.control-group {
+    margin-bottom: 5px;
+}
+
+div#point-group-settings .colour.disabled span,
+div#point-group-settings .colour.disabled div.alpha-image {
+    background: transparent !important;
+}
+
+div#point-group-settings .colour span {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    bottom: 3px;
+    display: inline-block;
+    border: 1px solid black;
+}
+
+div#point-group-settings .colour div.alpha-image {
+    position: absolute;
+    left: 3px;
+    right: 3px;
+    top: 3px;
+    bottom: 3px;
+    display: inline-block;
+    background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
+}
+
+div#sample_characteristic input{
+    display: inline-block;
+    margin-bottom:0px;
+    
+}
+div#sample_characteristic a{
+    display: inline;  
+    position : absolute;
+}

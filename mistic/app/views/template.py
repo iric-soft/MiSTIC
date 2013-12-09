@@ -14,6 +14,25 @@ class Graph(object):
   def __init__(self, request):
     self.request = request
 
+  @view_config(route_name="mistic.modal.datasets")
+  def dataset_modal(self):
+    datasets = data.datasets.all()
+
+    incl = self.request.GET.getall('i')
+    if len(incl):
+      datasets = [ ds for ds in datasets if ds.id in incl ]
+
+    excl = self.request.GET.getall('x')
+    if len(excl):
+      datasets = [ ds for ds in datasets if ds.id not in excl ]
+
+    anot = self.request.GET.getall('anot')
+    if len(anot):
+      datasets = [ ds for ds in datasets if ds.annotation.id in anot ]
+
+    args = dict(datasets = datasets)
+    return render_to_response('mistic:app/templates/fragments/dataset_modal.mako', args, request = self.request)
+
   @view_config(route_name="mistic.template.root")
   def root(self):
     args = dict()
@@ -77,23 +96,14 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.pairplot")
   def pairplot(self):
-    
+
     dataset = self.request.matchdict.get('dataset', None)
     genes = self.request.matchdict.get('genes', [])
-    others =  dict(self.request.GET)
-    
-    try: 
-      others = base64.b64decode(others['o'])
-      others = dict([o.split('=') for o in  others.split(';')[:-1]])
-    except Exception, e :
-      pass
-      
     args = dict(
       dataset = dataset,
       genes = genes,
       others = others,
     )
-    
     return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)
 
 
@@ -102,16 +112,16 @@ class Graph(object):
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
 
-    
+
     _dataset = data.datasets.get(dataset)
-    
+
     if _dataset is None:
       print 'Not found'
-      
+
       raise HTTPNotFound()
 
     mst = _dataset.mst(xform)
-   
+
     if mst is None:
       raise HTTPNotFound()
 
@@ -127,8 +137,6 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.mstplot", request_method="POST")
   def mstplot_post(self):
-  
-    
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
 
@@ -150,15 +158,15 @@ class Graph(object):
       edges = mst[1],
       pos = mst[2]
     )
-   
+
     if len(mst[0]) < 200:
-     
+
       if _dataset.experiment=="ngs":
         return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
-      else : 
+      else:
         if _dataset.experiment=="hts":
           return render_to_response('mistic:app/templates/mstplot_small_chemical.mako', args, request = self.request)
-        else : 
+        else:
           return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
     else:
       return render_to_response('mistic:app/templates/mstplot.mako', args, request = self.request)

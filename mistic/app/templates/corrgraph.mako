@@ -25,12 +25,9 @@ ${parent.style()}
 
     <div id="dataset_menu" class="accordion-body collapse in">
       <div class="accordion-inner">
-        <select id="datasets">
-          <option value="">Select a dataset</option>
-%for d in data.datasets.all():
-          <option value="${d.id}">${d.name}</option>
-%endfor
-        </select>
+        <ul id="current_dataset">
+        </ul>
+        <button class='btn' id="add_dataset">Choose dataset</button>
       </div>
     </div>
   </div>
@@ -82,6 +79,7 @@ ${parent.style()}
 ${parent.pagetail()}
 
 <script src="${request.static_url('mistic:app/static/js/lib/corrgraph.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/dataset_selector.js')}" type="text/javascript"></script>
 <script type="text/javascript">
 $(document).ready(function() {
   (function() {
@@ -143,6 +141,14 @@ $(document).ready(function() {
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
 
+  $('#add_dataset').on('click', function(event) {
+    var ds_sel = new DatasetSelector();
+    ds_sel.show(event.currentTarget);
+    ds_sel.$el.on('select-dataset', function(event, dataset_id) {
+      addDataset(dataset_id);
+    });
+    event.preventDefault();
+  });
 
   gene_entry.on('change', function(item) {
     current_gene = item;
@@ -164,7 +170,7 @@ $(document).ready(function() {
       $.ajax({
         url: "${request.route_url('mistic.json.annotation.gene_ids', annotation='_annotation_')}".replace('_annotation_', dataset_annotation[current_dataset]),
         data: { filter_gsid: item.id },
-        dataype: 'json',
+        dataType: 'json',
         success: function(data) {
           current_graph.markGenes(data);
         },
@@ -184,6 +190,7 @@ $(document).ready(function() {
       $("#gene").attr('disabled', true);
       $("#goterm").attr("disabled", true);
       gene_entry.$el.val('');
+      $('ul#current_dataset').html('');
     };
 
     var enable = function(data) {
@@ -194,6 +201,7 @@ $(document).ready(function() {
       $("#gene").attr("disabled", false);
       $("#goterm").attr("disabled", false);
       gene_entry.$el.val('');
+      $('ul#current_dataset').html('').append('<li>' + dataset + '</li>');
     };
 
     if (dataset == '') {
@@ -203,7 +211,7 @@ $(document).ready(function() {
 
     $.ajax({
       url: "${request.route_url('mistic.json.dataset', dataset='_dataset_')}".replace('_dataset_', dataset),
-      dataype: 'json',
+      dataType: 'json',
       async: !sync,
       success: function(data) {
         var xf = $('#transform-buttons');
@@ -239,7 +247,7 @@ $(document).ready(function() {
     var req = $.ajax({
       url: "${request.route_url('mistic.json.gene.corr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', dataset).replace('_gene_id_', gene),
       data: {x: current_transform},
-      dataype: 'json',
+      dataType: 'json',
 
       success: function(data) {
         var nlabel = $("#nlabel").val();

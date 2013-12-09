@@ -9,9 +9,44 @@ import json
 import logging
 import exceptions
 import pandas
+import yaml
 
 from beaker.cache import *
 from cache_helpers import *
+
+
+
+class OrderedDictYAMLLoader(yaml.Loader):
+  def __init__(self, *args, **kwargs):
+    yaml.Loader.__init__(self, *args, **kwargs)
+
+    self.add_constructor(u'tag:yaml.org,2002:map', self.__class__.construct_yaml_map)
+    self.add_constructor(u'tag:yaml.org,2002:omap', self.__class__.construct_yaml_map)
+
+  def construct_yaml_map(self, node):
+    data = collections.OrderedDict()
+    yield data
+    value = self.construct_mapping(node)
+    data.update(value)
+
+  def construct_mapping(self, node, deep=False):
+    if isinstance(node, yaml.MappingNode):
+      self.flatten_mapping(node)
+    else:
+      raise yaml.constructor.ConstructorError(
+        None, None, 'expected a mapping node, but found %s' % node.id, node.start_mark)
+
+    mapping = collections.OrderedDict()
+    for key_node, value_node in node.value:
+      key = self.construct_object(key_node, deep=deep)
+      try:
+        hash(key)
+      except TypeError, exc:
+        raise yaml.constructor.ConstructorError('while constructing a mapping',
+          node.start_mark, 'found unacceptable key (%s)' % exc, key_node.start_mark)
+      value = self.construct_object(value_node, deep=deep)
+      mapping[key] = value
+    return mapping
 
 
 
@@ -750,10 +785,13 @@ class GlobalConfig(object):
 
     self.config_path = config_path
     if os.path.splitext(self.config_path)[1].lower() == '.yaml':
-      import yaml
-      self.config = yaml.load(open(self.config_path, 'rbU'))
+      self.config = yaml.load(
+        open(self.config_path, 'rbU'),
+        Loader=OrderedDictYAMLLoader)
     else:
-      self.config = json.loads(re.sub(r'(?m)//.*$', '', open(self.config_path, 'rbU').read()))
+      self.config = json.loads(
+        re.sub(r'(?m)//.*$', '', open(self.config_path, 'rbU').read()),
+        object_pairs_hook=collections.OrderedDict)
 
   @property
   def config_dir(self):

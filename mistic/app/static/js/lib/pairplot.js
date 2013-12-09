@@ -1,14 +1,30 @@
 (function() {
-    pairplot = function(xdata, ydata, elem) {
-        this.options = {
-            padding: [ 20,20,20,20 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
-            separation: 10,
-            width: 1000,
-            height: 1000,
-            axes: true,
-            minimalAxes: false,
-            clearBrush : false,
-        };
+    var defaults = {
+        padding: [ 20,20,20,20 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
+        separation: 10,
+        width: 1000,
+        height: 1000,
+        axes: true,
+        minimalAxes: false,
+
+        base_attrs: {
+            _shape:  'circle',
+            d:       d3.svg.symbol().type("circle")(),
+            fill:    "rgba(0,0,0,.65)",
+            stroke:  null,
+        },
+    };
+
+    pairplot = function(xdata, ydata, elem, options) {
+        this.options = {};
+
+        _.extend(this.options, defaults);
+
+        if (options !== undefined) {
+            _.extend(this.options, options);
+        }
+
+        this.options.base_attrs = _.clone(this.options.base_attrs)
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
@@ -20,18 +36,19 @@
             .attr("height", this.height)
             .attr('version', '1.1')
             .attr('baseProfile', 'full')
-            .attr('xmlns', 'http://www.w3.org/2000/svg');
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink")
+            .classed('pairplot', true);
+
+        this.point_groups = [];
 
         this.data = [];
         this.current_selection = [];
         this.subgraphs = [];
     };
+
     pairplot.prototype.setMinimalAxes = function(b) {
       this.options.minimalAxes = b;
-    };
-
-    pairplot.prototype.clearBrush = function() {
-      this.options.clearBrush = true;
     };
 
     pairplot.prototype.resize = function(width, height) {
@@ -48,7 +65,6 @@
         }
     };
 
-
     pairplot.prototype.removeData = function(matcher) {
         this.data = _.reject(this.data, matcher);
         current_selection = this.getSelection(); 
@@ -56,12 +72,22 @@
         this.setSelection(current_selection);
     };
 
-
     pairplot.prototype.addData = function(data) {
         this.data.push(data);
         current_selection = this.getSelection(); 
         this.draw();
         this.setSelection(current_selection);
+    };
+
+    pairplot.prototype.pointIDs = function() {
+        var ids = {};
+        for (var i in this.data) {
+            var d = this.data[i].data;
+            for (var j in d) {
+                ids[d[j].sample] = true;
+            }
+        }
+        return _.keys(ids);
     };
 
     pairplot.prototype.getSelection = function() {
@@ -78,6 +104,41 @@
 
     pairplot.prototype.childSelectionUpdated = function(event, selection) {
         this.setSelection(selection);
+    };
+
+    pairplot.prototype.setBaseAttrs = function(cls) {
+        this.options.base_attrs = {};
+        _.extend(this.options.base_attrs, cls);
+
+        _.each(this.subgraphs, function(s) {
+            s.setBaseAttrs(this.options.base_attrs);
+        });
+    };
+
+    pairplot.prototype.setPointGroups = function(pgs) {
+        this.point_groups = pgs;
+
+        _.each(this.subgraphs, function(s) { s.setPointGroups(pgs); });
+    };
+
+    pairplot.prototype.legendSymbol = function(node, pg) {
+        var attrs = {};
+
+        _.extend(attrs, this.options.base_attrs);
+        _.extend(attrs, pg.get('style'));
+        if (attrs.fill === null) attrs.fill = 'none';
+        if (attrs.fill === undefined) attrs.fill = '#aaa';
+
+        var g = node
+            .append('g')
+            .classed('node', true);
+
+        g.append('path')
+            .each(function(d, i) {
+                for (var i in attrs) {
+                    d3.select(this).attr(i, attrs[i]);
+                }
+            });
     };
 
     pairplot.prototype.draw = function() {
@@ -102,13 +163,13 @@
             display_corr: false,
             background: true,
             axes: false,
-            makeGridLine:false,
-            textOnly:false,
+            makeGridLine: false,
+            textOnly: false,
             minimal: this.options.minimalAxes,
-            clearBrush : this.options.clearBrush,
+            base_attrs: this.options.base_attrs,
+            class_attrs: this.options.class_attrs
         };
 
-        this.current_selection = [];
         this.subgraphs = []
 
         var sep = this.options.separation;
@@ -142,6 +203,8 @@
                         s = new textpanel(s_opts, this.data[x], this.data[y]);
                     } else if (x > y ) {
                         s = new scatterplot(s_opts, this.data[x], this.data[y]);
+                        s.setSelection(this.current_selection, true);
+                        s.setPointGroups(this.point_groups);
                         this.subgraphs.push(s);
                     }
                     $(g[0]).append(s.svg);

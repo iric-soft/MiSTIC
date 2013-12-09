@@ -40,25 +40,39 @@ class PDFData(object):
   def convert_svg(self):
     _data = self.request.POST['pdfdata']
 
-    # XXX: do this with lxml instead of regexp hacks.
-    # strip out invisible labels
-    _data = re.sub('<text [^<>]* class="circlelabel invisible">[^<>]*</text>', '', _data)
-    # explicitly set the fill of highlighted objects
-    _data = re.sub('class="highlighted"', 'fill="rgb(20, 216, 28)"', _data)
+    from lxml import etree
+    import cStringIO
+    doc = etree.parse(cStringIO.StringIO(_data))
+    root = doc.getroot()
+
+    class XPHasClass(object):
+      def __init__(self, klass):
+        self.klass = klass
+      def __repr__(self):
+        return "contains(concat(' ', normalize-space(@class), ' '), ' {0} ')".format(self.klass)
+
+    def removeNodes(xpath):
+      for node in doc.xpath(xpath, namespaces={'svg':"http://www.w3.org/2000/svg"}):
+        node.getparent().remove(node)
+
+    removeNodes('//svg:g[{0}]'.format(XPHasClass('brush')))
+
+    removeNodes('//svg:g[{0}]/svg:text[{1}]'.format(XPHasClass('node'), XPHasClass('invisible')))
+
+    for node in doc.xpath(
+        '//svg:g[{0} and {1}]'.format(XPHasClass('node'), XPHasClass('highlighted')),
+        namespaces={'svg':"http://www.w3.org/2000/svg"}):
+      node.attrib['fill'] = 'rgb(20, 216, 28)'
 
     # extract width and height
-    ht = re.search(r'height\s*=\s*"([^"]*)"', _data)
-    wd = re.search( r'width\s*=\s*"([^"]*)"', _data)
+    ht = root.attrib.get('height')
+    wd = root.attrib.get('width')
 
-    if ht is not None and wd is not None:
-      ht = ht.group(1)
-      wd = wd.group(1)
-    else:
-      ht = None
-      wd = None
+    if ht is None or wd is None:
+      ht = wd = None
 
     input = tempfile.NamedTemporaryFile(suffix='.svg')
-    input.write(_data.encode('utf-8'))
+    doc.write(input)
     input.flush()
 
     output = tempfile.NamedTemporaryFile('rb', suffix='.pdf')

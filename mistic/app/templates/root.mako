@@ -2,26 +2,18 @@
 <%!
 import json
 import mistic.app.data as data
-terms = []
-dds = {}
-
-def parse_term(x):
-  x = x.split('=', 1)
-  return x[0].strip(), x[1].strip()
 
 terms = []
+transforms = []
 
 for ds in data.datasets.all():
-  ds_terms = [ parse_term(term) for term in ds.tags.split(';') if len(term) ]
-
-  for k,v in ds_terms:
+  for k,v in ds.tags.iteritems():
     if k not in terms:
       terms.append(k)
 
-  dds[ds.name] = dict(ds_terms)
-
-transforms = ('log', 'rank', 'none')
-#transforms = ['log']
+  for t in ds.transforms:
+   if t not in transforms:
+     transforms.append(t)
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -79,30 +71,32 @@ a#oo{
 <table id="datasets-table" style="width:850px;">
 <thead>
 <tr>
+  <th>Dataset</th>
 %for term in terms :
   <th><a><i class="icon-th-list"></a></i>${term}</th>
 %endfor
 <th>n</th>
-<th colspan="3">Icicle</th>
+<th>Icicle</th>
 </tr>
 </thead>
 
 <tbody>
   %for ds in data.datasets.all() :
   <tr>
-   %for term in terms :
-    <td>${dds[ds.name].get(term, '')}</td>
-   %endfor
-   <td>${ds.numberSamples}</td>
-    %for i, tf in enumerate(transforms):
-      %if tf in ds.transforms:
-      <td><a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a></td>
-     %else:
-      <td></td>
+    <td>${ds.name}</td>
+%for term in terms:
+    <td>${ds.tags.get(term, '')}</td>
+%endfor
+    <td>${ds.numberSamples}</td>
+    <td>
+%for i, tf in enumerate(transforms):
+  <span style="display: inline-block; width: 4em;">
+  %if tf in ds.transforms:
+      <a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a>
   %endif
-  %endfor
-   
-      
+  </span>
+%endfor
+    </td>
   </tr>
   %endfor
 </tbody>
@@ -123,34 +117,29 @@ ${parent.pagetail()}
 
  $(document).ready(function() {
       var oTable = initTable();
-      
-    });
+});
     
-  function initTable() {
-        
-        var aoc = new Array();
-        var bsc = new Array();
-        for (var i=0; i<${len(terms)}; i++) {
-            aoc.push(null);
-            bsc.push(true);
-        }
-        aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": false }, { "bSortable": false } ]);
-        bsc = bsc.concat([true, null, null, null ]);
+function initTable() {
+  var aoc = [null];
+  var bsc = [true];
+  for (var i=0; i<${len(terms)}; i++) {
+    aoc.push(null);
+    bsc.push(true);
+  }
+  aoc = aoc.concat([null, { "bSortable": false } ]);
+  bsc = bsc.concat([true, false ]);
   
-        return $('#datasets-table').dataTable( {  
-                        "aoColumns": aoc  ,   
-                        "bSearch": bsc  ,
-                        "bPaginate": false, 
-                        "bSort":true,
-                        "bProcessing": false ,
-                        "sDom": 'Rlfrtip',
-                        "bRetrieve":true,
-                      });    
-                      
-                      
-               
-  }    
-  
+  return $('#datasets-table').dataTable({
+    "aoColumns": aoc,
+    "bSearch": bsc,
+    "bPaginate": false, 
+    "bSort":true,
+    "bProcessing": false,
+    "sDom": 'Rlfrtip',
+    "bRetrieve":true,
+  });
+}
+
 $('#datasets-table th a i').on('click', function(event) { 
     
     event.stopPropagation();
@@ -199,15 +188,9 @@ $('#csv-button').on('click', function(event){
 });
       
 $('#datasets-table tbody tr ').on('click', function(event){
-    var values = _.map(this.cells, function(d){return(d.innerText);});
-    
-    var i = _.indexOf(values, 'log');
-    if (i==-1) { i = _.indexOf(values, 'rank');} 
-    else { if (i==-1) { i = _.indexOf(values, 'none');}} 
-    
-    var link = this.cells[i].innerHTML;
+    var link = $(this.cells).find('span > a')[0];
     window.open ($(link).attr("href"));
-    
+  
 });
       
 </script>

@@ -1,27 +1,38 @@
 (function() {
-    scatterplot = function(options, xdata, ydata) {
-        this.options = {
-            padding: [ 20,20,60,60 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
-            inner: 10,   // amount that the plot background is expanded by.
-            outer: 15,   // amount that the plot axes are moved by.
-            xlab_offset: 36,
-            ylab_offset: -38,
-            width: 1000,
-            height: 1000,
-            axis_labels: false,
-            background: true,
-            axes: false,
-            pt_size: 4,
-            makeGridLine:false,
-            gridValue: 10,
-            minimal : true,
-            clearBrush: false,
+    var defaults = {
+        padding: [ 20,20,60,60 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
+        inner: 10,   // amount that the plot background is expanded by.
+        outer: 15,   // amount that the plot axes are moved by.
+        xlab_offset: 36,
+        ylab_offset: -38,
+        width: 1000,
+        height: 1000,
+        axis_labels: false,
+        background: true,
+        axes: false,
+        pt_size: 4,
+        makeGridLine: false,
+        gridValue: 10,
+        minimal: true,
 
-        };
+        base_attrs: {
+            _shape:  'circle',
+            d:       d3.svg.symbol().type("circle")(),
+            fill:    "rgba(0,0,0,.65)",
+            stroke:  null,
+        },
+    };
+
+    scatterplot = function(options, xdata, ydata) {
+        this.options = {}
+
+        _.extend(this.options, defaults);
 
         if (options !== undefined) {
             _.extend(this.options, options);
         }
+
+        this.options.base_attrs = _.clone(this.options.base_attrs)
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
 
@@ -33,21 +44,43 @@
             .attr("height", this.height)
             .attr('version', '1.1')
             .attr('baseProfile', 'full')
-            .attr('xmlns', 'http://www.w3.org/2000/svg');
+            .attr("xmlns", "http://www.w3.org/2000/svg")
+            .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink")
+            .classed('scatterplot', true);
 
-        this.xdata = undefined;
-        this.ydata = undefined;
-        this.go_term = undefined;
+        this.xScale = undefined;
+        this.yScale = undefined;
+
+        this.xAxis = undefined;
+        this.yAxis = undefined;
+
+        this.current_selection = [];
+
+        this.point_groups = null;
 
         this.setXData(xdata, false);
         this.setYData(ydata, false);
 
-        this.yAxis = undefined;
-        this.xAxis = undefined;
-
-        this.selection = [];
-
         this.draw();
+    };
+
+    scatterplot.prototype.setBaseAttrs = function(cls) {
+        this.options.base_attrs = {};
+        _.extend(this.options.base_attrs, cls);
+
+        this.updatePoints();
+    };
+
+    scatterplot.prototype.setPointGroups = function(pgs) {
+        if (this.point_groups !== null) {
+            this.point_groups.off(null, null, this);
+        }
+        this.point_groups = pgs;
+        if (this.point_groups !== null) {
+            this.point_groups.on('change:point_ids change:style add remove reset sort', this.updatePoints, this);
+        }
+
+        this.updatePoints();
     };
 
     scatterplot.prototype.resize = function(width, height) {
@@ -60,7 +93,6 @@
                 .attr("height", height);
 
             this.draw();
-
         }
     };
 
@@ -79,12 +111,32 @@
 
     scatterplot.prototype.setXData = function(xdata, redraw) {
         if (xdata !== undefined) {
+            this.x_id = xdata.gene;
             this.xlab = xdata.symbol;
             this.xdata = this.datadict(xdata.data);
         } else {
             this.xdata = undefined;
         }
-        if (redraw !== false) this.draw();
+        if (redraw !== false) {
+            this.update();
+        }
+    };
+
+    scatterplot.prototype.setYData = function(ydata, redraw) {
+        if (ydata !== undefined) {
+            this.y_id = ydata.gene;
+            this.ylab = ydata.symbol;
+            this.ydata = this.datadict(ydata.data);
+        } else {
+            this.ydata = undefined;
+        }
+        if (redraw !== false) {
+            this.update();
+        }
+    };
+
+    scatterplot.prototype.pointIDs = function() {
+        return _.intersection(_.keys(this.xdata), _.keys(this.ydata));
     };
 
     scatterplot.prototype.notifySelectionChange = function(quiet) {
@@ -95,17 +147,7 @@
         }
     };
 
-    scatterplot.prototype.setYData = function(ydata, redraw) {
-        if (ydata !== undefined) {
-            this.ylab = ydata.symbol;
-            this.ydata = this.datadict(ydata.data);
-        } else {
-            this.ydata = undefined;
-        }
-        if (redraw !== false) this.draw();
-    };
-
-    scatterplot.prototype.highlightCircle = function(d, i) {
+    scatterplot.prototype.toggleSelected = function(d, i) {
         var current_selection = this.nodes[0][i];
         d3.select(current_selection).classed('selected', !d3.select(current_selection).classed('selected'));
         this.notifySelectionChange();
@@ -119,10 +161,10 @@
     };
 
     scatterplot.prototype.getSelection = function() {
-        var circles = d3
+        var nodes = d3
             .select(this.svg)
             .selectAll("g.node.selected");
-        var selected = _.map(circles.data(), function(c) { return c.s; });
+        var selected = _.map(nodes.data(), function(d) { return d.k; });
         return selected;
     };
 
@@ -130,19 +172,35 @@
     };
 
     scatterplot.prototype.brushed = function() {
+        var self = this;
         var e = d3.event.target.extent();
         var circles  = d3
             .select(this.svg)
             .selectAll("g.node")
             .filter(function(d) {
-                return e[0][0] <= d.x && d.x <= e[1][0] &&
-                    e[0][1] <= d.y && d.y <= e[1][1]
+                var t = self.transform(d);
+                return e[0][0] <= t.x && t.x <= e[1][0] && e[0][1] <= t.y && t.y <= e[1][1]
             });
-        var selected = _.map(circles.data(), function(c) {return c.s;});
+        var selected = _.map(circles.data(), function(d) { return d.k; });
         this.setSelection(selected);
     };
 
     scatterplot.prototype.brushend = function() {
+    };
+
+    scatterplot.prototype._transform = function(v, scale) {
+        var d = scale.domain();
+        var r = scale.range();
+        if (d[0] > v) return r[0];
+        if (d[1] < v) return r[1];
+        return scale(v);
+    };
+
+    scatterplot.prototype.transform = function(d) {
+        return {
+            x: this._transform(d.x, this.xScale),
+            y: this._transform(d.y, this.yScale)
+        };
     };
 
     scatterplot.prototype.makeMinimalAxes = function() {
@@ -181,8 +239,7 @@
             .ticks(5);
     };
 
-    scatterplot.prototype.makeAxes = function() {
-
+    scatterplot.prototype.updateAxes = function() {
         if (this.options.minimal) {
             this.makeMinimalAxes();
         } else {
@@ -191,33 +248,53 @@
 
         var svg = d3.select(this.svg);
 
+        if (this.xAxis !== null) {
+            svg.select('g.axis-x')
+                .transition()
+                .call(this.xAxis);
+        }
+
+        if (this.yAxis !== null) {
+            svg.select('g.axis-y')
+                .transition()
+                .call(this.yAxis);
+        }
+
+        svg .selectAll('.axis path, .axis line')
+            .attr('fill', 'none')
+            .attr('stroke', '#aaa')
+            .attr('opacity', 1.0)
+            .attr('shape-rendering', 'crispEdges');
+
+        svg .selectAll('.axis text')
+            .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
+    };
+
+    scatterplot.prototype.makeAxes = function() {
+        var self = this;
+
+        this.xAxis = d3.svg.axis()
+        this.yAxis = d3.svg.axis()
+
+        var svg = d3.select(this.svg);
+
         svg .append("g")
             .attr("class", "axis axis-x")
             .attr("transform", "translate(0," + (this.height - this.options.padding[2] + this.options.outer) + ")")
-            .call(this.xAxis);
 
         svg .append("g")
             .attr("class", "axis axis-y")
             .attr("transform", "translate(" + (this.options.padding[3] - this.options.outer) + ",0)")
-            .call(this.yAxis);
 
-        svg .selectAll('.axis path, .axis line')
-            .attr('fill', 'none')
-            .attr('stroke', 'black')
-            .attr('opacity', .3)
-            .attr('shape-rendering', 'crispEdges');
-
-
-        svg .selectAll('.axis text')
-            .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
+        this.updateAxes();
 
         if (this.options.makeGridLine) {
             svg.selectAll('.axis-x line')
-                .filter(function(d, i) { return d <= this.options.gridValue })
+                .filter(function(d, i) { return d <= self.options.gridValue })
                 .attr('y1',-(this.height -this.options.padding[2] + this.options.outer)-this.yScale(d3.min([this.yScale.domain()[1],this.options.gridValue])));
 
             svg.selectAll('.axis-y line')
-                .filter(function(d, i) { return d <= this.options.gridValue })
+                .filter(function(d, i) { return d <= self.options.gridValue })
                 .attr('x2', this.xScale(this.xScale.domain()[1])-(this.options.padding[3] - this.options.outer));
         }
 
@@ -248,8 +325,112 @@
         }
     };
 
+    scatterplot.prototype.pointAttrs = function(d, i) {
+        var self = this;
+        var result = {};
 
-    scatterplot.prototype.draw = function(data) {
+        _.extend(result, this.options.base_attrs);
+        if (this.point_groups !== null) {
+            this.point_groups.each(function(pg) {
+                if (pg.hasPoint(d.k)) {
+                    _.extend(result, pg.get('style'));
+                }
+            });
+        }
+        _.extend(result, d.attrs);
+        if (!result.fill) result.fill = 'none';
+        return result;
+    };
+
+    scatterplot.prototype.updatePoints = function() {
+        var self = this;
+        var xy = this.getXYData();
+
+        var pt_size = this.options.pt_size;
+        var font_size = pt_size + 8;
+
+        this.nodes =
+          d3.select(this.svg)
+            .select('.nodes')
+            .selectAll('.node')
+            .data(xy, function (d) { return d.k; });
+
+        var g = this.nodes
+          .enter()
+            .append('g')
+            .classed('node', true)
+            .attr("transform", function(d) {
+                var t = self.transform(d);
+                return "translate(" + [t.x, t.y] + ")";
+            });
+
+        g.append('path')
+            .on('click', _.bind(this.toggleSelected, this));
+
+        g.append("text")
+            .attr('style', 'font-size:'+ font_size+"px;")
+            .classed('circlelabel invisible', true);
+        g.append('title');
+
+        var transition = this.nodes.transition();
+
+        transition
+            .attr("transform", function(d) {
+                var t = self.transform(d);
+                return "translate(" + [t.x, t.y] + ")";
+            });
+
+        transition
+          .select('path')
+            .each(function(d, i) {
+                var a = self.pointAttrs(d, i);
+                // this can be done better in d3 v3
+                for (var i in a) {
+                    d3.select(this).attr(i, a[i]);
+                }
+            });
+
+        transition
+          .select('text')
+            .attr('x', pt_size + 2)
+            .attr('y', pt_size)
+            .text(function(d) {return d.k;} );
+
+        transition
+          .select('title')
+            .text(function(d) {
+                return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
+            });
+
+        this.nodes
+          .exit()
+            .transition()
+            .remove();
+    }
+
+    scatterplot.prototype.getXYData = function() {
+        var keys = _.intersection(_.keys(this.xdata), _.keys(this.ydata));
+
+        var xy = [];
+
+        for (var i in keys) {
+            var k = keys[i];
+            xy.push({
+                k:   k,
+                x:   this.xdata[k],
+                y:   this.ydata[k] 
+            });
+        }
+
+        return xy;
+    };
+
+    scatterplot.prototype.update = function() {
+        this.updatePoints();
+        this.updateAxes();
+    };
+
+    scatterplot.prototype.draw = function() {
         var self = this;
 
         if (this.xdata === undefined || this.ydata === undefined) {
@@ -266,42 +447,22 @@
         var v2_log = [];
         var v1 = [];
         var v2 = [];
-        var v1_anscombe = [];
-        var v2_anscombe = [];
 
-        var xy = [];
-
-        var lg = true;
-
-        for (var i in keys) {
-            var k = keys[i];
-            var p = k.split('-')
-            var s = k;
-            if (p.length>1){
-                var s = p[0]+'-'+p[1]+'-'+p[2];
-            }
-            
-            var x = this.xdata[k];
-            var y = this.ydata[k];
-            if  (x < 0.0 ||  y < 0.0) {
-                lg = false;
-                xy.push({x:x,y:y,k:k,s:s});
-            } else {
-                xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k, s:s});
-            }
-
+        _.each(keys, function(k) {
+            var x = self.xdata[k];
+            var y = self.ydata[k];
             v1.push(x);
             v2.push(y);
-            v1_log.push(Math.log(x + 1/1024));
-            v2_log.push(Math.log(y + 1/1024));
-        }
-       
-        var rr = Math.max(
-            stats.range(v1)[1]-stats.range(v1)[0],
-            stats.range(v2)[1]-stats.range(v2)[0]);
-        if (rr<1) {
-            lg = false;
-        }
+            v1_log.push(Math.log(1000 * x + 1) / Math.log(10.0));
+            v2_log.push(Math.log(1000 * y + 1) / Math.log(10.0));
+        });
+
+        var x_range = stats.range(v1);
+        var y_range = stats.range(v2);
+
+        var lg =
+            Math.max(x_range[1] - x_range[0], y_range[1] - y_range[0]) > 1 &&
+            Math.min(x_range[0], y_range[0]) >= 0.0;
 
         var r = stats.pearson(v1, v2);
         var r_log = stats.pearson(v1_log, v2_log);
@@ -309,31 +470,25 @@
         var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
 
-        var dmx = d3.extent(xy, function(d) { return d.x; });
-        var dmy = d3.extent(xy, function(d) { return d.y; });
-
         if (lg) {
-            this.xScale = d3.scale.log();
-            this.yScale = d3.scale.log();
+            this.xScale = d3.scale.log().domain([ Math.max(0.01, x_range[0]), x_range[1] ]);
+            this.yScale = d3.scale.log().domain([ Math.max(0.01, y_range[0]), y_range[1] ]);
         } else {
-            this.xScale = d3.scale.linear();
-            this.yScale = d3.scale.linear();
-            //if (rr<1) {
-            //  dmx = [0,1];
-            //  dmy = [0,1];
-            //}
+            this.xScale = d3.scale.linear().domain(x_range);
+            this.yScale = d3.scale.linear().domain(y_range);
         }
 
-        this.xScale.domain(dmx)
+        this.xScale
             .range([ this.options.padding[3], this.width - this.options.padding[1] ])
             .nice();
 
-        this.yScale.domain(dmy)
+        this.yScale
             .range([ this.height - this.options.padding[2], this.options.padding[0] ])
             .nice();
 
-        var bkgx = this.options.padding[3]-this.options.inner;
-        var bkgy = this.options.padding[0]-this.options.inner;
+        // background rectangle
+        var bkgx = this.options.padding[3] - this.options.inner;
+        var bkgy = this.options.padding[0] - this.options.inner;
 
         var color = 'transparent';
         if (this.options.background) {
@@ -351,11 +506,9 @@
             .attr('stroke-width', '1')
             .attr('shape-rendering', 'crispEdges');
 
-        this.xScaleBrush = this.xScale.copy();
-        this.yScaleBrush = this.yScale.copy();
-
-        this.xScaleBrush.range([ bkgx, bkgx+width ]);
-        this.yScaleBrush.range([ bkgy + height, bkgy ]);
+        // selection brush
+        this.xScaleBrush = d3.scale.linear().domain([ bkgx, bkgx+width ]).range([ bkgx, bkgx+width ]);
+        this.yScaleBrush = d3.scale.linear().domain([ bkgy+height, bkgy ]).range([ bkgy+height, bkgy ]);
 
         this.brush = d3.svg.brush()
             .x(this.xScaleBrush)
@@ -368,36 +521,15 @@
             .classed("brush", true)
             .call(this.brush);
 
-        if (this.options.axes) {
-            this.makeAxes();
-        }
+        // draw points
+        svg.append('g')
+            .classed('nodes', true);
 
-        this.nodes = svg
-            .selectAll(".node")
-            .data(xy);
+        // collect data
+        var xy = this.getXYData();
 
-        var nodes = this.nodes.enter().append("g").classed('node', true);
+        if (this.options.axes) this.makeAxes();
 
-        nodes.append('circle')
-            .attr('cx', function(d) { return self.xScale(d.x); })
-            .attr('cy', function(d) { return self.yScale(d.y); })
-            .attr('r',  this.options.pt_size)
-            .attr('opacity', 0.65)
-            .on('click', _.bind(this.highlightCircle, this));
-
-        nodes.append('title')
-            .text(function(d) {
-                return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
-            });
-
-        var pt_size = this.options.pt_size;
-        var font_size = pt_size + 8;
-
-        nodes.append("text")
-            .text(function(d) {return d.s;} )
-            .attr('x', function(d) { return self.xScale(d.x)+pt_size; })
-            .attr('y', function(d) { return self.yScale(d.y)+pt_size;})
-            .attr('style', 'font-size:'+ font_size+"px;")
-            .classed('circlelabel invisible', true);
+        this.updatePoints();
     };
 })();
