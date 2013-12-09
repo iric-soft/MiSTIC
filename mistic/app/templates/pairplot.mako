@@ -171,7 +171,7 @@ $(document).ready(function() {
     moviePath: "${request.static_url('mistic:app/static/swf/ZeroClipboard.swf')}"
   });
 
-  var gene_entry = new GeneDropdown({ el: $("x#gene") });
+  var gene_entry = new GeneDropdown({ el: $("#gene") });
   var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
 
   current_graph = new pairplot(undefined, undefined, $('#graph'));
