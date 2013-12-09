@@ -504,7 +504,6 @@ $(document).ready(function() {
 
   $('#sample_annotation_drop').on('click', function() {
     sample_annotation_entry.$el.val('');
-    console.debug(sample_annotation_entry);
     sample_annotation_entry.update();
     sample_annotation_entry.$el.focus();
   });
