@@ -98,11 +98,9 @@ class Graph(object):
 
     dataset = self.request.matchdict.get('dataset', None)
     genes = self.request.matchdict.get('genes', [])
-    others = dict(self.request.GET)
     args = dict(
       dataset = dataset,
       genes = genes,
-      others = others,
     )
 
     return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)

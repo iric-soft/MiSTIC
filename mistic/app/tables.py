@@ -54,11 +54,20 @@ class JSONStore(Base):
 
     @property
     def client_id(self):
-        return '{0.id};{0.key}'.format(self)
+        return '{0.id}:{0.key}'.format(self)
 
     @classmethod
-    def val_for_cid(cls, session, cid):
-        _id, _key = cid.split(';',1)
+    def store(cls, session, _val):
+        row = session.query(JSONStore).filter(JSONStore.val == _val).scalar()
+        if row is None:
+            row = JSONStore(val = _val)
+            session.add(row)
+            row = session.merge(row)
+        return row.client_id
+
+    @classmethod
+    def fetch(cls, session, cid):
+        _id, _key = cid.split(':',1)
         _id = int(_id)
         row = session.query(JSONStore).filter(and_(JSONStore.id == _id, JSONStore.key == _key)).scalar()
         if row is not None:
@@ -66,6 +75,7 @@ class JSONStore(Base):
         return None
 
 Index('m_jsonstore_i1',  JSONStore.id, JSONStore.key)
+Index('m_jsonstore_i2',  JSONStore.val)
 
 
 DBSession = scoped_session(sessionmaker(extension=ZopeTransactionExtension()))

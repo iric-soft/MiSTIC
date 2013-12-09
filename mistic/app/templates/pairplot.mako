@@ -1,5 +1,6 @@
 <%!
 import mistic.app.data as data
+import mistic.app.tables as tables
 import json
 %>
 
@@ -194,7 +195,16 @@ $(document).ready(function() {
     ++next_group;
   };
 
+<%
+  hl = request.GET.get('hl')
+  if hl is not None:
+    hl = tables.JSONStore.fetch(tables.DBSession(), hl)
+%>
+%if hl is not None:
+  pgs.reset(${hl|n});
+%else:
   newGroup();
+%endif
   $('#new_group').on('click', function(event) { newGroup(); event.preventDefault(); });
 
   var updateInfo = function() {	
@@ -387,7 +397,20 @@ $(document).ready(function() {
     if (current_graph.data.length>0){
         _.each(current_graph.data, function(x) { url += '/' + x.gene; });
     }
-    $("span#share").html(url);
+
+    $.ajax({
+      url: "${request.route_url('mistic.json.attr.set')}",
+      dataType: 'json',
+      type: 'POST',
+      data: JSON.stringify(pgs.toJSON()),
+      error: function(req, status, error) {
+        console.log('failed to construct a URL');
+      },
+      success: function(data) {
+        $("span#share").html(url + '?hl=' + data);
+      },
+    });
+
   });
 
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
