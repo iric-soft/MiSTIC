@@ -1,3 +1,4 @@
+import numpy
 import scipy.stats
 import math
 
@@ -26,17 +27,26 @@ def genesetOverRepresentation(identifiers, background, geneset_ids):
     NY = len(gsid_genes - identifiers)
     NN = len(background) - YY - YN - NY
 
-    tab = [ [ YY, YN ], [ NY, NN ] ]
-    
+    _tab = [ [ YY, YN ], [ NY, NN ] ]
+    tab = numpy.array(_tab, dtype=numpy.int64)
+
+    if tab[1,0] > 0 and tab[0,1] > 0:
+        odds = tab[0,0] * tab[1,1] / float(tab[1,0] * tab[0,1])
+    else:
+        odds = numpy.inf
+
+    if odds < 1:
+      continue
+
     odds, p_val = scipy.stats.fisher_exact(tab)
-    
-    if odds < 1 or p_val > 0.05:
+
+    if p_val > 0.05:
       continue
     
     if math.isnan(odds) or math.isinf(odds): odds = str(odds)
     gs_tab.append(dict(
       id = gsid,
-      tab = tab,
+      tab = _tab,
       p_val = p_val,
       odds = odds,
       genes = sorted(gsid_genes)
