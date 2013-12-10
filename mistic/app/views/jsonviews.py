@@ -275,7 +275,7 @@ class Dataset(object):
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
         return out
 
-
+      
       query = sum([ q.split() for q in query ], [])
       query = [ re.compile(re.escape(q), re.I) for q in query if q != '' ]
 
@@ -285,10 +285,10 @@ class Dataset(object):
       for q in query:
         for k,v in d.items():
           keyFound = False
-          if q.match(k):
+          if q.search(k):
               keyFound = True
           for e in v:
-            if q.match(e) or keyFound:
+            if q.search(e) or keyFound:
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
 
       return out
