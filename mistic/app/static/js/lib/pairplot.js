@@ -6,6 +6,8 @@
         height: 1000,
         axes: true,
         minimalAxes: false,
+        x_log: false,
+        y_log: false,
 
         base_attrs: {
             _shape:  'circle',
@@ -40,15 +42,17 @@
             .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink")
             .classed('pairplot', true);
 
-        this.point_groups = [];
+        this.point_groups = null;
 
         this.data = [];
         this.current_selection = [];
         this.subgraphs = [];
+        this.plot_matrix = [];
     };
 
     pairplot.prototype.setMinimalAxes = function(b) {
       this.options.minimalAxes = b;
+      _.each(this.subgraphs, function (s) { s.options.minimal = b; s.updateAxes(); });
     };
 
     pairplot.prototype.resize = function(width, height) {
@@ -67,6 +71,25 @@
     pairplot.prototype.removeData = function(matcher) {
         this.data = _.reject(this.data, matcher);
         this.draw();
+    };
+
+
+    pairplot.prototype.updateData = function(data) {
+        var idx;
+        for (idx = 0; idx < this.data.length; ++idx) {
+            if (data.gene == this.data[idx].gene) break;
+        }
+        if (idx == this.data.length) {
+            return;
+        }
+        this.data[idx] = data;
+        var i;
+        for (i = 0; i < this.data.length; ++i) {
+            this.plot_matrix[idx][i].setXData(data, false);
+            this.plot_matrix[i][idx].setYData(data, false);
+            this.plot_matrix[idx][i].update();
+            if (i != idx) this.plot_matrix[i][idx].update();
+        }
     };
 
     pairplot.prototype.addData = function(data) {
@@ -99,6 +122,12 @@
 
     pairplot.prototype.childSelectionUpdated = function(event, selection) {
         this.setSelection(selection);
+    };
+
+    pairplot.prototype.setScaleType = function(x_log, y_log) {
+        this.options.x_log = x_log;
+        this.options.y_log = y_log;
+        _.each(this.subgraphs, function(s) { s.setScaleType(x_log, y_log); });
     };
 
     pairplot.prototype.setBaseAttrs = function(cls) {
@@ -162,7 +191,8 @@
             textOnly: false,
             minimal: this.options.minimalAxes,
             base_attrs: this.options.base_attrs,
-            class_attrs: this.options.class_attrs
+            x_log: this.options.x_log,
+            y_log: this.options.y_log,
         };
 
         this.subgraphs = []
@@ -177,8 +207,12 @@
             sep = 5;
         }
 
+        this.plot_matrix = new Array(N);
         for (x = 0; x < N; ++x) {
+            this.plot_matrix[x] = new Array(N);
             for (y = 0; y < N; ++y) {
+                var s;
+
                 xlo = Math.floor(this.options.padding[3] + s_w * x / N);
                 ylo = Math.floor(this.options.padding[0] + s_h * y / N);
                 xhi = Math.floor(this.options.padding[3] + s_w * (x+1) / N - sep);
@@ -193,7 +227,6 @@
 
                     _.extend(s_opts, {axes:((d==1 && N < n_axis) ? true : false)});
 
-                    var s;
                     if (x < y ) {
                         s = new textpanel(s_opts, this.data[x], this.data[y]);
                     } else if (x > y ) {
@@ -202,92 +235,17 @@
                         s.setPointGroups(this.point_groups);
                         this.subgraphs.push(s);
                     }
-                    $(g[0]).append(s.svg);
+                } else {
+                    var gi_opts = { fsize_head: Math.max(12, 25 - N), fsize: Math.max(10, 16 - N), width: xhi - xlo, height: yhi - ylo };
+                    s = new geneinfo(gi_opts, this.data[x]);
                 }
-
-                else {
-                    //console.log(JSON.stringify(this.data[x].symbol));
-
-                     var fsize_symbol = 25-N;
-                     var name_length = this.data[x].name.length;
-                     var name = this.data[x].name  ?  this.data[x].name  : this.data[x].gene;
-                     var name_space = this.width/(N)-this.options.padding[3]*N*2 - 50;
-
-                     if ((name_space)<name_length) {
-                        if ((name_space)>3) {   name = name.slice(1,name_space)+'...';}
-                        else {name = '';}
-                     }
-
-                     var fsize_name = 16-N;
-
-
-                     g.append('text')
-                        .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5-8)
-                        .attr('dy', '12px')
-                        .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: ' + fsize_symbol + 'px; font-weight: 600')
-                        .attr('id', 'text-symbol')
-                        .text(this.data[x].symbol ? this.data[x].symbol : this.data[x].gene);
-
-                     if (name!='') {
-                     g.append('text')
-                        .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5+8)
-                        .attr('dy', '12px')
-                        .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: '+ fsize_name +'px; font-weight: 600')
-                        .attr('id', 'text-name')
-                        .text(name);
-                     }
-
-                     var fsize = 16-N, d=40, p=15;
-
-                     if (N>4){  p=11, d= 38;}
-                     if (name=='') {d = d-10;}
-
-                     var expr = _.map(this.data[x].data, function(d) {return d.expr});
-
-                     var sd_e = stats.stdev(expr);
-                     var mu_e = stats.average(expr);
-                     var rg_e = stats.range(expr);
-
-                     if (fsize >= 10) {
-
-                     g.append('text')
-                        .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5+d)
-                        .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: '+fsize+'px; font-weight: 600')
-                        .text('Mean =  ' + mu_e.toFixed(2));
-
-
-                     g.append('text')
-                        .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5+d+p)
-                        .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: '+fsize+'px; font-weight: 600')
-                        .text('Std =  ' + sd_e.toFixed(2));
-                     }
-
-                    else { p=0; fsize=11;}
-
-                     g.append('text')
-                        .attr('x', (xhi-xlo)/2)
-                        .attr('y', (yhi-ylo)/5+d+2*p)
-                        .attr('text-anchor', 'middle')
-                        .attr('style', 'font-family: helvetica; font-size: '+fsize+'px; font-weight: 600')
-                        .text(' [' + rg_e[0].toFixed(2) +", "+ rg_e[1].toFixed(2)+"]");
-
-
-                }
+                $(g[0]).append(s.svg);
+                this.plot_matrix[x][y] = s;
+                s.draw();
             }
         }
-        $('svg', this.svg).on('updateselection', _.bind(this.childSelectionUpdated, this));
-
+        $('svg.scatterplot', this.svg).on('updateselection', _.bind(this.childSelectionUpdated, this));
     };
-
-
 })();
 
 

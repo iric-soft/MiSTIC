@@ -3,6 +3,7 @@
         padding: [ 20,20,60,60 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
         inner: 10,   // amount that the plot background is expanded by.
         outer: 15,   // amount that the plot axes are moved by.
+        outside_domain_pad: [10, 10],
         xlab_offset: 36,
         ylab_offset: -38,
         width: 1000,
@@ -60,8 +61,6 @@
 
         this.setXData(xdata, false);
         this.setYData(ydata, false);
-
-        this.draw();
     };
 
     scatterplot.prototype.setBaseAttrs = function(cls) {
@@ -77,7 +76,7 @@
         }
         this.point_groups = pgs;
         if (this.point_groups !== null) {
-            this.point_groups.on('change:point_ids change:style add remove reset sort', this.updatePoints, this);
+            this.point_groups.on('change:point_ids change:style add remove reset sort', function() { this.updatePoints(); }, this);
         }
 
         this.updatePoints();
@@ -191,8 +190,10 @@
     scatterplot.prototype._transform = function(v, scale) {
         var d = scale.domain();
         var r = scale.range();
-        if (d[0] > v) return r[0];
-        if (d[1] < v) return r[1];
+        var o0 = this.options.outside_domain_pad[0] - this.options.pt_size;
+        var o1 = this.options.outside_domain_pad[1] - this.options.pt_size;
+        if (d[0] > v) return r[0] + o0 * (r[0]<r[1] ? -1 : +1);
+        if (d[1] < v) return r[1] + o1 * (r[0]<r[1] ? -1 : +1);
         return scale(v);
     };
 
@@ -206,37 +207,50 @@
     scatterplot.prototype.makeMinimalAxes = function() {
         xmean = stats.average(_.values(this.xdata));
         ymean = stats.average(_.values(this.ydata));
-        xrg = stats.range(_.values(this.xdata));
-        yrg = stats.range(_.values(this.ydata));
 
-        this.xAxis = d3.svg
-            .axis()
-            .scale(this.xScale)
-            .orient("bottom")
-            .tickValues([xrg[0]+0.001, xmean, xrg[1]])
-            .tickFormat(d3.format(",.1f"));
+        var dx = this.xScale.domain();
+        var dy = this.yScale.domain();
 
-        this.yAxis = d3.svg
-            .axis()
-            .scale(this.yScale)
-            .orient("left")
-            .tickValues([yrg[0]+0.01, ymean, yrg[1]])
-            .tickFormat(d3.format(",.1f"));
+        var dmx = d3.extent(_.values(this.xdata), function(d) { return (d < dx[0] || d > dx[1]) ? null : d; });
+        var dmy = d3.extent(_.values(this.ydata), function(d) { return (d < dy[0] || d > dy[1]) ? null : d; });
+
+        var fmt = function(x) { return d3.format(",.2g")(x).replace(/([.][0-9]*[1-9])0*$/, '$1'); }
+
+        if (this.xAxis !== null) {
+            this.xAxis
+                .scale(this.xScale)
+                .orient("bottom")
+                .tickValues([dmx[0], xmean, dmx[1]])
+                .tickFormat(fmt);
+        }
+
+        if (this.yAxis !== null) {
+            this.yAxis
+                .scale(this.yScale)
+                .orient("left")
+                .tickValues([dmy[0], ymean, dmy[1]])
+                .tickFormat(fmt);
+        }
     };
 
     scatterplot.prototype.makeFullAxes = function() {
-        this.xAxis = d3.svg.axis()
-            .scale(this.xScale)
-            .orient("bottom")
-            .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
-            .ticks(5);
+        if (this.xAxis !== null) {
+            this.xAxis
+                .tickValues(null)
+                .scale(this.xScale)
+                .orient("bottom")
+                .tickFormat(this.xScale.tickFormat(5))
+                .ticks(5);
+        }
 
-
-        this.yAxis = d3.svg.axis()
-            .scale(this.yScale)
-            .orient("left")
-            .tickFormat(this.xScale.tickFormat(5, d3.format(".2f")))
-            .ticks(5);
+        if (this.yAxis !== null) {
+            this.yAxis
+                .tickValues(null)
+                .scale(this.yScale)
+                .orient("left")
+                .tickFormat(this.xScale.tickFormat(5))
+                .ticks(5);
+        }
     };
 
     scatterplot.prototype.updateAxes = function() {
@@ -342,9 +356,41 @@
         return result;
     };
 
-    scatterplot.prototype.updatePoints = function() {
+    scatterplot.prototype.updateScales = function(xy) {
+        if (xy === undefined) xy = this.getXYData();
+
+        var dmx, dmy;
+
+        if (this.options.x_log) {
+            dmx = d3.extent(xy, function(d) { return d.x == 0.0 ? null : d.x; });
+            this.xScale = d3.scale.log();
+        } else {
+            dmx = d3.extent(xy, function(d) { return d.x; });
+            this.xScale = d3.scale.linear();
+        }
+
+        this.xScale.domain(dmx)
+            .range([ this.options.padding[3] + this.options.outside_domain_pad[0],
+                     this.width - this.options.padding[1] - this.options.outside_domain_pad[1] ])
+            .nice();
+
+        if (this.options.y_log) {
+            dmy = d3.extent(xy, function(d) { return d.y == 0.0 ? null : d.y; });
+            this.yScale = d3.scale.log();
+        } else {
+            dmy = d3.extent(xy, function(d) { return d.y; });
+            this.yScale = d3.scale.linear();
+        }
+
+        this.yScale.domain(dmy)
+            .range([ this.height - this.options.padding[2] - this.options.outside_domain_pad[1],
+                     this.options.padding[0] + this.options.outside_domain_pad[0] ])
+            .nice();
+    };
+
+    scatterplot.prototype.updatePoints = function(xy) {
         var self = this;
-        var xy = this.getXYData();
+        if (xy === undefined) xy = this.getXYData();
 
         var pt_size = this.options.pt_size;
         var font_size = pt_size + 8;
@@ -425,8 +471,15 @@
         return xy;
     };
 
+    scatterplot.prototype.setScaleType = function(x_log, y_log) {
+        this.options.x_log = x_log;
+        this.options.y_log = y_log;
+    };
+
     scatterplot.prototype.update = function() {
-        this.updatePoints();
+        var xy = this.getXYData();
+        this.updateScales(xy);
+        this.updatePoints(xy);
         this.updateAxes();
     };
 
@@ -439,52 +492,11 @@
 
         var svg = d3.select(this.svg)
 
+        // clear the current plot
         svg.selectAll('*').remove();
-
-        var keys = _.intersection(_.keys(this.xdata), _.keys(this.ydata));
-
-        var v1_log = [];
-        var v2_log = [];
-        var v1 = [];
-        var v2 = [];
-
-        _.each(keys, function(k) {
-            var x = self.xdata[k];
-            var y = self.ydata[k];
-            v1.push(x);
-            v2.push(y);
-            v1_log.push(Math.log(1000 * x + 1) / Math.log(10.0));
-            v2_log.push(Math.log(1000 * y + 1) / Math.log(10.0));
-        });
-
-        var x_range = stats.range(v1);
-        var y_range = stats.range(v2);
-
-        var lg =
-            Math.max(x_range[1] - x_range[0], y_range[1] - y_range[0]) > 1 &&
-            Math.min(x_range[0], y_range[0]) >= 0.0;
-
-        var r = stats.pearson(v1, v2);
-        var r_log = stats.pearson(v1_log, v2_log);
 
         var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
-
-        if (lg) {
-            this.xScale = d3.scale.log().domain([ Math.max(0.01, x_range[0]), x_range[1] ]);
-            this.yScale = d3.scale.log().domain([ Math.max(0.01, y_range[0]), y_range[1] ]);
-        } else {
-            this.xScale = d3.scale.linear().domain(x_range);
-            this.yScale = d3.scale.linear().domain(y_range);
-        }
-
-        this.xScale
-            .range([ this.options.padding[3], this.width - this.options.padding[1] ])
-            .nice();
-
-        this.yScale
-            .range([ this.height - this.options.padding[2], this.options.padding[0] ])
-            .nice();
 
         // background rectangle
         var bkgx = this.options.padding[3] - this.options.inner;
@@ -527,9 +539,10 @@
 
         // collect data
         var xy = this.getXYData();
+        this.updateScales(xy);
 
         if (this.options.axes) this.makeAxes();
 
-        this.updatePoints();
+        this.updatePoints(xy);
     };
 })();
