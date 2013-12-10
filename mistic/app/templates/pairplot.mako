@@ -74,9 +74,9 @@ import json
           <div id='sample_characteristic'>
           <div class="btn-group">
           <input id='sample_annotation' type=text autocomplete="off" placeholder='Select a characteristic'></input>
-          <a id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <button id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
           <span class="caret"></span>
-          </a>
+          </button>
           </div>
           </div>
           
@@ -280,15 +280,18 @@ $(document).ready(function() {
 
         current_datasets = [dataset];
         dataset_info = [data];
-        gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]);
-        sample_annotation_entry.url = "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset);
+        gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]));
+        sample_annotation_entry.setSearchURL("${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset));
+        $("#sample_annotation_drop").attr('disabled', false);
 
         $("#gene").attr('disabled', false);
       },
       error: function() {
         current_dataset = [];
         dataset_info = [];
-        gene_entry.url = null;
+        gene_entry.setSearchURL(undefined);
+        sample_annotation_entry.setSearchURL(undefined);
+        $("#sample_annotation_drop").attr('disabled', true);
         $("#gene").attr('disabled', true);
       },
       complete: function() {
@@ -451,8 +454,9 @@ $(document).ready(function() {
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
   %else:
-    gene_entry.url = null;
-
+    gene_entry.setSearchURL(undefined);
+    sample_annotation_entry.setSearchURL(undefined);
+    $("#sample_annotation_drop").attr('disabled', true);
     $("#gene").attr('disabled', true);
     $("#tag").attr('disabled', true);
   %endif

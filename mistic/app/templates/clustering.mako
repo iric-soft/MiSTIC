@@ -133,7 +133,7 @@ $(document).ready(function() {
                               "Transform: ${xform}"]); 
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
-  gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset=dataset)}";
+  gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
 
   var go_entry = new GODropdown({
     el: $("#goterm"),

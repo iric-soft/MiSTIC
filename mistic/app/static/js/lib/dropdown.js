@@ -194,6 +194,11 @@
             this.beginFetching(this.searchURL(), this.searchData());
         },
 
+        setSearchURL: function(url) {
+            this.url = url;
+            this.$el.attr('disabled', this.url === undefined);
+        },
+
         searchURL: function() {
             return this.url;
         },
@@ -377,9 +382,7 @@
                 this.collection = new Backbone.Collection();
             }
 
-            if (this.options.url !== undefined) {
-                this.url = this.options.url;
-            }
+            this.setSearchURL(this.options.url);
 
             this.fetching_items = false;
             this.current_search = null;

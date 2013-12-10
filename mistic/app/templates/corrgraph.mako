@@ -184,22 +184,18 @@ $(document).ready(function() {
   var addDataset = function(dataset, sync) {
     var disable = function() {
       dataset_info = {};
-      go_entry.url = null;
+      go_entry.setSearchURL(undefined);
       current_dataset = null;
-      gene_entry.url = null;
-      $("#gene").attr('disabled', true);
-      $("#goterm").attr("disabled", true);
+      gene_entry.setSearchURL(undefined);
       gene_entry.$el.val('');
       $('ul#current_dataset').html('');
     };
 
     var enable = function(data) {
       dataset_info = data;
-      go_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation='_annotation_')}".replace('_annotation_', dataset_info.anot);
+      go_entry.setSearchURL("${request.route_url('mistic.json.annotation.gs', annotation='_annotation_')}".replace('_annotation_', dataset_info.anot));
       current_dataset = dataset;
-      gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
-      $("#gene").attr("disabled", false);
-      $("#goterm").attr("disabled", false);
+      gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset));
       gene_entry.$el.val('');
       $('ul#current_dataset').html('').append('<li>' + dataset + '</li>');
     };
