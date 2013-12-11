@@ -1,0 +1,37 @@
+ontology: data/ontology
+
+orthology: data/annotation/orthology.txt
+
+annotations:
+- id: official_symbol
+  name: Human official gene symbol
+  path: data/annotation/official_symbol.txt
+
+dataset_annotations:
+
+datasets:
+- id:   bodymap
+  name: Illumina Bodymap
+  desc: Illumina Bodymap (n=16)
+  path: data/datasets/bodymap.txt
+  annr: official_symbol
+  expt: ngs
+  txid: '9606'
+  type: rpkm
+  xfrm: [log]
+  tags:
+    technology: RNA-Seq
+
+genesets:
+- id: go
+  name: Gene Ontology
+  desc: Gene Ontology
+  anot: 
+    official_symbol: data/genesets/go/official_symbol.txt
+- id: msigdb
+  name: MSigDB
+  desc: Gene sets extracted from MSigDB
+  path: data/genesets/msigdb/info.txt
+  anot: 
+    official_symbol: data/genesets/msigdb/official_symbol.txt
+
