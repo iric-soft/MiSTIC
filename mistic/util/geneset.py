@@ -3,6 +3,26 @@ import scipy.stats
 import math
 from mistic.util.json_helpers import *
 
+def chi2_yates(((a,b),(c,d))):
+  if any([ x < 0 for x in (a,b,c,d) ]):
+    return None
+
+  a,b,c,d = float(a),float(b),float(c),float(d)
+  t = a+b+c+d
+  ea = (a+b) * (a+c) / t
+  eb = (b+a) * (b+d) / t
+  ec = (c+a) * (c+d) / t
+  ed = (d+b) * (d+c) / t
+
+  if any([ x == 0.0 for x in (ea,eb,ec,ed) ]):
+    return None
+
+  return (
+    math.pow(abs(a - ea) - 0.5, 2) / ea +
+    math.pow(abs(b - eb) - 0.5, 2) / eb +
+    math.pow(abs(c - ec) - 0.5, 2) / ec +
+    math.pow(abs(d - ed) - 0.5, 2) / ed
+  )
 
 def genesetOverRepresentation(identifiers, background, geneset_ids):
   """
@@ -38,6 +58,10 @@ def genesetOverRepresentation(identifiers, background, geneset_ids):
     if odds < 1:
       continue
 
+    chi2 = chi2_yates(_tab)
+    if chi2 < 2.5:
+      continue
+
     odds, p_val = scipy.stats.fisher_exact(tab)
 
     if p_val > 0.05:
@@ -50,7 +74,12 @@ def genesetOverRepresentation(identifiers, background, geneset_ids):
       odds = safeFloat(odds),
       genes = sorted(gsid_genes)
     ))
-    
- 
+
   gs_tab.sort(key = lambda d: d['p_val'])
   return gs_tab
+
+
+
+__all__ = [
+  'genesetOverRepresentation',
+]
