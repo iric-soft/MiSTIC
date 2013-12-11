@@ -69,7 +69,7 @@ def read_json_table(path, converters = {}):
     index.append(ident)
     rows.append(row)
   columns = col_order.keys()
-  table = pandas.DataFrame(rows, index = pandas.Series(index, dtype=str), columns = columns)
+  table = pandas.DataFrame(rows, index = pandas.Series(index, dtype=str), columns = columns, dtype = object)
   return table
 
 def write_json_table(path, table, converters = {}):
