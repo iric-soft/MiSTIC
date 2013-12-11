@@ -159,6 +159,11 @@
         this.notifySelectionChange(quiet);
     };
 
+    scatterplot.prototype.clearBrush = function() {
+        this.brush.clear();
+        d3.select(this.svg).select('g.brush').call(this.brush);
+    };
+
     scatterplot.prototype.getSelection = function() {
         var nodes = d3
             .select(this.svg)
