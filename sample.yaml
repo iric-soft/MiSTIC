@@ -15,6 +15,7 @@ datasets:
   desc: Illumina Bodymap (n=16)
   path: data/datasets/bodymap.txt
   annr: official_symbol
+  annc: ''
   expt: ngs
   txid: '9606'
   type: rpkm
