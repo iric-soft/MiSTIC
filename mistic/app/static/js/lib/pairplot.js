@@ -120,6 +120,10 @@
         }
     };
 
+    pairplot.prototype.clearBrush = function() {
+        _.each(this.subgraphs, function(g) { g.clearBrush(); });
+    };
+
     pairplot.prototype.clearOtherBushes = function(event, scatterplot) {
         _.each(this.subgraphs, function(g) { if (g !== scatterplot) g.clearBrush(); });
     };
