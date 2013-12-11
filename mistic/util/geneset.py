@@ -1,7 +1,7 @@
 import numpy
 import scipy.stats
 import math
-
+from mistic.util.json_helpers import *
 
 
 def genesetOverRepresentation(identifiers, background, geneset_ids):
@@ -43,12 +43,11 @@ def genesetOverRepresentation(identifiers, background, geneset_ids):
     if p_val > 0.05:
       continue
     
-    if math.isnan(odds) or math.isinf(odds): odds = str(odds)
     gs_tab.append(dict(
       id = gsid,
       tab = _tab,
-      p_val = p_val,
-      odds = odds,
+      p_val = safeFloat(p_val),
+      odds = safeFloat(odds),
       genes = sorted(gsid_genes)
     ))
     
