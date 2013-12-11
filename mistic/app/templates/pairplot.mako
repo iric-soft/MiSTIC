@@ -74,9 +74,9 @@ import json
           <div id='sample_characteristic'>
           <div class="btn-group">
           <input id='sample_annotation' type=text autocomplete="off" placeholder='Select a characteristic'></input>
-          <a id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+          <button id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
           <span class="caret"></span>
-          </a>
+          </button>
           </div>
           </div>
           
@@ -100,6 +100,11 @@ import json
             <li><a id='select_clear' href="#">Select all</a></li>
             <li class="divider"></li>
             <li><a id="change_axes"  href="#">Change axes</a></li>
+            <li>
+              Transformation:
+              <div class="btn-group btn-group-justified" data-toggle="buttons-radio" id="transform-buttons">
+              </div>
+            </li>
           </ul>
         </div>
       </div>
@@ -162,6 +167,7 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/scatterplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/textpanel.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/pairplot.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/geneinfo.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/dataset_selector.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/ZeroClipboard.min.js')}" type="text/javascript"></script>
 
@@ -174,7 +180,12 @@ $(document).ready(function() {
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
 
+  current_datasets = [];
+  dataset_info = [];
+  current_transform = "none";
   current_graph = new pairplot(undefined, undefined, $('#graph'));
+  current_graph.setScaleType(false, false);
+
   $("#options").css('display', 'none');
 
   var group_colours = [ "rgba(252,132,3,.65)", "rgba(11,190,222,.65)", "rgba(36,153,36,.65)", "rgba(155,42,141,.65)" ];
@@ -205,6 +216,7 @@ $(document).ready(function() {
 %else:
   newGroup();
 %endif
+
   $('#new_group').on('click', function(event) { newGroup(); event.preventDefault(); });
 
   var updateInfo = function() {	
@@ -224,32 +236,91 @@ $(document).ready(function() {
     }
   };
 
+  var setCurrentTransform = function(xfrm) {
+    if (current_transform !== xfrm) {
+      var avail_xfrms = dataset_info[0]['xfrm']
+      if (_.contains(avail_xfrms, xfrm)) {
+        $('#transform-buttons button').toggleClass('active', current_transform == xfrm);
+        current_transform = xfrm;
+        reloadAll();
+        // choose log scales if 'log' is a valid transformation, and the selected transformation is 'none'
+        var lg = current_transform === 'none' && _.contains(avail_xfrms, 'log');
+        current_graph.setScaleType(lg, lg);
+      }
+    }
+  };
+
+  var setAvailableTransforms = function(xfrm_list) {
+    var xf = $('#transform-buttons');
+    xf.empty();
+    current_transform = xfrm_list[0];
+    _.each(xfrm_list, function(val) {
+      var btn = $('<button class="btn btn-default">');
+      btn.on('click', function(event) {
+        setCurrentTransform($(this).text());
+        event.preventDefault();
+      });
+      btn.text(val);
+      xf.append(btn);
+    });
+  };
+
   var addDataset = function(dataset, sync) {
+    current_graph.removeData(function() { return true; });
+
     $.ajax({
-      url: "${request.route_url('mistic.json.dataset.sampleinfo', dataset='_dataset_')}".replace('_dataset_', dataset),
+      url: "${request.route_url('mistic.json.dataset', dataset='_dataset_')}".replace('_dataset_', dataset),
       dataype: 'json',
       async: !sync,
       success: function(data) {
+        $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
+
+        setAvailableTransforms(data['xfrm']);
+        setCurrentTransform(data['xfrm'][0]);
+
         current_datasets = [dataset];
-        gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]);
-        sample_annotation_entry.url = "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset);
+        dataset_info = [data];
+        gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]));
+        sample_annotation_entry.setSearchURL("${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset));
+        $("#sample_annotation_drop").attr('disabled', false);
 
         $("#gene").attr('disabled', false);
-        $(".locate").attr('disabled', false);
-        $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
       },
       error: function() {
         current_dataset = [];
-        gene_entry.url = null;
+        dataset_info = [];
+        gene_entry.setSearchURL(undefined);
+        sample_annotation_entry.setSearchURL(undefined);
+        $("#sample_annotation_drop").attr('disabled', true);
         $("#gene").attr('disabled', true);
-        $(".locate").attr('disabled', true);
       },
       complete: function() {
         gene_entry.$el.val('');
         info.clear();
         $('#genelist').empty();
-        current_graph.removeData(function() { return true; });
+
+      }
+    });
+  };
+
+  var reloadAll = function(sync) {
+    _.each(current_graph.data, function(data) {
+      reloadGene(data.gene, sync);
+    });
+  };
+
+  var reloadGene = function(gene_id, sync) {
+    $.ajax({
+      url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_datasets[0]).replace('_gene_id_', gene_id),
+      dataype: 'json',
+      data: { x: current_transform },
+      async: !sync,
+      success: function(data) {
+        current_graph.updateData(data);
         updateInfo();
+      },
+      error: function() {
+        // inform the user something went wrong.
       }
     });
   };
@@ -258,6 +329,7 @@ $(document).ready(function() {
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_datasets[0]).replace('_gene_id_', gene_id),
       dataype: 'json',
+      data: { x: current_transform },
       async: !sync,
       success: function(data) {
         current_graph.addData(data);
@@ -375,8 +447,6 @@ $(document).ready(function() {
     gene_data = [ ds.expndata(gene) for gene in genes ]
   %>
 
-  current_datasets = [];
-
   %if ds is not None:
     addDataset("${dataset}", true);
     // Gene symbols were passed in the URL
@@ -384,8 +454,9 @@ $(document).ready(function() {
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
   %else:
-    gene_entry.url = null;
-
+    gene_entry.setSearchURL(undefined);
+    sample_annotation_entry.setSearchURL(undefined);
+    $("#sample_annotation_drop").attr('disabled', true);
     $("#gene").attr('disabled', true);
     $("#tag").attr('disabled', true);
   %endif
@@ -529,6 +600,8 @@ $(document).ready(function() {
     });
     event.preventDefault();
   });
+
+  $("#transform-buttons").button();
 });
 </script>
 </%block>

@@ -355,13 +355,13 @@ div#point-group-settings .colour div.alpha-image {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
 }
 
-div#sample_characteristic input{
+div#sample_characteristic input {
     display: inline-block;
     margin-bottom:0px;
-    
 }
-div#sample_characteristic a{
-    display: inline;  
+
+div#sample_characteristic button {
+    display: inline;
     position : absolute;
 }
 

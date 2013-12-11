@@ -56,10 +56,6 @@
         return vals;
     };
 
-    textpanel.prototype.setLog = function(l) {
-        this.options.lg=l;
-    };
-
     textpanel.prototype.setXData = function(xdata, redraw) {
         if (xdata !== undefined) {
             this.xlab = xdata.symbol;
@@ -156,4 +152,6 @@
             }
         }
     };
+
+    textpanel.prototype.update = textpanel.prototype.draw;
 })();

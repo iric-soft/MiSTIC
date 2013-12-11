@@ -126,20 +126,14 @@ $(document).ready(function() {
 
   $('#datasets').on('change', function(event) {
     current_dataset = event.target.value;
+    var search_url = undefined;
     if (current_dataset === '') {
       current_dataset = null;
-      gene1_entry.url =
-      gene2_entry.url = null;
-      $("#gene1").attr('disabled', true);
-      $("#gene2").attr('disabled', true);
-     
     } else {
-      
-      $("#gene1").attr('disabled', false);
-      $("#gene2").attr('disabled', false);
-      gene1_entry.url =
-      gene2_entry.url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
+      search_url = "${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset);
     }
+    gene1_entry.setSearchURL(search_url);
+    gene2_entry.setSearchURL(search_url);
     gene1_entry.$el.val('');
     gene2_entry.$el.val('');
     updateURLTarget({ dataset: current_dataset });

@@ -181,8 +181,8 @@ var updateEnrichmentTable = function() {
 
     var td = tr.selectAll('td')
         .data(function(d) { return [
-        { value: d.p_val.toExponential(2) },
-        { value: d.odds.toFixed(2) },
+        { value: (typeof(d.p_val) === 'string') ? d.p_val : d.p_val.toExponential(2) },
+        { value: (typeof(d.odds)  === 'string') ? d.odds  : d.odds.toFixed(2) },
         { value: d.gs },
         { value: d.cat },
         { value: d.id },
@@ -447,11 +447,11 @@ getAnnotationContent = function(d) {
   
   h = h + "<p>";
   h = h + '<table class="table table-condensed" <thead><tr>';
-  h = h + '<th></th><th>Cluster nodes</th><th>All genes</th>';
+  h = h + '<th></th><th>In cluster</th><th>Not in cluster</th>';
   h = h + '</tr></thead>';
   h = h + '<tbody>';
-  h = h + '<tr><td>In</td><td>'+d.tab[0][0]+'</td> <td>'+d.tab[1][0]+'</td></tr>';
-  h = h + '<tr><td>Not</td><td>'+d.tab[0][1]+'</td> <td>'+d.tab[1][1]+'</td></tr>';
+  h = h + '<tr><th>In gene set</th><td>'+d.tab[0][0]+'</td> <td>'+d.tab[1][0]+'</td></tr>';
+  h = h + '<tr><th>Not in gene set</th><td>'+d.tab[0][1]+'</td> <td>'+d.tab[1][1]+'</td></tr>';
   h = h + '</tbody>';
   h = h + '</table></div></div>';
   $('#part2 > .accordion').append(getAccordionGroup('info', '1', 'Information', h))

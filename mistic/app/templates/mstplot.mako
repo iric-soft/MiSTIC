@@ -73,7 +73,7 @@ $(document).ready(function() {
   current_graph.draw();
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
-  gene_entry.url = "${request.route_url('mistic.json.dataset.search', dataset=ds.id)}";
+  gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=ds.id)}");
 
   gene_entry.on('change', function(item) {
     if (item === null) return;

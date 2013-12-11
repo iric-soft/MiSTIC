@@ -19,8 +19,9 @@ class AnscombeTransform(object):
 
 
 class LogTransform(object):
-  def __init__(self, scale = 1024, bias = 1, base = 2):
+  def __init__(self, scale = 1000, bias = 1, base = 10):
     self.params = (scale, bias, base)
+
   def __call__(self, matrix):
     
     scale, bias, base = self.params
@@ -43,26 +44,30 @@ class RankTransform(object):
     idx = [ i for i, j in enumerate(row) if not numpy.isnan(j) ]
     idx.sort(key = lambda x: row[x])
 
-    mean = (len(idx) + 1) / 2.0
+    mean = (len(idx) - 1) / 2.0
     sd = math.sqrt((len(idx) * len(idx) - 1) / 12.0)
 
-    rank_vals = [ (i - mean) / sd for i in range(1, len(idx) + 1) ]
-
-    for i, r in zip(idx, rank_vals):
-      row[i] = r
-
-
+    i = 0
+    rv = 0.0
+    while i < len(idx):
+      j = i
+      v = 0.0
+      while j < len(idx) and row[idx[i]] == row[idx[j]]:
+        v += rv
+        rv += 1.0
+        j += 1
+      v = v / (j-i)
+      v = (v - mean) / sd
+      while i < j:
+        row[idx[i]] = v
+        i += 1
 
   def __call__(self, matrix):
-    o = (numpy.random.ranf(matrix.shape) - .5) * 0.001
-
-    if hasattr(matrix, 'values'):
-      df = numpy.log2(matrix + 0.1 + o)
-      d = df.values
-      r = df
+    r = matrix.copy()
+    if hasattr(r, 'values'):
+      d = r.values
     else:
-      d = numpy.log2(matrix + 0.1 + o)
-      r = d
+      d = r
 
     if len(d.shape) == 1:
       self.rankRow(d)
@@ -70,7 +75,7 @@ class RankTransform(object):
       for i in range(len(d)):
         self.rankRow(d[i])
 
-    return r
+    return d
     
 
 class DataSet(object):
