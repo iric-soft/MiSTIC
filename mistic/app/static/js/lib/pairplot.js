@@ -120,6 +120,10 @@
         }
     };
 
+    pairplot.prototype.clearOtherBushes = function(event, scatterplot) {
+        _.each(this.subgraphs, function(g) { if (g !== scatterplot) g.clearBrush(); });
+    };
+
     pairplot.prototype.childSelectionUpdated = function(event, selection) {
         this.setSelection(selection);
     };
@@ -245,6 +249,7 @@
             }
         }
         $('svg.scatterplot', this.svg).on('updateselection', _.bind(this.childSelectionUpdated, this));
+        $('svg.scatterplot', this.svg).on('brushstart',      _.bind(this.clearOtherBushes, this));
     };
 })();
 
