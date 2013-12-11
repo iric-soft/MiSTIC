@@ -173,6 +173,7 @@
     };
 
     scatterplot.prototype.brushstart = function() {
+        $(this.svg).trigger('brushstart', [this]);
     };
 
     scatterplot.prototype.brushed = function() {
@@ -190,6 +191,7 @@
     };
 
     scatterplot.prototype.brushend = function() {
+        $(this.svg).trigger('brushstart', [this]);
     };
 
     scatterplot.prototype._transform = function(v, scale) {
