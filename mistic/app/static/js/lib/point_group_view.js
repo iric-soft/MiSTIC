@@ -211,12 +211,14 @@
         add_points: function() {
             var sel = this.graph.getSelection();
             this.graph.setSelection([]);
+            this.graph.clearBrush();
             this.group.addPoints(sel);
         },
 
         remove_points: function() {
             var sel = this.graph.getSelection();
             this.graph.setSelection([]);
+            this.graph.clearBrush();
             this.group.removePoints(sel);
         },
 
@@ -226,6 +228,7 @@
 
         set_selection: function() {
             this.graph.setSelection(this.value());
+            this.graph.clearBrush();
         },
 
         serialize: function() {
