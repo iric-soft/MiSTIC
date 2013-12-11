@@ -446,6 +446,7 @@ class Dataset(object):
      for r in gs_tab:
          x = r['id']
          info = a.geneset_info(x)
+         info = info.replace({numpy.nan : ''})
          r['info'] = dict(info)
          r['name'] = info.get('name', '')
          r['desc'] = info.get('desc', '')
