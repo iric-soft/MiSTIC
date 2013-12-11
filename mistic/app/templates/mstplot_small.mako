@@ -181,8 +181,8 @@ var updateEnrichmentTable = function() {
 
     var td = tr.selectAll('td')
         .data(function(d) { return [
-        { value: typeof(d.p_val) === 'string' ? d.p_val : d.p_val.toExponential(2) },
-        { value: typeof(d.odds) === 'string' ? d.odds : d.odds.toFixed(2) },
+        { value: (typeof(d.p_val) === 'string') ? d.p_val : d.p_val.toExponential(2) },
+        { value: (typeof(d.odds)  === 'string') ? d.odds  : d.odds.toFixed(2) },
         { value: d.gs },
         { value: d.cat },
         { value: d.id },
