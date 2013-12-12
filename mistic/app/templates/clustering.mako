@@ -190,7 +190,10 @@ $(document).ready(function() {
 
           current_graph.colourByClusterMatch(
             node_content,
-            function (a,b,c,d) {
+            // function (a, b, c, d, cur_max) {
+            //   return fisher.exact_w (a, b, c, d, cur_max);
+            // },
+            function (a, b, c, d, ignored) {
               return Math.max(0.0, stats.kappa(a, b, c, d));
             },
             function (a,b) {
