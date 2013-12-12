@@ -516,11 +516,16 @@ class GeneSet(object):
 
 def make_id_map(x, y, matcher):
   r = {}
+  d = []
   for i in x:
     l = [ j for j in y if matcher(i, j) ]
     if len(l) > 1:
+      logging.warn('mapping must not be ambiguous %s %s', i,  str(l))
       # mapping must not be ambiguous
-      return None
+      l.sort()
+      r[i]=l[0]
+      d.append(l[1:])
+      continue
     elif len(l) == 0:
       # mapping may skip source ids
       continue
@@ -531,10 +536,11 @@ def make_id_map(x, y, matcher):
   if len(set(r.values())) != len(r):
     # mapping must be 1:1
     return None
-  if set(r.values()) != set(y):
-    # mapping must cover all target ids
-    return None
-  return r
+  #if set(r.values()) != set(y):
+  #  # mapping must cover all target ids
+  #  return None
+  d = sum(d, [])
+  return r,d
 
 def prefix_map(x, y):
   return make_id_map(x, y, lambda i, j: j.startswith(i))
@@ -572,7 +578,7 @@ class DataSet(object):
     else:
       self.catchMappedSampleIDs()
       self.checkAllSamplesHaveAnnotations()
-
+     
     self.transforms  = []
 
     for x in self.config.get('xfrm', ['none']):
@@ -583,7 +589,8 @@ class DataSet(object):
     sample_set = set(self.samples)
     cann_set = set(self.cannotation.data.index)
     samples_without_annotation = sorted(sample_set - cann_set)
-    if len(samples_without_annotation):
+   
+    if len(samples_without_annotation):      
       logging.warn('no sample annotation for samples [{0}] in dataset {1} (sample annotation {2})'.format(
         ', '.join(samples_without_annotation),
         self.id,
@@ -600,12 +607,20 @@ class DataSet(object):
       self.id,
       self.config['annc']))
     for mapper in (prefix_map, rev_prefix_map):
-      cann_map = mapper(cann_set, sample_set)
+      cann_map,ambiguous = mapper(cann_set, sample_set)
+     
       if cann_map is not None:
         logging.warn('mapping found: {0}'.format(mapper.__name__))
         self.cannotation = copy.copy(self.cannotation)
         self.cannotation.data = self.cannotation.data.copy()
         self.cannotation.data.index = self.cannotation.data.index.map(cann_map.get)
+        self.cannotation.data = self.cannotation.data.drop([None], axis=0)
+       
+        if len(ambiguous): 
+          n = len(self.data.df.columns)
+          self.data.df = self.data.df.drop(ambiguous, axis=1)
+          logging.warn('%s samples in dataset.  Removed duplicates: %s.  Now %s samples in dataset', n,  str(ambiguous), len(self.data.df.columns))
+        
         break
     else:
       logging.warn('no mapping found, no annotation information will be available.')
