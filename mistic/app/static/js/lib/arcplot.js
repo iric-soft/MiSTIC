@@ -390,7 +390,7 @@
                 var __np = c_counts[i] - n.__pp[i];
                 var __nn = total - n.__pn[i] - __np - n.__pp[i];
 
-                var x = statistic(__pp, __pn, __np, __nn);
+                var x = statistic(__pp, __pn, __np, __nn, x_max);
                 if (x === undefined) continue;
 
                 // stats.chi2_yates(__pp, __pn, __np, __nn);
