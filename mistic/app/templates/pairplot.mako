@@ -282,9 +282,10 @@ $(document).ready(function() {
         dataset_info = [data];
         gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]));
         sample_annotation_entry.setSearchURL("${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset));
+        $("#sample_annotation").val('');
         $("#sample_annotation_drop").attr('disabled', false);
-
         $("#gene").attr('disabled', false);
+        $("input").attr('disabled', false);
       },
       error: function() {
         current_dataset = [];
@@ -293,11 +294,13 @@ $(document).ready(function() {
         sample_annotation_entry.setSearchURL(undefined);
         $("#sample_annotation_drop").attr('disabled', true);
         $("#gene").attr('disabled', true);
+        $('input').attr('disabled', true);
       },
       complete: function() {
         gene_entry.$el.val('');
         info.clear();
         $('#genelist').empty();
+        updateEnrichmentTable([]);
 
       }
     });
@@ -454,11 +457,14 @@ $(document).ready(function() {
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
   %else:
+    console.debug('no dataset');
     gene_entry.setSearchURL(undefined);
     sample_annotation_entry.setSearchURL(undefined);
     $("#sample_annotation_drop").attr('disabled', true);
+    $('input').attr('disabled', true);
     $("#gene").attr('disabled', true);
-    $("#tag").attr('disabled', true);
+    updateEnrichmentTable([]);
+    
   %endif
 
   $("#share_url").on('click', function(event){
