@@ -41,13 +41,7 @@ td.subgroup {
 
 th { padding:0px;}
 
-i {
-float: left;
-}
 
-a#oo{
-    text-decoration : none;
-}
 
 </%block>
 <%block name="actions">
@@ -68,12 +62,13 @@ a#oo{
 <hr>
 
 
-<table id="datasets-table" style="width:850px;">
+<table id="datasets-table">
 <thead>
 <tr>
   <th>Dataset</th>
 %for term in terms :
-  <th><a><i class="icon-th-list"></a></i>${term}</th>
+  <th><a class="group-data">&#x2630</a> ${term}</th>
+  
 %endfor
 <th>n</th>
 <th>Icicle</th>
@@ -140,16 +135,16 @@ function initTable() {
   });
 }
 
-$('#datasets-table th a i').on('click', function(event) { 
+$('#datasets-table th a ').on('click', function(event) { 
     
     event.stopPropagation();
-    var cell = this.parentElement.parentElement; 
+    var cell = this.parentElement;
     var cellContent = cell.innerHTML;
     var oTable = initTable();
       
-    var alreadyActive = $(this).hasClass('icon-active');
+    var alreadyActive = $(this).hasClass('active');
     
-    $('.icon-th-list').removeClass('icon-active');
+    $('.group-data').removeClass('active');
     
     oTable = removeGrouping(oTable);  // utils.js
     oTable = setColReorder(oTable);  // utils.js
@@ -168,7 +163,7 @@ $('#datasets-table th a i').on('click', function(event) {
      }
      j = j;
     
-     $(this).addClass('icon-active');
+     $(this).addClass('active');
     
      oTable = removeColReorder(oTable);  // utils.js
      

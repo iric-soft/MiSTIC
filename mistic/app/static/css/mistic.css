@@ -404,3 +404,28 @@ div#sample_characteristic button {
   border-bottom-color: transparent;
 }
 
+.group-data {
+    padding: 0px 2px;
+    font-weight: bold;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .2;
+    filter: alpha(opacity=20);
+}
+
+.group-data:hover,.group-data.active {
+    color: #000;
+    text-decoration: none;
+    cursor: pointer;
+    opacity: .8;
+    filter: alpha(opacity=40);
+}
+
+.group-data.disabled:hover {
+    color: #000;
+    text-decoration: none;
+    cursor: default;
+    opacity: .2;
+    filter: alpha(opacity=20);
+}
+
