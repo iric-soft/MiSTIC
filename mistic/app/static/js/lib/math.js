@@ -296,74 +296,9 @@
         return a * d / (b * c);
     };
 
-    // Perform a Fisher exact test on a 2x2 contingency table.
-    //
-    // Parameters
-    // ----------
-    // a, b, c, d
-    //   table: [ a b ]
-    //          [ c d ]
-    // alternative:
-    //   alternative hypothesis ('two-sided', 'less', 'greater') default: 'two-sided'
-    // Returns
-    // -------
-    // oddsratio
-    //   This is prior odds ratio and not a posterior estimate.
-    // p_value
-    //   P-value, the probability of obtaining a distribution at least as
-    //   extreme as the one that was actually observed, assuming that the
-    //   null hypothesis is true.
 
-    stats.fisherp = function(a, b, c, d, alternative) {
-        if (a < 0 || b < 0 || c < 0 || d < 0) {
-            throw "all values must be nonnegative.";
-        }
+    // ** Fisher's exact test has been moved to fisher.js **
 
-        if (a + b == 0 || a + c == 0 || b + c == 0 || b + d == 0) {
-            return { p_value: 1.0, oddsratio: NaN };
-        }
-
-        var result = {};
-
-        if (b > 0 && c > 0) {
-            result.oddsratio = a * d / (b * c);
-        } else {
-            result.oddsratio = Infinity;
-        }
-
-        // a = c[0,0]
-        // b = c[0,1]
-        // c = c[1,0]
-        // d = c[1,1]
-
-        var n1 = a + b;
-        var n2 = c + d;
-        var n  = a + c;
-
-        switch (alternative) {
-        case "less": {
-            result.p_value = hypergeom.cdf(a, a+c, a+b, a+b+c+d);
-            break;
-        }
-        case "greater": {
-            result.p_value = hypergeom.cdf(b, b+d, a+b, a+b+c+d);
-            break;
-        }
-        case undefined:
-        case "two-sided": {
-            throw "unimplemented";
-        }
-        default: {
-            throw "alternative should be 'less', 'greater' or 'two-sided'";
-        }
-        }
-
-        if (result.p_value > 1.0) {
-            result.p_value = 1.0;
-        }
-
-        return result;
-    };
 
     // Chi-square test of independence.
     stats.chi2 = function(a, b, c, d) {

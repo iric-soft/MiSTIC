@@ -1,6 +1,5 @@
 //                              -*- Mode: JavaScript -*- 
 // fisher.js --- Fisher's exact test
-// Derived from http://www.langsrud.com/fisher.htm by Oyvind Langsrud
 // 
 
 (function () {
@@ -37,101 +36,54 @@
     return (lnfact (n) - lnfact (k) - lnfact (n - k));
   }
 
-  
-  function hyper_323 (n11, n1_, n_1, n) {
-    return (Math.exp (lnbico (n1_, n11) + lnbico (n - n1_, n_1 - n11) - lnbico (n, n_1)));
-  }
 
-  
-  var sn11, sn1_, sn_1, sn, sprob;
-  function hyper (n11) {
-    return (hyper0 (n11, 0, 0, 0));
-  }
-  
-
-  function hyper0 (n11i,n1_i,n_1i,ni) {
-    if (!(n1_i | n_1i | ni)) {
-      if (!(n11i % 10 == 0)) {
-        if (n11i == sn11 + 1) {
-          sprob *= ((sn1_ - sn11) / (n11i)) * ((sn_1 - sn11) / (n11i + sn - sn1_ - sn_1));
-          sn11 = n11i;
-          return sprob;
-        }
-        if (n11i == sn11 - 1) {
-          sprob *= ((sn11) / (sn1_ - n11i)) * ((sn11 + sn - sn1_ - sn_1) / (sn_1 - n11i));
-          sn11 = n11i;
-          return sprob;
-        }
-      }
-      sn11 = n11i;
-    } else {
-      sn11 = n11i;
-      sn1_ = n1_i;
-      sn_1 = n_1i;
-      sn   = ni;
+  fisher.exact_nc = function (n11, n12, n21, n22, w) {
+    // Fisher's exact test modified to use Fisher's non-central hypergeometric
+    // distribution with a odds-ratio bias of w.  The procedure returns the p-value
+    // based on a null-hypothesis of the odds-ratio being <= w.
+    // Significant calls indicates that n11 / n12 is enriched by at least w.
+    var x = n11;
+    var m1 = n11 + n21;
+    var m2 = n12 + n22;
+    var n = n11 + n12;
+    var x_min = Math.max (0, n - m2);
+    var x_max = Math.min (n, m1);
+    var l = [];
+    for (var y = x_min; y <= x_max; y++) {
+      l[y - x_min] = (lnbico (m1, y) + lnbico (m2, n - y) + y * Math.log (w));
     }
-    sprob = hyper_323(sn11,sn1_,sn_1,sn);
-    return sprob;
+    var max_l = Math.max.apply (Math, l);
+    
+    
+    var sum_l = l.map (function (x) { return Math.exp (x - max_l); }).reduce (function (a, b) {
+        return a + b; }, 0);
+    sum_l = Math.log (sum_l);
+    
+
+    var den_sum = 0;
+    for (var y = x; y <= x_max; y++) {
+      den_sum += Math.exp (l[y - x_min] - max_l);
+    }
+    den_sum = Math.log (den_sum);
+    return Math.exp (den_sum - sum_l);
   }
   
-  fisher.exact = function (n11, n12, n21, n22) {
-    var n1_ = n11 + n12;
-    var n_1 = n11 + n21;
-    var n   = n11 + n12 + n21 + n22;
-
-    var sleft, sright, sless, slarg;
-    var p, i, j, prob;
-    var max = n1_;
-    if (n_1 < max) max = n_1;
-    var min = n1_ + n_1 - n;
-    if (min < 0) min = 0;
-    if (min == max) {
-      sless = 1;
-      sright= 1;
-      sleft = 1;
-      slarg = 1;
-      return 1;
-    }
-    prob = hyper0 (n11, n1_, n_1, n);
-    sleft = 0;
-    p = hyper (min);
-    for (i = min + 1; p < 0.99999999 * prob; i++) {
-      sleft += p;
-      p = hyper (i);
-    }
-    i--;
-    if (p < 1.00000001 * prob) sleft += p;
-    else i--;
-    sright = 0;
-    p = hyper (max);
-    for (j = max - 1; p < 0.99999999 * prob; j--) {
-      sright += p;
-      p = hyper (j);
-    }
-    j++;
-    if (p < 1.00000001 * prob) sright += p;
-    else j++;
-    if (Math.abs (i - n11) < Math.abs (j - n11)) {
-      sless = sleft;
-      slarg = 1 - sleft + prob;
-    } else {
-      sless = 1 - sright + prob;
-      slarg = sright;
-    }
-    return slarg;
-  }
-
-  fisher.exact_w = function (n11, n12, n21, n22, cur_max) {
-    //console.log ('bing');
-    if (cur_max == 1) return 0;
+  fisher.exact_nc_w = function (n11, n12, n21, n22) {
+    // Returns a weight between 0 and 1 appropriate for colour coding
     if ((n11 / n12) / (n21 / n22) < 1) return 0;
-    var a = -Math.log (fisher.exact (n11, n12, n21, n22));
-    var b = -Math.log (0.05);
-    var c = -Math.log (1e-20);
+    if (n11 + n12 == 0 || n11 + n21 == 0 || n12 + n21 == 0 || n12 + n22 == 0) {
+      return 0;
+    }
+    var a = -Math.log (fisher.exact_nc (n11, n12, n21, n22, 5));
+    var b = -Math.log (0.05);  // Will be clipped at 0
+    var c = -Math.log (1e-20); // Will be clipped at 1
     var res = (a - b) / (c - b);
+    console.log (n11, n12, n21, n22, res);
     if (res > 1) return 1;
     if (res < 0) return 0;
     return res;
   }
   
+  
+
 })();
