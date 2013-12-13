@@ -532,10 +532,10 @@ def make_id_map(x, y, matcher):
     r[i] = l[0]
   if not len(r):
     # mapping must not be empty
-    return None
+    return None, None
   if len(set(r.values())) != len(r):
     # mapping must be 1:1
-    return None
+    return None, None
   #if set(r.values()) != set(y):
   #  # mapping must cover all target ids
   #  return None
@@ -607,7 +607,11 @@ class DataSet(object):
       self.id,
       self.config['annc']))
     for mapper in (prefix_map, rev_prefix_map):
-      cann_map,ambiguous = mapper(cann_set, sample_set)
+      print cann_set
+      print sample_set
+      tmp = mapper(cann_set, sample_set)
+      print tmp
+      cann_map,ambiguous = tmp
      
       if cann_map is not None:
         logging.warn('mapping found: {0}'.format(mapper.__name__))
