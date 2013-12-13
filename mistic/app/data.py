@@ -607,10 +607,7 @@ class DataSet(object):
       self.id,
       self.config['annc']))
     for mapper in (prefix_map, rev_prefix_map):
-      print cann_set
-      print sample_set
       tmp = mapper(cann_set, sample_set)
-      print tmp
       cann_map,ambiguous = tmp
      
       if cann_map is not None:
