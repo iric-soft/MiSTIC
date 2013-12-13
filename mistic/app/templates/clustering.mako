@@ -155,7 +155,7 @@ $(document).ready(function() {
           current_graph.colourByClusterMatch(
             [ gene_set, current_graph.root.getContent() ],
             function (a,b,c,d) {
-              return Math.max(0.0, stats.kappa(a, b, c, d));
+               return fisher.exact_nc_w (a, b, c, d);
             },
             function (a,b) {
               return a > b;
