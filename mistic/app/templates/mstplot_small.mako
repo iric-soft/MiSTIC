@@ -326,8 +326,8 @@ getAccordionGroup = function(parentId, id, title, content) {
   h = '<div class="accordion-group">';
   h = h + '<div class="accordion-heading">';
   h = h + '<a class="accordion-toggle" data-toggle="collapse" data-parent="#'+parentId+'" href="#a'+id+'">';
-  h = h + '<div id="title">'+title+'</div>';
-  h = h + '</a></div><div id="a'+id+'" class="accordion-body collapse"><div class="accordion-inner">';
+  h = h + '<div id="title"><h5>'+title+'</h5></div>';
+  h = h + '</a></div><div id="a'+id+'" class="accordion-body collapse"><div class="accordion-inner" style="max-height:300px; overflow-y:auto">';
   h = h + content;
   h = h + '</div></div></div>'
   
@@ -342,74 +342,67 @@ getContent = function(d) {
   var gcLink = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+'';
   var egLink = 'http://www.ncbi.nlm.nih.gov/gene?cmd=search&term='+d.name+'[sym] AND human[ORGN]';
   var wkLink = 'http://en.wikipedia.org/wiki/'+d.name;
+  var urlEnsembl = 'http://beta.rest.ensembl.org/lookup/symbol/homo_sapiens/'+d.name+'?content-type=application/json';
+  var urlNCBI  = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=_id_&retmode=txt'; 
+  var urlEnsemblId = 'http://beta.rest.ensembl.org/xrefs/id/_id_?content-type=application/json';
   
   var links = {'Ensembl':ebLink, 'GeneCards':gcLink, 'EntrezGene': egLink, 'Wikipedia': wkLink};
-  
+  var infos = ['Ensembl','EntrezGene']
   
   var part2 = $("#part2");
-  part2.html('');
-  part2.append('<p>');
-  part2.append('<div class="accordion" id="info"></div>');
+  part2.html('').append('<p><div class="accordion" id="info"></div>');
+  
+  h = d.name +' : '+d.title;
+  c = '<ul id="links" class="source-links" style="padding:5px;"><li>GO TO : </li></ul>';
+  $('#part2 > .accordion').append(getAccordionGroup('info','ttle', h, c ))
   
   _.each(_.pairs(links), function(p) {
-      
-       h = '<h4>'+ d.name +'   '+d.title+ '</h4><p>';
-       h = h +'<a href="'+p[1]+'" target="_blank">  Go to '+p[0]+'</a>';
-       $('#part2 > .accordion').append(getAccordionGroup('info',p[0], p[0], h))
+       h = '<li><a href="'+p[1]+'" target="_blank"> <strong>'+p[0]+'</strong></a></li>';
+       $('#links').append(h);     
+  }); 
+   _.each(infos, function(p) {
+    $('#part2 > .accordion').append(getAccordionGroup('info',p, p,''))
   }); 
   $('.accordion-body:first').addClass('collapse in');
 
- 
-  var urlEnsembl = 'http://beta.rest.ensembl.org/lookup/symbol/homo_sapiens/'+d.name+'?content-type=application/json';
-  var urlNCBI  = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=2&retmode=txt'; 
-  var urlEnsemblId = 'http://beta.rest.ensembl.org/xrefs/id/_id_?content-type=application/json';
-  
-  var xrefs = {};
+
   $.ajax({type: 'GET',
          url: urlEnsembl ,
          success: function(data) {        
-            console.debug($('#Ensembl').html());
-            console.debug(data);
             var eid = data['id']
-            p = '<table class="table table-condensed">';
+            
+            p = '<pre>';
             _.each(_.pairs(data), function(a) {
-                p = p + '<tr><td>'+a[0]+'</td><td>'+a[1]+'</td></tr>';
+                p = p +a[0]+' : '+a[1]+'<br>';
             });
-            p = p + '</table>';
+            p = p + '</pre>';
            
-            $('#aEnsembl').append(p); 
-           
+            $('#aEnsembl > .accordion-inner').append(p); 
             
-            $.ajax({type: 'GET',
-                url: urlEnsemblId.replace('_id_', eid) ,
-                 success: function(data) {        
-                    xref = data;
-                    console.debug(xrefs);
-           
-            },
-             
-            error: function() {},
-            dataType: 'json',
-            async: true
+            egid = '';
+            $.get(urlEnsemblId.replace('_id_', eid), function(r){
+              egid =  _.where(r, {dbname:"EntrezGene"})[0].primary_id;
+              console.debug(r);
+              $.get(urlNCBI.replace('_id_', egid), function(r){
+                $('#aEntrezGene > .accordion-inner').append('<pre>'+r+'</pre>'); 
+            
+                });
             });
-            
- 
+
         },
          beforeSend : function() {
-            $("#aEnsembl").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
-            },
+            $("#aEnsembl > .accordion-inner").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
+            $("#aEntrezGene > .accordion-inner").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
+        },
         complete: function() {
         $("div#loading").remove();
-          
         },
+        
         error: function() {},
         dataType: 'json',
         async: true
    });
-           
-   //d3.select('#part2').html (h);    
- 
-
+    
  
 };
 
@@ -417,13 +410,13 @@ getContent = function(d) {
 
 getAnnotationContent = function(d) {  
   var a = d.info;
+  a = _.omit(a, ['name', 'cat', 'id']);
   $('#part2').html('');
   $('#part2').append('<div class="accordion" id="info"></div>');
-  
-  h = "<h4>"+d.id +"</h4><p>" ;
+  h = '';
   _.each(_.pairs(a), function(i) {
              if (i[0]=='name'){
-             h = h + "<span style='font-weight:bold'>"+i[0] + "</span>: " + i[1]+'<br>' ;
+             h = h+ "<span style='font-weight:bold'>"+i[0] + "</span>: " + i[1]+'<br>' ;
              }
              else {
            
@@ -454,7 +447,7 @@ getAnnotationContent = function(d) {
   h = h + '<tr><th>Not in gene set</th><td>'+d.tab[0][1]+'</td> <td>'+d.tab[1][1]+'</td></tr>';
   h = h + '</tbody>';
   h = h + '</table></div></div>';
-  $('#part2 > .accordion').append(getAccordionGroup('info', '1', 'Information', h))
+  $('#part2 > .accordion').append(getAccordionGroup('info', '1', d.name.replace(/_/g, ' '), h))
   $('.accordion-body:first').addClass('collapse in');
   
 };
@@ -546,13 +539,13 @@ $(document).keyup(function(e) {
 
 
 $(document).ready(function() {
-
+    
     updateEnrichmentTable();   
     $.ajax({
         url: "${request.route_url('mistic.json.dataset.geneset.enrich', dataset=dataset)}",
         dataType: 'json',
         type: 'POST',
-        data: { genes: JSON.stringify(_.pluck(json.nodes, 'name')) },
+        data: { genes: JSON.stringify(_.pluck(json.nodes, 'id')) },
         error: function(req, status, error) {
           console.log('got an error', status, error);
         },
@@ -560,7 +553,7 @@ $(document).ready(function() {
         $("#go_table .dataTables_empty").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
         },
         success: function(data) {
-          console.debug(data);
+          
           json.gstab = data;
           updateEnrichmentTable();
         },
