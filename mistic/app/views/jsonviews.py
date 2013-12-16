@@ -428,21 +428,12 @@ class Dataset(object):
     @view_config(route_name="mistic.json.dataset.geneset.enrich", request_method="POST", renderer="json")
     def genesets_enrichment (self):
      
-     
      genes = set(json.loads(self.request.POST['genes']))
      a = self.dataset.annotation
 
      from mistic.util import geneset
-     import time
-     #import cProfile as profile
-  
-     #profile.runctx('print geneset.genesetOverRepresentation(genes, a.genes, a.all_genesets()); print', 
-     #                globals(), {'geneset':geneset, 'genes':genes, 'a': a})
-  
-     start = time.time()
      gs_tab = geneset.genesetOverRepresentation(genes, a.genes, a.all_genesets())
-     print 'Geneset over representation running time : ' , time.time()-start
-    
+  
      for r in gs_tab:
          x = r['id']
          info = a.geneset_info(x)
@@ -456,7 +447,6 @@ class Dataset(object):
            r['gs'], r['cat'] = x.split('.', 1)
          else:
            r['gs'], r['cat'] = x, ''
-     
      
      return gs_tab
 
