@@ -74,11 +74,11 @@
     if (n11 + n12 == 0 || n11 + n21 == 0 || n12 + n21 == 0 || n12 + n22 == 0) {
       return 0;
     }
-    var a = -Math.log (fisher.exact_nc (n11, n12, n21, n22, 5));
+    var a = -Math.log (fisher.exact_nc (n11, n12, n21, n22, 2));
     var b = -Math.log (0.05);  // Will be clipped at 0
     var c = -Math.log (1e-20); // Will be clipped at 1
     var res = (a - b) / (c - b);
-    console.log (n11, n12, n21, n22, res);
+    //console.log (n11, n12, n21, n22, res);
     if (res > 1) return 1;
     if (res < 0) return 0;
     return res;

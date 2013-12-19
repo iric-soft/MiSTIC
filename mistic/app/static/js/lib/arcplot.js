@@ -45,7 +45,7 @@
     };
 
     arcplot.prototype.zoom = function() {
-        console.debug("zoom");
+       
         var S = d3.event.scale
         var T = d3.event.translate
 
@@ -65,7 +65,6 @@
     };
 
     arcplot.prototype._resize = function() {
-        console.debug("_resize");
         var curr_width = 0;
         var curr_height = 0;
         var svg = d3.select(this.elem[0]).select('svg');
@@ -209,7 +208,33 @@
                 ;
         });
     };
+    arcplot.prototype._zoom = function() {
+        
+        this.zoom.scale(this.xform.S).translate(this.xform.T);
+        this.body
+            .transition()
+            .duration(1000)
+            .attr('transform', 'translate(' + this.xform.T + ') scale(' + this.xform.S + ')');
 
+        var self = this;
+        this.label_g.selectAll('g')
+            .data(this.labels)
+            .transition()
+            .duration(1000)
+            .attr('transform', function(d) {
+                var _x = self.xform.T[0] + self.xform.S * (d.pos[0] + self.width / 2);
+                var _y = self.xform.T[1] + self.xform.S * (d.pos[1] + self.height / 2);
+                return 'translate(' + String(_x) + ',' + String(_y) + ')';
+            });
+        
+    };
+    
+    arcplot.prototype.dezoom = function(){
+        this.xform = { T: [0,0], S: 1 };
+        this._zoom();
+    };
+    
+    
     arcplot.prototype.zoomTo = function(id) {
         console.log('zoomTo');
         var arc = this.body
@@ -238,28 +263,12 @@
             if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
 
         } else {
-            console.log(id+' not found');
+            console.log(id+' not found'); 
             return;
         }
 
         this.xform = { T: T, S: S };
-
-        this.zoom.scale(S).translate(T);
-        this.body
-            .transition()
-            .duration(1000)
-            .attr('transform', 'translate(' + T + ') scale(' + S + ')');
-
-        var self = this;
-        this.label_g.selectAll('g')
-            .data(this.labels)
-            .transition()
-            .duration(1000)
-            .attr('transform', function(d) {
-                var _x = self.xform.T[0] + self.xform.S * (d.pos[0] + self.width / 2);
-                var _y = self.xform.T[1] + self.xform.S * (d.pos[1] + self.height / 2);
-                return 'translate(' + String(_x) + ',' + String(_y) + ')';
-            });
+        this._zoom();
     };
 
     arcplot.prototype.arcAngle = function(arc) {
@@ -652,7 +661,6 @@
     };
 
     arcplot.prototype.draw = function() {
-        console.debug("draw");
         var self = this;
         this.width = this.elem.width();
         this.height = this.elem.height();
@@ -679,7 +687,7 @@
                     .on("zoom", _.bind(this.zoom, this)));
  
         this.xform = { T: [ 0, 0 ], S: 1.0 };
-
+        
         this.body = this.zoom_g
             .append('g');
 
@@ -744,6 +752,6 @@
             .attr('stroke', 'none')
             .on('click', _.bind(this.click, this));
             
-        console.debug(this);
+       
     };
 })();

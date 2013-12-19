@@ -3,6 +3,7 @@ import json
 import mistic.app.data as data
 import pickle
 %>
+
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">MST Clustering</%block>
 <%block name="actions">
@@ -12,13 +13,9 @@ import pickle
   <form class="form-inline">
   
   <div class="accordion" id="accordion">
-  
-  
-     <div class="accordion-heading"><h4 class="accordion-title"> <a class="accordion-toggle" >Color plot by  </a></h4></div> 
-      
      <div class="accordion-group">     
        <div class="accordion-heading"><h4 class="accordion-title">
-            <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset</a></h4>
+            <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset comparison</a></h4>
        </div>
        
        <div id="dataset_menu" class="accordion-body collapse in">
@@ -38,7 +35,7 @@ import pickle
           
     <div class="accordion-group">     
        <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Gene  </a></h4>
+         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  </a></h4>
       </div>
   
    <div id="locate_gene" class="accordion-body collapse in">
@@ -55,40 +52,45 @@ import pickle
           
    <div class="accordion-group">     
        <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#go_colour">Gene Ontology  </a></h4>
+         <a class="accordion-toggle" data-toggle="collapse"  href="#go_colour">Geneset enrichment</a></h4>
       </div>
   
    <div id="go_colour" class="accordion-body collapse in">
        <div class="accordion-inner">  
-            <label for="goterm"></label> <input type="text" id="goterm"></input></label>
-    
-            <div style='padding-top:10px;'> 
-            <button class="btn btn-primary"  id='bp_go' title='Biological Process'>BP</button>
-            <button class="btn btn-primary"  id='mf_go' title='Molecular Function'>MF</button>
-            <button class="btn btn-primary"  id='cc_go' title='Cellular Compartment'>CC</button>
-            </div>
-    
+            <input type="text" id="goterm" placeholder='Search for geneset'></input></label>
+  
       </div>
       </div>
     </div>
-    
-    
-   
-  
-  </div>
   
   
+  <div class="accordion-group">
+       <div class="accordion-heading">
+         <h4 class="accordion-title">
+           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
+         </h4>
+       </div>
+
+      <div id="options_menu" class="accordion-body collapse ">
+        <div class="accordion-inner">
+           <ul id="options" class="nav nav-list">
+            <li><a id='clear_plot' href="#">Clear plot</a></li>
+          
+            <li class="divider"></li>
+            
+            <div>
+            <label for="odds">Set odds ratio: </label>          
+            <input id="odds" value='2' size=3 disabled type='text' style='width:10px;height:10px'></input>
+           </div>
+          </ul>
+        </div>
+      </div>
+     </div>
+   </div>
   
-  
-  
-  
-  
-  
-  
- 
-    
     
   </form>
+
 </%block>
 <%block name="style">
 ${parent.style()}
@@ -112,12 +114,19 @@ $(document).ready(function() {
 <%
   ds = data.datasets.get(dataset)
   my_annotation = ds.annotation.id
+  
+  if xform == 'log': 
+    xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
+  else : 
+    xf = xform 
+
 %>
 
   resizeGraph = function() {
     current_graph.elem.height($(window).height() - 180);
     current_graph.resize();
   };
+  
 
   var nodes = ${json.dumps(nodes)|n};
   var edges = ${json.dumps(edges)|n};
@@ -130,7 +139,8 @@ $(document).ready(function() {
 
   current_graph.setData(cluster_roots);
   current_graph.setGraphInfo(["Dataset: ${dataset}", 
-                              "Transform: ${xform}"]); 
+                              "Transform: ${xf}"]); 
+  console.debug(current_graph);
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
@@ -139,7 +149,7 @@ $(document).ready(function() {
     el: $("#goterm"),
     url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
   });
-
+  
   go_entry.on('change', function(item) {
     if (item === null) {
       current_graph.removeColour();
@@ -149,6 +159,7 @@ $(document).ready(function() {
         data: { filter_gsid: item.id },
         dataype: 'json',
         success: function(data) {
+          $("#dataset_cmp").val($("#dataset_cmp option:first").val());
           var gene_set = {};
           for (var i = 0; i < data.length; ++i) { gene_set[data[i]] = true; }
                               console.log(JSON.stringify(gene_set));
@@ -161,6 +172,7 @@ $(document).ready(function() {
               return a > b;
             },
             Red4);
+            current_graph.dezoom();
         },
         error: function() {
           // inform the user something went wrong.
@@ -178,7 +190,8 @@ $(document).ready(function() {
         url: "${request.route_url('mistic.json.dataset.mapped_mst', dataset='_dataset_', xform=xform, tgt_annotation=my_annotation)}".replace('_dataset_', val),
         dataype: 'json',
         success: function(data) {
-          var node_content = [];
+          $('#goterm').val('');
+            var node_content = [];
           _.each(Node.fromMST(data[0], data[1]), function(root) {
             var new_root = root.collapse(current_graph.options.cluster_minsize);
             new_root.collapseUnbranched();
@@ -200,6 +213,7 @@ $(document).ready(function() {
               return a > b;
             },
             YlGnBl);
+            
         },
         error: function() {
         }
@@ -250,43 +264,10 @@ $(document).ready(function() {
     return req;
   };
 
-  $('#bp_go').click(function (event) {
-  	if ($('#bp_go').hasClass("clicked")) {
-  		$('#bp_go').removeClass("clicked")
-  	}
-  	else {
-    	$('#bp_go').button('loading');
-    	go_colour('biological_process').done(function() { $('#bp_go').button('reset'); });
-    	event.preventDefault();
-    	$('#bp_go').addClass("clicked")
-    }
-  });
-  $('#mf_go').click(function (event) {
-   	if ($('#mf_go').hasClass("clicked")) {
-  		$('#mf_go').removeClass("clicked")
-  	}
-  	else { 
-    	$('#mf_go').button('loading');
-    	go_colour('molecular_function').done(function() { $('#mf_go').button('reset'); });
-    	event.preventDefault();
-    	$('#mf_go').addClass("clicked")
-    }
-    
-  });
-  $('#cc_go').click(function (event) {
-  	if ($('#cc_go').hasClass("clicked")) {
-  		$('#cc_go').removeClass("clicked")
-  	}
-  	else {
-    	$('#cc_go').button('loading');
-    	go_colour('cellular_component').done(function() { $('#cc_go').button('reset'); });
-    	event.preventDefault();
-    	$('#cc_go').addClass("clicked")
-    }
-  });
+  
  
   gene_entry.on('change', function(item) {
-    console.log (item.id);
+   
     if (item !== null) {
       current_graph.zoomTo(item.id);
     } else {
@@ -300,6 +281,16 @@ $(document).ready(function() {
     $('#geneset').val(JSON.stringify(selection));
     $('#genesetform').submit();
   });
+
+  $('#clear_plot').on("click", function(event){
+    current_graph.removeColour();
+    current_graph.zoomTo(null);
+    current_graph.dezoom();
+    $('#gene').val('');
+    $('#goterm').val('');
+    
+  });
+
 
   $(window).resize(resizeGraph);
   resizeGraph();  
