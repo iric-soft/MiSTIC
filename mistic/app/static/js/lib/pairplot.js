@@ -8,6 +8,7 @@
         minimalAxes: false,
         x_log: false,
         y_log: false,
+        xform: '', 
 
         base_attrs: {
             _shape:  'circle',
@@ -63,8 +64,11 @@
             d3.select(this.svg)
                 .attr("width", width)
                 .attr("height", height);
-
+            var my_selection = this.current_selection;
+            this.current_selection = [];
             this.draw();
+            this.setSelection(my_selection);
+            
         }
     };
 
@@ -72,16 +76,31 @@
         this.data = _.reject(this.data, matcher);
         this.draw();
     };
+    pairplot.prototype.reset = function () {
+        this.point_groups = null;
+        this.data = [];
+        this.current_selection = [];
+        this.subgraphs = [];
+        this.plot_matrix = [];
+        this.xform='';
+    };
 
-
+    pairplot.prototype.updateXform = function(xform) {
+        this.xform=xform;
+        this.draw();
+    };
+    
     pairplot.prototype.updateData = function(data) {
         var idx;
+
         for (idx = 0; idx < this.data.length; ++idx) {
             if (data.gene == this.data[idx].gene) break;
         }
+       
         if (idx == this.data.length) {
             return;
         }
+        
         this.data[idx] = data;
         var i;
         for (i = 0; i < this.data.length; ++i) {
@@ -89,7 +108,7 @@
             this.plot_matrix[i][idx].setYData(data, false);
             this.plot_matrix[idx][i].update();
             if (i != idx) this.plot_matrix[i][idx].update();
-        }
+      }
     };
 
     pairplot.prototype.addData = function(data) {
@@ -237,8 +256,10 @@
 
                     if (x < y ) {
                         s = new textpanel(s_opts, this.data[x], this.data[y]);
+                        s.setXform(this.xform);
                     } else if (x > y ) {
                         s = new scatterplot(s_opts, this.data[x], this.data[y]);
+                       
                         s.setSelection(this.current_selection, true);
                         s.setPointGroups(this.point_groups);
                         this.subgraphs.push(s);

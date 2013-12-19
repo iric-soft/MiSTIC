@@ -123,7 +123,14 @@
                 showButtons: false,
                 showAlpha: true,
                 change: function(colour) {
-                    $('span', this).css('background-color', $(this).spectrum('get').toRgbString());
+                    try { 
+                        $('span', this).css('background-color', $(this).spectrum('get').toRgbString());
+                    }
+                    catch (err) {
+                       alert('Click outside the color selector before saving');
+                       
+                       
+                    }
                 },
                 beforeShow: function(colour) {
                     if ($(this).hasClass('disabled')) return false;

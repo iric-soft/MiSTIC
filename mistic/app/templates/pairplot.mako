@@ -44,8 +44,7 @@ import json
             <div id="gene_menu" class="accordion-body collapse ">
               <div class="accordion-inner">
 
-                  <label for="gene">Select a gene :</label>
-                  <input type="text" id="gene" autocomplete="off"/> <br>	
+                  <input type="text" id="gene" autocomplete="off" placeholder='Select a gene'/> <br>	
 
                   <span id="genelist"></span>
               </div>
@@ -188,7 +187,9 @@ $(document).ready(function() {
 
   $("#options").css('display', 'none');
 
-  var group_colours = [ "rgba(252,132,3,.65)", "rgba(11,190,222,.65)", "rgba(36,153,36,.65)", "rgba(155,42,141,.65)" ];
+  var group_colours = [ "rgba(252,132,3,.65)", "rgba(11,190,222,.65)", "rgba(36,153,36,.65)", 
+                        "rgba(155,42,141,.65)", "rgba(255,3,79,.65)","rgba(11,162,162,.65)"  ,
+                        "rgba(204,0,0,.65)", "rgba(0,76,153,.65)", "rgba(0,204,0,.65)" ];
   var next_group = 0;
 
   var pgs = new PointGroupCollection();
@@ -197,8 +198,9 @@ $(document).ready(function() {
   var pgs_view = new PointGroupListView({ groups: pgs, graph: current_graph, el: $("#current_selection") })
 
   var newGroup = function() {
+    next_group = $('.point-group').length ;
     var pg = new PointGroup({
-      style: { fill: group_colours[next_group % 4] }
+      style: { fill: group_colours[next_group % 9] }
     });
 
     pgs.add(pg);
@@ -227,20 +229,27 @@ $(document).ready(function() {
       nsamples=0;
     }
     $("#nb_datasets").text('('+current_datasets.length+')');
-
     $("#nb_samples").text('('+nsamples+')');
-
     $("#nb_genes").text('('+current_graph.data.length+')');
+    $("#options").css('display', 'none');
     if(current_graph.data.length>=2) {
       $("#options").css('display', 'inline');
     }
   };
 
+  <%
+    xf = {'log':'log', 'rank':'rank', 'none':''}
+    ds = data.datasets.all()[0]
+    xf['log'] = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform('log').params))
+    
+  %>
+
   var setCurrentTransform = function(xfrm) {
-    if (current_transform !== xfrm) {
+     
+     if (current_transform !== xfrm) {
       var avail_xfrms = dataset_info[0]['xfrm']
       if (_.contains(avail_xfrms, xfrm)) {
-        $('#transform-buttons button').toggleClass('active', current_transform == xfrm);
+         $('#transform-buttons button').toggleClass('active', current_transform == xfrm);
         current_transform = xfrm;
         reloadAll();
         // choose log scales if 'log' is a valid transformation, and the selected transformation is 'none'
@@ -248,15 +257,25 @@ $(document).ready(function() {
         current_graph.setScaleType(lg, lg);
       }
     }
+    else {
+     $('#transform-buttons button:contains("'+xfrm+'")').toggleClass('active', current_transform == xfrm);
+    }
+    var xform_text = current_transform;
+    if (current_transform==='log') { xform_text = "${xf['log']}"; }
+    if (current_transform==='none') { xform_text = "${xf['none']}"; }
+    current_graph.updateXform(xform_text);
+   
   };
 
   var setAvailableTransforms = function(xfrm_list) {
     var xf = $('#transform-buttons');
     xf.empty();
+   
     current_transform = xfrm_list[0];
     _.each(xfrm_list, function(val) {
       var btn = $('<button class="btn btn-default">');
       btn.on('click', function(event) {
+        console.debug($(this).text());
         setCurrentTransform($(this).text());
         event.preventDefault();
       });
@@ -267,25 +286,27 @@ $(document).ready(function() {
 
   var addDataset = function(dataset, sync) {
     current_graph.removeData(function() { return true; });
-
+    
     $.ajax({
       url: "${request.route_url('mistic.json.dataset', dataset='_dataset_')}".replace('_dataset_', dataset),
       dataype: 'json',
       async: !sync,
       success: function(data) {
         $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
-
+        
         setAvailableTransforms(data['xfrm']);
         setCurrentTransform(data['xfrm'][0]);
-
         current_datasets = [dataset];
         dataset_info = [data];
+      
+        
         gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]));
         sample_annotation_entry.setSearchURL("${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset));
         $("#sample_annotation").val('');
         $("#sample_annotation_drop").attr('disabled', false);
         $("#gene").attr('disabled', false);
         $("input").attr('disabled', false);
+        
       },
       error: function() {
         current_dataset = [];
@@ -329,6 +350,7 @@ $(document).ready(function() {
   };
 
   var addGene = function(gene_id, gene_symbol, sync) {
+   
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_datasets[0]).replace('_gene_id_', gene_id),
       dataype: 'json',
@@ -415,10 +437,11 @@ $(document).ready(function() {
   var _selection = { active: false, pending: undefined };
 
   var selectionSearch = function(selection) {
+    
     if (_selection.active) {
       _selection.pending = selection;
     } else {
-      if (!selection.length) {
+      if (_.isUndefined(selection) || !selection.length) {
         updateEnrichmentTable([])
         return;
       }
@@ -457,7 +480,6 @@ $(document).ready(function() {
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
   %else:
-    console.debug('no dataset');
     gene_entry.setSearchURL(undefined);
     sample_annotation_entry.setSearchURL(undefined);
     $("#sample_annotation_drop").attr('disabled', true);
@@ -487,11 +509,9 @@ $(document).ready(function() {
         $("span#share").html(url + '?hl=' + data);
       },
     });
-
   });
 
   $('body').on('click.remove', 'i.icon-remove-sign', function(event) {
-
     var badge = $(event.target).closest('span.badge');
     var badge_idx = parseInt(badge.attr('data-idx'));
 
@@ -504,7 +524,6 @@ $(document).ready(function() {
         $("#options").css('display', 'none');
     }
     info.clear();
-
     updateInfo();
   });
 
@@ -601,9 +620,15 @@ $(document).ready(function() {
     var ds_sel = new DatasetSelector();
     ds_sel.disable_rows(current_datasets);
     ds_sel.show(event.currentTarget);
+    
     ds_sel.$el.on('select-dataset', function(event, dataset_id) {
-      addDataset(dataset_id);
+       //current_graph.reset();
+       addDataset(dataset_id);
+       $('input').val('');
+       updateInfo();
     });
+    
+   
     event.preventDefault();
   });
 

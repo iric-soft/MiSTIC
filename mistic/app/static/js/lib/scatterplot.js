@@ -241,7 +241,8 @@
     };
 
     scatterplot.prototype.makeFullAxes = function() {
-        if (this.xAxis !== null) {
+      
+        if (this.xAxis !== null && !(_.isUndefined(this.xAxis))) {
             this.xAxis
                 .tickValues(null)
                 .scale(this.xScale)
@@ -250,7 +251,7 @@
                 .ticks(5);
         }
 
-        if (this.yAxis !== null) {
+        if (this.yAxis !== null && !(_.isUndefined(this.yAxis))) {
             this.yAxis
                 .tickValues(null)
                 .scale(this.yScale)
@@ -269,13 +270,13 @@
 
         var svg = d3.select(this.svg);
 
-        if (this.xAxis !== null) {
+        if (this.xAxis !== null && !(_.isUndefined(this.xAxis))) {
             svg.select('g.axis-x')
                 .transition()
                 .call(this.xAxis);
         }
 
-        if (this.yAxis !== null) {
+        if (this.yAxis !== null && !(_.isUndefined(this.yAxis))) {
             svg.select('g.axis-y')
                 .transition()
                 .call(this.yAxis);
@@ -396,6 +397,7 @@
     };
 
     scatterplot.prototype.updatePoints = function(xy) {
+        
         var self = this;
         if (xy === undefined) xy = this.getXYData();
 
@@ -428,6 +430,8 @@
         var transition = this.nodes.transition();
 
         transition
+            .duration(500)
+            .ease("linear")
             .attr("transform", function(d) {
                 var t = self.transform(d);
                 return "translate(" + [t.x, t.y] + ")";
@@ -459,6 +463,7 @@
           .exit()
             .transition()
             .remove();
+       
     }
 
     scatterplot.prototype.getXYData = function() {

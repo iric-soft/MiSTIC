@@ -6,6 +6,7 @@
             outer: 15,   // amount that the plot axes are moved by.
             width: 1000,
             height: 1000,
+            xform: '',
         };
 
         if (options !== undefined) {
@@ -76,6 +77,9 @@
         if (redraw !== false) this.draw();
     };
 
+    textpanel.prototype.setXform = function(xform) {
+        this.xform = xform;
+    }
     textpanel.prototype.draw = function(data) {
         var self = this;
 
@@ -86,46 +90,22 @@
         var svg = d3.select(this.svg)
 
         svg.selectAll('*').remove();
-
+     
         var keys = _.intersection(_.keys(this.xdata), _.keys(this.ydata));
 
-        var v1_log = [];
-        var v2_log = [];
         var v1 = [];
         var v2 = [];
-
-        var xy = [];
-
-        var lg = true;
 
         for (var i in keys) {
             var k = keys[i];
             var x = this.xdata[k];
             var y = this.ydata[k];
-            if  (x < 0.0 ||  y < 0.0) {
-                lg = false;
-                xy.push({x:x,y:y,k:k});
-            } else {
-                xy.push({ x: x < 0.0105 ? 0.01 : x, y: y < 0.0105 ? 0.01 : y , k: k});
-            }
-
             v1.push(x);
             v2.push(y);
-            v1_log.push(Math.log(x + 1/1024));
-            v2_log.push(Math.log(y + 1/1024));
         }
 
-        var rr = Math.max(
-            stats.range(v1)[1]-stats.range(v1)[0],
-            stats.range(v2)[1]-stats.range(v2)[0]);
-
-        if (rr<1) {
-            lg = false;
-        }
-
+ 
         var r = stats.pearson(v1, v2);
-        var r_log = stats.pearson(v1_log, v2_log);
-
         var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
 
@@ -143,13 +123,10 @@
                 .attr('y', this.options.padding[0]+ height/3)
                 .attr('text-anchor', 'left')
                 .attr('style', 'font-family: helvetica; font-size: '+ fsize+ 'px; font-weight: 300');
-            if (lg) {
-                var rtext = fsize>=11 ? 'r(log+k) = ' : '';
-                this.corr.text(rtext + r_log.toFixed(2));
-            } else {
-                var rtext = fsize>=11 ? 'r = ' : '';
+           
+                var rtext = fsize>=11 ? 'r('+this.xform +')= ' : '';
                 this.corr.text(rtext + r.toFixed(2));
-            }
+          
         }
     };
 
