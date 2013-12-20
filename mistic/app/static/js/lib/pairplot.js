@@ -64,10 +64,7 @@
             d3.select(this.svg)
                 .attr("width", width)
                 .attr("height", height);
-            var my_selection = this.current_selection;
-            this.current_selection = [];
-            this.draw();
-            this.setSelection(my_selection);
+            this.reloadSelection();
             
         }
     };
@@ -91,29 +88,34 @@
     };
     
     pairplot.prototype.updateData = function(data) {
-        var idx;
-
+       
+        var idxs = [];
+        var my_selection = this.current_selection;
         for (idx = 0; idx < this.data.length; ++idx) {
-            if (data.gene == this.data[idx].gene) break;
+            if (data.gene == this.data[idx].gene) idxs.push(idx);
         }
        
-        if (idx == this.data.length) {
-            return;
-        }
+        for (j=0; j< idxs.length; j++){
+            var idx = idxs[j];
+            if (idx == this.data.length) {
+                return;
+            }
         
-        this.data[idx] = data;
-        var i;
-        for (i = 0; i < this.data.length; ++i) {
-            this.plot_matrix[idx][i].setXData(data, false);
-            this.plot_matrix[i][idx].setYData(data, false);
-            this.plot_matrix[idx][i].update();
-            if (i != idx) this.plot_matrix[i][idx].update();
+            this.data[idx] = data;
+            var i;
+            for (i = 0; i < this.data.length; ++i) {
+             this.plot_matrix[idx][i].setXData(data, false);
+             this.plot_matrix[i][idx].setYData(data, false);
+             this.plot_matrix[idx][i].update();
+             if (i != idx) this.plot_matrix[i][idx].update();
+        }     
       }
+      _.each(this.subgraphs, function(g){g.setSelection(my_selection);});
     };
 
     pairplot.prototype.addData = function(data) {
         this.data.push(data);
-        this.draw();
+        this.reloadSelection();
     };
 
     pairplot.prototype.pointIDs = function() {
@@ -139,6 +141,14 @@
         }
     };
 
+    pairplot.prototype.reloadSelection = function(){
+        var my_selection = this.current_selection;
+        this.current_selection = [];
+        this.draw();
+        this.setSelection(my_selection, true);
+    }
+    
+    
     pairplot.prototype.clearBrush = function() {
         _.each(this.subgraphs, function(g) { g.clearBrush(); });
     };

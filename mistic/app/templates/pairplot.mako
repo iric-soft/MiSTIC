@@ -275,7 +275,6 @@ $(document).ready(function() {
     _.each(xfrm_list, function(val) {
       var btn = $('<button class="btn btn-default">');
       btn.on('click', function(event) {
-        console.debug($(this).text());
         setCurrentTransform($(this).text());
         event.preventDefault();
       });

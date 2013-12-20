@@ -140,10 +140,12 @@
 
     scatterplot.prototype.notifySelectionChange = function(quiet) {
         var selection = this.getSelection();
+        
         if (!_.isEqual(this.current_selection, selection)) {
             this.current_selection = selection;
             if (!quiet) $(this.svg).trigger('updateselection', [this.current_selection]);
         }
+     
     };
 
     scatterplot.prototype.toggleSelected = function(d, i) {
@@ -272,13 +274,13 @@
 
         if (this.xAxis !== null && !(_.isUndefined(this.xAxis))) {
             svg.select('g.axis-x')
-                .transition()
+                //.transition()
                 .call(this.xAxis);
         }
 
         if (this.yAxis !== null && !(_.isUndefined(this.yAxis))) {
             svg.select('g.axis-y')
-                .transition()
+                //.transition()
                 .call(this.yAxis);
         }
 
@@ -396,6 +398,7 @@
             .nice();
     };
 
+
     scatterplot.prototype.updatePoints = function(xy) {
         
         var self = this;
@@ -463,6 +466,7 @@
           .exit()
             .transition()
             .remove();
+            
        
     }
 
