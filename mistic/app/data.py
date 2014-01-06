@@ -64,7 +64,7 @@ def read_json_table(path, converters = {}):
         if k in converters:
           row[k] = converters[k](row[k])
     except ValueError:
-      logging.warn('failed to parse JSON data for identifier {0} on row {1} of {2}'.format(ident, rownum, path))
+      #logging.warn('failed to parse JSON data for identifier {0} on row {1} of {2}'.format(ident, rownum, path))
       continue
     index.append(ident)
     rows.append(row)
@@ -84,7 +84,8 @@ def write_json_table(path, table, converters = {}):
           v = converters[col](v)
         row[col] = v
       except ValueError:
-        logging.warn('failed to convert value {0} on row {1} while writing to {2}'.format(repr(v), ident, path))
+        pass
+        #logging.warn('failed to convert value {0} on row {1} while writing to {2}'.format(repr(v), ident, path))
     try:
       row = json.dumps(row)
       out.write(ident)
@@ -92,7 +93,8 @@ def write_json_table(path, table, converters = {}):
       out.write(row)
       out.write('\n')
     except:
-      logging.warn('failed to serialize {0} on row {1} while writing to {2}'.format(repr(row), ident, path))
+      pass
+      #logging.warn('failed to serialize {0} on row {1} while writing to {2}'.format(repr(row), ident, path))
 
   out.close()
 
@@ -611,7 +613,7 @@ class DataSet(object):
       cann_map,ambiguous = tmp
      
       if cann_map is not None:
-        logging.warn('mapping found: {0}'.format(mapper.__name__))
+        #logging.warn('mapping found: {0}'.format(mapper.__name__))
         self.cannotation = copy.copy(self.cannotation)
         self.cannotation.data = self.cannotation.data.copy()
         self.cannotation.data.index = self.cannotation.data.index.map(cann_map.get)

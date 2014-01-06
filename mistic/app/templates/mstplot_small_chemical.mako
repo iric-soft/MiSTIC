@@ -117,20 +117,30 @@ ${parent.style()}
 <%block name="getExtraContent">
 
 getContent = function(d) {
-  
+
   var content = "";
+  var part2 = $("#part2");
+  part2.html('').append('<p><div class="accordion" id="info"></div>');
   
-  png_url = "${request.application_url}"+"/images/compounds/"+d.name+".png"
+  var png_url = "${request.application_url}"+"/images/compounds/"+d.name+".png"
+  var image = "<img height=200px src='"+png_url+"' alt='[structure not found/available]'>"
+  c = '<ul id="links" class="source-links" style="padding:5px;"><li>GO TO : </li></ul>';
+  $('#part2 > .accordion').append(getAccordionGroup('p0','0', d.title, image))
+  $('#part2 > .accordion').append(getAccordionGroup('p1','1', 'Links', c))
+  $('#part2 > .accordion').append(getAccordionGroup('p2','2', 'More', '<div id="more">Formula : '+ d.formula+'</div>'))
   
   if (d.title!='') {
       var dt = d.title.toLowerCase().replace(' ','&nbsp;');
-      content = "<h4>"+d.title+"</h4>" +'<p><a href=http://en.wikipedia.org/wiki/'+ dt +' target="_blank">Wikipedia</a>';
+      
       url = 'http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/'+d.title+'/property/MolecularFormula/JSON'
-      content = content + "<p>Formula : "+ d.formula +                               
-                "<p><img height=200px src='"+png_url+"' alt='[structure not found/available]'>"
-                
-      $('#part2').html(content);
-   
+      
+       
+      //$('#part2').html(content);
+      
+     
+      var wlinks =  '<a href=http://en.wikipedia.org/wiki/'+ dt +' target="_blank"><strong>Wikipedia</strong></a>';
+      $('#links').append('<li>'+wlinks+'</li>'); 
+      
       $.ajax({type: 'GET',
                 url: url,
                 success: function(json) { 
@@ -139,13 +149,23 @@ getContent = function(d) {
                       // "<p><img height=200px src='http://pubchem.ncbi.nlm.nih.gov/rest/pug/compound/name/"+d.title+"/PNG' alt='[structure not found/available]'>"+
                       pubchem = "http://pubchem.ncbi.nlm.nih.gov/summary/summary.cgi?cid="+cid;
                       pubchem_assay = "http://pubchem.ncbi.nlm.nih.gov/assay/assay.cgi?cid="+cid;
-                      content = content + "<p><a href="+pubchem+" target='_blank'>Pubchem</a>&nbsp;&nbsp;"+
-                                "<a href="+pubchem_assay+" target='_blank'>Pubchem_BioAssay</a>"; 
+                      content = "<li><a href="+pubchem+" target='_blank'>Pubchem</a></li>"+
+                                "<li><a href="+pubchem_assay+" target='_blank'>Pubchem_BioAssay</a></li>";
+                      $('#links').append(content);
+                      content = '' 
                       if (d.actions!=''){
-                        content = content +  "<p>Action : "+ d.actions 
+                        content = "<p>Action : "+ d.actions 
                     }
-                      d3.select('#part2').html(content);
-     
+                      $('#more').append(content); 
+                      
+                      
+                },
+                beforeSend : function() {
+                    $("#a1 > .accordion-inner").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
+                    $("#a2 > .accordion-inner").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
+                },
+                complete: function() {
+                    $("div#loading").remove();
                 },
                 error: function() {console.log("Not found :"+d.title);},
                 dataType: 'json',
@@ -153,11 +173,11 @@ getContent = function(d) {
             });
            
    }
-  else  {
-  
-    content ="<p>Formula : "+ d.formula + "<p><img height=200px src='"+png_url+"' alt='[structure not found/available]'>"        
-    d3.select('#part2').html(content);
-  }
+   else {
+    $('#links').append('No available links');
+   }
+ 
+   $('.accordion-body:first').addClass('collapse in');
 };
 
 

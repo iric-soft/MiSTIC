@@ -210,7 +210,6 @@ def main(global_config, **settings):
     config.add_route('mistic.json.dataset.mst',            '/datasets/{dataset}/mst/{xform}')
     config.add_route('mistic.json.dataset.mapped_mst',     '/datasets/{dataset}/mst/{xform}/{tgt_annotation}')
 
-    # params: go=GO_ID - filter the list of returned genes by GO term.
     config.add_route('mistic.json.dataset.genes',          '/datasets/{dataset}/genes')
     config.add_route('mistic.json.gene',                   '/datasets/{dataset}/genes/{gene_id}')
     config.add_route('mistic.json.gene.corr',              '/datasets/{dataset}/genes/{gene_id}/corr')

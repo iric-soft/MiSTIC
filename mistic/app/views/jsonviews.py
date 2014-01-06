@@ -340,8 +340,8 @@ class Dataset(object):
     @view_config(route_name="mistic.json.dataset.samples", request_method="GET", renderer="json")
     def samples(self):
         filters = self.request.GET.items()
-        samples = self.dataset.cannotation.data.index
-
+        samples = set(self.dataset.cannotation.data.index) & set(self.dataset.samples)
+        
         for k,v in filters:
             if k in self.dataset.cannotation.data.columns:
                 samples = [ s for s in samples if self.dataset.cannotation.data[k][s] == v ]

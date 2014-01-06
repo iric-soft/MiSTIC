@@ -378,7 +378,7 @@ $(document).ready(function() {
   var updateEnrichmentTable = function(data) {
     $('#sample_enrichment').html('');
     if (!data.length) return;
-
+    console.debug(data);
     var table = d3
       .select('#sample_enrichment')
       .insert('table', ':first-child');
@@ -392,7 +392,7 @@ $(document).ready(function() {
       .append("tr")
 
     var th = thr.selectAll('th')
-      .data([ 'P-val', 'Odds', 'Key : Value' ])
+      .data([ 'P-val', 'Odds', 'Key : Value', 'Tab' ])
       .enter()
       .append('th')
       .text(function(d) { return d; });
@@ -407,9 +407,10 @@ $(document).ready(function() {
       .data(function(d) { return [
         { value: d.p_val.toExponential(1) },
         { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) },
-        { value: d.key +' : '+d.val }
-        
-      ];});
+        { value: d.key +' : '+d.val },
+        { value: ' [['+ d.tab[0][0]+','+d.tab[1][0]+']['+d.tab[0][1]+','+d.tab[1][1]+']]'}
+      ];})
+      ;
 
     td.enter()
       .append('td')

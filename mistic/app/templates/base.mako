@@ -234,7 +234,7 @@ mistic = {
 
   window.SampleAnnotationDropdown = Dropdown.extend({
     item_view: SampleAnnotationItemView,
-    max_items: 100,
+    max_items: 1500,
     menu: '<ul class="typeahead dropdown-menu" style="width:auto;max-width: 400px; max-height: 400px; overflow-x: hidden; overflow-y: auto"></ul>',
 
     autofillText: function(model) {
