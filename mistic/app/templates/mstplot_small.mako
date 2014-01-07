@@ -382,7 +382,7 @@ getContent = function(d) {
             egid = '';
             $.get(urlEnsemblId.replace('_id_', eid), function(r){
               egid =  _.where(r, {dbname:"EntrezGene"})[0].primary_id;
-              console.debug(r);
+              
               $.get(urlNCBI.replace('_id_', egid), function(r){
                 $('#aEntrezGene > .accordion-inner').append('<pre>'+r+'</pre>'); 
             
