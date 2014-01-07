@@ -303,18 +303,21 @@ class Dataset(object):
         if not self.dataset.cannotation:
             return []
         anns = self.dataset.cannotation.data
+        
         samples = set(json.loads(self.request.POST['samples']))
 
         out = []
-
+        
         for col in anns.columns:
 
             all_samples = set(anns.index[anns[col].map(lambda x: x not in ("", None))])
+            all_samples = all_samples & set(self.dataset.samples)
+            
             tst_samples = samples & all_samples
 
             col_vals = set(anns[col]) - set(("", None))
             for val in col_vals:
-                val_samples = set(anns.index[anns[col] == val])
+                val_samples = set(anns.index[anns[col] == val]) & set(self.dataset.samples)
 
                 YY = len(val_samples & tst_samples)  #  samples with col == val
                 YN = len(tst_samples) - YY           #  samples with col != val
