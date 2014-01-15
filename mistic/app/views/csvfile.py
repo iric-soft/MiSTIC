@@ -57,11 +57,11 @@ class CSVData(object):
     else : 
       pearson  = dataset.data.rowcorr(row)
      
-      
+    
     result = [
       (i1, r1,
-       dataset.annotation.symbol.get(r1, ''),
-       dataset.annotation.desc.get(r1, ''),
+       dataset.annotation.get_symbol(r1),
+       dataset.annotation.get_name(r1),
        r, s)
       for (i1, r1, r), (i2, r2, s) in zip(pearson, spearman) ]
 
