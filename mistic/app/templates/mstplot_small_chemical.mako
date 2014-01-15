@@ -194,17 +194,20 @@ ${parent.pagetail()}
   a = ds.annotation
     
   molecules = []
+  moleculeNames = []
   names = {}
 
   for n in nodes: 
    
     try:
       molecules.append(pybel.readstring( 'smi', str(a.data.ix[n].get('smi', {}))))
+      moleculeNames.append(n)
     except:
-      print a.data.ix[n].get('smi', {})
-      
-  tanimoto =  [[ mol1.calcfp() | mol2.calcfp() for mol1 in molecules] for mol2 in molecules]
-  d = dict(zip(nodes,tanimoto))
+      pass
+          
+  tanimoto =  [[mol1.calcfp() | mol2.calcfp() for mol1 in molecules] for mol2 in molecules]
+  
+  d = dict(zip(moleculeNames, tanimoto))
   d.update({'header': nodes})
   tanimoto_tab = d 
   
@@ -214,10 +217,10 @@ ${parent.pagetail()}
     #formula = a.attrs.get(n, {}).get('formula') or '',
     #can = a.attrs.get(n, {}).get('can') or '',
     #smile = a.attrs.get(n, {}).get('smi') or '',
-    index = nodes.index(n),
-    mean = numpy.mean(tanimoto[nodes.index(n)]),
-    sum = numpy.sum(tanimoto[nodes.index(n)]),
-  ) for n in nodes if n in tanimoto_tab.keys()]
+    index = moleculeNames.index(n),
+    mean = numpy.mean(tanimoto[moleculeNames.index(n)]),
+    sum = numpy.sum(tanimoto[moleculeNames.index(n)]),
+    ) for n in nodes if n in tanimoto_tab.keys()]
   
 %>
 
@@ -364,7 +367,6 @@ if (title.length < maxNodes) {
                               tr = d3.selectAll('#tanimoto_table tbody tr')[0]; 
                               var mx = matrix[d.index];
                               mx[d.index] = 1.00;
-                                
                               d3.selectAll(tr).each(function(d,i) {  
                                        d3.select(this.cells[valueCell])
                                          .append("text")
