@@ -44,7 +44,7 @@
         svg.selectAll('*').remove();
 
         var g = svg.append('g');
-
+        
         var expr = _.map(this.data.data, function(d) {return d.expr});
 
         var sd_e = stats.stdev(expr);
@@ -71,7 +71,14 @@
 
         g.selectAll('text')
             .each(function(d) {
-                d.bbox = this.getBBox();
+                try {  
+                    d.bbox = this.getBBox();
+                }
+                // firefox error
+                catch(err) {
+                    mysvg = $(this).parents()[1];
+                    d.bbox = mysvg.createSVGRect (); 
+                }
                 for (var i = d.text.length-1; d.bbox.width > self.width && i >= 0; --i) {
                     d3.select(this).text(d.text.substring(0, i) + '...')
                     d.bbox = this.getBBox();
