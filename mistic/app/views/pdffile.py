@@ -1,4 +1,4 @@
-from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPBadRequest
+from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPBadRequest, HTTPInternalServerError
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.renderers import render_to_response
@@ -42,7 +42,14 @@ class PDFData(object):
 
     from lxml import etree
     import cStringIO
-    doc = etree.parse(cStringIO.StringIO(_data))
+    
+    try:
+      _data = _data.encode('utf-8', 'ignore')
+      doc = etree.parse(cStringIO.StringIO(_data))
+    
+    except Exception, e: 
+      raise HTTPInternalServerError(detail="Unable to generate the requested pdf.  Please contact the administrator")
+      
     root = doc.getroot()
 
     class XPHasClass(object):
