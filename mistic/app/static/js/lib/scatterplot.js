@@ -163,6 +163,7 @@
 
     scatterplot.prototype.clearBrush = function() {
         this.brush.clear();
+        d3.select(this.svg).select('.brush').select('text').remove();
         d3.select(this.svg).select('g.brush').call(this.brush);
     };
 
@@ -175,7 +176,11 @@
     };
 
     scatterplot.prototype.brushstart = function() {
+        var b = d3.select(this.svg).select('.brush').select('text').remove();
         $(this.svg).trigger('brushstart', [this]);
+        var b = d3.select(this.svg).select('.brush');
+        b.append('text');
+        
     };
 
     scatterplot.prototype.brushed = function() {
@@ -183,13 +188,28 @@
         var e = d3.event.target.extent();
         var circles  = d3
             .select(this.svg)
-            .selectAll("g.node")
-            .filter(function(d) {
+            .selectAll("g.node");
+        var ntotal  = circles[0].length;
+        circles = circles.filter(function(d) {
                 var t = self.transform(d);
                 return e[0][0] <= t.x && t.x <= e[1][0] && e[0][1] <= t.y && t.y <= e[1][1]
             });
         var selected = _.map(circles.data(), function(d) { return d.k; });
         this.setSelection(selected);
+        nselected = selected.length;
+        
+        var p = nselected/ntotal*100;
+        var r = d3.select(this.svg).select('rect.extent')
+        var b = d3.select(this.svg).select('.brush').select('text');
+        if (nselected > 0) {
+          
+            b.attr('x', r.attr('x'))
+             .attr('y', r.attr('y'))
+             .attr('text-anchor', 'right')
+             .attr('fill','grey')
+             .attr('style', 'font-family: helvetica; font-size: 11px;')
+             .text(p.toFixed(2)+'%');
+       }
     };
 
     scatterplot.prototype.brushend = function() {

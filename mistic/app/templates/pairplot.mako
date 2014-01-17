@@ -133,7 +133,7 @@ import json
  ${parent.graph()}
 
   <div class="modal hide" id="link_to_share">
-    <div class="modal-dialog">
+    <div class="modal-dialog" >
       <div class="modal-content">
         <div class="modal-header">
           <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
@@ -148,7 +148,8 @@ import json
         <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
       </div>
     </div>
-  </div>
+     </div>
+ 
 
 </%block>
 
@@ -202,9 +203,7 @@ $(document).ready(function() {
     var pg = new PointGroup({
       style: { fill: group_colours[next_group % 9] }
     });
-
     pgs.add(pg);
-
     ++next_group;
   };
 
@@ -219,12 +218,31 @@ $(document).ready(function() {
   newGroup();
 %endif
 
-  $('#new_group').on('click', function(event) { newGroup(); event.preventDefault(); });
+  
+
+  $('#new_group').on('click', function(event) { 
+      newGroup(); 
+      $('.sg-ops').bind('click', function(event) { 
+       _.defer(updateInfo);
+      });
+      event.preventDefault(); 
+  });
+    
+    $('.sg-ops').on('click', function(event) { 
+    _.defer(updateInfo);
+   });
 
   var updateInfo = function() {	
+    
     // Update counts label (dataset, genes, samples)
     var nplots = stats.sum(_.range(1,current_graph.data.length));
-    var nsamples = $("g.node[class*='highlighted']").length/nplots;
+    
+    var s = _.flatten(_.map(current_graph.point_groups.models, function(d) {return d.get('point_ids');}));
+    s = _.without(s, "");
+    s = _.uniq(s);
+    var nsamples = s.length;
+   
+    
     if (_.isNaN(nsamples)) {
       nsamples=0;
     }
@@ -376,8 +394,10 @@ $(document).ready(function() {
   };
 
   var updateEnrichmentTable = function(data) {
-    $('#sample_enrichment').html('');
+     $('#sample_enrichment').html('');
     if (!data.length) return;
+    var s = ['Number of selected points with annotations : '+eval(data[0].tab[0].join('+'))+'/'+$('.selected').length].join(' ');
+    $('#sample_enrichment').html(s);
     
     var table = d3
       .select('#sample_enrichment')
@@ -392,7 +412,7 @@ $(document).ready(function() {
       .append("tr")
 
     var th = thr.selectAll('th')
-      .data([ 'P-val', 'Odds', 'Key : Value'])
+      .data([ 'P-val', 'Odds', 'Selected', 'Key : Value' ])
       .enter()
       .append('th')
       .text(function(d) { return d; });
@@ -404,10 +424,14 @@ $(document).ready(function() {
       .append('tr');
 
     var td = tr.selectAll('td')
-      .data(function(d) { return [
-        { value: d.p_val.toExponential(1) },
-        { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) , title: '\t\tIn Selection\tNot in Selection\nIn Category\t\t'+ d.tab[0][0]+'\t'+d.tab[1][0]+'\nNot in Category\t\t'+d.tab[0][1]+'\t'+d.tab[1][1]},
-        { value: d.key +' : '+d.val }
+      .data(function(d) { 
+       var title = '\t\tIn Selection |  Not in Selection\nIn Category\t\t'+ d.tab[0][0]+' | '+d.tab[1][0]+'\nNot in Category\t'+d.tab[0][1]+' | '+d.tab[1][1];
+       return [
+        { value: d.p_val.toExponential(1), title:title },
+        { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) , title:title },
+        { value: d.tab[0][0]+'/'+ (parseInt(d.tab[1][0])+ parseInt(d.tab[0][0])), title:title},
+        { value: d.key +' : '+d.val, title:title },
+       
       ];})
       ;
 
@@ -601,10 +625,11 @@ $(document).ready(function() {
   sample_annotation_entry.on("change", function(item){
     if (item === null) return;
     var val = item.id.split('.');
-    var l1 = val[0];
-    var l2 = val[1];
+    
+    var l1 = _.initial(val).join('.');
+    var l2 = val[val.length-1];
     var kv = {};
-    kv[l1] = l2;
+    kv[l1] = l2
     $.ajax({
       url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
       data: kv,
