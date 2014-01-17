@@ -8,3 +8,4 @@ pyramid-debugtoolbar==1.0.1
 SQLAlchemy==0.8.3
 zope.sqlalchemy==0.7.3
 pyramid-tm==0.7
+lxml==3.2.5
