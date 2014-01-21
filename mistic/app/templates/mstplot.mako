@@ -9,9 +9,29 @@ import mistic.app.data as data
 </%block>
 <%block name="controls">
   <form class="form-inline">
-    <span id="genelist"></span>
-    <label for="gene">Gene:</label>
-    <input type="text" id="gene">
+  
+  <div class="accordion" id="accordion">
+       
+      <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  </a></h4>
+       </div>
+  
+       <div id="locate_gene" class="accordion-body collapse in">
+         <div class="accordion-inner">  
+    
+         <span id="genelist"></span>
+         <label for="gene">Gene:</label>
+         <input type="text" id="gene">
+  
+      </div>
+      </div>
+    </div>
+   </div>       
+  
+  
+    
+   
   </form>
 </%block>
 <%block name="style">
