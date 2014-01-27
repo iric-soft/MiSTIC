@@ -8,9 +8,7 @@ output = phantom.args[1];
 
 var page = webpage.create();
 
-if (phantom.args.length >= 4) {
-  page.paperSize = { width: phantom.args[2], height: phantom.args[3] };
-}
+page.paperSize = { format: 'letter', orientation: 'landscape', border: '1cm' };  
 
 page.open(input, function(status) {
   if (status !== 'success') {
