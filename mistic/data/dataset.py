@@ -68,14 +68,14 @@ class RankTransform(object):
       d = r.values
     else:
       d = r
-
     if len(d.shape) == 1:
       self.rankRow(d)
     else:
       for i in range(len(d)):
         self.rankRow(d[i])
-
-    return d
+    
+    df = pandas.DataFrame(d, index=matrix.index, columns=matrix.columns, dtype=float)
+    return df
     
 
 class DataSet(object):
