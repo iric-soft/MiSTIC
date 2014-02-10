@@ -46,12 +46,12 @@ class PDFData(object):
     try:
       _data = _data.encode('utf-8', 'ignore')
       doc = etree.parse(cStringIO.StringIO(_data))
-    
+     
     except Exception, e: 
       raise HTTPInternalServerError(detail="Unable to generate the requested pdf.  Please contact the administrator")
       
     root = doc.getroot()
-
+    
     class XPHasClass(object):
       def __init__(self, klass):
         self.klass = klass
@@ -61,27 +61,26 @@ class PDFData(object):
     def removeNodes(xpath):
       for node in doc.xpath(xpath, namespaces={'svg':"http://www.w3.org/2000/svg"}):
         node.getparent().remove(node)
-
+    
     removeNodes('//svg:g[{0}]'.format(XPHasClass('brush')))
-
     removeNodes('//svg:g[{0}]/svg:text[{1}]'.format(XPHasClass('node'), XPHasClass('invisible')))
 
-    for node in doc.xpath(
-        '//svg:g[{0} and {1}]'.format(XPHasClass('node'), XPHasClass('highlighted')),
-        namespaces={'svg':"http://www.w3.org/2000/svg"}):
-      node.attrib['fill'] = 'rgb(20, 216, 28)'
+    for node in doc.xpath('//svg:g[{0}]/svg:path'.format(XPHasClass('node')),namespaces={'svg':"http://www.w3.org/2000/svg"}):
+      fill = node.attrib['fill'] 
+      fill = ','.join(fill.split(',')[0:3]).replace('rgba', 'rgb')+')'
+      node.attrib['fill'] = fill
 
     # extract width and height
     ht = root.attrib.get('height')
     wd = root.attrib.get('width')
-
+    
     if ht is None or wd is None:
       ht = wd = None
 
     input = tempfile.NamedTemporaryFile(suffix='.svg')
     doc.write(input)
     input.flush()
-
+    
     output = tempfile.NamedTemporaryFile('rb', suffix='.pdf')
 
     try:
