@@ -73,9 +73,10 @@ class RankTransform(object):
     else:
       for i in range(len(d)):
         self.rankRow(d[i])
-    
-    df = pandas.DataFrame(d, index=matrix.index, columns=matrix.columns, dtype=float)
-    return df
+    if hasattr(r, 'values'):
+      return pandas.DataFrame(d, index=matrix.index, columns=matrix.columns, dtype=float)
+    else : 
+      return d
     
 
 class DataSet(object):
