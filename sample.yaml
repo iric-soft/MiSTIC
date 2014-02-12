@@ -8,14 +8,16 @@ annotations:
   path: data/annotation/official_symbol.txt
 
 dataset_annotations:
-
+- id: bodymap_annotation
+  name: Bodymap annotation
+  path: data/annotation/sample/bodymap.json
 datasets:
 - id:   bodymap
   name: Illumina Bodymap
   desc: Illumina Bodymap (n=16)
-  path: data/datasets/bodymap.txt
+  path: data/datasets/bodymap_illumina_rnaseq.txt
   annr: official_symbol
-  annc: ''
+  annc: bodymap_annotation
   expt: ngs
   txid: '9606'
   type: rpkm
