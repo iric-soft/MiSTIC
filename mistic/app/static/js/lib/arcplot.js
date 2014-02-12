@@ -45,7 +45,7 @@
     };
 
     arcplot.prototype.zoom = function() {
-       
+        
         var S = d3.event.scale
         var T = d3.event.translate
 
@@ -236,7 +236,7 @@
     
     
     arcplot.prototype.zoomTo = function(id) {
-        console.log('zoomTo');
+        
         var arc = this.body
             .selectAll('path.arc')
             .classed('highlight', function(d) { return d.content.hasOwnProperty(id); });
@@ -246,7 +246,7 @@
             .selectAll('path.arc.highlight');
         
         var S, T;
-
+        
         if (hl[0].length === 1) {
             var bbox = hl[0][0].getBBox();
 
@@ -661,13 +661,17 @@
     };
 
     arcplot.prototype.draw = function() {
+        
         var self = this;
+        
+        
         this.width = this.elem.width();
         this.height = this.elem.height();
 
         // reset the container 
         this.elem.empty();
-
+        
+        
         d3.select(this.elem[0])
             .append('svg')
             .attr("width", this.width)
@@ -678,13 +682,14 @@
             .attr('xmlns', 'http://www.w3.org/2000/svg');
 
         this.svg  = d3.select(this.elem[0]).select('svg');
-
+        
+        var zoom = d3.behavior.zoom()
+                    .scaleExtent([0.75, 50])
+                    .on("zoom", _.bind(this.zoom, this))
+        
         this.zoom_g = this.svg
             .append('g')
-            .call(
-                this.zoom = d3.behavior.zoom()
-                    .scaleExtent([0.75, 50])
-                    .on("zoom", _.bind(this.zoom, this)));
+            .call(zoom);
  
         this.xform = { T: [ 0, 0 ], S: 1.0 };
         
@@ -752,6 +757,6 @@
             .attr('stroke', 'none')
             .on('click', _.bind(this.click, this));
             
-       
+    
     };
 })();
