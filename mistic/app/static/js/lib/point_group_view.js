@@ -19,7 +19,7 @@
 
         save: function() {
             var attrs = {};
-
+            
             switch (this.$('.group-fill .state').val()) {
             case 'enabled':
                 attrs.fill = this.$('.group-fill .colour span').css('background-color');
@@ -122,20 +122,23 @@
                 showInput: false,
                 showButtons: false,
                 showAlpha: true,
+                clickoutFiresChange: true,
                 change: function(colour) {
+                    
                     try { 
                         $('span', this).css('background-color', $(this).spectrum('get').toRgbString());
+                        $('.action-save').prop('disabled', false); 
                     }
                     catch (err) {
-                       alert('Click outside the color selector before saving');
-                       
-                       
+                        
+
                     }
                 },
                 beforeShow: function(colour) {
                     if ($(this).hasClass('disabled')) return false;
                     $(this).spectrum('set', $('span', this).css('background-color'));
-                    console.log(this);
+                    $('.action-save').prop('disabled', true);
+                    //console.log(this);
                 },
             });
 
@@ -165,7 +168,7 @@
             'click  .sg-clear':         'clear_points',
             'click  .sg-set-selection': 'set_selection',
             'click  .sg-style':         'settings',
-            'click  .close':            'remove',
+            'click  .times':            'remove',
             'click  .shift-up':         'shift_up',
             'click  .shift-dn':         'shift_dn',
         },
