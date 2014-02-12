@@ -73,10 +73,17 @@ class RankTransform(object):
     else:
       for i in range(len(d)):
         self.rankRow(d[i])
+        
     if hasattr(r, 'values'):
-      return pandas.DataFrame(d, index=matrix.index, columns=matrix.columns, dtype=float)
-    else : 
-      return d
+        if isinstance(r, pandas.DataFrame) : 
+          d = pandas.DataFrame(d, index=matrix.index, columns=matrix.columns, dtype=float)
+         
+        elif isinstance(r, pandas.Series) : 
+          d = pandas.Series(d, index=matrix.index, dtype=float)
+         
+        else: 
+          print 'matrix is %s ' % r.__class__
+    return d
     
 
 class DataSet(object):
@@ -106,26 +113,47 @@ class DataSet(object):
     return numpy.ma.corrcoef(data)
 
   def rowcorr(self, rownum, transform = None):
+    row = self.df.iloc[rownum]
+
+    if transform is not None: row = transform(row)
+    
+    out = []
+    
+    for i, r in enumerate(self.df.index):
+      row2 = self.df.iloc[i]
+
+      if transform is not None: row2 = transform(row2)
+      
+      c = row.corr(row2)
+      if numpy.isnan(c) : 
+        c = 0.0
+        
+      out.append((i, r, c))
+    return out
+
+  def rowcorr_numpy(self, rownum, transform = None):
     row = self.df.values[rownum,:]
 
     if transform is not None: row = transform(row)
     row = numpy.ma.masked_array(row, numpy.isnan(row))
 
     out = []
-
+    
     for i, r in enumerate(self.df.index):
       row2 = self.df.values[i,:]
 
       if transform is not None: row2 = transform(row2)
       row2 = numpy.ma.masked_array(row2, numpy.isnan(row2))
-
+      
+     
       z = numpy.ma.corrcoef(row, row2)
-
+     
       if z.mask[0,1] or numpy.isnan(z[0,1]):
         c = 0.0
       else:
         c = z[0,1]
 
+        
       out.append((i, r, c))
     return out
 
