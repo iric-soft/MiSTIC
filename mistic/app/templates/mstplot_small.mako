@@ -216,8 +216,12 @@ var height =($(document).height()-($(document).height()/5));  //was width:780
 
 var svg = d3.select("#graph").append("svg")
     .attr("width", width)
-    .attr("height", height);
-
+    .attr("height", height)
+    .attr('version', '1.1')
+    .attr('baseProfile', 'full')
+    .attr("xmlns", "http://www.w3.org/2000/svg")
+    .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink");
+          
 var grav = .20;
 var charge = -150; 
 var force = d3.layout.force()
