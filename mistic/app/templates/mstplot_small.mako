@@ -228,7 +228,7 @@ var force = d3.layout.force()
 
 force
    .nodes(json.nodes)
-   .links(json.links)
+   .links(json.links) 
    .start();
 
 force.on("tick", function() {
