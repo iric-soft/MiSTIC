@@ -9,7 +9,8 @@ ${parent.style()}
 </%block>
 <%block name="actions">
   <button class="btn" id="download">CSV</button>
-  <button class="btn" id="download-all">CSV [all]</button>${parent.actions()}
+  <!--<button class="btn" id="download-all">CSV [all]</button>-->
+  ${parent.actions()}
 
 </%block>
 
@@ -39,7 +40,7 @@ ${parent.style()}
 
     <div id="gene_menu" class="accordion-body collapse in">
       <div class="accordion-inner">
-        <input type="text" id="gene">
+        <input type="text" id="gene" autocomplete='off'>
         <button class="btn" id="plot">Plot</button>
       </div>
     </div>
@@ -109,18 +110,16 @@ $(document).ready(function() {
           .replace('_dataset_', opts.dataset)
           .replace('_gene_', opts.gene);
         url_button($('#download-all'), url);
-
-        url = "${request.route_url('mistic.template.corrgraph_static', dataset = '_dataset_', gene = '_gene_')}"
-          .replace('_dataset_', opts.dataset)
-          .replace('_gene_', opts.gene);
+      
         if (opts.go !== undefined) {
           url += '?go=' + opts.go;
         }
-        url_button($('#static_url'), url);
+        
+  
       } else {
         url_button($('#download'), null);
         url_button($('#download-all'), null);
-        url_button($('#static_url'), null);
+      
       }
     };
   })();
@@ -135,7 +134,7 @@ $(document).ready(function() {
   var current_graph = new corrgraph([], $('#graph'));
 
   resizeGraph = function() {
-    current_graph.elem.height($(window).height() -248 );
+    current_graph.elem.height($(window).height() -100 );
     current_graph.resize();
   };
 
@@ -245,14 +244,16 @@ $(document).ready(function() {
       data: {x: current_transform},
       dataType: 'json',
 
+
+      beforeSend : function() {
+        $("#graph").html('<div id="loading"><center><img src="${request.application_url}/static/img/ajax-loader.gif"/></center> </div>');
+       },
       success: function(data) {
         var nlabel = $("#nlabel").val();
         current_graph.annotation = current_dataset.genes;
         current_graph.setLabelNb(nlabel);
-
         current_graph.setNameAsLabel(name_labels);
         current_graph.setData(data.data);
-
         current_graph.draw();
         updateURLTarget({ dataset: dataset, gene: gene });
       },
@@ -260,7 +261,8 @@ $(document).ready(function() {
         // inform the user something went wrong.
       },
       complete: function() {
-        req.done(function() { $('#plot').button('reset'); });
+        req.done(function() { $('#plot').button('reset');
+                              $("div#loading").remove(); });
       }
     });
   };

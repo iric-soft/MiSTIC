@@ -101,7 +101,7 @@
         var xScale = this.xScale;
         var yScale = this.yScale;
         var nameAsLabel = this.options.nameAsLabel;
-        console.log(nameAsLabel);
+        //console.log(nameAsLabel);
         
         var TOP = 100;
         var BTM = d3.select(this.elem[0]).select('svg').attr('height') - 100;
@@ -318,7 +318,7 @@
     	  //console.log('updateLabels');
     	 
         var subset = _.filter(this.data, function(d) { return d.labelled === true; });
-        
+               
         if (subset.length>0) {
           subset = _.map(subset, this.labelMaker())
           var label_g = d3.select(this.elem[0]).selectAll('g.labels');
@@ -356,7 +356,7 @@
           var lines = label_g
               .selectAll('.label-path')
               .data(subset, function(d) { return d.gene; });
-
+          
           lines
               .attr('d', function(d, i) { return d.p; })
 
@@ -369,7 +369,7 @@
               .attr('opacity', .5)
               .attr('stroke-width', '0.5')
               .attr('d', function(d, i) { return d.p; })
-
+          
           lines
             .exit()
               .remove();
