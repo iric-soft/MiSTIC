@@ -123,7 +123,7 @@ $(document).ready(function() {
 %>
 
   resizeGraph = function() {
-    current_graph.elem.height($(window).height() - 180);
+    current_graph.elem.height($(window).height()-100);
     current_graph.resize();
   };
   
@@ -140,7 +140,7 @@ $(document).ready(function() {
   current_graph.setData(cluster_roots);
   current_graph.setGraphInfo(["Dataset: ${dataset}", 
                               "Transform: ${xf}"]); 
-  console.debug(current_graph);
+ 
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
