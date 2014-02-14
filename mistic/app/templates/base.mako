@@ -4,7 +4,7 @@
 
 
   <head>
-    <title><%block name="pagetitle">Correlation waterfall plot</%block></title>
+    <title><%block name="pagetitle"></%block></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="description" content="">
@@ -88,7 +88,15 @@ mistic = {
         </div>
         <div class="pull-right">
           <div class="btn-group">
-            <%block name="actions"><button type="submit" class="btn" id="pdf" href="">PDF</button></%block>
+            <%block name="actions">
+            <%
+            import mistic.app.views.pdffile as pdffile
+            no_pdf = pdffile.PDFData.rsvg_convert== None and pdffile.PDFData.phantomjs== None
+            %>
+            %if not no_pdf:
+                <button type="submit" class="btn" id="pdf" href="">PDF</button>
+            %endif
+            </%block>
           </div>
         </div>
       </div>
