@@ -96,7 +96,6 @@ import json
            <ul id="options" class="nav nav-list">
             <li><a id='show_labels'  href="#">Show labels</a></li>
             <li><a id='clear_labels' href="#">Clear labels</a></li>
-            <li><a id='select_clear' href="#">Select all</a></li>
             <li class="divider"></li>
             <li><a id="change_axes"  href="#">Change axes</a></li>
             <li>
@@ -199,7 +198,7 @@ $(document).ready(function() {
   var pgs_view = new PointGroupListView({ groups: pgs, graph: current_graph, el: $("#current_selection") })
 
   var newGroup = function() {
-    next_group = $('.point-group').length ;
+    next_group = $('.point-group').length;
     var pg = new PointGroup({
       style: { fill: group_colours[next_group % 9] }
     });
@@ -236,13 +235,14 @@ $(document).ready(function() {
     
     // Update counts label (dataset, genes, samples)
     var nplots = stats.sum(_.range(1,current_graph.data.length));
-    
-    var s = _.flatten(_.map(current_graph.point_groups.models, function(d) {return d.get('point_ids');}));
-    s = _.without(s, "");
-    s = _.uniq(s);
-    var nsamples = s.length;
-   
-    
+    var nsamples = 0;
+
+    if (!(_.isUndefined(nplots)) & current_graph.point_groups != null) {     
+        var s = _.flatten(_.map(current_graph.point_groups.models, function(d) {return d.get('point_ids');}));
+        s = _.without(s, "");
+        s = _.uniq(s);
+        var nsamples = s.length;
+    }
     if (_.isNaN(nsamples)) {
       nsamples=0;
     }
@@ -339,6 +339,8 @@ $(document).ready(function() {
         info.clear();
         $('#genelist').empty();
         updateEnrichmentTable([]);
+        updateInfo();
+       
 
       }
     });
@@ -396,7 +398,7 @@ $(document).ready(function() {
   var updateEnrichmentTable = function(data) {
      $('#sample_enrichment').html('');
     if (!data.length) return;
-    var s = ['Number of selected points with annotations : '+eval(data[0].tab[0].join('+'))+'/'+$('.selected').length].join(' ');
+    var s = ['Number of selected points with annotations : '+eval(data[0].tab[0].join('+'))+'/'+($('.selected').length/$('.scatterplot').length)].join(' ');
     $('#sample_enrichment').html(s);
     
     var table = d3
@@ -596,18 +598,7 @@ $(document).ready(function() {
     event.preventDefault();
   });
 
-  $('#select_clear').on('click', function(event) {
-    if (!d3.select(this).classed("active")){
-      current_graph.setSelection(current_graph.pointIDs());
-      d3.select(this).text("Clear all");
-      d3.select(this).classed("active", true);
-    } else {
-      current_graph.setSelection([]);
-      d3.select(this).text("Select all");
-      d3.select(this).classed("active", false);
-    }
-    event.preventDefault();
-  });
+
 	
   var minimal_axes = false;
   $('#change_axes').on('click', function(event){
@@ -646,7 +637,8 @@ $(document).ready(function() {
     ds_sel.show(event.currentTarget);
     
     ds_sel.$el.on('select-dataset', function(event, dataset_id) {
-       //current_graph.reset();
+       pgs.reset();
+       newGroup();
        addDataset(dataset_id);
        $('input').val('');
        updateInfo();

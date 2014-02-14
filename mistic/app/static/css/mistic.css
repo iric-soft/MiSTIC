@@ -466,3 +466,17 @@ div#sample_characteristic button {
     font-family:inherit;
 }
 
+#sample_annotation {
+   text-overflow : ellipsis;
+   display: block;
+   margin-right: -22px;
+   width : 100%;
+}
+
+#sample_annotation_drop {
+    display: inline-block;
+    width: 24px;
+    position :absolute;
+    
+    background-clip : padding-box;
+}
