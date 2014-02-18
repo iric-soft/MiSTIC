@@ -182,6 +182,7 @@
                 _.isEqual(this.current_search, [url, data])) {
                 return;
             }
+        
 
             this.fetching_items = true;
             this.current_search = [url, data];
