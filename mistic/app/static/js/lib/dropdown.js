@@ -319,7 +319,8 @@
                 }
                 }
             }
-            this.update(event)
+            setTimeout(_.bind(this.update, this, event), 4);
+            //this.update(event)
         },
 
         keypress: function(event) {
@@ -388,10 +389,10 @@
             this.fetching_items = false;
             this.current_search = null;
             this.selected_item = null;
-            this.selected_text = null
+            this.selected_text = null;
 
             this.collection.on('all', _.bind(this.renderItems, this));
-
+                      
             this.$menu = $(this.menu);
            
             this.shown = false;
