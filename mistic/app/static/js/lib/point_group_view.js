@@ -85,13 +85,12 @@
                     { height: $(pos_elem)[0].offsetHeight,
                       offsetTop: $(pos_elem)[0].offsetTop}
                 );
-                console.debug( pos);
-                
+               
                 this.$el.css({
                     width: 'auto',
-                    top: pos.offsetTop+pos.height+pos.height/2, //+ pos.height + 5,
-                    left: pos.left,
-                    margin: 0
+                    top: '40%',
+                    left: pos.left > 0 ? pos.left : 0 
+                  
                 })
             } else {
                 this.$el.css({

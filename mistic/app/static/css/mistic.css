@@ -480,3 +480,15 @@ div#sample_characteristic button {
     
     background-clip : padding-box;
 }
+
+
+.modal-backdrop, 
+.modal-backdrop.fade.in{
+    opacity: 0.7;
+    filter: alpha(opacity=70);
+    background: #000;
+}
+#point-group-settings {
+    margin: 0;
+    width: auto;
+}
