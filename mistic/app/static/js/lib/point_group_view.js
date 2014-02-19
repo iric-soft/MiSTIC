@@ -76,18 +76,20 @@
 
         show: function(pos_elem) {
             var self = this;
-            this.$el.appendTo($('body')).modal({ backdrop: false });
+            this.$el.appendTo($('body')).modal({ backdrop: true, keyboard:true });
 
             if (pos_elem !== undefined) {
                 var pos = _.extend(
                     {},
                     $(pos_elem).offset(),
-                    { height: $(pos_elem)[0].offsetHeight }
+                    { height: $(pos_elem)[0].offsetHeight,
+                      offsetTop: $(pos_elem)[0].offsetTop}
                 );
-
+                console.debug( pos);
+                
                 this.$el.css({
                     width: 'auto',
-                    top: pos.top + pos.height + 5,
+                    top: pos.offsetTop+pos.height+pos.height/2, //+ pos.height + 5,
                     left: pos.left,
                     margin: 0
                 })

@@ -9,7 +9,7 @@ import json
 
 <%block name="actions">
   ${parent.actions()}
-   <a id="share_url" href="#link_to_share" role="button" class="btn" data-toggle="modal">Link to share</a>
+   <a id="share_url" href="#link_to_share" role="button" class="btn" >Link to share</a>
 </%block>
 
 <%block name="controls">
@@ -532,6 +532,9 @@ $(document).ready(function() {
       },
       success: function(data) {
         $("span#share").html(url + '?hl=' + data);
+        $("#link_to_share").modal({keyboard : true, 
+                                   backdrop: true });
+
       },
     });
   });
