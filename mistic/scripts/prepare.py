@@ -262,7 +262,7 @@ def run(args):
       continue
     basedir, basefile = os.path.split(base)
 
-    transforms = set(('none', 'log', 'anscombe', 'rank')) & set(dataset.get('xfrm', []))
+    transforms = set(('none', 'log', 'rank')) & set(dataset.get('xfrm', [])) # 'anscombe'
 
     for t in transforms:
       transformed = os.path.join(basedir, 'transformed', t, basefile)
