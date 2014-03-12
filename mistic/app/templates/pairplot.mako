@@ -627,7 +627,7 @@ $(document).ready(function() {
     $.ajax({
       url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
       data: kv,
-      dataype: 'json',
+      datatype: 'json',
       success: function(data) {
         current_graph.setSelection(data);
       }

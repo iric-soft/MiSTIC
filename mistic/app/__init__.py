@@ -22,6 +22,7 @@ from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.authorization import ACLAuthorizationPolicy
 
 from pyramid_beaker import set_cache_regions_from_settings
+from pyramid.session import UnencryptedCookieSessionFactoryConfig
 
 from sqlalchemy import engine_from_config
 
@@ -162,7 +163,10 @@ def main(global_config, **settings):
                 authentication_policy=BasicAuthenticationPolicy(
                     http_basic_authenticator(settings['mistic.basic.auth']),
                     realm=settings.get('mistic.basic.realm', 'mistic')),
-                authorization_policy=ACLAuthorizationPolicy()))
+                authorization_policy=ACLAuthorizationPolicy() ))
+
+    my_session_factory = UnencryptedCookieSessionFactoryConfig('myouwnsekreetfactory')
+    config_args.update(dict(session_factory= my_session_factory))
 
     config = Configurator(**config_args)
 
@@ -224,6 +228,8 @@ def main(global_config, **settings):
 
     config.add_route('mistic.json.attr.set',               '/attr')
     config.add_route('mistic.json.attr.get',               '/attr/{id}')
+    
+    config.add_route('mistic.json.saveValueInSession',     '/saveInSession')
 
     config.add_route('mistic.template.corrgraph',          '/genecorr')
     config.add_route('mistic.template.corrgraph_static',   '/genecorr/{dataset}/{gene}')
@@ -238,9 +244,11 @@ def main(global_config, **settings):
 
     config.add_route('mistic.template.clustering',         '/clustering/{dataset}/{xform}')
     config.add_route('mistic.template.mstplot',            '/mstplot/{dataset}/{xform}')
+   
 
     config.add_static_view('static', 'mistic:app/static', cache_max_age=3600)
     config.add_static_view('images', 'mistic:resources/images', cache_max_age=3600)
+
 
     config.scan()
 

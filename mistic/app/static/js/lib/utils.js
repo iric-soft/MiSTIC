@@ -118,3 +118,35 @@
      return oTable;
    };
 })();
+
+
+(function() {
+    getCookie = function(key) {
+       cookies = document.cookie.split('; ');
+  
+       for(var i=0; i<cookies.length; i++){
+         name = cookies[i].split('=')[0];
+         value = cookies[i].split('=')[1];
+    
+         if (name==key) {
+           return value.split(',');
+         } 
+       }    
+      return [] 
+    };
+})();
+
+(function() {
+    setCookie = function(key, value) {
+        document.cookie=key+'='+value+'; expires=Thu, 2 Aug 2017 20:47:11 UTC; path=/';
+    };
+})();
+(function() {
+    resetCookie = function(key) {
+        cookies = document.cookie.split('; ');
+        for (i in cookies) {
+           var c = (/^[^=]+/.exec(cookies[i])[0]);
+           if (c == key)   { document.cookie =c+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT";}    
+     }  
+    };
+})();

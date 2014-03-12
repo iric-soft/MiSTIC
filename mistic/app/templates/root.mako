@@ -72,6 +72,7 @@ th { padding:0px;}
 %endfor
 <th>n</th>
 <th>Icicle</th>
+<th></th>
 </tr>
 </thead>
 
@@ -91,6 +92,9 @@ th { padding:0px;}
   %endif
   </span>
 %endfor
+    </td>
+    <td class='td_add_favorite'>
+      <a class="add_favorite"><span class="dummy" id="dummy" style="display:none">a</span>&#x2736</a>
     </td>
   </tr>
   %endfor
@@ -121,8 +125,9 @@ function initTable() {
     aoc.push(null);
     bsc.push(true);
   }
-  aoc = aoc.concat([null, { "bSortable": false } ]);
-  bsc = bsc.concat([true, false ]);
+  aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": true , "sType": "html"}]);
+  bsc = bsc.concat([true, false, false ]);
+  var n = bsc.length-1;
   
   return $('#datasets-table').dataTable({
     "aoColumns": aoc,
@@ -132,6 +137,7 @@ function initTable() {
     "bProcessing": false,
     "sDom": 'Rlfrtip',
     "bRetrieve":true,
+    "aaSorting": [[n, 'asc'],[0,'asc']],
   });
 }
 
@@ -182,12 +188,68 @@ $('#csv-button').on('click', function(event){
      
 });
       
-$('#datasets-table tbody tr ').on('click', function(event){
-    var link = $(this.cells).find('span > a')[0];
+$('#datasets-table tbody td ').on('click', function(event){
+    var tr = $(this).parents('tr');
+    var link = $(tr).find('span > a')[0];
+    if ($(this).hasClass('td_add_favorite')) return;
     window.open ($(link).attr("href"));
   
 });
-      
+
+var favorites = getCookie('favorite_datasets');
+
+$('.td_add_favorite' ).on('click', function(event) {
+    
+    event.stopPropagation();
+    event.preventDefault();
+    var favorite_dataset = $(this).parents('tr').find('td')[0].innerText;
+    var ix = favorites.indexOf(favorite_dataset);
+ 
+    if (ix ==-1) {
+        favorites.push (favorite_dataset);
+    }
+    else {
+        favorites.splice(ix, 1);
+    }
+    manageFavorites();
+    setCookie('favorite_datasets', favorites);
+        
+ });
+
+var manageFavorites = function () {
+   
+    var oTable = initTable();
+  
+   _.each($('.add_favorite'), function(a) { 
+             var tr =  $(a).parents('tr');
+             var td  = tr.find('td')[0]
+             var txt = td.innerText;
+             
+             $(a).removeClass('active');
+             $(a).find('span#dummy').text('');
+             var a_td = $(a).parents('td')[0];
+             var h_td = a_td.innerHTML;
+             pos = oTable.fnGetPosition(a_td);
+             
+             if (favorites.indexOf(txt)!= -1) {
+                
+                $(a).addClass('active');
+                $(a).find('span#dummy').text('a');
+                a_td = $(a).parents('td')[0];
+                h_td = a_td.innerHTML;
+ 
+             }
+            oTable.fnUpdate(h_td, pos[0], pos[1], true, false)
+           
+    } ); 
+   
+   
+             
+};
+
+manageFavorites();
+
+
 </script>
 
 </%block>
