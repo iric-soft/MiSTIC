@@ -410,6 +410,9 @@
                     x_max = x;
                     x_max_i = i;
                     x_tab = [ __pp, __pn, __np, __nn ];
+                    if (x > 0.1) {
+                      console.log ("significant", x, __pp, __pn, __np, __nn, statistic);
+                    }
                 }
             }
 
