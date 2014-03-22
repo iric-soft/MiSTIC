@@ -231,7 +231,7 @@
     
     arcplot.prototype.dezoom = function(){
         this.xform = { T: [0,0], S: 1 };
-        this._zoom();
+        //this._zoom();
     };
     
     
@@ -399,14 +399,17 @@
                 var __np = c_counts[i] - n.__pp[i];
                 var __nn = total - n.__pn[i] - __np - n.__pp[i];
 
-                var x = statistic(__pp, __pn, __np, __nn);
+                // This is to avoid quantifying a depletion of the (now smaller) background as an
+                // enrichment in the cluster.  It will also very slightly speed up computations.
+                if (__pp + __pn > __np + __nn) continue;
+
+                var x = statistic (__pp, __pn, __np, __nn);
                 if (x === undefined) continue;
-
-                // stats.chi2_yates(__pp, __pn, __np, __nn);
-                // var x = stats.fisherp(__pp, __pn, __np, __nn, 'greater');
-                // var x = stats.kappa(__pp, __pn, __np, __nn);
-
-                if (comparator(x, x_max)) {
+                
+                if (comparator (x, x_max)) {
+                    // if (x > 0.001) {
+                    //   console.log ("significant", __pp, __pn, __np, __nn, x);
+                    // }
                     x_max = x;
                     x_max_i = i;
                     x_tab = [ __pp, __pn, __np, __nn ];
@@ -538,10 +541,9 @@
 
     arcplot.prototype.colourByClusterMatch = function(clusters, statistic, comparator, ramp) {
         this.findBestMatches(clusters, statistic, comparator);
-
         this.body
             .selectAll('path.arc')
-            .attr('fill', function(d) { return d.__x_max_i == -1 ? '#000' : ramp(d.__x_max); });
+            .attr('fill', function(d) { return d.__x_max_i == -1 ? ramp (0) : ramp(d.__x_max); });
     };
 
     arcplot.prototype.removeColour = function() {
