@@ -14,6 +14,7 @@ for ds in data.datasets.all():
   for t in ds.transforms:
    if t not in transforms:
      transforms.append(t)
+
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -67,7 +68,7 @@ th { padding:0px;}
 <tr>
   <th>Dataset</th>
 %for term in terms :
-  <th><a class="group-data">&#x2630</a> ${term}</th>
+  <th><a class="unicode-icon group-data">&#x2630</a> ${term}</th>
   
 %endfor
 <th>n</th>
@@ -79,7 +80,7 @@ th { padding:0px;}
 <tbody>
   %for ds in data.datasets.all() :
   <tr>
-    <td>${ds.name}</td>
+    <td>${ds.name}<a style='float:right;' class="unicode-icon description" title='Click here to know more about the dataset' data-id=${ds.id}>&#8230</a></td>
 %for term in terms:
     <td>${ds.tags.get(term, '')}</td>
 %endfor
@@ -88,13 +89,13 @@ th { padding:0px;}
 %for i, tf in enumerate(transforms):
   <span style="display: inline-block; width: 4em;">
   %if tf in ds.transforms:
-      <a href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a>
+      <a id='icicle-link' target="_blank" href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a>
   %endif
   </span>
 %endfor
     </td>
     <td class='td_add_favorite'>
-      <a class="add_favorite"><span class="dummy" id="dummy" style="display:none">a</span>&#x2736</a>
+      <a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'><span class="dummy" id="dummy" style="display:none">a</span>&#x2736</a>
     </td>
   </tr>
   %endfor
@@ -103,16 +104,36 @@ th { padding:0px;}
 </div>
 
 
+<div id='description-modal' class="modal hide" tabindex="-1" role="dialog">
+  <div class="modal-header">
+    <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+    <div id='description-modal-title'><h4></h4></div>
+  </div>
+  <div id='description-modal-body' class="modal-body">
+    
+  </div>
+
+</div>
+
+
   
 </%block>
 <%block name="pagetail">
 ${parent.pagetail()}
+
+<%
+
+dat = [dict([(k, ds.__dict__[k]) for k in ds.__dict__.keys() if isinstance(ds.__dict__[k], str) and '/' not in ds.__dict__[k]]) for ds in data.datasets.all()]
+
+%>
+
 
 <form id="csvform" target="_blank" method="post" action="${request.route_url('mistic.csv.root')}">
 <input id="csvdata" type="hidden" name="csvdata" value=""></input></form>
  
 <script type="text/javascript" charset="utf-8">
 
+ var dat = ${json.dumps(dat)|n};
 
  $(document).ready(function() {
       var oTable = initTable();
@@ -189,9 +210,12 @@ $('#csv-button').on('click', function(event){
 });
       
 $('#datasets-table tbody td ').on('click', function(event){
+    
+    if ($(this).find('#icicle-link').length>1) return;
+    if ($(this).hasClass('td_add_favorite')) return;
+    
     var tr = $(this).parents('tr');
     var link = $(tr).find('span > a')[0];
-    if ($(this).hasClass('td_add_favorite')) return;
     window.open ($(link).attr("href"));
   
 });
@@ -215,6 +239,18 @@ $('.td_add_favorite' ).on('click', function(event) {
     setCookie('favorite_datasets', favorites);
         
  });
+ 
+ $('.description' ).on('click', function(event) {
+    
+    event.stopPropagation();
+    event.preventDefault();
+    d = _.where(dat, {'id': $(this).data('id')})[0];
+    $('#description-modal-title > h4').html(d.name);
+    $('#description-modal-body').html(d.description);
+    $('#description-modal').modal('show')
+        
+ });
+
 
 var manageFavorites = function () {
    
