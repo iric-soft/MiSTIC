@@ -124,6 +124,8 @@ class Annotation(object):
         self.annotation = data.annotations.get(request.matchdict['annotation'])
         if self.annotation is None:
             raise HTTPNotFound()
+            
+        self._genesets_search = {3 : self._genesets, 2: self._genesets_cat, 1: self._genesets_type}
 
     def gene_record(self, gene, genesets = None):
         '''
@@ -169,48 +171,108 @@ class Annotation(object):
         result = self.annotation.get_gene_ids(self.request.GET.getall('filter_gsid'))
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
+
+    def _query_to_regex (self, query):
+      if query: 
+        query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
+        query = [ re.compile(q, re.I) for q in query ]
+      return query 
+      
     @key_cache_region('mistic', 'jsonviews', lambda args: args[1])
     def _genesets(self, query, limit):
-        query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '' ]
-        query = [ re.compile(q, re.I) for q in query ]
+       
+        
         out = []
         
+        query = self._query_to_regex(query)
+          
         for gsid in sorted(self.annotation.get_geneset_ids()):
-            if limit and len(out) > limit : 
-              break
+          if limit and len(out) > limit : 
+            break
             
+          geneset_id, ident = gsid.rsplit(':', 1)
+          geneset_id = geneset_id.split('.')
+          geneset_id, geneset_cat = geneset_id[0], geneset_id[1:]
+          geneset = self.annotation.genesets.get(geneset_id)
+              
+          row = geneset.genesets.ix[ident]
+          name = row['name']
+          
+          if (all([ q.search(gsid+' '+name) is not None for q in query ])):
+            out.append(dict(name = name, id = gsid))
             
-            geneset_id, ident = gsid.rsplit(':', 1)
-            geneset_id = geneset_id.split('.')
-            geneset_id, geneset_cat = geneset_id[0], geneset_id[1:]
-            geneset = self.annotation.genesets.get(geneset_id)
-            row = geneset.genesets.ix[ident]
-            name = row['name']
-            
-            if (all([ q.search(gsid+' '+name) is not None for q in query ])):
-                out.append(dict(name = name, id = gsid))
+
         return out
+    
+      
+    def _genesets_cat (self, query, limit):
+      
+      out = []
+      
+      geneset_types = self.annotation.genesets.keys()
+      geneset_type = [q for q in query if q in geneset_types]
+      
+      
+      if len(geneset_type)>0 : 
+        geneset_type = geneset_type[0]
+        query = tuple([q for q in query if q != geneset_type])   # Use the type only to restrict the list
+        genesets_data = {geneset_type : self.annotation.genesets[geneset_type]}
+      else : 
+        genesets_data = self.annotation.genesets
+      
+    
+      
+      query = self._query_to_regex(query)
+      
+      for k,v in genesets_data.items() :
+        if limit and len(out) > limit : 
+          break 
+       
+        ss = sorted(list(set(list(v.genesets['cat']))))
+       
+        for s in ss : 
+          if (all([q.search(k+' '+s) is not None for q in query ])) or not query:
+            out.append(dict(id = k+'.'+s, name = ''))
+      return out
+
+
+    def _genesets_type (self, query, limit):
+     
+      out = []
+      query = self._query_to_regex(query)
+      genesets_data =  self.annotation.genesets
+      for k,v in genesets_data.items() :           
+        if (all([ q.search(k) is not None for q in query ])) or not query:
+          out.append(dict(id = k,name = v.description))
+        
+      return out
+      
+      
 
     @view_config(route_name="mistic.json.annotation.gs", request_method="GET", renderer="json")
     def genesets(self):
+        level = int(self.request.GET.get('v')) 
         query = self.request.GET.getall('q')
         query = tuple(sum([ q.split() for q in query ], []))
         limit = self.request.GET.get('l')
-       
+
         try:
             limit = int(limit)
         except:
-            limit = 1000
+            limit = 100
 
-        out = self._genesets(query, limit)
-
+        
+        #out = self._genesets(query, limit)
+       
+        out = self._genesets_search[level](query, limit)
+        
         #if limit is not None:
         #    out = out[:limit]
         return out
 
    
     
-  
+
 
 class AnnotationGene(Annotation):
     def __init__(self, request):

@@ -147,6 +147,7 @@ mistic = {
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.colReorderWithResize.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.scientific-sorting.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.columnFilter.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/spectrum.js')}" type="text/javascript"></script>
 
 <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
@@ -207,13 +208,17 @@ mistic = {
 
   window.GODropdown = Dropdown.extend({
     item_view: GOItemView,
-    max_items: 100,
+    max_items: 50,
     menu: '<ul class="typeahead dropdown-menu" style="max-width: 600px; max-height: 400px; overflow-x: hidden; overflow-y: auto"></ul>',
 
     autofillText: function(model) {
-      console.log(typeof(model))
       if (model !== undefined && model !== null) {
-        return model.id + ' ' + model.get('name');
+        if (model.get('name')!='') {
+            return model.id + ': ' + model.get('name');
+            }
+        else {
+                return model.id ;
+              }
       }
       return '';
     },

@@ -402,7 +402,7 @@ div#sample_characteristic button {
   border-bottom-color: transparent;
 }
 
-.group-data {
+.unicode-icon {
     padding: 0px 2px;
     font-weight: bold;
     color: #000;
@@ -411,7 +411,16 @@ div#sample_characteristic button {
     filter: alpha(opacity=20);
 }
 
-.group-data:hover,.group-data.active {
+.unicode-icon {
+    padding: 0px 2px;
+    font-weight: bold;
+    color: #000;
+    text-shadow: 0 1px 0 #fff;
+    opacity: .2;
+    filter: alpha(opacity=20);
+}
+
+.unicode-icon:hover,.unicode-icon.active {
     color: #000;
     text-decoration: none;
     cursor: pointer;
@@ -419,7 +428,7 @@ div#sample_characteristic button {
     filter: alpha(opacity=40);
 }
 
-.group-data.disabled:hover {
+.unicode-icon.disabled:hover {
     color: #000;
     text-decoration: none;
     cursor: default;
@@ -427,41 +436,7 @@ div#sample_characteristic button {
     filter: alpha(opacity=20);
 }
 
-.add_favorite {
-    padding: 0px 2px;
-    font-weight: bold;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    opacity: .2;
-    filter: alpha(opacity=20);
-}
 
-.add_favorite :hover {
-    padding: 0px 2px;
-    font-weight: bold;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    opacity: .2;
-    filter: alpha(opacity=20);
-}
-
-
-.add_favorite.active, .add_favorite:hover {
-    color: #000000;
-    text-decoration: none;
-    cursor: pointer;
-    opacity: .8;
-    background-color: 'red';
-    filter: alpha(opacity=40);
-}
-
-.add_favorite .disabled:hover {
-    color: #000;
-    text-decoration: none;
-    cursor: default;
-    opacity: .2;
-    filter: alpha(opacity=20);
-}
 
 
 
@@ -529,3 +504,16 @@ div#sample_characteristic button {
     margin: 0;
     width: auto;
 }
+
+input.search_init,input.text_filter:focus {
+    width :100%;
+    font-size:10px;
+}
+
+
+
+
+
+
+
+

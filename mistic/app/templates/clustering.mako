@@ -57,8 +57,32 @@ import pickle
   
    <div id="go_colour" class="accordion-body collapse in">
        <div class="accordion-inner">  
-            <input type="text" id="goterm" placeholder='Search for geneset'></input></label>
-  
+           
+            
+            <div class="input-append btn-group"  style='margin-left:0px;'>
+                <input type="text" id="level1" placeholder='Restrict geneset search to this type'>
+                <a id='level1_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
+                <span class="caret"></span>
+                </a>
+            </div>
+           <div class="input-append btn-group"  style='margin-left:0px;'>
+                 <input type="text" id="level2" placeholder='Restrict geneset search to this category'>
+                <a id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
+                <span class="caret"></span>
+                </a>
+            </div>
+           
+           <div class="input-append btn-group" style='margin-left:0px;'>
+                <input type="text" id="level3" placeholder='Search for a geneset'>
+                <a id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
+                <span class="caret"></span>
+                </a>
+            </div>
+         
+         
+          <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
+         
+          
       </div>
       </div>
     </div>
@@ -114,11 +138,16 @@ $(document).ready(function() {
 <%
   ds = data.datasets.get(dataset)
   my_annotation = ds.annotation.id
+  #print dir(ds.annotation)
+  #print [(k,v.description) for k,v in ds.annotation.genesets.items()]
+  #print ds.annotation.genesets['CNV']
   
   if xform == 'log': 
     xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
   else : 
     xf = xform 
+
+ 
 
 %>
 
@@ -150,7 +179,67 @@ $(document).ready(function() {
     url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
   });
   
-  go_entry.on('change', function(item) {
+  
+  var level1_entry = new GODropdown({
+    el: $("#level1"),
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=1"
+  });
+  
+  var level2_entry = new GODropdown({
+    el: $("#level2"),
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2"
+  });
+  
+  var level3_entry = new GODropdown({
+    el: $("#level3"),
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3"
+  });
+  
+  $('#clear_input').on('click', function() {
+    level1_entry.$el.val('');
+    level2_entry.$el.val('');
+    level3_entry.$el.val('');
+    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;";
+    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;";
+  });
+  
+  
+  $('#level1_drop').on('click', function() {
+    level1_entry.$el.val('');
+    level1_entry.update();
+    level1_entry.$el.focus();
+  });
+  
+  level1_entry.on('change', function() {
+    level2_entry.$el.val('');
+    level3_entry.$el.val('');
+    gstype = $("#level1").val().split(':')[0];
+    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;q="+gstype;
+    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gstype;
+  });
+  
+   level2_entry.on('change', function() {
+    level3_entry.$el.val('');
+    gsid = $("#level2").val();
+    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gsid;
+  });
+  
+  
+  
+   $('#level2_drop').on('click', function() {
+    level2_entry.$el.val('');
+    level2_entry.update();
+    level2_entry.$el.focus();
+  });
+  
+   $('#level3_drop').on('click', function() { 
+    level3_entry.$el.val('');
+    level3_entry.update();
+    level3_entry.$el.focus();
+  });
+  
+  
+  level3_entry.on('change', function(item) {
     if (item === null) {
       current_graph.removeColour();
     } else {

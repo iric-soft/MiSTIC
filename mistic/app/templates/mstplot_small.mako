@@ -159,11 +159,24 @@ var updateEnrichmentTable = function() {
     var table = d3.select('#go_table')
                 .insert('table', ':first-child')
                 .attr('id', 'gotable');
-
+    
     var thead = table.append('thead');
     var tbody = table.append('tbody');
+    var tfoot = table.append('tfoot');
 
     var thr = thead.selectAll("tr")
+        .data([ 1 ])
+        .enter()
+        .append("tr");
+
+    var th = thr.selectAll('th')
+        .data([ 'P-value', 'Odds',  'Type', 'Cat', 'ID', 'Name' ])
+        .enter()
+        .append('th')
+        .text(function(d) { return d; });
+
+
+    var thr = tfoot.selectAll("tr")
         .data([ 1 ])
         .enter()
         .append("tr");
@@ -214,17 +227,23 @@ var updateEnrichmentTable = function() {
         .attr('classed', function(d) {return d.class; })
         ;
     $('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": [ 0 ], 'aaSorting':["asc"] },
-                                           { "sType": "numeric", "aTargets": [ 1 ]}],
+                                               { "sType": "numeric", "aTargets": [ 1 ]},
+                                               ],
+                         
                           "bPaginate" : true,
                           "iDisplayLength": 10,
                           "sPaginationType": "full_numbers",
                           "bLengthChange": false,
                           "bFilter": true,
                           "bSort": true,
+                         
                           "bInfo": true,
           
-    });    
+    }).columnFilter({sPlaceHolder: "tfoot", 
+                    aoColumns:[null,null, {type:'text', bRegex:true},{type:'text', bRegex:true},{type:'text', bRegex:true},{type:'text', bRegex:true}]});
     
+   
+    console.debug('w');
     }
     
    
@@ -290,12 +309,13 @@ var force2;
 
 var initForce = function(){
     force = d3.layout.force().gravity(grav).charge(charge).distance(distance).size([width, height]).nodes(json.nodes).links(json.links);
+    
     force.start();
 }
 
 var initForceLabel = function(){
     
-    force = d3.layout.force().size([width, height]).nodes(json.nodes).links(json.links).gravity(grav).linkDistance(25)
+    force = d3.layout.force().size([width, height]).nodes(json.nodes).links(json.links).gravity(grav).linkDistance(50)
               .charge(charge).linkStrength(function(x) {
              return x.weight * 10});
          
