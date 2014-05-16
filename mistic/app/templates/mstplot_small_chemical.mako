@@ -547,7 +547,8 @@ search2_entry.on('change', function() {
   
 });
 
-
+ $("#document-tanimoto").modal({keyboard : true, 
+                                backdrop: true });
 
 
 </script>
