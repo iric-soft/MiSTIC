@@ -668,32 +668,38 @@ class DataSet(object):
 
   @key_cache_region('mistic', 'genecorr', lambda args: (args[0].id,) + args[1:])
   def _genecorr(self, gene, xform, absthresh, thresh):
-    result = self.data.rowcorr(self.data.r(gene), transform = self._makeTransform(xform))
-
+    row = self.data.r(gene)
+    
+    if not isinstance(row, list) : 
+      row = [row]
+      
+    result = [self.data.rowcorr(row[i], transform = self._makeTransform(xform)) for i in range(len(row))]
+    
     if absthresh is not None:
       absthresh = float(absthresh)
-      result = [ r for r in result if abs(r[2]) >= absthresh ]
-
+      result = [[r for r in res if abs(r[2]) >= absthresh] for res in result]
+   
     if thresh is not None:
       thresh = float(thresh)
-      result = [ r for r in result if r[2] >= thresh ]
+      result = [[r for r in res if abs(r[2]) >= thresh] for res in result]
 
     return dict(
       gene = gene,
       symbol = self.annotation.get_symbol(gene, ''),
       name = self.annotation.get_name(gene, ''),
       dataset = self.id,
-      row = self.data.r(gene),
+      row = str(self.data.r(gene)),
       xform = xform,
-      data = tuple([
+      data = tuple([[
           dict(
             idx=a,
             gene=b,
             symbol = self.annotation.get_symbol(b, ''),
             name = self.annotation.get_name(b, ''),
             corr=c,
-            ) for a,b,c in result ]))
-
+            row=str(row[i])
+            ) for a,b,c in result[i]] for i in range(len(result)) ]))
+           
   def genecorr(self, gene, xform = None, absthresh = None, thresh = None):
     return self._genecorr(gene, xform, absthresh, thresh)
 
@@ -799,25 +805,22 @@ class DataSet(object):
 
   def expndata(self, gene, xform = None):
     expn = self.data.row(self.data.r(gene), transform = self._makeTransform(xform))
-
-    data = []
-    for i in range(len(self.samples)): 
-      dat = {}
-      if self.cannotation:
-        dat = self.cannotation.get(self.samples[i], default = {})
-      dat.update({'sample':self.samples[i], 'expr':expn[i]})
-      data.append(dat) 
-
-    data = tuple(data)
-
+   
+    if len(expn.shape) == 1 : 
+      expn.shape = (1,expn.shape[0])
+    
+    
+    row = self.data.r(gene)
+    if isinstance(row, int) : row = [row]
+    
     return dict(
       gene = gene,
       symbol = self.annotation.get_symbol(gene, ''),
       name = self.annotation.get_name(gene, ''),
       dataset = self.id,
-      row = self.data.r(gene),
+      row = str(row)  ,
       xform = xform,
-      data = tuple([ dict(sample=a, expr=float(b)) for a, b in zip(self.samples, expn) ])
+      data = tuple([[dict(sample=a, expr=float(b), row=int(row[i])) for a, b in zip(self.samples, expn[i,])] for i in range(expn.shape[0]) ])
     )
     
   def getSamplesByCharacteristic (self, ki, vi):

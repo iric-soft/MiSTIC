@@ -149,6 +149,7 @@ import json
     </div>
      </div>
  
+<%include file="mistic:app/templates/fragments/alert_modal.mako"/>
 
 </%block>
 
@@ -359,6 +360,7 @@ $(document).ready(function() {
       data: { x: current_transform },
       async: !sync,
       success: function(data) {
+        
         current_graph.updateData(data);
         updateInfo();
       },
@@ -376,8 +378,30 @@ $(document).ready(function() {
       data: { x: current_transform },
       async: !sync,
       success: function(data) {
-        current_graph.addData(data);
-        var label = $('<span>')
+       
+        row = JSON.parse(data.row);
+       
+        if (row.length > 1) {
+ 
+            $('.alert-modal-title').html('Warning');
+            $('.alert-modal-body').html(row.length + ' entries found for ' + data.gene);
+            $('.alert-modal').modal('toggle');
+        }
+       _.each(row, function(e,i) {
+            
+               dat = data.data[i];
+               obj = {data:dat, 
+                       row:e, 
+                       symbol: (row.length > 1 ? data.symbol+'_'+i  : data.symbol),
+                       gene : data.gene,
+                       xform : data.xform,
+                       name : data.name,
+                       dataset: data.dataset                       
+                       };
+               
+                current_graph.addData(obj);       
+                
+                 var label = $('<span>')
           .addClass('badge')
           .css({ 'margin': '0px 5px' })
           .attr({ 'data-idx': current_graph.data.length - 1 })
@@ -385,7 +409,10 @@ $(document).ready(function() {
         label.append($('<i>')
           .addClass('icon-white icon-remove-sign')
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
-        $('#genelist').append(label);
+        $('#genelist').append(label);       
+            });
+            
+       
 
         updateInfo();
       },

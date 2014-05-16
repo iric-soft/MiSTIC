@@ -74,6 +74,9 @@ ${parent.style()}
 </div>
 
 </form>
+
+<%include file="mistic:app/templates/fragments/alert_modal.mako"/>
+
 </%block>
 
 <%block name="pagetail">
@@ -249,11 +252,18 @@ $(document).ready(function() {
         $("#graph").html('<div id="loading"><center><img src="${request.application_url}/static/img/ajax-loader.gif"/></center> </div>');
        },
       success: function(data) {
+       
+        if (data.data.length > 1) {
+            $('.alert-modal-title').html('Warning');
+            $('.alert-modal-body').html(data.data.length + ' entries found for ' + data.gene+'.  Displaying only the first one');
+            $('.alert-modal').modal('toggle');            
+        }
+        
         var nlabel = $("#nlabel").val();
         current_graph.annotation = current_dataset.genes;
         current_graph.setLabelNb(nlabel);
         current_graph.setNameAsLabel(name_labels);
-        current_graph.setData(data.data);
+        current_graph.setData(data.data[0]);
         current_graph.draw();
         updateURLTarget({ dataset: dataset, gene: gene });
       },
@@ -267,6 +277,7 @@ $(document).ready(function() {
     });
   };
 
+  
   $('#plot').click(function (event) {
     if (current_dataset !== null && current_gene !== null) {
       var expt = dataset_info['expt']

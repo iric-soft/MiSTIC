@@ -538,10 +538,7 @@ class DatasetGene(Dataset):
     def __init__(self, request):
         super(DatasetGene, self).__init__(request)
         self.gene = request.matchdict['gene_id']
-        self.row = self.dataset.data.r(self.gene)
-        if self.row == -1:
-            raise HTTPNotFound()
-
+        self.row = self.dataset.data.r(self.gene)      
         self.x = self.request.GET.get('x')
 
     @view_config(route_name="mistic.json.gene", request_method="GET", renderer="json")

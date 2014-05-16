@@ -171,9 +171,12 @@ class DataSet(object):
 
   def r(self, rowname):
     try:
-      return self.df.index.get_loc(rowname)
+      r = self.df.index.get_loc(rowname)
+      if isinstance(r, numpy.ndarray): 
+        r = list(self.df.reset_index()[r].index)
+      return r
     except KeyError:
-      return -1
+        return -1
 
   def c(self, colname):
     try:
