@@ -29,7 +29,7 @@ import scipy.stats
             </%block>  
         </div>
     </form>
-    <button class="btn btn-primary" id="dealWithLabels" data-toggle="button">Avoid overlapping labels</button>
+   
     
    
     
@@ -275,29 +275,12 @@ var clickOnNode = function(d) {
        }   
     }
     
-var clickOnLink = function(d) {var url = "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}";     
+var clickOnLink = function(d) {
+       var url = "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}";     
        url += '/' + d.source.id;
        url += '/' + d.target.id;
        window.open(url); 
 }
-
-
-var labelAnchors= [];
-for(var i = 0; i < json.nodes.length; i++) {
-    var node = json.nodes[i];
-    labelAnchors.push({ node : node  });
-    labelAnchors.push({ node : node  });
-}
-
-var labelAnchorLinks= [];
-for(var i = 0; i < json.nodes.length; i++) {
-    labelAnchorLinks.push({
-     source : i * 2,
-     target : i * 2 + 1,
-     weight :1
-   });
-}
-
 
 
 var grav = 0.2; //0.2;
@@ -305,90 +288,61 @@ var charge = -150 ;//-150;
 var distance = 50;
 
 var force;
-var force2;
 
 var initForce = function(){
     force = d3.layout.force().gravity(grav).charge(charge).distance(distance).size([width, height]).nodes(json.nodes).links(json.links);
-    
     force.start();
 }
 
-var initForceLabel = function(){
-    
-    force = d3.layout.force().size([width, height]).nodes(json.nodes).links(json.links).gravity(grav).linkDistance(50)
-              .charge(charge).linkStrength(function(x) {
-             return x.weight * 10});
-         
-    force2 = d3.layout.force().nodes(labelAnchors).links(labelAnchorLinks)
-            .gravity(0).linkDistance(0).linkStrength(8).charge(-150).size([width, height])
-            .on('end', function() { console.log('forced2 ended!'); });
-    force2.start();
-    force2.on("tick", function() { updateAnchors(); });
-    force.on('end', function() {  force2.charge(-500).distance(1).gravity(0.5).alpha(0.05);
-                                  force2.start();  
-                                  console.log('forced ended!'); });
-    force.start();
-
-}
-
-var dealWithLabels = false;
-console.debug('Deal with labels: ' +dealWithLabels);
 
 initForce ();
-initForceLabel();  
 
 var graph = svg.append('g').attr('class', 'graph');
 
 var link = graph.selectAll(".link")
     .data(json.links)
-  .enter().append("line")
+    .enter().append("line")
     .attr("stroke-width", 2)
     .attr("stroke", function(d) { return YlGnBl(1-d.weight); })
     .on('click', clickOnLink);
 
-var anchorLink = svg.selectAll("line.anchorLink").data(labelAnchorLinks).enter().append("svg:line")
-                 .attr("class", "anchorLink").style("stroke", "#999").style("stroke-width", Number(dealWithLabels));
-
 var node = svg.selectAll("g.node").data(force.nodes()).enter().append("svg:g")
-          .attr("class", "node");
+          .attr("class", "node")
+          .attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 400')
+          .attr('fill', '#fff');
           
-node.append("svg:circle").attr("r", 5).style("fill", "#000").style("stroke", "#FFF").style("stroke-width", 0);
-node.call(force.drag);
+node.append("svg:circle")
+    .attr("r", 5)  
+    .attr("x", 0)
+    .attr("y", 0)
+    .style("fill", "#000")
+    .style("stroke", "#FFF")
+    .style("stroke-width", 0);
 
-var anchorNode = svg.selectAll("g.anchorNode").data(labelAnchors).enter().append("svg:g")
-                .attr("class", function(d, i) {return  i % 2 == 0 ? "anchorNode fixed" : "anchorNode moving"});
-anchorNode.append("svg:circle").attr("r", 0).style("fill", "#FFF");
-anchorNode.append("svg:rect").attr('height', 15).attr('x', 0).attr('y', 0) 
-      .style("stroke", "#000")
-      .style("stroke-width", 1)
-      .on('click', clickOnNode )
-      .append("title")
-      .text(function(d) { return d.node.title; });
-      
-anchorNode.append("svg:text")
-          .attr('dy',10) 
-          .attr('dx',2.5) 
-          .text(function(d) {return d.node.name;})
-          .style("font-family", "Arial").style("font-size", 10);
+node.append("rect")
+    .attr('height', 15)
+    .attr('x', 5)
+    .attr('y', -6)
+    .attr('fill', '#0074cc')
+    .attr('stroke', '#000')
+    .on('click', clickOnNode)
+    .append("title")
+    .text(function(d) { return d.title+" "+d.chr; });
 
-anchorNode.each(function(d, i) {
-    var w = d3.select(this).select('text')[0][0].getBBox().width;
-    d3.select(this).select('rect').attr('width',( w==0 ? 0 : w+5 ));
+
     
-    if (!(i % 2 == Number(dealWithLabels))) {
-        d3.select(this).style('display','none');
-    }
+node.append("svg:text")
+    .attr("dx", 10)
+    .attr("dy", 6)
+    .attr("pointer-events", "none")
+    .text(function(d) { return d.name});
     
+node.each(function(d) {
+    var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
+    d3.select(this).select('rect').attr('width', w);
 });
 
-anchorNode.selectAll('rect').call(force.drag);
-
-var resetForceParameters =function() {
-    force.gravity(0.2);
-    force.charge(-150);
-    force.distance(50);
-}
-
+node.call(force.drag);
 
 var updateLink = function() {
   this.attr("x1", function(d) { return d.source.x; })
@@ -401,46 +355,10 @@ var updateNode = function() {
     this.attr("transform", function(d) { return "translate(" + (_.isUndefined(d.x) ? d.node.x : d.x) + "," + (_.isUndefined(d.y) ? d.node.y : d.y) + ")"; });
 } 
 
-
-var  updateAnchors = function(){
- anchorNode.each(function(d, i) {
-   
-    if(i % 2 == 0) {
-      d.x = d.node.x;
-      d.y = d.node.y;
-    }
-   else {
-     var b = this.childNodes[1].getBBox();
-    
-     var diffX = d.x - d.node.x;
-     var diffY = d.y - d.node.y;
-
-     var dist = Math.sqrt(diffX * diffX + diffY * diffY);
-
-     var shiftX = b.width * (diffX - dist) / (dist * 2);
-     var shiftY = b.height * (diffY - dist) / (dist * 2);
-    
-     shiftX = Math.max(-b.width, Math.min(0, shiftX)); 
-     shiftY = Math.min(b.height, Math.max(0, shiftY)); 
-     
-     this.childNodes[0].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
-     this.childNodes[1].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
-     this.childNodes[2].setAttribute("transform", "translate(" + shiftX + "," + shiftY + ")");
-     }          
-   });
-  anchorNode.call(updateNode);
-  anchorLink.call(updateLink);
-
-}
-
-
 force.on("tick", function() {
   
   node.call(updateNode);
-  anchorNode.call(updateNode);
   link.call(updateLink);
-  
-  force2.start();
   
   var xlo, xhi, ylo, yhi;
 
@@ -466,8 +384,8 @@ force.on("tick", function() {
   }
 
   if (xfrac > 1.0 || yfrac > 1.0) {
-    grav *= 1.11;
-    charge *= .90;
+    grav *= 1.01;
+    charge *= .99;
     force.gravity(grav);
     force.charge(charge);
   }
@@ -631,37 +549,26 @@ $('#select_all').on('click', function(event) {
 
 var showName = false;
 $('#show_labels').on("click", function(event){
+    console.debug('show_labels');
     showName = !showName;
    
-    var cls = dealWithLabels ? 'g.moving' : 'g.fixed'; 
+  
     
-    if (showName) {d3.select('#graph').selectAll(cls).selectAll('text').each(function(d) {d3.select(this).text(d.node.name);});}
-    if (!showName){d3.select('#graph').selectAll(cls).selectAll('text').each(function(d) {d3.select(this).text(d.node.title);});}
+    if (showName) {d3.select('#graph').selectAll('text').each(function(d) {d3.select(this).text(d.name);});}
+    if (!showName){d3.select('#graph').selectAll('text').each(function(d) {d3.select(this).text(d.title);});}
     
-    d3.select('#graph').selectAll(cls).each(function(d) {
-       var w = d3.select(this).select('text')[0][0].getBBox().width ;
-       d3.select(this).select('rect').attr('width',( w==0 ? 0 : w+5 )); 
+  
+    d3.select('#graph').selectAll('.node').each(function(d) {
+       var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
+       d3.select(this).select('rect').attr('width',w); 
       });
         
    
-    resetForceParameters ();
-    force.start();
+  
     return false;
     
   });
 
-$('#dealWithLabels').on('click', function(event) {
-
-    dealWithLabels = !dealWithLabels;
-    var cls = dealWithLabels ? 'g.moving' : 'g.fixed'; 
-    var txt = dealWithLabels ? 'Do not avoid overlapping labels' : 'Avoid overlapping labels'; 
-    var linkStroke = dealWithLabels ? 1 : 0;
-    $(this).text(txt);
-    d3.select('#graph').selectAll('.anchorNode').style('display', 'none');
-    d3.select('#graph').selectAll('.anchorLink').style('stroke-width', linkStroke);
-    d3.select('#graph').selectAll(cls).style('display', 'inline');
-
-});
 
 
 $('#clear_selection').on('click', function(event) {
