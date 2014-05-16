@@ -251,7 +251,7 @@ $(document).ready(function() {
           $("#dataset_cmp").val($("#dataset_cmp option:first").val());
           var gene_set = {};
           for (var i = 0; i < data.length; ++i) { gene_set[data[i]] = true; }
-                              console.log(JSON.stringify(gene_set));
+          console.log(JSON.stringify(gene_set));
           current_graph.colourByClusterMatch(
             [ gene_set, current_graph.root.getContent() ],
             function (a,b,c,d) {
