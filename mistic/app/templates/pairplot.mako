@@ -353,6 +353,8 @@ $(document).ready(function() {
     });
   };
 
+ 
+  
   var reloadGene = function(gene_id, sync) {
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_datasets[0]).replace('_gene_id_', gene_id),
@@ -361,7 +363,25 @@ $(document).ready(function() {
       async: !sync,
       success: function(data) {
         
-        current_graph.updateData(data);
+        row = JSON.parse(data.row);
+       _.each(row, function(e,i) {
+            
+               dat = data.data[i];
+               obj = {data:dat, 
+                       row:e, 
+                       symbol: (row.length > 1 ? data.symbol+'_'+i  : data.symbol),
+                       gene : data.gene,
+                       xform : data.xform,
+                       name : data.name,
+                       dataset: data.dataset                       
+                       };
+               
+                current_graph.updateData(obj);       
+        
+       });
+        
+        
+        
         updateInfo();
       },
       error: function() {
