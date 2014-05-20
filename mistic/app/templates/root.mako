@@ -211,7 +211,7 @@ $('#csv-button').on('click', function(event){
       
 $('#datasets-table tbody td ').on('click', function(event){
     
-    if ($(this).find('#icicle-link').length>1) return;
+    if ($(this).find('a#icicle-link').length>=1) return;
     if ($(this).hasClass('td_add_favorite')) return;
     
     var tr = $(this).parents('tr');
