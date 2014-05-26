@@ -1,0 +1,2 @@
+recursive-include mistic/app/static *
+recursive-include mistic/app/templates *

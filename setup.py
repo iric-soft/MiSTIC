@@ -7,7 +7,9 @@ here = os.path.abspath(os.path.dirname(__file__))
 README = open(os.path.join(here, 'README.md')).read()
 CHANGES = open(os.path.join(here, 'CHANGES.md')).read()
 
-requires = ['pyramid', 'pyramid_debugtoolbar']
+from pip.req import parse_requirements
+
+requires = [ str(ir.req) for ir in parse_requirements('Requirements.txt') ]
 
 setup(
   name='mistic',
@@ -23,7 +25,6 @@ setup(
     ],
   author='Tobias Sargeant',
   author_email='sargeant@wehi.edu.au',
-  url='https://github.com/folded/mistic',
   keywords='web pyramid pylons',
   packages=find_packages(),
   include_package_data=True,
@@ -39,5 +40,4 @@ setup(
   main = mistic.app:main
 """,
   paster_plugins=['pyramid'],
-  )
-
+)
