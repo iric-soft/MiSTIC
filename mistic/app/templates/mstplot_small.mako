@@ -706,7 +706,7 @@ $(document).ready(function() {
           console.log('got an error', status, error);
         },
         beforeSend : function() {
-        $("#go_table .dataTables_empty").append('<div id="loading"><img src="${request.application_url}/static/img/ajax-loader.gif"/> </div>');
+        $("#go_table .dataTables_empty").append('<div id="loading"><img src="${request.static_url('mistic:app/static/img/ajax-loader.gif')}"/> </div>');
         },
         success: function(data) {
           
