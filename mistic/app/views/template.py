@@ -32,6 +32,16 @@ class Graph(object):
     args = dict(datasets = datasets)
     return render_to_response('mistic:app/templates/fragments/dataset_modal.mako', args, request = self.request)
 
+  @view_config(route_name="mistic.modal.geneset_categories")
+  def _modal(self):
+    dataset = self.request.matchdict['dataset']
+    _dataset = data.datasets.get(dataset)
+    if _dataset is None:
+      raise HTTPNotFound()
+
+    args = dict(dataset = dataset)
+    return render_to_response('mistic:app/templates/fragments/geneset_category_modal.mako', args, request = self.request)
+
   @view_config(route_name="mistic.template.root")
   def root(self):
     args = dict()

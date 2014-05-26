@@ -187,6 +187,7 @@ def main(global_config, **settings):
     config.add_route('mistic.template.root',               '/')
 
     config.add_route('mistic.modal.datasets',              '/modal/datasets')
+    config.add_route('mistic.modal.geneset_categories',    '/modal/geneset_categories/{dataset}')
     # params: go=GO_ID - filter the list of returned genes by GO term.
     config.add_route('mistic.json.annotation.genes',       '/annotations/{annotation}/genes')
     config.add_route('mistic.json.annotation.gene_ids',    '/annotations/{annotation}/gene_ids')

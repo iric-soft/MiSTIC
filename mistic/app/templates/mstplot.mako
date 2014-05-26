@@ -10,28 +10,54 @@ import mistic.app.data as data
 <%block name="controls">
   <form class="form-inline">
   
-  <div class="accordion" id="accordion">
-       
+    <div class="accordion" id="accordion">
       <div class="accordion-group">     
-       <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  </a></h4>
-       </div>
+        <div class="accordion-heading">
+          <h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse" href="#locate_gene">Locate gene</a>
+          </h4>
+        </div>
   
-       <div id="locate_gene" class="accordion-body collapse in">
-         <div class="accordion-inner">  
-    
-         <span id="genelist"></span>
-         <label for="gene">Gene:</label>
-         <input type="text" id="gene">
-  
+        <div id="locate_gene" class="accordion-body collapse in">
+          <div class="accordion-inner">
+            <span id="genelist"></span>
+            <label for="gene">Gene:</label>
+            <input type="text" id="gene">
+          </div>
+        </div>
       </div>
+
+      <div class="accordion-group">
+        <div class="accordion-heading">
+          <h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse" href="#locate_geneset">Locate geneset</a>
+          </h4>
+        </div>
+
+        <div id="locate_geneset" class="accordion-body collapse in">
+          <div class="accordion-inner">
+            <div class="input-prepend input-append">
+
+              <div class="btn-group">
+                <button class="btn" id="restrict_geneset">
+                  <span class="icon-filter"></span>
+                </button>
+              </div>
+
+              <input type="text" id="level3" placeholder="Geneset">
+
+              <div class="btn-group">
+                <button class="btn dropdown-toggle" id="geneset_drop" data-toggle="dropdown">
+                  <span class="caret"></span>
+                </button>
+              </div>
+
+            </div>
+          </div>
+        </div>
       </div>
+
     </div>
-   </div>       
-  
-  
-    
-   
   </form>
 </%block>
 <%block name="style">
@@ -48,6 +74,8 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/djset.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/modal_base.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/geneset_category_selector.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 <%
@@ -99,6 +127,13 @@ $(document).ready(function() {
     if (item === null) return;
     current_graph.selected_ids[item.id] = true;
     current_graph.updateLabels();
+  });
+
+  $('#restrict_geneset').on('click', function(event) {
+    var gscat_sel = new GenesetCategorySelector({ dataset: "${ds.id}" });
+    gscat_sel.show(event.currentTarget);
+
+    event.preventDefault();
   });
 });
 </script>
