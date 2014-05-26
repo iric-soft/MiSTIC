@@ -54,24 +54,34 @@ import pickle
 
         <div id="go_colour" class="accordion-body collapse in">
           <div class="accordion-inner">
-            <div class="input-append btn-group"  style='margin-left:0px;'>
-              <input type="text" id="level1" placeholder='Restrict geneset search to this type'>
-              <a id='level1_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
-                <span class="caret"></span>
-              </a>
+
+            <div class="input-append">
+              <input type="text" id="level1" placeholder="Restrict geneset search to this type">
+              <div class="btn-group">
+                <button id='level1_drop' class="btn dropdown-toggle" data-toggle="dropdown">
+                  <span class="caret"></span>
+                </button>
+              </div>
             </div>
-            <div class="input-append btn-group"  style='margin-left:0px;'>
-              <input type="text" id="level2" placeholder='Restrict geneset search to this category'>
-              <a id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
-                <span class="caret"></span>
-              </a>
+
+            <div class="input-append">
+              <input type="text" id="level2" placeholder="Restrict geneset search to this category">
+              <div class="btn-group">
+                <button id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                  <span class="caret"></span>
+                </button>
+              </div>
             </div>
-            <div class="input-append btn-group" style='margin-left:0px;'>
-              <input type="text" id="level3" placeholder='Search for a geneset'>
-              <a id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
-                <span class="caret"></span>
-              </a>
+
+            <div class="input-append">
+              <input type="text" id="level3" placeholder="Search for a geneset">
+              <div class="btn-group">
+                <button id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown">
+                  <span class="caret"></span>
+                </button>
+              </div>
             </div>
+
             <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
           </div>
         </div>
@@ -158,12 +168,6 @@ $(document).ready(function() {
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
-
-  var go_entry = new GODropdown({
-    el: $("#goterm"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
-  });
-
 
   var level1_entry = new GODropdown({
     el: $("#level1"),
@@ -264,8 +268,7 @@ $(document).ready(function() {
         url: "${request.route_url('mistic.json.dataset.mapped_mst', dataset='_dataset_', xform=xform, tgt_annotation=my_annotation)}".replace('_dataset_', val),
         dataype: 'json',
         success: function(data) {
-          $('#goterm').val('');
-            var node_content = [];
+          var node_content = [];
           _.each(Node.fromMST(data[0], data[1]), function(root) {
             var new_root = root.collapse(current_graph.options.cluster_minsize);
             new_root.collapseUnbranched();
@@ -278,7 +281,7 @@ $(document).ready(function() {
           current_graph.colourByClusterMatch(
             node_content,
             // function (a, b, c, d, cur_max) {
-            //   return fisher.exact_w (a, b, c, d, cur_max);
+            //   return fisher.exact_w(a, b, c, d, cur_max);
             // },
             function (a, b, c, d, ignored) {
               return Math.max(0.0, stats.kappa(a, b, c, d));
@@ -287,7 +290,6 @@ $(document).ready(function() {
               return a > b;
             },
             YlGnBl);
-
         },
         error: function() {
         }
