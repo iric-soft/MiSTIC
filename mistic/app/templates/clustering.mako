@@ -12,110 +12,95 @@ import pickle
 <%block name="controls">
   <form class="form-inline">
   
-  <div class="accordion" id="accordion">
-     <div class="accordion-group">     
-       <div class="accordion-heading"><h4 class="accordion-title">
+    <div class="accordion" id="accordion">
+      <div class="accordion-group">
+        <div class="accordion-heading"><h4 class="accordion-title">
             <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset comparison</a></h4>
-       </div>
-       
-       <div id="dataset_menu" class="accordion-body collapse in">
-         <div class="accordion-inner">    
-           
-               <select id="dataset_cmp">
-                    <option value="">Choose a dataset for comparison </option>
-            %for d in data.datasets.all():
-                    <option value="${d.id}">${d.name}</option>
-            %endfor
-            </select>
-                 
-              </div>
-            </div>
-          </div>
-          
-          
-    <div class="accordion-group">     
-       <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  </a></h4>
-      </div>
-  
-   <div id="locate_gene" class="accordion-body collapse in">
-       <div class="accordion-inner">  
-    
-    
-    <label for="gene1"></label>
-    <input type="text" id="gene">
-  
-    </div>
-      </div>
-    </div>
-          
-          
-   <div class="accordion-group">     
-       <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#go_colour">Geneset enrichment</a></h4>
-      </div>
-  
-   <div id="go_colour" class="accordion-body collapse in">
-       <div class="accordion-inner">  
-           
-            
-            <div class="input-append btn-group"  style='margin-left:0px;'>
-                <input type="text" id="level1" placeholder='Restrict geneset search to this type'>
-                <a id='level1_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
-                <span class="caret"></span>
-                </a>
-            </div>
-           <div class="input-append btn-group"  style='margin-left:0px;'>
-                 <input type="text" id="level2" placeholder='Restrict geneset search to this category'>
-                <a id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
-                <span class="caret"></span>
-                </a>
-            </div>
-           
-           <div class="input-append btn-group" style='margin-left:0px;'>
-                <input type="text" id="level3" placeholder='Search for a geneset'>
-                <a id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
-                <span class="caret"></span>
-                </a>
-            </div>
-         
-         
-          <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
-         
-          
-      </div>
-      </div>
-    </div>
-  
-  
-  <div class="accordion-group">
-       <div class="accordion-heading">
-         <h4 class="accordion-title">
-           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
-         </h4>
-       </div>
+        </div>
 
-      <div id="options_menu" class="accordion-body collapse ">
-        <div class="accordion-inner">
-           <ul id="options" class="nav nav-list">
-            <li><a id='clear_plot' href="#">Clear plot</a></li>
-          
-            <li class="divider"></li>
-            
-            <div>
-            <label for="odds">Set odds ratio: </label>          
-            <input id="odds" value='2' size=3 disabled type='text' style='width:10px;height:10px'></input>
-           </div>
-          </ul>
+        <div id="dataset_menu" class="accordion-body collapse in">
+          <div class="accordion-inner">
+            <select id="dataset_cmp">
+              <option value="">Choose a dataset for comparison </option>
+%for d in data.datasets.all():
+              <option value="${d.id}">${d.name}</option>
+%endfor
+            </select>
+          </div>
         </div>
       </div>
-     </div>
-   </div>
-  
-    
-  </form>
 
+
+      <div class="accordion-group">
+        <div class="accordion-heading"><h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  </a></h4>
+        </div>
+
+        <div id="locate_gene" class="accordion-body collapse in">
+          <div class="accordion-inner">
+            <label for="gene1"></label>
+            <input type="text" id="gene">
+          </div>
+        </div>
+      </div>
+
+
+      <div class="accordion-group">
+        <div class="accordion-heading">
+          <h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse"  href="#go_colour">Geneset enrichment</a>
+          </h4>
+        </div>
+
+        <div id="go_colour" class="accordion-body collapse in">
+          <div class="accordion-inner">
+            <div class="input-append btn-group"  style='margin-left:0px;'>
+              <input type="text" id="level1" placeholder='Restrict geneset search to this type'>
+              <a id='level1_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
+                <span class="caret"></span>
+              </a>
+            </div>
+            <div class="input-append btn-group"  style='margin-left:0px;'>
+              <input type="text" id="level2" placeholder='Restrict geneset search to this category'>
+              <a id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
+                <span class="caret"></span>
+              </a>
+            </div>
+            <div class="input-append btn-group" style='margin-left:0px;'>
+              <input type="text" id="level3" placeholder='Search for a geneset'>
+              <a id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
+                <span class="caret"></span>
+              </a>
+            </div>
+            <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-group">
+        <div class="accordion-heading">
+          <h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
+          </h4>
+        </div>
+
+        <div id="options_menu" class="accordion-body collapse ">
+          <div class="accordion-inner">
+            <ul id="options" class="nav nav-list">
+              <li><a id='clear_plot' href="#">Clear plot</a></li>
+              <li class="divider"></li>
+              <div>
+                <label for="odds">Set odds ratio: </label>
+                <input id="odds" value='2' size=3 disabled type='text' style='width:10px;height:10px'>
+              </div>
+            </ul>
+          </div>
+        </div>
+      </div>
+    </div>
+  </form>
 </%block>
+
 <%block name="style">
 ${parent.style()}
 
@@ -141,13 +126,13 @@ $(document).ready(function() {
   #print dir(ds.annotation)
   #print [(k,v.description) for k,v in ds.annotation.genesets.items()]
   #print ds.annotation.genesets['CNV']
-  
-  if xform == 'log': 
-    xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
-  else : 
-    xf = xform 
 
- 
+  if xform == 'log':
+    xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
+  else :
+    xf = xform
+
+
 
 %>
 
@@ -155,7 +140,7 @@ $(document).ready(function() {
     current_graph.elem.height($(window).height()-100);
     current_graph.resize();
   };
-  
+
 
   var nodes = ${json.dumps(nodes)|n};
   var edges = ${json.dumps(edges)|n};
@@ -167,9 +152,9 @@ $(document).ready(function() {
   });
 
   current_graph.setData(cluster_roots);
-  current_graph.setGraphInfo(["Dataset: ${dataset}", 
-                              "Transform: ${xf}"]); 
- 
+  current_graph.setGraphInfo(["Dataset: ${dataset}",
+                              "Transform: ${xf}"]);
+
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
@@ -178,23 +163,23 @@ $(document).ready(function() {
     el: $("#goterm"),
     url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
   });
-  
-  
+
+
   var level1_entry = new GODropdown({
     el: $("#level1"),
     url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=1"
   });
-  
+
   var level2_entry = new GODropdown({
     el: $("#level2"),
     url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2"
   });
-  
+
   var level3_entry = new GODropdown({
     el: $("#level3"),
     url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3"
   });
-  
+
   $('#clear_input').on('click', function() {
     level1_entry.$el.val('');
     level2_entry.$el.val('');
@@ -202,14 +187,14 @@ $(document).ready(function() {
     level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;";
     level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;";
   });
-  
-  
+
+
   $('#level1_drop').on('click', function() {
     level1_entry.$el.val('');
     level1_entry.update();
     level1_entry.$el.focus();
   });
-  
+
   level1_entry.on('change', function() {
     level2_entry.$el.val('');
     level3_entry.$el.val('');
@@ -217,28 +202,28 @@ $(document).ready(function() {
     level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;q="+gstype;
     level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gstype;
   });
-  
+
    level2_entry.on('change', function() {
     level3_entry.$el.val('');
     gsid = $("#level2").val();
     level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gsid;
   });
-  
-  
-  
+
+
+
    $('#level2_drop').on('click', function() {
     level2_entry.$el.val('');
     level2_entry.update();
     level2_entry.$el.focus();
   });
-  
-   $('#level3_drop').on('click', function() { 
+
+   $('#level3_drop').on('click', function() {
     level3_entry.$el.val('');
     level3_entry.update();
     level3_entry.$el.focus();
   });
-  
-  
+
+
   level3_entry.on('change', function(item) {
     if (item === null) {
       current_graph.removeColour();
@@ -302,7 +287,7 @@ $(document).ready(function() {
               return a > b;
             },
             YlGnBl);
-            
+
         },
         error: function() {
         }
@@ -353,10 +338,10 @@ $(document).ready(function() {
     return req;
   };
 
-  
- 
+
+
   gene_entry.on('change', function(item) {
-   
+
     if (item !== null) {
       current_graph.zoomTo(item.id);
     } else {
@@ -377,12 +362,12 @@ $(document).ready(function() {
     current_graph.dezoom();
     $('#gene').val('');
     $('#goterm').val('');
-    
+
   });
 
 
   $(window).resize(resizeGraph);
-  resizeGraph();  
+  resizeGraph();
 });
 </script>
 </%block>
