@@ -478,6 +478,8 @@ class GeneSet(object):
       self.path     = self.config['path']
       self.genesets = read_json_table(global_config.file_path(self.path))
 
+    self.categories = sorted(set(self.genesets['cat']))
+
     self.annotations = dict([
         (annotation, GeneSetAnnotation(path, global_config))
         for annotation, path in self.config.get('anot', {}).iteritems() ])
