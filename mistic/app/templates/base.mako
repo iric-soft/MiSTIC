@@ -10,11 +10,11 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="keywords" content="">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap.css" type="text/css" media="screen" charset="utf-8">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/css/bootstrap-responsive.min.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/twitter-bootstrap/2.3.2/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/twitter-bootstrap/2.3.2/css/bootstrap-responsive.min.css')}" type="text/css" media="screen" charset="utf-8">
 
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.1.0/bootstrap-modal.min.css" type="text/css" media="screen" charset="utf-8">
-    <link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.css" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/bootstrap-modal/2.1.0/bootstrap-modal.min.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/bootstrap-select/1.5.4/bootstrap-select.min.css')}" type="text/css" media="screen" charset="utf-8">
 
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/jquery.dataTables.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
@@ -135,20 +135,22 @@ mistic = {
 <form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}">
 <input id="pdfdata" type="hidden" name="pdfdata" value=""></input></form>
 
-<script src="${request.static_url('mistic:app/static/js/lib/jquery.min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/underscore-min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/backbone-min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/jquery/1.11.1/jquery.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/underscore.js/1.6.0/underscore-min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/backbone.js/1.1.2/backbone-min.js')}" type="text/javascript"></script>
 
-<script src="//cdnjs.cloudflare.com/ajax/libs/twitter-bootstrap/2.3.2/js/bootstrap.min.js" type="text/javascript"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-select/1.5.4/bootstrap-select.min.js" type="text/javascript"></script>
-<script src="//cdnjs.cloudflare.com/ajax/libs/bootstrap-modal/2.1.0/bootstrap-modal.pack.min.js" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/twitter-bootstrap/2.3.2/js/bootstrap.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/bootstrap-select/1.5.4/bootstrap-select.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/bootstrap-modal/2.1.0/bootstrap-modal.pack.min.js')}" type="text/javascript"></script>
 
-<script src="${request.static_url('mistic:app/static/js/lib/d3.v2.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/d3/3.4.8/d3.min.js')}" type="text/javascript"></script>
+
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.colReorderWithResize.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.scientific-sorting.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.columnFilter.js')}" type="text/javascript"></script>
+
 <script src="${request.static_url('mistic:app/static/js/lib/spectrum.js')}" type="text/javascript"></script>
 
 <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>

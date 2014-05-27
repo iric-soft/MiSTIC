@@ -248,6 +248,8 @@ def main(global_config, **settings):
    
 
     config.add_static_view('static', 'mistic:app/static', cache_max_age=3600)
+    config.add_static_view('cdnjs',  'mistic:app/cdnjs', cache_max_age=3600)
+    # config.add_static_view('https://cdnjs.cloudflare.com/ajax/libs', 'mistic:app/cdnjs', cache_max_age=3600)
     config.add_static_view('images', 'mistic:resources/images', cache_max_age=3600)
 
 
