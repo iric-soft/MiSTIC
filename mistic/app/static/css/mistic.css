@@ -80,6 +80,10 @@ div#more-information a:hover
 }
 
 
+ul.geneset-type-list,
+ul.geneset-cat-list {
+  list-style: none;
+}
 
 .go-cellular_component span.label,
 .go-biological_process span.label,

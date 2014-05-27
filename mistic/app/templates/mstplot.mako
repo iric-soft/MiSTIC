@@ -40,7 +40,7 @@ import mistic.app.data as data
 
               <div class="btn-group">
                 <button class="btn" id="restrict_geneset">
-                  <span class="icon-filter"></span>
+                  Filter <span class="caret"></span>
                 </button>
               </div>
 
@@ -74,7 +74,6 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/djset.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/modal_base.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/geneset_category_selector.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
