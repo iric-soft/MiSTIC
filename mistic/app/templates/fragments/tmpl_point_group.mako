@@ -4,19 +4,28 @@
     <div class="widgets">
       <a class="shift-up">&#x25B2;</a>
       <a class="shift-dn">&#x25BC;</a>
-      <a class="times" style="font-size: 20px;font-weight: bold;line-height: 18px; padding-bottom:0.5px;">&times;</a>
+      <a class="times" style="font-size: 20px; font-weight: bold; line-height: 18px; padding-bottom: 0.5px;">&times;</a>
     </div>
     <div class="header"><span><% view.name() %></span></div>
-    <span class="control-group sg-style" style="position: absolute; left: 2px; width: 16px;">
-      <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
-    </span>
-    <span class="control-group sg-ops" style="position: absolute; right: 2px; z-index:3; width: 68px; padding-top: 5px; padding-bottom: 1px">
-      <i class="sg-add           icon-plus"     ></i>
-      <i class="sg-remove        icon-minus"    ></i>
-      <i class="sg-clear         icon-trash"    ></i>
-      <i class="sg-set-selection icon-share-alt"></i>
-    </span>
-    <input style="display: inline-block; width: auto; position: absolute; z-index:2; left: 28px; right: 80px;" type="text" autocomplete="off">
+    <div style="clear: both;"></div>
+    <table width="100%">
+      <tr>
+        <td width="16px">
+          <div class="control-group sg-style" style="width: 16px; float: left;">
+            <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
+          </div>
+        </td><td style="padding: 0px 8px 0px 10px;">
+          <input style="width: 100%; margin: 0px -8px; padding: 3px 6px;" type="text" autocomplete="off">
+        </td><td width="70px">
+          <div class="control-group sg-ops" style="float: right; width: 68px; padding: 3px;">
+            <i class="sg-add           icon-plus"     ></i>
+            <i class="sg-remove        icon-minus"    ></i>
+            <i class="sg-clear         icon-trash"    ></i>
+            <i class="sg-set-selection icon-share-alt"></i>
+          </div>
+        </td>
+      </tr>
+    </table>
   </div>
 </script>
 
