@@ -7,13 +7,17 @@
 
         render: function() {
             this.$el.html(this.template(this.model));
-            this.$el.highlight_text(this.options.search);
+            this.$el.highlight_text(this.search);
             if ($.isFunction(this.itemClass)) {
                 this.$el.addClass(this.itemClass.call(this));
             } else {
                 this.$el.addClass(this.itemClass);
             }
             return this;
+        },
+
+        initialize: function(options) {
+            this.search = options.search;
         }
     });
 
@@ -375,16 +379,16 @@
             $(event.target).val('');
         },
         
-        initialize: function() {
+        initialize: function(options) {
             var self = this;
 
-            if (this.options.collection !== undefined) {
-                this.collection = this.options.collection;
+            if (options.collection !== undefined) {
+                this.collection = options.collection;
             } else {
                 this.collection = new Backbone.Collection();
             }
 
-            this.setSearchURL(this.options.url);
+            this.setSearchURL(options.url);
 
             this.fetching_items = false;
             this.current_search = null;
