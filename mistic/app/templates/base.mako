@@ -158,9 +158,9 @@ mistic = {
 <script src="${request.static_url('mistic:app/static/js/lib/fisher.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/base64.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/transform.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/ontology.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/datasets.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/dropdown.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/go_dropdown.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/utils.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/modal_base.js')}" type="text/javascript"></script>
 
@@ -196,43 +196,6 @@ mistic = {
 
  
  
-  window.GOTerm = Backbone.Model.extend();
-
-  window.GO = Backbone.Collection.extend({
-    url: "${request.route_url('mistic.json.go')}",
-    model: window.GOTerm
-  });
-
-  window.go_cache = new GO();
-
-  window.GOItemView = DropdownItemView.extend({
-    template: _.template(<%text>"<span class='label'><%- id %></span> <%- get('name') %>"</%text>),
-    itemClass: function() { return 'go-'+this.model.get('namespace'); }
-  });
-
-  window.GODropdown = Dropdown.extend({
-    item_view: GOItemView,
-    max_items: 50,
-    menu: '<ul class="typeahead dropdown-menu" style="max-width: 600px; max-height: 400px; overflow-x: hidden; overflow-y: auto"></ul>',
-
-    autofillText: function(model) {
-      if (model !== undefined && model !== null) {
-        if (model.get('name')!='') {
-            return model.id + ': ' + model.get('name');
-            }
-        else {
-                return model.id ;
-              }
-      }
-      return '';
-    },
-
-    searchData: function() {
-      return { q: this.$el.val() };
-    }
-  });
-  
-
   window.SampleFeature = Backbone.Model.extend();
 
   window.SampleAnnotation = Backbone.Collection.extend({

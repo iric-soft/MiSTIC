@@ -146,6 +146,10 @@ $(document).ready(function() {
 
 %>
 
+  var go_cache = new Backbone.Collection({
+    url: "${request.route_url('mistic.json.go')}",
+  });
+
   resizeGraph = function() {
     current_graph.elem.height($(window).height()-100);
     current_graph.resize();
