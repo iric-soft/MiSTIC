@@ -201,6 +201,7 @@ $(document).ready(function() {
     level1_entry.$el.val('');
     level1_entry.update();
     level1_entry.$el.focus();
+    return false;
   });
 
   level1_entry.on('change', function() {
@@ -211,26 +212,25 @@ $(document).ready(function() {
     level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gstype;
   });
 
-   level2_entry.on('change', function() {
+  $('#level2_drop').on('click', function() {
+    level2_entry.$el.val('');
+    level2_entry.update();
+    level2_entry.$el.focus();
+    return false;
+  });
+
+  level2_entry.on('change', function() {
     level3_entry.$el.val('');
     gsid = $("#level2").val();
     level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gsid;
   });
 
-
-
-   $('#level2_drop').on('click', function() {
-    level2_entry.$el.val('');
-    level2_entry.update();
-    level2_entry.$el.focus();
-  });
-
-   $('#level3_drop').on('click', function() {
+  $('#level3_drop').on('click', function() {
     level3_entry.$el.val('');
     level3_entry.update();
     level3_entry.$el.focus();
+    return false;
   });
-
 
   level3_entry.on('change', function(item) {
     if (item === null) {
