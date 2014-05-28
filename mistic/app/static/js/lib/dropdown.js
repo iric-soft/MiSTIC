@@ -396,7 +396,7 @@
             this.selected_text = null;
 
             this.collection.on('all', _.bind(this.renderItems, this));
-                      
+
             this.$menu = $(this.menu);
            
             this.shown = false;
