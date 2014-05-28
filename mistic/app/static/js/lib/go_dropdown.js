@@ -29,4 +29,3 @@
 
     window.GODropdown = GODropdown;
 })(window.jQuery);
-
