@@ -70,15 +70,16 @@ import json
 
           <hr>
 
-          <div id='sample_characteristic'>
-          <div class="btn-group">
-          <input id='sample_annotation' type=text autocomplete="off" placeholder='Select a characteristic'></input>
-          <button id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span class="caret"></span>
-          </button>
+          <div id="sample_characteristic">
+            <div class="input-append">
+              <input id="sample_annotation" type="text" style="text-overflow : ellipsis;" autocomplete="off" placeholder="Select a characteristic">
+              <div class="btn-group">
+                <button id="sample_annotation_drop" class="btn dropdown-toggle" data-toggle="dropdown">
+                  <span class="caret"></span>
+                </button>
+              </div>
+            </div>
           </div>
-          </div>
-          
         </div>
       </div>
 
@@ -614,6 +615,7 @@ $(document).ready(function() {
     sample_annotation_entry.$el.val('');
     sample_annotation_entry.update();
     sample_annotation_entry.$el.focus();
+    return false;
   });
  
   sample_annotation_entry.on("change", function(item){

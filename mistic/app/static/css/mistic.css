@@ -357,18 +357,6 @@ div#point-group-settings .colour div.alpha-image {
     background-image: url(data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAwAAAAMCAIAAADZF8uwAAAAGUlEQVQYV2M4gwH+YwCGIasIUwhT25BVBADtzYNYrHvv4gAAAABJRU5ErkJggg==);
 }
 
-div#sample_characteristic input {
-    display: inline-block;
-    margin-bottom:0px;
-}
-
-div#sample_characteristic button {
-    display: inline;
-    position : absolute;
-}
-
-
-
 #part2 {
   overflow-y: hidden;
   overflow-x: hidden;
@@ -484,17 +472,6 @@ div#sample_characteristic button {
 
 #sample_annotation {
    text-overflow : ellipsis;
-   display: block;
-   margin-right: -22px;
-   width : 100%;
-}
-
-#sample_annotation_drop {
-    display: inline-block;
-    width: 24px;
-    position :absolute;
-    
-    background-clip : padding-box;
 }
 
 .modal-backdrop, 
