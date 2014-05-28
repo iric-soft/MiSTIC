@@ -344,22 +344,21 @@
         },
 
         blur: function(event) {
-          
             if (this.cancel_blur) {
                 delete this.cancel_blur;
                 return;
             }
+
             setTimeout(_.bind(this.hide, this), 0);
         },
 
         itemMousedown: function(event) {
-            
             var self = this;
-            event.preventDefault();
 
 	    this.cancel_blur = true;
-	         
             setTimeout(function() { delete self.cancel_blur; }, 0);
+
+            event.preventDefault();
         },
 
         itemClick: function(event) {
