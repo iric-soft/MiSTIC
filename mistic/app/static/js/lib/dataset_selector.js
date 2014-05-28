@@ -22,6 +22,22 @@
             return body_text;
         },
 
+        render: function() {
+            ModalBase.prototype.render.call(this);
+
+            this.$('tbody tr').addClass('selectable');
+
+            this.$('table').dataTable({
+                "bPaginate": true,
+                "bSort":true,
+                "bProcessing": false,
+                "sDom": 'Rlfrtip',
+                "bRetrieve":true,
+            });
+
+            return this;
+        },
+
         select: function(event) {
             var dataset_id = $(event.currentTarget).data('dataset');
             this.$el.trigger('select-dataset', [dataset_id]);
@@ -29,6 +45,7 @@
         },
 
         disable_rows: function(row_ids) {
+            console.log(row_ids)
             this.$('tbody tr').each(function () {
                 if (_.contains(row_ids, $(this).data('dataset'))) {
                     $(this).removeClass('selectable');

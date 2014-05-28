@@ -9,7 +9,7 @@
       <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
       <h4 class="modal-title" style="padding-right: 3em; white-space: nowrap;"><%- self.title %></h4>\
     </div>\
-    <div class="modal-body"><%= self.getBody() %></div>\
+    <div class="modal-body"><%= self.getBody() %><br style="clear: both;"></div>\
     <div class="modal-footer">\
       <%= self.footer(this) %>\
       <button class="btn btn-default" data-dismiss="modal">Cancel</button>\
@@ -31,8 +31,6 @@
 
         render: function() {
             this.$el.html(this.template({ self: this }));
-            this.$('.modal-body').css('max-height', '200px');
-            this.$('.modal-body').css('overflow-y', 'scroll');
             return this;
         },
 
