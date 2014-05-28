@@ -97,8 +97,7 @@
         url: undefined,
 
         hasScroll: function() {
-	         console.log(this.$menu.outerHeight(), this.$menu[0].scrollHeight);
-	         return this.$menu.outerHeight() < this.$menu[0].scrollHeight;
+	    return this.$menu.outerHeight() < this.$menu[0].scrollHeight;
         },
 
         scrollToItem: function(item) {
