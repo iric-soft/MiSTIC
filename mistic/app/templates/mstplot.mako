@@ -72,8 +72,6 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/djset.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/geneset_category_selector.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/geneset_selector.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 <%
