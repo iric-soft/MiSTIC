@@ -9,15 +9,15 @@ import mistic.app.data as data
 </%block>
 <%block name="controls">
   <form class="form-inline">
-  
+
     <div class="accordion" id="accordion">
-      <div class="accordion-group">     
+      <div class="accordion-group">
         <div class="accordion-heading">
           <h4 class="accordion-title">
             <a class="accordion-toggle" data-toggle="collapse" href="#locate_gene">Locate gene</a>
           </h4>
         </div>
-  
+
         <div id="locate_gene" class="accordion-body collapse in">
           <div class="accordion-inner">
             <span id="genelist"></span>
@@ -119,10 +119,24 @@ $(document).ready(function() {
     url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"
   });
 
-  //var geneset_entry = new GODropdown({
-  //  el: $("#geneset"),
-  //  url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"+"?v=3"
-  //});
+  geneset_selector.on('GenesetSelector:change', function(item) {
+      if (item === null) return;
+      console.log('item', item);
+      $.ajax({
+        url: "${request.route_url('mistic.json.annotation.gene_ids', annotation=ds.annotation.id)}",
+        data: { filter_gsid: item.id },
+        dataype: 'json',
+        success: function(data) {
+          _.each(data, function(item) {
+            current_graph.selected_ids[item] = true;
+            current_graph.updateLabels();
+          });
+        },
+        error: function() {
+          // inform the user something went wrong.
+        }
+      });
+  });
 });
 </script>
 </%block>
