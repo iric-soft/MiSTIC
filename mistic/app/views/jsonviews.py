@@ -169,8 +169,6 @@ class Annotation(object):
         result = self.annotation.get_gene_ids(self.request.GET.getall('filter_gsid'))
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
-
-
     def _query_to_regex (self, query):
       if query: 
         query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
@@ -196,13 +194,9 @@ class Annotation(object):
 
         return out
 
-
-
     @view_config(route_name="mistic.json.annotation.gs.types", request_method="GET", renderer="json")
     def geneset_types(self):
         return [ dict(id = k,name = v.description) for k,v in self.annotation.genesets.iteritems() ]
-
-
 
     @key_cache_region('mistic', 'jsonviews', lambda args: args[1:])
     def _genesets(self, query, limit_cats, limit_types):
@@ -251,8 +245,6 @@ class Annotation(object):
             out = out[:limit]
 
         return out
-
-   
     
 
 
@@ -310,36 +302,24 @@ class Dataset(object):
 
     @view_config(route_name="mistic.json.dataset.sampleinfo.search", request_method="GET", renderer="json")
     def sample_info_search(self):
-      if not self.dataset.cannotation:
-         return []
-      out = []
-      anns = self.dataset.cannotation.data
-      d = dict([ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ])
-      query = self.request.GET.getall('q')
+        if not self.dataset.cannotation:
+            return []
 
-      if query ==['']:
+        out = []
+
+        anns = self.dataset.cannotation.data
+        d = dict([ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ])
+
+        query = tuple(sorted(set(sum([ q.split() for q in self.request.GET.getall('q') ], []))))
+        query = [ re.compile(re.escape(q), re.I) for q in query ]
+
         for k,v in d.items():
-          for e in v:
-              out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
+            key_match = not len(query) or any([ q.search(k) for q in query ])
+            for e in v:
+                if key_match or any([ q.search(e) for q in query ]):
+                    out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
+
         return out
-
-      
-      query = sum([ q.split() for q in query ], [])
-      query = [ re.compile(re.escape(q), re.I) for q in query if q != '' ]
-
-      if query == []:
-        return []
-
-      for q in query:
-        for k,v in d.items():
-          keyFound = False
-          if q.search(k):
-              keyFound = True
-          for e in v:
-            if q.search(e) or keyFound:
-              out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
-
-      return out
 
 
     @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
@@ -487,7 +467,7 @@ class Dataset(object):
         for r in gs_tab:
             x = r['id']
             info = a.geneset_info(x)
-            info = info.replace({numpy.nan : ''})
+            info = info.replace({ numpy.nan : '' })
             r['info'] = dict(info)
             r['name'] = info.get('name', '')
             r['desc'] = info.get('desc', '')
