@@ -154,6 +154,14 @@
             this.hide();
         },
 
+        toggle: function() {
+            if (this.shown) {
+                this.hide();
+            } else {
+                this.show();
+            }
+        },
+
         show: function() {
             if (!this.shown) {
                 var pos = _.extend(
