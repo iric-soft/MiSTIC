@@ -197,6 +197,8 @@ def main(global_config, **settings):
     config.add_route('mistic.json.annotation.gene.symbol', '/annotations/{annotation}/genes/{gene_id}/symbol')
 
     config.add_route('mistic.json.annotation.gs',          '/annotations/{annotation}/gs')
+    config.add_route('mistic.json.annotation.gs.types',    '/annotations/{annotation}/gs/type')
+    config.add_route('mistic.json.annotation.gs.cats',     '/annotations/{annotation}/gs/cat')
 
     config.add_route('mistic.json.cannotation.items',      '/cannotations/datasets/{dataset}')
 

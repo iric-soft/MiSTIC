@@ -125,8 +125,6 @@ class Annotation(object):
         if self.annotation is None:
             raise HTTPNotFound()
             
-        self._genesets_search = {3 : self._genesets, 2: self._genesets_cat, 1: self._genesets_type}
-
     def gene_record(self, gene, genesets = None):
         '''
         return a gene record as a dict.
@@ -172,88 +170,74 @@ class Annotation(object):
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
 
+
     def _query_to_regex (self, query):
       if query: 
         query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
         query = [ re.compile(q, re.I) for q in query ]
       return query 
       
-    @key_cache_region('mistic', 'jsonviews', lambda args: args[1])
-    def _genesets(self, query, limit):
-       
-        
-        out = []
-        
+
+
+    @view_config(route_name="mistic.json.annotation.gs.cats", request_method="GET", renderer="json")
+    def geneset_categories(self):
+        types = self.request.GET.getall('t')
+        query = tuple(sorted(set(sum([ q.split() for q in self.request.GET.getall('q') ], []))))
         query = self._query_to_regex(query)
-          
-        for gsid in sorted(self.annotation.get_geneset_ids()):
-          if limit and len(out) > limit : 
-            break
-            
-          geneset_id, ident = gsid.rsplit(':', 1)
-          geneset_id = geneset_id.split('.')
-          geneset_id, geneset_cat = geneset_id[0], geneset_id[1:]
-          geneset = self.annotation.genesets.get(geneset_id)
-              
-          row = geneset.genesets.ix[ident]
-          name = row['name']
-          
-          if (all([ q.search(gsid+' '+name) is not None for q in query ])):
-            out.append(dict(name = name, id = gsid))
-            
+
+        out = []
+
+        for gs_id, gs in self.annotation.genesets.iteritems():
+            if len(types) and gs_id not in types:
+                continue
+            for cat_id in gs.categories:
+                if (all([q.search(cat_id) is not None for q in query ])):
+                    out.append(dict(id = gs_id+'.'+cat_id, name = ''))
 
         return out
-    
-      
-    def _genesets_cat (self, query, limit):
-      
-      out = []
-      
-      geneset_types = self.annotation.genesets.keys()
-      geneset_type = [q for q in query if q in geneset_types]
-      
-      
-      if len(geneset_type)>0 : 
-        geneset_type = geneset_type[0]
-        query = tuple([q for q in query if q != geneset_type])   # Use the type only to restrict the list
-        genesets_data = {geneset_type : self.annotation.genesets[geneset_type]}
-      else : 
-        genesets_data = self.annotation.genesets
-      
-    
-      
-      query = self._query_to_regex(query)
-      
-      for k,v in genesets_data.items() :
-        if limit and len(out) > limit : 
-          break 
-       
-        ss = sorted(list(set(list(v.genesets['cat']))))
-       
-        for s in ss : 
-          if (all([q.search(k+' '+s) is not None for q in query ])) or not query:
-            out.append(dict(id = k+'.'+s, name = ''))
-      return out
 
 
-    def _genesets_type (self, query, limit):
+
+    @view_config(route_name="mistic.json.annotation.gs.types", request_method="GET", renderer="json")
+    def geneset_types(self):
+        return [ dict(id = k,name = v.description) for k,v in self.annotation.genesets.iteritems() ]
+
+
+
+    @key_cache_region('mistic', 'jsonviews', lambda args: args[1:])
+    def _genesets(self, query, limit_cats, limit_types):
+        out = []
+
+        query = self._query_to_regex(query)
+
+        limit_types = set(limit_types)
+        limit_cats = set(limit_cats)
+
+        for gsid in sorted(self.annotation.get_geneset_ids()):
+            cat_id, ident = gsid.rsplit(':', 1)
+            if len(limit_cats) and cat_id not in limit_cats:
+                continue
+
+            cat_id = cat_id.split('.')
+            geneset_id, cat_id = cat_id[0], cat_id[1:]
+            if len(limit_types) and geneset_id not in limit_types:
+                continue
+
+            geneset = self.annotation.genesets.get(geneset_id)
+
+            name = geneset.genesets.ix[ident, 'name']
+
+            if (any([ q.search(gsid) is not None for q in query ]) or
+                all([ q.search(name) is not None for q in query ])):
+                out.append(dict(name = name, id = gsid))
+
+        return out
      
-      out = []
-      query = self._query_to_regex(query)
-      genesets_data =  self.annotation.genesets
-      for k,v in genesets_data.items() :           
-        if (all([ q.search(k) is not None for q in query ])) or not query:
-          out.append(dict(id = k,name = v.description))
-        
-      return out
-      
-      
-
     @view_config(route_name="mistic.json.annotation.gs", request_method="GET", renderer="json")
     def genesets(self):
-        level = int(self.request.GET.get('v')) 
-        query = self.request.GET.getall('q')
-        query = tuple(sum([ q.split() for q in query ], []))
+        query = tuple(sorted(set(sum([ q.split() for q in self.request.GET.getall('q') ], []))))
+        limit_cats = tuple(sorted(set(self.request.GET.getall('c'))))
+        limit_types = tuple(sorted(set(self.request.GET.getall('t'))))
         limit = self.request.GET.get('l')
 
         try:
@@ -261,13 +245,11 @@ class Annotation(object):
         except:
             limit = 100
 
-        
-        #out = self._genesets(query, limit)
-       
-        out = self._genesets_search[level](query, limit)
-        
-        #if limit is not None:
-        #    out = out[:limit]
+        out = self._genesets(query, limit_cats, limit_types)
+
+        if limit is not None:
+            out = out[:limit]
+
         return out
 
    

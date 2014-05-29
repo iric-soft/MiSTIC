@@ -22,8 +22,16 @@
             return '';
         },
 
+        initialize: function(options) {
+            Dropdown.prototype.initialize.call(this, options);
+            this.extra_args = options.extra_args || {};
+        },
+
         searchData: function() {
-            return { q: this.$el.val() };
+            return _.extend(
+                { },
+                this.extra_args,
+                { q: this.$el.val(), });
         }
     });
 

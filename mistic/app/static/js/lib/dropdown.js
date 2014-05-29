@@ -197,7 +197,7 @@
             this.fetching_items = true;
             this.current_search = [url, data];
             this.collection.url = url;
-            this.collection.fetch({ data: data }).done(_.bind(this.afterFetch, this));
+            this.collection.fetch({ data: $.param(data, true) }).done(_.bind(this.afterFetch, this));
         },
 
         afterFetch: function() {

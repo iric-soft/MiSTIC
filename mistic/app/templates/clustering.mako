@@ -175,25 +175,25 @@ $(document).ready(function() {
 
   var level1_entry = new GODropdown({
     el: $("#level1"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=1"
+    url: "${request.route_url('mistic.json.annotation.gs.types', annotation=my_annotation)}"
   });
 
   var level2_entry = new GODropdown({
     el: $("#level2"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2"
+    url: "${request.route_url('mistic.json.annotation.gs.cats', annotation=my_annotation)}"
   });
 
   var level3_entry = new GODropdown({
     el: $("#level3"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3"
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
   });
 
   $('#clear_input').on('click', function() {
     level1_entry.$el.val('');
     level2_entry.$el.val('');
     level3_entry.$el.val('');
-    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;";
-    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;";
+    level2_entry.extra_args = {};
+    level3_entry.extra_args = {};
   });
 
 
@@ -204,12 +204,16 @@ $(document).ready(function() {
     return false;
   });
 
-  level1_entry.on('change', function() {
+  level1_entry.on('change', function(item) {
     level2_entry.$el.val('');
     level3_entry.$el.val('');
-    gstype = $("#level1").val().split(':')[0];
-    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;q="+gstype;
-    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gstype;
+    if (item === null) {
+      delete level2_entry.extra_args.t;
+      delete level3_entry.extra_args.t;
+    } else {
+      level2_entry.extra_args.t = item.id;
+      level3_entry.extra_args.t = item.id;
+    }
   });
 
   $('#level2_drop').on('click', function() {
@@ -219,10 +223,13 @@ $(document).ready(function() {
     return false;
   });
 
-  level2_entry.on('change', function() {
+  level2_entry.on('change', function(item) {
     level3_entry.$el.val('');
-    gsid = $("#level2").val();
-    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gsid;
+    if (item === null) {
+      delete level3_entry.extra_args.c;
+    } else {
+      level3_entry.extra_args.c = item.id;
+    }
   });
 
   $('#level3_drop').on('click', function() {
@@ -243,8 +250,9 @@ $(document).ready(function() {
         success: function(data) {
           $("#dataset_cmp").val($("#dataset_cmp option:first").val());
           var gene_set = {};
-          for (var i = 0; i < data.length; ++i) { gene_set[data[i]] = true; }
-                              console.log(JSON.stringify(gene_set));
+          for (var i = 0; i < data.length; ++i) {
+            gene_set[data[i]] = true;
+          }
           current_graph.colourByClusterMatch(
             [ gene_set, current_graph.root.getContent() ],
             function (a,b,c,d) {
