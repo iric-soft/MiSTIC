@@ -63,9 +63,18 @@
             return body_text;
         },
 
+        show: function(pos_elem) {
+            var result = ModalBase.prototype.show.call(this, [pos_elem]);
+
+            this.$('.modal-body').css('max-height', 200);
+            this.$('.modal-body').css('overflow', 'scroll');
+
+            return result;
+        },
+
         clearClicked: function(event) {
             this.dismiss();
-            this.$el.trigger('geneset-filter:update', []);
+            this.trigger('GenesetCategorySelector:update', []);
             return false;
         },
 
