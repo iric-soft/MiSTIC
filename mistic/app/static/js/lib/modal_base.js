@@ -40,7 +40,9 @@
 
         show: function(pos_elem) {
             var self = this;
-            this.$el.appendTo($('body')).modal({ backdrop: false });
+            this.$el.appendTo($('body'));
+            this.$el.modal({ backdrop: false });
+            this.delegateEvents();
 
             if (pos_elem !== undefined) {
                 var pos = _.extend(
