@@ -52,8 +52,7 @@ class GO(object):
 
     @view_config(route_name="mistic.json.go.search", request_method="GET", renderer="json")
     def search(self):
-        query = self.request.GET.getall('q')
-        query = sum([ q.split() for q in query ], [])
+        query = tuple(sorted(set(sum([ q.split() for q in self.request.GET.getall('q') ], []))))
         query = [ re.compile(re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q), re.I) for q in query if q != '' ]
 
         if query == []:
@@ -170,17 +169,13 @@ class Annotation(object):
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
     def _query_to_regex (self, query):
-      if query: 
-        query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
-        query = [ re.compile(q, re.I) for q in query ]
-      return query 
-      
-
+        return tuple([ re.compile(re.escape(q), re.I) for q in query ])
 
     @view_config(route_name="mistic.json.annotation.gs.cats", request_method="GET", renderer="json")
     def geneset_categories(self):
         types = self.request.GET.getall('t')
-        query = tuple(sorted(set(sum([ q.split() for q in self.request.GET.getall('q') ], []))))
+
+        query = sorted(set(sum([ q.split() for q in self.request.GET.getall('q') ], [])))
         query = self._query_to_regex(query)
 
         out = []
