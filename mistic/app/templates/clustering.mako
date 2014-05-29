@@ -54,35 +54,7 @@ import pickle
 
         <div id="go_colour" class="accordion-body collapse in">
           <div class="accordion-inner">
-
-            <div class="input-append">
-              <input type="text" id="level1" placeholder="Restrict geneset search to this type">
-              <div class="btn-group">
-                <button id='level1_drop' class="btn dropdown-toggle" data-toggle="dropdown">
-                  <span class="caret"></span>
-                </button>
-              </div>
-            </div>
-
-            <div class="input-append">
-              <input type="text" id="level2" placeholder="Restrict geneset search to this category">
-              <div class="btn-group">
-                <button id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                  <span class="caret"></span>
-                </button>
-              </div>
-            </div>
-
-            <div class="input-append">
-              <input type="text" id="level3" placeholder="Search for a geneset">
-              <div class="btn-group">
-                <button id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                  <span class="caret"></span>
-                </button>
-              </div>
-            </div>
-
-            <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
+            <div id="geneset_selector"></div>
           </div>
         </div>
       </div>
@@ -173,73 +145,13 @@ $(document).ready(function() {
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
 
-  var level1_entry = new GODropdown({
-    el: $("#level1"),
-    url: "${request.route_url('mistic.json.annotation.gs.types', annotation=my_annotation)}"
+  var geneset_selector = new GenesetSelector({
+    el: $("#geneset_selector"),
+    dataset: "${ds.id}",
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"
   });
 
-  var level2_entry = new GODropdown({
-    el: $("#level2"),
-    url: "${request.route_url('mistic.json.annotation.gs.cats', annotation=my_annotation)}"
-  });
-
-  var level3_entry = new GODropdown({
-    el: $("#level3"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
-  });
-
-  $('#clear_input').on('click', function() {
-    level1_entry.$el.val('');
-    level2_entry.$el.val('');
-    level3_entry.$el.val('');
-    level2_entry.extra_args = {};
-    level3_entry.extra_args = {};
-  });
-
-
-  $('#level1_drop').on('click', function() {
-    level1_entry.$el.val('');
-    level1_entry.update();
-    level1_entry.$el.focus();
-    return false;
-  });
-
-  level1_entry.on('change', function(item) {
-    level2_entry.$el.val('');
-    level3_entry.$el.val('');
-    if (item === null) {
-      delete level2_entry.extra_args.t;
-      delete level3_entry.extra_args.t;
-    } else {
-      level2_entry.extra_args.t = item.id;
-      level3_entry.extra_args.t = item.id;
-    }
-  });
-
-  $('#level2_drop').on('click', function() {
-    level2_entry.$el.val('');
-    level2_entry.update();
-    level2_entry.$el.focus();
-    return false;
-  });
-
-  level2_entry.on('change', function(item) {
-    level3_entry.$el.val('');
-    if (item === null) {
-      delete level3_entry.extra_args.c;
-    } else {
-      level3_entry.extra_args.c = item.id;
-    }
-  });
-
-  $('#level3_drop').on('click', function() {
-    level3_entry.$el.val('');
-    level3_entry.update();
-    level3_entry.$el.focus();
-    return false;
-  });
-
-  level3_entry.on('change', function(item) {
+  geneset_selector.on('GenesetSelector:change', function(item) {
     if (item === null) {
       current_graph.removeColour();
     } else {
