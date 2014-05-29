@@ -695,30 +695,29 @@ $(document).keyup(function(e) {
 
 
 $(document).ready(function() {
-    
     updateEnrichmentTable();   
+
     $.ajax({
         url: "${request.route_url('mistic.json.dataset.geneset.enrich', dataset=dataset)}",
         dataType: 'json',
         type: 'POST',
-        data: { genes: JSON.stringify(_.pluck(json.nodes, 'id')) },
+        data: {
+            genes: JSON.stringify(_.pluck(json.nodes, 'id'))
+        },
         error: function(req, status, error) {
-          console.log('got an error', status, error);
+            console.log('got an error', status, error);
         },
         beforeSend : function() {
-        $("#go_table .dataTables_empty").append('<div id="loading"><img src="${request.static_url('mistic:app/static/img/ajax-loader.gif')}"/> </div>');
+            $("#go_table .dataTables_empty").append('<div id="loading"><img src="${request.static_url('mistic:app/static/img/ajax-loader.gif')}"/></div>');
         },
         success: function(data) {
-          
-          json.gstab = data;
-          updateEnrichmentTable();
+            json.gstab = data;
+            updateEnrichmentTable();
         },
         complete: function() {
-        $("div#loading").remove();
-          
+            $("div#loading").remove();
         }
-      });
-    
+    });
 });    
 
 
