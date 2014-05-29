@@ -73,7 +73,7 @@
             this.dismiss();
             var categories = this.$("input[data-geneset-cat]:checked");
             var selected_categories = _.map(categories, function(x) { return $(x).data('geneset-cat'); });
-            this.$el.trigger('geneset-filter:update', selected_categories);
+            this.trigger('GenesetCategorySelector:update', selected_categories);
             return false;
         },
 

@@ -80,6 +80,10 @@ div#more-information a:hover
 }
 
 
+ul.geneset-type-list {
+  margin: 0px;
+}
+
 ul.geneset-type-list,
 ul.geneset-cat-list {
   list-style: none;
@@ -468,10 +472,6 @@ div#point-group-settings .colour div.alpha-image {
     background-color:transparent;
     border : 0px;
     font-family:inherit;
-}
-
-#sample_annotation {
-   text-overflow : ellipsis;
 }
 
 .modal-backdrop, 
