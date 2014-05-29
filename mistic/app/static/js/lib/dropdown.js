@@ -185,7 +185,6 @@
                 _.isEqual(this.current_search, [url, data])) {
                 return;
             }
-        
 
             this.fetching_items = true;
             this.current_search = [url, data];
@@ -221,6 +220,19 @@
             }
             this.renderItems();
             this.show();
+        },
+
+        collectionChange: function() {
+            var self = this;
+            this.need_render = true;
+            setTimeout(
+                function() {
+                    if (self.need_render) {
+                        self.renderItems();
+                        delete self.need_render;
+                    }
+                },
+                0);
         },
 
         renderItems: function() {
@@ -322,7 +334,7 @@
                 }
                 }
             }
-            setTimeout(_.bind(this.update, this, event), 4);
+            setTimeout(_.bind(this.update, this, event), 0);
             //this.update(event)
         },
 
@@ -393,7 +405,7 @@
             this.selected_item = null;
             this.selected_text = null;
 
-            this.collection.on('all', _.bind(this.renderItems, this));
+            this.collection.on('all', _.bind(this.collectionChange, this));
 
             this.$menu = $(this.menu);
            
