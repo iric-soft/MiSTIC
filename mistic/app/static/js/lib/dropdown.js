@@ -334,8 +334,7 @@
                 }
                 }
             }
-            setTimeout(_.bind(this.update, this, event), 0);
-            //this.update(event)
+            this.update(event)
         },
 
         keypress: function(event) {
