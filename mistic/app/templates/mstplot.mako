@@ -37,21 +37,17 @@ import mistic.app.data as data
         <div id="locate_geneset" class="accordion-body collapse in">
           <div class="accordion-inner">
             <div class="input-prepend input-append">
-
               <div class="btn-group">
                 <button class="btn" id="restrict_geneset">
                   Filter <span class="caret"></span>
                 </button>
               </div>
-
               <input type="text" id="geneset" placeholder="Geneset">
-
               <div class="btn-group">
                 <button class="btn dropdown-toggle" id="geneset_drop" data-toggle="dropdown">
                   <span class="caret"></span>
                 </button>
               </div>
-
             </div>
           </div>
         </div>
