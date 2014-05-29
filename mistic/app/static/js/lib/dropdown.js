@@ -269,6 +269,8 @@
 
             if (this.collection.length === 0) {
                 this.hide();
+            } else {
+                this.show();
             }
         },
 
