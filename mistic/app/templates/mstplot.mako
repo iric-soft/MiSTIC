@@ -14,6 +14,20 @@ import mistic.app.data as data
       <div class="accordion-group">
         <div class="accordion-heading">
           <h4 class="accordion-title">
+            <a class="accordion-toggle" data-toggle="collapse" href="#selection">Selection</a>
+          </h4>
+        </div>
+
+        <div id="selection" class="accordion-body collapse in">
+          <div class="accordion-inner">
+            <button id="clear_all" class="btn">Clear all</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="accordion-group">
+        <div class="accordion-heading">
+          <h4 class="accordion-title">
             <a class="accordion-toggle" data-toggle="collapse" href="#locate_gene">Locate gene</a>
           </h4>
         </div>
@@ -103,6 +117,11 @@ $(document).ready(function() {
 
   current_graph.setData(nodes, edges, info, pos);
   current_graph.draw();
+
+  $('#clear_all').on('click', function() {
+    current_graph.selected_ids = {};
+    current_graph.updateLabels();
+  });
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=ds.id)}");
