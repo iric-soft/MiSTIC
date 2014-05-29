@@ -110,12 +110,9 @@ $(document).ready(function() {
   #print ds.annotation.genesets['CNV']
 
   if xform == 'log':
-    xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
+    xf = 'log%(base)s(%(scale)s * RPKM + %(bias)s)' % dict(zip(['scale','bias','base'],ds._makeTransform(xform).params))
   else :
     xf = xform
-
-
-
 %>
 
   var go_cache = new Backbone.Collection({
