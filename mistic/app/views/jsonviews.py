@@ -478,28 +478,27 @@ class Dataset(object):
         
     @view_config(route_name="mistic.json.dataset.geneset.enrich", request_method="POST", renderer="json")
     def genesets_enrichment (self):
-     
-     genes = set(json.loads(self.request.POST['genes']))
-     a = self.dataset.annotation
+        genes = set(json.loads(self.request.POST['genes']))
+        a = self.dataset.annotation
 
-     from mistic.util import geneset
-     gs_tab = geneset.genesetOverRepresentation(genes, a.genes, a.all_genesets())
+        from mistic.util import geneset
+        gs_tab = geneset.genesetOverRepresentation(genes, a.genes, a.all_genesets())
   
-     for r in gs_tab:
-         x = r['id']
-         info = a.geneset_info(x)
-         info = info.replace({numpy.nan : ''})
-         r['info'] = dict(info)
-         r['name'] = info.get('name', '')
-         r['desc'] = info.get('desc', '')
-         x, r['id'] = x.rsplit(':', 1)
+        for r in gs_tab:
+            x = r['id']
+            info = a.geneset_info(x)
+            info = info.replace({numpy.nan : ''})
+            r['info'] = dict(info)
+            r['name'] = info.get('name', '')
+            r['desc'] = info.get('desc', '')
+            x, r['id'] = x.rsplit(':', 1)
    
-         if '.' in x:
-           r['gs'], r['cat'] = x.split('.', 1)
-         else:
-           r['gs'], r['cat'] = x, ''
-     
-     return gs_tab
+            if '.' in x:
+                r['gs'], r['cat'] = x.split('.', 1)
+            else:
+                r['gs'], r['cat'] = x, ''
+
+        return gs_tab
 
 
 class DatasetSample(Dataset):
