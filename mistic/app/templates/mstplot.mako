@@ -36,19 +36,7 @@ import mistic.app.data as data
 
         <div id="locate_geneset" class="accordion-body collapse in">
           <div class="accordion-inner">
-            <div class="input-prepend input-append">
-              <div class="btn-group">
-                <button class="btn" id="restrict_geneset">
-                  Filter <span class="caret"></span>
-                </button>
-              </div>
-              <input type="text" id="geneset" placeholder="Geneset">
-              <div class="btn-group">
-                <button class="btn dropdown-toggle" id="geneset_drop" data-toggle="dropdown">
-                  <span class="caret"></span>
-                </button>
-              </div>
-            </div>
+            <div id="geneset_selector"></div>
           </div>
         </div>
       </div>
@@ -71,6 +59,7 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/geneset_category_selector.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/geneset_selector.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 <%
@@ -124,27 +113,16 @@ $(document).ready(function() {
     current_graph.updateLabels();
   });
 
-  var geneset_entry = new GODropdown({
-    el: $("#geneset"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"+"?v=3"
+  var geneset_selector = new GenesetSelector({
+    el: $("#geneset_selector"),
+    dataset: "${ds.id}",
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"
   });
 
-  $('#geneset_drop').on('click', function() {
-    geneset_entry.$el.val('');
-    geneset_entry.update();
-    geneset_entry.$el.focus();
-    return false;
-  });
-
-  var gscat_sel = new GenesetCategorySelector({ dataset: "${ds.id}" });
-
-  $('#restrict_geneset').on('click', function(event) {
-    gscat_sel.show(event.currentTarget);
-    event.preventDefault();
-  });
-
-  gscat_sel.on('GenesetCategorySelector:update', function(selection) {
-  });
+  //var geneset_entry = new GODropdown({
+  //  el: $("#geneset"),
+  //  url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"+"?v=3"
+  //});
 });
 </script>
 </%block>

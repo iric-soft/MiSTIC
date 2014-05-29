@@ -15,7 +15,7 @@ import json
   <li><label class="checkbox"><input type="checkbox" data-geneset-type="${gs_id}"> <b>${gs.name}</b></label>
     <ul class="geneset-cat-list">
 %for cat_id in gs.categories:
-      <li><label class="checkbox"><input type="checkbox" data-geneset-cat="${gs_id}:${cat_id}"> ${cat_id}</li></label>
+      <li><label class="checkbox"><input type="checkbox" data-geneset-cat="${gs_id}.${cat_id}"> ${cat_id}</li></label>
 %endfor
     </ul>
   </li>

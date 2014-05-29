@@ -1,8 +1,5 @@
 <!DOCTYPE html>
 <html>
-
-
-
   <head>
     <title><%block name="pagetitle"></%block></title>
     <meta http-equiv="Content-Type" content="text/html; charset=UTF-8" />
@@ -20,7 +17,6 @@
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic_svg.css')}" type="text/css" media="screen" charset="utf-8">
-
 
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
@@ -134,6 +130,8 @@ mistic = {
 <%block name="pagetail">
 <form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}">
 <input id="pdfdata" type="hidden" name="pdfdata" value=""></input></form>
+
+<%include file="mistic:app/templates/fragments/tmpl_geneset_selector.mako"/>
 
 <script src="${request.static_url('mistic:app/cdnjs/jquery/1.11.1/jquery.min.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/cdnjs/underscore.js/1.6.0/underscore-min.js')}" type="text/javascript"></script>

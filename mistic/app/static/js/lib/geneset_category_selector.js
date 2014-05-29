@@ -1,13 +1,13 @@
 (function() {
     GenesetCategorySelector = ModalBase.extend({
-        footer : _.template('<button class="btn btn-primary modal-save">Save</button><button class="btn btn-primary modal-clear">Clear</button>'),
+        footer: _.template('<button class="btn btn-primary modal-save">Save</button><button class="btn btn-primary modal-clear">Clear</button>'),
 
-        events : function() {
+        events: function() {
             return _.extend({}, _.result(ModalBase.prototype, 'events'), {
-                'click .modal-save':                                         'saveClicked',
-                'click .modal-clear':                                        'clearClicked',
-                'change ul.geneset-cat-list > li > input[type="checkbox"]':  'changeCat',
-                'change ul.geneset-type-list > li > input[type="checkbox"]': 'changeType',
+                'click .modal-save':                                                 'saveClicked',
+                'click .modal-clear':                                                'clearClicked',
+                'change ul.geneset-cat-list > li > label > input[type="checkbox"]':  'changeCat',
+                'change ul.geneset-type-list > li > label > input[type="checkbox"]': 'changeType',
             });
         },
 
@@ -17,7 +17,7 @@
             var tgt = $(event.currentTarget);
             var checked = tgt.prop("checked");
             var type_id = tgt.data("geneset-type");
-            var categories = this.$("input[data-geneset-cat^='" + type_id + ":']");
+            var categories = this.$("input[data-geneset-cat^='" + type_id + ".']");
 
             categories.each(function() { $(this).prop("checked", checked) });
 
@@ -27,10 +27,10 @@
         changeCat: function(event) {
             var tgt = $(event.currentTarget);
             var cat_id = tgt.data('geneset-cat');
-            var type_id = cat_id.split(':')[0];
+            var type_id = cat_id.split('.')[0];
 
             var checked = tgt.prop("checked");
-            var siblings = this.$("input[data-geneset-cat^='" + type_id + ":']");
+            var siblings = this.$("input[data-geneset-cat^='" + type_id + ".']");
             var states = _.map(siblings, function(x) { return $(x).prop('checked'); });
             var parent = this.$("input[data-geneset-type='" + type_id + "']");
 
