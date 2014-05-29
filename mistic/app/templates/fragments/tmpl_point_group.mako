@@ -10,13 +10,13 @@
     <div style="clear: both;"></div>
     <table width="100%">
       <tr>
-        <td width="16px" style="padding: 0px 1px;">
+        <td width="16px" style="padding: 0px;">
           <div class="control-group sg-style" style="width: 16px; float: left;">
             <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" class="legend" width="16" height="20"></svg>
           </div>
         </td><td style="padding: 0px 8px 0px 10px;">
           <input style="width: 100%; margin: 0px -8px; padding: 3px 6px;" type="text" autocomplete="off">
-        </td><td width="68px" style="padding: 0px 1px;">
+        </td><td width="68px" style="padding: 0px;">
           <div class="control-group sg-ops" style="float: right; width: 68px; padding: 3px;">
             <i class="sg-add           icon-plus"     ></i>
             <i class="sg-remove        icon-minus"    ></i>
