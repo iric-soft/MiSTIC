@@ -44,7 +44,7 @@ import mistic.app.data as data
                 </button>
               </div>
 
-              <input type="text" id="level3" placeholder="Geneset">
+              <input type="text" id="geneset" placeholder="Geneset">
 
               <div class="btn-group">
                 <button class="btn dropdown-toggle" id="geneset_drop" data-toggle="dropdown">
@@ -128,11 +128,26 @@ $(document).ready(function() {
     current_graph.updateLabels();
   });
 
-  $('#restrict_geneset').on('click', function(event) {
-    var gscat_sel = new GenesetCategorySelector({ dataset: "${ds.id}" });
-    gscat_sel.show(event.currentTarget);
+  var geneset_entry = new GODropdown({
+    el: $("#geneset"),
+    url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"+"?v=3"
+  });
 
+  $('#geneset_drop').on('click', function() {
+    geneset_entry.$el.val('');
+    geneset_entry.update();
+    geneset_entry.$el.focus();
+    return false;
+  });
+
+  var gscat_sel = new GenesetCategorySelector({ dataset: "${ds.id}" });
+
+  $('#restrict_geneset').on('click', function(event) {
+    gscat_sel.show(event.currentTarget);
     event.preventDefault();
+  });
+
+  gscat_sel.on('GenesetCategorySelector:update', function(selection) {
   });
 });
 </script>
