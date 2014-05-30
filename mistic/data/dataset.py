@@ -7,6 +7,10 @@ import itertools
 import exceptions
 import csv
 import pandas
+import random
+import logging
+
+logger = logging.getLogger(__name__)
 
 
 
@@ -111,6 +115,42 @@ class DataSet(object):
 
     data = numpy.ma.masked_array(data, numpy.isnan(data))
     return numpy.ma.corrcoef(data)
+
+  def randompaircorr(self, N = 10000, transform = None, permute = False):
+    logging.info('randompaircorr begin')
+    out = []
+
+    if transform is None:
+      data = self.df
+    else:
+      data = transform(self.df)
+    if isinstance(data, pandas.DataFrame):
+      data = data.values
+
+    if permute:
+      data = numpy.random.permutation(data.T).T
+
+    logging.info('transform done')
+
+    for i in xrange(N):
+      if i % 1000 == 0:
+        logging.info('...{0}'.format(i))
+      a, b = random.sample(xrange(data.shape[0]), 2)
+
+      ra = data[a]
+      rb = data[b]
+
+      z = numpy.corrcoef(ra, rb)
+
+      if numpy.isnan(z[0,1]):
+        c = 0.0
+      else:
+        c = z[0,1]
+
+      out.append(c)
+
+    logging.info('correlation done')
+    return out
 
   def rowcorr(self, rownum, transform = None):
     row = self.df.iloc[rownum]

@@ -294,6 +294,16 @@ class Dataset(object):
         anns = self.dataset.cannotation.data
         return [ (col, sorted(set(anns[col]) - set([""]))) for col in anns.columns ]
 
+    @key_cache_region('mistic', 'genecorr', lambda args: (args[0].dataset.id,) + args[1:])
+    def _random_corr(self, N, xform):
+        return {
+            'corr': sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = False)),
+            'permuted': sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = True)),
+        }
+
+    @view_config(route_name="mistic.json.dataset.randomcorr", request_method="GET", renderer="json")
+    def random_corr(self):
+        return self._random_corr(int(self.request.matchdict['N']), self.request.matchdict['xform'])
 
     @view_config(route_name="mistic.json.dataset.sampleinfo.search", request_method="GET", renderer="json")
     def sample_info_search(self):

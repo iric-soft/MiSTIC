@@ -205,7 +205,7 @@ def main(global_config, **settings):
     config.add_route('mistic.json.datasets',               '/datasets')
     config.add_route('mistic.json.dataset',                '/datasets/{dataset}')
     config.add_route('mistic.json.dataset.search',         '/datasets/{dataset}/search')
-
+    config.add_route('mistic.json.dataset.randomcorr',     '/datasets/{dataset}/randomcorr/{xform}/{N:\d+}')
     config.add_route('mistic.json.dataset.sampleinfo',     '/datasets/{dataset}/sampleinfo')
     config.add_route('mistic.json.dataset.samples',        '/datasets/{dataset}/samples')
     config.add_route('mistic.json.dataset.samples.enrich', '/datasets/{dataset}/samples/enrichment')
