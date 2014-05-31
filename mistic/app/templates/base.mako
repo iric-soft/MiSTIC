@@ -7,14 +7,15 @@
     <meta name="description" content="">
     <meta name="author" content="">
     <meta name="keywords" content="">
+
     <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/twitter-bootstrap/2.3.2/css/bootstrap.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/twitter-bootstrap/2.3.2/css/bootstrap-responsive.min.css')}" type="text/css" media="screen" charset="utf-8">
-
     <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/bootstrap-modal/2.1.0/bootstrap-modal.min.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/bootstrap-select/1.5.4/bootstrap-select.min.css')}" type="text/css" media="screen" charset="utf-8">
-
     <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/datatables/1.9.4/css/jquery.dataTables.min.css')}" type="text/css" media="screen" charset="utf-8">
-    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
+
+    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/ext/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
+
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic_svg.css')}" type="text/css" media="screen" charset="utf-8">
 
