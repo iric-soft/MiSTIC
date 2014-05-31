@@ -1,9 +1,11 @@
-(function() {
-    GenesetCategorySelector = ModalBase.extend({
+define(["underscore", "backbone", "jquery", "modal_base"], function(_, Backbone, $, mb) {
+    "use strict"; // jshint ;_;
+
+    var GenesetCategorySelector = mb.ModalBase.extend({
         footer: _.template('<button class="btn btn-primary modal-save">Save</button><button class="btn btn-primary modal-clear">Clear</button>'),
 
         events: function() {
-            return _.extend({}, _.result(ModalBase.prototype, 'events'), {
+            return _.extend({}, _.result(mb.ModalBase.prototype, 'events'), {
                 'click .modal-save':                                                 'saveClicked',
                 'click .modal-clear':                                                'clearClicked',
                 'change ul.geneset-cat-list > li > label > input[type="checkbox"]':  'changeCat',
@@ -51,20 +53,22 @@
 
         getBody: function() {
             var body_text = '';
-            $.ajax({
-                url: '/modal/geneset_categories/' + this.options.dataset,
-                data: {},
-                async: false,
-                dataType: 'html',
-                success: function(data) {
-                    body_text = data;
-                }
-            });
+            if (this.options.dataset !== undefined) {
+                $.ajax({
+                    url: '/modal/geneset_categories/' + this.options.dataset,
+                    data: {},
+                    async: false,
+                    dataType: 'html',
+                    success: function(data) {
+                        body_text = data;
+                    }
+                });
+            }
             return body_text;
         },
 
         show: function(pos_elem) {
-            var result = ModalBase.prototype.show.call(this, [pos_elem]);
+            var result = mb.ModalBase.prototype.show.call(this, [pos_elem]);
 
             this.$('.modal-body').css('max-height', 200);
             this.$('.modal-body').css('overflow', 'scroll');
@@ -87,6 +91,15 @@
         },
 
         select: function(event) {
+        },
+
+        setDataset: function(dataset) {
+            this.options.dataset = dataset;
+            this.render();
         }
     });
-})();
+
+    return {
+        GenesetCategorySelector: GenesetCategorySelector
+    };
+});

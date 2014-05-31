@@ -1,4 +1,4 @@
-(function() {
+define(["underscore", "d3"], function(_, d3) {
     var _interp = function(ramp, w) {
         w = w * (ramp.length - 1);
         var i = Math.floor(w);
@@ -29,7 +29,8 @@
         ],
         function(c) { return d3.rgb(c); });
 
-    YlGnBl = function(w) { return _interp(_ylgnbl, w); };
-
-    Red4 = function(w) { return _interp(_red, Math.pow(w, 1/4.0)); };
-})();
+    return {
+        YlGnBl: function(w) { return _interp(_ylgnbl, w); },
+        Red4:   function(w) { return _interp(_red, Math.pow(w, 1/4.0)); },
+    }
+});

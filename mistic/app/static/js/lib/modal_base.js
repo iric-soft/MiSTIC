@@ -1,5 +1,5 @@
-(function() {
-    ModalBase = Backbone.View.extend({
+define(["underscore", "backbone", "jquery", "bootstrap-modal"], function(_, Backbone, $) {
+    var ModalBase = Backbone.View.extend({
         tagName: 'div',
         className: 'modal hide',
         template: _.template('\
@@ -70,4 +70,8 @@
             this.render();
         }
     });
-})();
+
+    return {
+        ModalBase: ModalBase
+    };
+});

@@ -1,5 +1,7 @@
-(function() {
-    GenesetSelector = Backbone.View.extend({
+define(["underscore", "backbone", "jquery", "go_dropdown", "geneset_category_selector"], function(_, Backbone, $, gd, gsc) {
+    "use strict"; // jshint ;_;
+
+    var GenesetSelector = Backbone.View.extend({
         tagName: 'div',
         template: _.template($('#tmpl-geneset-selector').html()),
 
@@ -30,7 +32,7 @@
         },
 
         filter_update: function(categories) {
-            this.$('.geneset-filter').toggleClass('btn-info', categories.length != 0);
+            this.$('.geneset-filter').toggleClass('btn-warning', categories.length != 0);
             this.geneset_entry.extra_args.c = categories;
         },
 
@@ -43,12 +45,17 @@
             this.trigger('GenesetSelector:change', item);
         },
 
+        setDataset: function(dataset, url) {
+            this.gscat_sel.setDataset(dataset);
+            this.geneset_entry.setSearchURL(url);
+        },
+
         initialize: function(options) {
             this.render();
 
-            this.gscat_sel = new GenesetCategorySelector({ dataset: options.dataset });
+            this.gscat_sel = new gsc.GenesetCategorySelector({ dataset: options.dataset });
             this.gscat_sel.on('GenesetCategorySelector:update', _.bind(this.filter_update, this));
-            this.geneset_entry = new GODropdown({
+            this.geneset_entry = new gd.GODropdown({
                 el: this.$("input"),
                 url: options.url
             });
@@ -56,5 +63,7 @@
         },
     });
 
-    window.GenesetSelector = GenesetSelector;
-})();
+    return {
+        GenesetSelector: GenesetSelector
+    };
+});

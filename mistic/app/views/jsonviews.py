@@ -296,9 +296,18 @@ class Dataset(object):
 
     @key_cache_region('mistic', 'genecorr', lambda args: (args[0].dataset.id,) + args[1:])
     def _random_corr(self, N, xform):
+        N_samples = self.dataset.data.df.shape[1]
+        gauss = sorted([
+            numpy.corrcoef(numpy.random.randn(N_samples), numpy.random.randn(N_samples))[0,1]
+            for i in xrange(N)
+        ])
+        corr = sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = False))
+        permuted = sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = True))
         return {
-            'corr': sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = False)),
-            'permuted': sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = True)),
+            'n_samples': N_samples,
+            'corr':      corr,
+            'permuted':  permuted,
+            'gauss':     gauss
         }
 
     @view_config(route_name="mistic.json.dataset.randomcorr", request_method="GET", renderer="json")

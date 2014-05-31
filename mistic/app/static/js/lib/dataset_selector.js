@@ -1,9 +1,17 @@
-(function() {
-    DatasetSelector = ModalBase.extend({
+define(["underscore", "backbone", "jquery", "modal_base"], function(_, Backbone, $, mb) {
+    "use strict"; // jshint ;_;
+
+    require(["datatables",
+             "datatables.colreorderwithresize",
+             "datatables.rowgrouping",
+             "datatables.scientificsorting",
+             "datatables.columnfilter"]);
+
+    var DatasetSelector = mb.ModalBase.extend({
         title: 'Dataset selector',
 
         events : function() {
-            return _.extend({}, _.result(ModalBase.prototype, 'events'), {
+            return _.extend({}, _.result(mb.ModalBase.prototype, 'events'), {
                 'click tbody tr.selectable': 'select',
             });
         },
@@ -23,7 +31,7 @@
         },
 
         render: function() {
-            ModalBase.prototype.render.call(this);
+            mb.ModalBase.prototype.render.call(this);
 
             this.$('tbody tr').addClass('selectable');
 
@@ -53,4 +61,8 @@
             });
         },
     });
-})();
+
+    return {
+       DatasetSelector: DatasetSelector
+    };
+});

@@ -1,4 +1,4 @@
-(function($){
+define(["underscore", "backbone", "jquery"], function(_, Backbone, $) {
     "use strict"; // jshint ;_;
 
     var DropdownItemView = Backbone.View.extend({
@@ -63,9 +63,6 @@
         });
     };
 
-    window.DropdownItemView = DropdownItemView;
-    window.Highlighter = Highlighter;
-
     $.fn.unhighlight_text = function() {
         Highlighter.unhighlight(this);
     }
@@ -75,7 +72,7 @@
         this.each(function() { hl.highlight(this); });
     }
 
-    window.Dropdown = Backbone.View.extend({
+    var Dropdown = Backbone.View.extend({
         tagName: 'input',
         attributes: { type: 'text' },
 
@@ -92,7 +89,7 @@
         item: '<li><a href="#"></a></li>',
         trailer: _.template('<li>(<%- remain %> more)</li>'),
 
-        item_view: window.DropdownItemView,
+        item_view: DropdownItemView,
         max_items: 10,
         url: undefined,
 
@@ -426,4 +423,10 @@
                 .on('click',     _.bind(this.itemClick, this));
         }
     });
-})(window.jQuery);
+
+    return {
+        Dropdown:         Dropdown,
+        Highlighter:      Highlighter,
+        DropdownItemView: DropdownItemView
+    }
+});

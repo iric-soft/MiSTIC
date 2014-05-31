@@ -10,6 +10,28 @@ body {
   z-index:10;
 }
 
+/* restyle dataTable */
+table.dataTable tr.odd { background-color: #f8f8f8; }
+table.dataTable tr.even { background-color: white; }
+
+table.dataTable tr.odd td.sorting_1 { background-color: #e8e8e8; }
+table.dataTable tr.odd td.sorting_2 { background-color: #ececec; }
+table.dataTable tr.odd td.sorting_3 { background-color: #f0f0f0; }
+table.dataTable tr.even td.sorting_1 { background-color: #f0f0f0; }
+table.dataTable tr.even td.sorting_2 { background-color: #f4f4f4; }
+table.dataTable tr.even td.sorting_3 { background-color: #f8f8f8; }
+
+table.dataTable tr:hover td {
+  background-color: #bfdcf2 !important;
+}
+
+table.dataTable tr.selected td,
+table.dataTable tr.selected:hover td {
+  background-color: #0074cc !important;
+  color: #fff;
+}
+
+
 form#pdfform {
   margin: 0;
   padding: 0;
@@ -183,6 +205,7 @@ path.arc:hover {
 path.arc.highlight {
   fill: #f00;
 }
+
 path.axis.selected {
   stroke-width:3.5;
 }

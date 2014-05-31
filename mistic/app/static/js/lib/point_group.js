@@ -1,5 +1,7 @@
-(function() {
-    PointGroup = Backbone.Model.extend({
+define(["underscore", "backbone"], function(_, Backbone) {
+    "use strict"; // jshint ;_;
+
+    var PointGroup = Backbone.Model.extend({
         defaults: {
             name: undefined,
             style: {},
@@ -59,7 +61,12 @@
         },
     });
 
-    PointGroupCollection = Backbone.Collection.extend({
+    var PointGroupCollection = Backbone.Collection.extend({
         model: PointGroup,
     });
-})();
+
+    return {
+        PointGroup:           PointGroup,
+        PointGroupCollection: PointGroupCollection
+    };
+});

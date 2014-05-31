@@ -1,5 +1,5 @@
-(function(){
-    PostorderTraversal = function(node) {
+define(["underscore", "djset"], function(_, dj) {
+    var PostorderTraversal = function(node) {
         this.stack = [[ node ]];
         this._pushChildren();
     };
@@ -28,7 +28,7 @@
 
 
 
-    PreorderTraversal = function(node) {
+    var PreorderTraversal = function(node) {
         this.stack = [[ node ]];
     };
 
@@ -50,7 +50,7 @@
 
 
 
-    Node = function(args) {
+    var Node = function(args) {
         _.extend(this, args);
         if (this.children === undefined) {
             this.children = [];
@@ -126,7 +126,7 @@
     Node.fromMST = function(nodes, edges) {
         var current_nodes = {};
 
-        var clusters = new djset(nodes.length);
+        var clusters = new dj.djset(nodes.length);
 
         for (var i = 0; i < nodes.length; ++i) {
             var content = {}
@@ -174,4 +174,10 @@
 
         return _.values(current_nodes);
     };
-})();
+
+    return {
+        Node:               Node,
+        PreorderTraversal:  PreorderTraversal,
+        PostorderTraversal: PostorderTraversal
+    };
+});

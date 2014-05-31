@@ -5,6 +5,7 @@
       <button class="btn geneset-filter">
         Filter <span class="caret"></span>
       </button>
+      <span></span>
     </div>
     <input type="text" placeholder="Gene set">
     <div class="btn-group">

@@ -1,22 +1,20 @@
-(function() {
+define(["underscore", "d3", "djset", "node", "colour"], function(_, d3, dj, node, colour) {
+    "use strict"; // jshint ;_;
+
     var GRID_DIV = 16;
     var distance = function(a, b) {
-        var t;
-        x = Math.abs(a.x - b.x);
-        y = Math.abs(a.y - b.y);
-        t = Math.min(x,y);
-        x = Math.max(x,y);
-        y = t;
-        return x * Math.sqrt(1+(y/x)*(y/x));
+        var x = Math.abs(a.x - b.x);
+        var y = Math.abs(a.y - b.y);
+        return Math.sqrt(x*x + y*y);
     };
 
-    mstplot = function(options) {
+    var mstplot = function(options) {
         this.options = {
-            width:           1000,
-            height:          750,
-            scale:           1000,
-            padding:         10,
-            ramp:            YlGnBl,
+            width:          1000,
+            height:         750,
+            scale:          1000,
+            padding:        10,
+            ramp:           colour.YlGnBl,
             node_r:         undefined, // node radius.
             node_w:         undefined, // node stroke-width.
             edge_w:         undefined, // edge stroke-width.
@@ -391,4 +389,8 @@
             .attr('stroke-width', this.options.node_w)
             .attr('fill',   '#081D58');
     };
-})();
+
+    return {
+        mstplot: mstplot
+    };
+});

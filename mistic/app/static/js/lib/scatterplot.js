@@ -1,4 +1,6 @@
-(function() {
+define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone, $, d3, math) {
+    "use strict"; // jshint ;_;
+
     var defaults = {
         padding: [ 20,20,60,60 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
         inner: 10,   // amount that the plot background is expanded by.
@@ -24,7 +26,7 @@
         },
     };
 
-    scatterplot = function(options, xdata, ydata) {
+    var scatterplot = function(options, xdata, ydata) {
         this.options = {}
 
         _.extend(this.options, defaults);
@@ -196,7 +198,7 @@
             });
         var selected = _.map(circles.data(), function(d) { return d.k; });
         this.setSelection(selected);
-        nselected = selected.length;
+        var nselected = selected.length;
         
         var p = nselected/ntotal*100;
         var r = d3.select(this.svg).select('rect.extent')
@@ -234,8 +236,8 @@
     };
 
     scatterplot.prototype.makeMinimalAxes = function() {
-        xmean = stats.average(_.values(this.xdata));
-        ymean = stats.average(_.values(this.ydata));
+        var xmean = math.stats.average(_.values(this.xdata));
+        var ymean = math.stats.average(_.values(this.ydata));
 
         var dx = this.xScale.domain();
         var dy = this.yScale.domain();
@@ -312,6 +314,12 @@
 
         svg .selectAll('.axis text')
             .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
+
+        svg .selectAll('.axis-x text')
+            .attr('text-anchor', 'middle');
+
+        svg .selectAll('.axis-y text')
+            .attr('text-anchor', 'end');
     };
 
     scatterplot.prototype.makeAxes = function() {
@@ -581,4 +589,8 @@
 
         this.updatePoints(xy);
     };
-})();
+
+    return {
+        scatterplot: scatterplot
+    };
+});

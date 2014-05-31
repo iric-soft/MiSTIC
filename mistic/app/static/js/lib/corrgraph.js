@@ -1,5 +1,7 @@
-(function() {
-    corrgraph = function(data, elem) {
+define(["underscore", "backbone", "jquery", "d3"], function(_, Backbone, $, d3) {
+    "use strict"; // jshint ;_;
+
+    var corrgraph = function(data, elem) {
         this.options = {
             padding: [ 80, 80, 80, 80 ],
             inner: 10,
@@ -177,9 +179,9 @@
         }
 
         var allocate_to_box = function(d) {
-        	//console.log('allocate_to_box');
+            //console.log('allocate_to_box');
             var x = xScale(d.idx);
-
+            var curr;
             var box = curr = boxes[boxes.length-1];
 
             if (!can_add_to_box(d, box)) {
@@ -470,6 +472,12 @@
         axes.selectAll('.axis text')
             .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
 
+        axes.selectAll('.axis-x text')
+            .attr('text-anchor', 'middle');
+
+        axes.selectAll('.axis-y text')
+            .attr('text-anchor', 'end');
+
         axes.append('g').attr('class', 'grid-lines').attr('opacity', .5);
 
         axes.select('g.grid-lines')
@@ -579,4 +587,8 @@
             .text(function(d) {return(d.corr.toFixed(2));});
            
     };
-})();
+
+    return {
+        corrgraph: corrgraph
+    };
+});

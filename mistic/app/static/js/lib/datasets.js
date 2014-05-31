@@ -1,11 +1,13 @@
-(function() {
-    Gene = Backbone.Model.extend();
+define(["underscore", "backbone", "jquery"], function(_, Backbone, $) {
+    "use strict"; // jshint ;_;
 
-    Genes = Backbone.Collection.extend({ model: Gene });
+    var Gene = Backbone.Model.extend();
+
+    var Genes = Backbone.Collection.extend({ model: Gene });
 
     var loaded_annotations = {};
 
-    Dataset = Backbone.Model.extend({
+    var Dataset = Backbone.Model.extend({
         initGenesFromData: function(data) {
             var genes = new Genes();
             for (var i in data) {
@@ -56,26 +58,26 @@
         }
     });
 
-    Datasets = Backbone.Collection.extend({ model: Dataset });
+    var Datasets = Backbone.Collection.extend({ model: Dataset });
 
-    datasets = new Datasets();
+    var datasets = new Datasets();
     datasets.url = mistic.url + '/datasets';
 
-    DatasetDummyOption = Backbone.View.extend({
+    var DatasetDummyOption = Backbone.View.extend({
         render: function() {
             this.el = '<option value="">Select a dataset</option>';
             return this;
         }
     });
 
-    DatasetOption = Backbone.View.extend({
+    var DatasetOption = Backbone.View.extend({
         render: function() {
             this.el = '<option value="' + this.model.id + '">' + this.model.escape('desc') + '</option>';
             return this;
         }
     });
 
-    DatasetSelector = Backbone.View.extend({
+    var DatasetSelector = Backbone.View.extend({
         events: {
             'change': 'selectDataset',
         },
@@ -101,7 +103,7 @@
 
 
 
-    GeneItem = Backbone.View.extend({
+    var GeneItem = Backbone.View.extend({
         tagName: 'li',
         className: 'menu-item',
 
@@ -114,7 +116,7 @@
         }
     });
 
-    GeneEntry = Backbone.View.extend({
+    var GeneEntry = Backbone.View.extend({
         events: {
             'blur':      'blur',
             'focus':     'focus',
@@ -256,4 +258,4 @@
                 .mousedown(function(event) { self.click(event); });
         }
     });
-})();
+});

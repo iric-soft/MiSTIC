@@ -1,4 +1,6 @@
-(function() {
+define(["underscore", "d3", "djset", "node"], function(_, d3, dj, node) {
+    "use strict"; // jshint ;_;
+
     var degrees = function(r) { return r * 180.0 / Math.PI; }
     var radians = function(d) { return d * Math.PI / 180.0; }
     var hypot = function(x, y) {
@@ -10,16 +12,18 @@
         y = t;
         return x * Math.sqrt(1+(y/x)*(y/x));
     };
+
     var p2c = function(ang, rad) {
         ang = radians(ang);
         return [Math.cos(ang) * rad, Math.sin(ang) * rad ];
     };
+
     var c2p = function(x, y) {
         var ang = degrees(Math.atan2(y, x));
         return [ ang, hypot(x, y) ];
     }
 
-    arcplot = function(elem, options) {
+    var arcplot = function(elem, options) {
         this.options = {
             max_weight:      1.0,
             cluster_minsize: 5,
@@ -49,7 +53,8 @@
         var S = d3.event.scale
         var T = d3.event.translate
 
-/*        if (T[0] > 0) T[0] = 0;
+/*
+        if (T[0] > 0) T[0] = 0;
         if (T[1] > 0) T[1] = 0;
         if (T[0] + S * this.width < this.width) T[0] = this.width - (S * this.width);
         if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
@@ -208,9 +213,10 @@
                 ;
         });
     };
+
     arcplot.prototype._zoom = function() {
-        
-        this.zoom.scale(this.xform.S).translate(this.xform.T);
+        this.zoom_behavior.scale(this.xform.S).translate(this.xform.T);
+
         this.body
             .transition()
             .duration(1000)
@@ -226,12 +232,11 @@
                 var _y = self.xform.T[1] + self.xform.S * (d.pos[1] + self.height / 2);
                 return 'translate(' + String(_x) + ',' + String(_y) + ')';
             });
-        
     };
     
     arcplot.prototype.dezoom = function(){
         this.xform = { T: [0,0], S: 1 };
-        //this._zoom();
+        this._zoom();
     };
     
     
@@ -301,10 +306,10 @@
         return { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1] }
     };
 
-    arcplot.prototype.collapseUnbranched = function(node) {
+    arcplot.prototype.collapseUnbranched = function(n) {
         var p, n;
 
-        for (p = new PostorderTraversal(node); (n = p.next()) !== null; ) {
+        for (p = new node.PostorderTraversal(n); (n = p.next()) !== null; ) {
             if (n.children.length === 1) {
                 var c = n.children[0];
                 n.lev = n.lev.concat(c.lev);
@@ -346,7 +351,7 @@
 
         var n_clusters = c_counts.length;
 
-        for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
+        for (var p = new node.PostorderTraversal(this.root); (n = p.next()) !== null; ) {
             n.__pp = new Array(n_clusters);
             n.__pn = new Array(n_clusters);
 
@@ -473,12 +478,12 @@
         this.findBestMatches(clusters, statistic, comparator);
 
         var n_nodes = 0;
-        for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
+        for (var p = new node.PostorderTraversal(this.root); (n = p.next()) !== null; ) {
             n.__idx = n_nodes++;
         }
 
-        var groups = new djset(n_nodes);
-        for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
+        var groups = new dj.djset(n_nodes);
+        for (var p = new node.PostorderTraversal(this.root); (n = p.next()) !== null; ) {
             for (var i = 0; i < n.children.length; ++i) {
                 if (n.__x_max_i == n.children[i].__x_max_i) {
                     groups.merge_sets(n.__idx, n.children[i].__idx);
@@ -488,7 +493,7 @@
 
         var grp_lookup = {};
         var grp_content = [];
-        for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
+        for (var p = new node.PostorderTraversal(this.root); (n = p.next()) !== null; ) {
             var i = groups.find_set_head(n.__idx);
             if (_.has(grp_lookup, i)) {
                 grp_content[grp_lookup[i]].push(n);
@@ -520,7 +525,7 @@
         this.updateLabels();
 
         var cids = {};
-        for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
+        for (var p = new node.PostorderTraversal(this.root); (n = p.next()) !== null; ) {
             cids[n.__x_max_i] = true;
         }
 
@@ -571,7 +576,7 @@
 
         this.arc_divisions = total_size;
 
-        this.root = new Node({
+        this.root = new node.Node({
             content:  {},
             size:     total_size,
             children: roots,
@@ -580,45 +585,45 @@
         });
 
         var p;
-        var node;
+        var n;
 
-        for (p = new PreorderTraversal(this.root); (node = p.next()) !== null; ) {
-            node.lev = [ [node.weight, node.size] ];
+        for (p = new node.PreorderTraversal(this.root); (n = p.next()) !== null; ) {
+            n.lev = [ [n.weight, n.size] ];
         }
 
         this.collapseUnbranched(this.root);
 
-        for (p = new PreorderTraversal(this.root); (node = p.next()) !== null; ) {
+        for (p = new node.PreorderTraversal(this.root); (n = p.next()) !== null; ) {
             var arc_tot = 0;
-            _.each(node.children, function(c) {
+            _.each(n.children, function(c) {
                 arc_tot += c.size;
             });
 
             var arc_pos = 0.0;
-            _.each(node.children, function(c) {
-                var arc = self.arc(node.arc_dir, _.last(node.lev));
+            _.each(n.children, function(c) {
+                var arc = self.arc(n.arc_dir, _.last(n.lev));
                 var arc_frac = c.size / arc_tot;
-                c.lev.splice(0, 0, [ _.last(node.lev)[0], c.size ]);
+                c.lev.splice(0, 0, [ _.last(n.lev)[0], c.size ]);
                 c.arc_dir = arc[0] + (arc[1]-arc[0]) * (arc_pos/arc_tot + arc_frac/2.0);
                 arc_pos += c.size;
             });
         }
     };
 
-    arcplot.prototype.nodeMidpoint = function(node) {
-        var s1 = this.scale(_.first(node.lev)[0]);
+    arcplot.prototype.nodeMidpoint = function(n) {
+        var s1 = this.scale(_.first(n.lev)[0]);
         var r1 = (1-s1) * this.options.rad_inner + s1 * this.options.rad_outer;
 
-        var s2 = this.scale(_.last(node.lev)[0]);
+        var s2 = this.scale(_.last(n.lev)[0]);
         var r2 = (1-s2) * this.options.rad_inner + s2 * this.options.rad_outer;
 
-        return p2c(node.arc_dir, (r1 + r2) / 2);
+        return p2c(n.arc_dir, (r1 + r2) / 2);
     };
 
-    arcplot.prototype.nodePath = function(node) {
+    arcplot.prototype.nodePath = function(n) {
         var self = this;
 
-        var lev = node.lev;
+        var lev = n.lev;
 
         if (lev.length === 1) {
             lev = [ lev[0], lev[0] ];
@@ -631,7 +636,7 @@
         var r2 = (1-s2) * this.options.rad_inner + s2 * this.options.rad_outer;
 
         var ae = _.map(lev, function(l) {
-            return self.arcEndpoints(node.arc_dir, l);
+            return self.arcEndpoints(n.arc_dir, l);
         });
 
         var path;
@@ -658,8 +663,8 @@
         return path;
     };
 
-    arcplot.prototype.click = function(node) {
-        this.trigger('click:cluster', _.keys(node.getContent()));
+    arcplot.prototype.click = function(n) {
+        this.trigger('click:cluster', _.keys(n.getContent()));
     };
 
     arcplot.prototype.draw = function() {
@@ -685,13 +690,14 @@
 
         this.svg  = d3.select(this.elem[0]).select('svg');
         
-        var zoom = d3.behavior.zoom()
-                    .scaleExtent([0.75, 50])
-                    .on("zoom", _.bind(this.zoom, this))
+        this.zoom_behavior =
+          d3.behavior.zoom()
+            .scaleExtent([0.75, 50])
+            .on("zoom", _.bind(this.zoom, this))
         
         this.zoom_g = this.svg
             .append('g')
-            .call(zoom);
+            .call(this.zoom_behavior);
  
         this.xform = { T: [ 0, 0 ], S: 1.0 };
         
@@ -743,7 +749,7 @@
 
         var nodes = [];
         var n, p;
-        for (p = new PreorderTraversal(this.root); (n = p.next()) !== null; ) {
+        for (p = new node.PreorderTraversal(this.root); (n = p.next()) !== null; ) {
             nodes.push(n);
         }
         
@@ -754,11 +760,15 @@
             .enter()
             .append('path')
             .attr('class', 'arc')
-            .attr('d', function(node) { return self.nodePath(node); })
+            .attr('d', function(n) { return self.nodePath(n); })
             .attr('fill', 'black')
             .attr('stroke', 'none')
             .on('click', _.bind(this.click, this));
             
     
     };
-})();
+
+    return {
+        arcplot: arcplot
+    };
+});

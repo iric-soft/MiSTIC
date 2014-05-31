@@ -1,4 +1,7 @@
-(function() {
+define(["underscore", "backbone", "jquery", "d3", "scatterplot", "geneinfo", "textpanel"],
+function(_, Backbone, $, d3, scatterplot, geneinfo, textpanel) {
+    "use strict"; // jshint ;_;
+
     var defaults = {
         padding: [ 20,20,20,20 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
         separation: 10,
@@ -18,7 +21,7 @@
         },
     };
 
-    pairplot = function(xdata, ydata, elem, options) {
+    var pairplot = function(xdata, ydata, elem, options) {
         this.options = {};
 
         _.extend(this.options, defaults);
@@ -95,7 +98,7 @@
             if (data.gene == this.data[idx].gene) idxs.push(idx);
         }
        
-        for (j=0; j< idxs.length; j++){
+        for (var j = 0; j < idxs.length; j++){
             var idx = idxs[j];
             if (idx == this.data.length) {
                 return;
@@ -108,7 +111,7 @@
              this.plot_matrix[i][idx].setYData(data, false);
              this.plot_matrix[idx][i].update();
              if (i != idx) this.plot_matrix[i][idx].update();
-        }     
+        }
       }
       _.each(this.subgraphs, function(g){g.setSelection(my_selection);});
     };
@@ -153,8 +156,8 @@
         _.each(this.subgraphs, function(g) { g.clearBrush(); });
     };
 
-    pairplot.prototype.clearOtherBushes = function(event, scatterplot) {
-        _.each(this.subgraphs, function(g) { if (g !== scatterplot) g.clearBrush(); });
+    pairplot.prototype.clearOtherBushes = function(event, src_scatterplot) {
+        _.each(this.subgraphs, function(g) { if (g !== src_scatterplot) g.clearBrush(); });
     };
 
     pairplot.prototype.childSelectionUpdated = function(event, selection) {
@@ -265,10 +268,10 @@
                     _.extend(s_opts, {axes:((d==1 && N < n_axis) ? true : false)});
 
                     if (x < y ) {
-                        s = new textpanel(s_opts, this.data[x], this.data[y]);
+                        s = new textpanel.textpanel(s_opts, this.data[x], this.data[y]);
                         s.setXform(this.xform);
                     } else if (x > y ) {
-                        s = new scatterplot(s_opts, this.data[x], this.data[y]);
+                        s = new scatterplot.scatterplot(s_opts, this.data[x], this.data[y]);
                        
                         s.setSelection(this.current_selection, true);
                         s.setPointGroups(this.point_groups);
@@ -276,7 +279,7 @@
                     }
                 } else {
                     var gi_opts = { fsize_head: Math.max(12, 25 - N), fsize: Math.max(10, 16 - N), width: xhi - xlo, height: yhi - ylo };
-                    s = new geneinfo(gi_opts, this.data[x]);
+                    s = new geneinfo.geneinfo(gi_opts, this.data[x]);
                 }
                 $(g[0]).append(s.svg);
                 this.plot_matrix[x][y] = s;
@@ -286,6 +289,8 @@
         $('svg.scatterplot', this.svg).on('updateselection', _.bind(this.childSelectionUpdated, this));
         $('svg.scatterplot', this.svg).on('brushstart',      _.bind(this.clearOtherBushes, this));
     };
-})();
 
-
+    return {
+        pairplot: pairplot
+    };
+});

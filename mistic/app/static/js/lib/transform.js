@@ -1,5 +1,7 @@
-(function() {
-    m3 = function() {
+define([], function() {
+    "use strict"; // jshint ;_;
+
+    var m3 = function() {
         this.m = [
             [1.0, 0.0, 0.0],
             [0.0, 1.0, 0.0],
@@ -86,4 +88,8 @@
     m3.prototype.copy = function() {
         return new m3().set(this);
     };
-})();
+
+    return {
+        m3: m3
+    };
+});

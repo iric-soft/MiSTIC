@@ -1,4 +1,6 @@
-(function() {
+define([], function() {
+    "use strict"; // jshint ;_;
+
     var MAXLOG    = 7.09782712893383996843e+2;
     var M_SQRT1_2 = 0.707106781186547524400844362104849039;
     var M_SQRT2   = 1.41421356237309504880168872420969808;
@@ -73,7 +75,7 @@
         return result;
     };
 
-    stats = {};
+    var stats = {};
 
     stats.erfc = function(a) {
         var x;
@@ -106,7 +108,7 @@
         if (a < 0.0) {
             y = 2.0 - y;
         }
-    
+
         if (y == 0.0) {
             // underflow
             return (a < 0.0) ? 2.0 : 0.0;
@@ -116,6 +118,10 @@
     };
 
     var lngamma = function(z) {
+        // Reference: "Lanczos, C. 'A precision approximation 
+        // of the gamma function', J. SIAM Numer. Anal., B, 1, 86-96, 1964."
+        // Translation of  Alan Miller's FORTRAN-implementation
+        // See http://lib.stat.cmu.edu/apstat/245
         var x = 0.1659470187408462e-06 / (z + 7);
         x += 0.9934937113930748e-05 / (z + 6);
         x -= 0.1385710331296526 / (z + 5);
@@ -136,7 +142,7 @@
         return lnfactorial(n) - lnfactorial(p) - lnfactorial(n - p);
     };
 
-    hypergeom = {};
+    var hypergeom = {};
 
     // pmf(k, K, n, N) = choose(n, k) * choose(N-n, K-k) / choose(N, K)
     // -- the probability of selecting k in K, from a set of n in N.
@@ -184,7 +190,7 @@
     };
 
     stats.z_low = function(x) {
-        // Returns left-hand tail of z distribution (0 to x). 
+        // Returns left-hand tail of z distribution (0 to x).
         // x ranges from -infinity to +infinity; result ranges from 0 to 1
 
         var y = x * M_SQRT1_2;
@@ -200,7 +206,7 @@
     };
 
     stats.z_high = function(x) {
-        // Returns right-hand tail of z distribution (0 to x). 
+        // Returns right-hand tail of z distribution (0 to x).
         // x ranges from -infinity to +infinity; result ranges from 0 to 1
 
         var y = x * M_SQRT1_2;
@@ -219,53 +225,53 @@
         return 2 * stats.z_high(Math.abs(x));
     };
 
-  stats.sum = function(a) {
-     var sz = a.length;
-     var sum_a = a[0];
-       
-     for (var i = 1; i < sz; ++i) {    
-        sum_a += a[i];
-    }
-    return sum_a;
-    };
-  
-   
-  stats.average = function(a) {
-      var sz = a.length;
-      var mean_a = a[0];
-       
-      for (var i = 1; i < sz; ++i) {    
-        var delta_a = a[i] - mean_a;
-        mean_a += delta_a / (i+1);
-    }
-    return mean_a;
+    stats.sum = function(a) {
+        var sz = a.length;
+        var sum_a = a[0];
+
+        for (var i = 1; i < sz; ++i) {
+            sum_a += a[i];
+        }
+        return sum_a;
     };
 
-  stats.stdev = function(a) {
-     var sz = a.length;
-     var sum_sq_a = 0.0; 
-     var mean_a = a[0];
-        
-    for (var i = 1; i < sz; ++i) {
-        var sweep = i / (i+1);
-        var delta_a = a[i] - mean_a;    
-        sum_sq_a += delta_a * delta_a * sweep;   
-        mean_a += delta_a / (i+1);
-       }
 
-     var pop_sd_a = Math.sqrt(sum_sq_a / sz);
-     return pop_sd_a ;
+    stats.average = function(a) {
+        var sz = a.length;
+        var mean_a = a[0];
+
+        for (var i = 1; i < sz; ++i) {
+            var delta_a = a[i] - mean_a;
+            mean_a += delta_a / (i+1);
+        }
+        return mean_a;
     };
-  stats.range = function (a) {
-      var sz = a.length;
-      var range = [a[0], a[0]];
-      for (var i = 1; i < sz; ++i) { 
-        if (a[i]<range[0]) { range[0] = a[i];} 
-        if (a[i]>range[1]) { range[1] = a[i];} 
-      }
-      return range
-  };
 
+    stats.stdev = function(a) {
+        var sz = a.length;
+        var sum_sq_a = 0.0;
+        var mean_a = a[0];
+
+        for (var i = 1; i < sz; ++i) {
+            var sweep = i / (i+1);
+            var delta_a = a[i] - mean_a;
+            sum_sq_a += delta_a * delta_a * sweep;
+            mean_a += delta_a / (i+1);
+        }
+
+        var pop_sd_a = Math.sqrt(sum_sq_a / sz);
+        return pop_sd_a ;
+    };
+
+    stats.range = function (a) {
+        var sz = a.length;
+        var range = [a[0], a[0]];
+        for (var i = 1; i < sz; ++i) {
+            if (a[i]<range[0]) { range[0] = a[i];}
+            if (a[i]>range[1]) { range[1] = a[i];}
+        }
+        return range
+    };
 
     stats.pearson = function(a, b) {
         var sz = Math.min(a.length, b.length);
@@ -296,9 +302,107 @@
         return a * d / (b * c);
     };
 
+    stats.fisher = {};
 
-    // ** Fisher's exact test has been moved to fisher.js **
+    // Perform a Fisher exact test on a 2x2 contingency table.
+    //
+    // Parameters
+    // ----------
+    // a, b, c, d
+    //   table: [ a b ]
+    //          [ c d ]
+    // alternative:
+    //   alternative hypothesis ('two-sided', 'less', 'greater') default: 'two-sided'
+    // Returns
+    // -------
+    // oddsratio
+    //   This is prior odds ratio and not a posterior estimate.
+    // p_value
+    //   P-value, the probability of obtaining a distribution at least as
+    //   extreme as the one that was actually observed, assuming that the
+    //   null hypothesis is true.
+    stats.fisher.exact = function(a, b, c, d, alternative) {
+        if (a < 0 || b < 0 || c < 0 || d < 0) {
+            throw "all values must be nonnegative.";
+        }
 
+        if (a + b == 0 || a + c == 0 || b + c == 0 || b + d == 0) {
+            return { p_value: 1.0, oddsratio: NaN };
+        }
+
+        var result = {};
+
+        if (b > 0 && c > 0) {
+            result.oddsratio = a * d / (b * c);
+        } else {
+            result.oddsratio = Infinity;
+        }
+
+        // a = c[0,0]
+        // b = c[0,1]
+        // c = c[1,0]
+        // d = c[1,1]
+
+        var n1 = a + b;
+        var n2 = c + d;
+        var n  = a + c;
+
+        switch (alternative) {
+        case "less": {
+            result.p_value = hypergeom.cdf(a, a+c, a+b, a+b+c+d);
+            break;
+        }
+        case "greater": {
+            result.p_value = hypergeom.cdf(b, b+d, a+b, a+b+c+d);
+            break;
+        }
+        case undefined:
+        case "two-sided": {
+            throw "unimplemented";
+        }
+        default: {
+            throw "alternative should be 'less', 'greater' or 'two-sided'";
+        }
+        }
+
+        if (result.p_value > 1.0) {
+            result.p_value = 1.0;
+        }
+
+        return result;
+    };
+
+    // Fisher's exact test modified to use Fisher's non-central hypergeometric
+    // distribution with a odds-ratio bias of w.  The procedure returns the p-value
+    // based on a null-hypothesis of the odds-ratio being <= w.
+    // Significant calls indicates that n11 / n12 is enriched by at least w.
+    stats.fisher.exact_nc = function(n11, n12, n21, n22, w) {
+        var x = n11;
+        var m1 = n11 + n21;
+        var m2 = n12 + n22;
+        var n = n11 + n12;
+        var x_min = Math.max(0, n - m2);
+        var x_max = Math.min(n, m1);
+
+        var l = [];
+        for (var y = x_min; y <= x_max; y++) {
+            l[y - x_min] = (lncombination(m1, y) + lncombination(m2, n - y) + y * Math.log(w));
+        }
+
+        var max_l = Math.max.apply(Math, l);
+
+        var sum_l = l.map( function (x) { return Math.exp(x - max_l); }).reduce( function (a, b) { return a + b; }, 0);
+        sum_l = Math.log(sum_l);
+
+        var den_sum = 0;
+        for (var y = x; y <= x_max; y++) {
+            den_sum += Math.exp(l[y - x_min] - max_l);
+        }
+
+        den_sum = Math.log(den_sum);
+
+        return Math.exp(den_sum - sum_l);
+    }
 
     // Chi-square test of independence.
     stats.chi2 = function(a, b, c, d) {
@@ -367,4 +471,9 @@
         var Pe  = PA1*PB1 + PA2*PB2;
         return (Pa - Pe) / (1.0 - Pe);
     };
-})();
+
+    return {
+        hypergeom: hypergeom,
+        stats:     stats
+    };
+});

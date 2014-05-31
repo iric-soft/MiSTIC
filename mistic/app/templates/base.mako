@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/bootstrap-modal/2.1.0/bootstrap-modal.min.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/bootstrap-select/1.5.4/bootstrap-select.min.css')}" type="text/css" media="screen" charset="utf-8">
 
-    <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/jquery.dataTables.css')}" type="text/css" media="screen" charset="utf-8">
+    <link rel="stylesheet" href="${request.static_url('mistic:app/cdnjs/datatables/1.9.4/css/jquery.dataTables.min.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic_svg.css')}" type="text/css" media="screen" charset="utf-8">
@@ -128,111 +128,66 @@ mistic = {
 
 </body>
 <%block name="pagetail">
-<form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}">
-<input id="pdfdata" type="hidden" name="pdfdata" value=""></input></form>
-
 <%include file="mistic:app/templates/fragments/tmpl_geneset_selector.mako"/>
 
-<script src="${request.static_url('mistic:app/cdnjs/jquery/1.11.1/jquery.min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/cdnjs/underscore.js/1.6.0/underscore-min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/cdnjs/backbone.js/1.1.2/backbone-min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/cdnjs/require.js/2.1.11/require.min.js')}"></script>
+<script type="text/javascript">
+    require.config({
+        baseUrl: "${request.static_url('mistic:app/static/js/lib')}",
 
-<script src="${request.static_url('mistic:app/cdnjs/twitter-bootstrap/2.3.2/js/bootstrap.min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/cdnjs/bootstrap-select/1.5.4/bootstrap-select.min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/cdnjs/bootstrap-modal/2.1.0/bootstrap-modal.pack.min.js')}" type="text/javascript"></script>
+        paths: {
+            "jquery":           "${request.static_url('mistic:app/cdnjs/jquery/1.11.1/jquery.min')}",
+            "underscore":       "${request.static_url('mistic:app/cdnjs/underscore.js/1.6.0/underscore-min')}",
+            "backbone":         "${request.static_url('mistic:app/cdnjs/backbone.js/1.1.2/backbone-min')}",
+            "bootstrap":        "${request.static_url('mistic:app/cdnjs/twitter-bootstrap/2.3.2/js/bootstrap.min')}",
+            "bootstrap-select": "${request.static_url('mistic:app/cdnjs/bootstrap-select/1.5.4/bootstrap-select.min')}",
+            "bootstrap-modal":  "${request.static_url('mistic:app/cdnjs/bootstrap-modal/2.1.0/bootstrap-modal.pack.min')}",
+            "d3":               "${request.static_url('mistic:app/cdnjs/d3/3.4.8/d3.min')}",
+            "zeroclipboard":    "${request.static_url('mistic:app/cdnjs/zeroclipboard/2.0.0-beta.8/ZeroClipboard.min')}",
 
-<script src="${request.static_url('mistic:app/cdnjs/d3/3.4.8/d3.min.js')}" type="text/javascript"></script>
+            "domReady":         "${request.static_url('mistic:app/cdnjs/require-domReady/2.0.1/domReady.min')}",
 
-<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.colReorderWithResize.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.scientific-sorting.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.columnFilter.js')}" type="text/javascript"></script>
+            "spectrum":         "${request.static_url('mistic:app/static/js/lib/ext/spectrum')}",
+            "base64":           "${request.static_url('mistic:app/static/js/lib/ext/base64')}",
 
-<script src="${request.static_url('mistic:app/static/js/lib/spectrum.js')}" type="text/javascript"></script>
+            "datatables":                      "${request.static_url('mistic:app/cdnjs/datatables/1.9.4/jquery.dataTables.min')}",
+            "datatables.colreorderwithresize": "${request.static_url('mistic:app/static/js/lib/ext/jquery.dataTables.colReorderWithResize')}",
+            "datatables.rowgrouping":          "${request.static_url('mistic:app/static/js/lib/ext/jquery.dataTables.rowGrouping')}",
+            "datatables.scientificsorting":    "${request.static_url('mistic:app/static/js/lib/ext/jquery.dataTables.scientific-sorting')}",
+            "datatables.columnfilter":         "${request.static_url('mistic:app/static/js/lib/ext/jquery.dataTables.columnFilter')}",
+        },
 
-<script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/math.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/fisher.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/base64.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/transform.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/datasets.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/dropdown.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/go_dropdown.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/utils.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/modal_base.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/geneset_category_selector.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/geneset_selector.js')}" type="text/javascript"></script>
+        shim: {
+            "bootstrap":                       { deps: ["jquery"] },
+            "bootstrap-select":                { deps: ["bootstrap"] },
+            "bootstrap-modal":                 { deps: ["bootstrap"] },
+            "spectrum":                        { deps: ["jquery"] },
+            "datatables.colreorderwithresize": { deps: ["datatables"] },
+            "datatables.rowgrouping":          { deps: ["datatables"] },
+            "datatables.scientificsorting":    { deps: ["datatables"] },
+            "datatables.columnfilter":         { deps: ["datatables"] },
+        },
+
+        waitSeconds: 15
+    });
+</script>
+
+<form id="pdfform" target="_blank" method="post" action="${request.route_url('mistic.pdf.fromsvg')}">
+  <input id="pdfdata" type="hidden" name="pdfdata" value=""></input>
+</form>
 
 <script type="text/javascript">
-(function($) {
+// force bootstrap to always be loaded.
+require(["bootstrap", "bootstrap-select"]);
+
+require(["jquery"], function($) {
   "use strict";
 
   $('#pdf').click(function() {
     $('#pdfdata').val($('#graph').html());
     $('#pdfform').submit();
   });
-
-  window.GeneItemView = DropdownItemView.extend({
-    template: _.template(<%text>"<span class='label'><%- get('id') %></span><%- get('name') %>  "</%text>),
-    itemClass: 'gene-item'
-  });
-
-  window.GeneDropdown = Dropdown.extend({
-    item_view: GeneItemView,
-
-    autofillText: function(model) {
-      if (model !== undefined && model !== null) {
-        var symbol = model.get('symbol') ? model.get('symbol') : model.get('id')
-        return symbol + ' ' + model.get('name');
-      }
-      return '';
-    },
-
-    searchData: function() {
-      return { q: this.$el.val() };
-    }
-  });
-
- 
- 
-  window.SampleFeature = Backbone.Model.extend();
-
-  window.SampleAnnotation = Backbone.Collection.extend({
-    model: window.SampleFeature
-  });
-
-  window.sample_annotation_cache = new SampleAnnotation();
-
-  window.SampleAnnotationItemView = DropdownItemView.extend({
-    
-    template: _.template(<%text>"<span class='label label-inverse'><%- get('key') %></span> <%- get('values') %>"</%text>),
-    itemClass: function() {return this.model.get('key'); }
-  });
-
-  window.SampleAnnotationDropdown = Dropdown.extend({
-    item_view: SampleAnnotationItemView,
-    max_items: 1500,
-    menu: '<ul class="typeahead dropdown-menu" style="width:auto;max-width: 400px; max-height: 400px; overflow-x: hidden; overflow-y: auto"></ul>',
-
-    autofillText: function(model) {
-    
-      if (model !== undefined && model !== null) {
-        return model.get('key') + ' : ' + model.get('values');
-      }
-      return '';
-    },
-
-    searchData: function() {
-      
-      return { q: this.$el.val() };
-    }
-  });
-  
-
-  
-  
-})(jQuery);
+});
 </script>
 </%block>
 </html>

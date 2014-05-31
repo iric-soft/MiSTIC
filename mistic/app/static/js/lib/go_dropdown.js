@@ -1,12 +1,12 @@
-(function($){
+define(["underscore", "jquery", "dropdown"], function(_, $, dropdown) {
     "use strict"; // jshint ;_;
 
-    var GODropdownItemView = DropdownItemView.extend({
+    var GODropdownItemView = dropdown.DropdownItemView.extend({
         template: _.template("<span class='label'><%- id %></span> <%- get('name') %>"),
         itemClass: function() { return 'go-'+this.model.get('namespace'); }
     });
 
-    var GODropdown = Dropdown.extend({
+    var GODropdown = dropdown.Dropdown.extend({
         item_view: GODropdownItemView,
         max_items: 50,
         menu: '<ul class="typeahead dropdown-menu" style="max-width: 600px; max-height: 400px; overflow-x: hidden; overflow-y: auto"></ul>',
@@ -23,7 +23,7 @@
         },
 
         initialize: function(options) {
-            Dropdown.prototype.initialize.call(this, options);
+            dropdown.Dropdown.prototype.initialize.call(this, options);
             this.extra_args = options.extra_args || {};
         },
 
@@ -35,5 +35,8 @@
         }
     });
 
-    window.GODropdown = GODropdown;
-})(window.jQuery);
+    return {
+        GODropdownItemView: GODropdownItemView,
+        GODropdown:         GODropdown
+    };
+});

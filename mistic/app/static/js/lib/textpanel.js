@@ -1,5 +1,7 @@
-(function() {
-    textpanel = function(options, xdata, ydata) {
+define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone, $, d3, math) {
+    "use strict"; // jshint ;_;
+
+    var textpanel = function(options, xdata, ydata) {
         this.options = {
             padding: [ 20,20,60,60 ], // amount that the plot region is inset by. [ top, right, bottom, left ]
             inner: 10,   // amount that the plot background is expanded by.
@@ -105,7 +107,7 @@
         }
 
  
-        var r = stats.pearson(v1, v2);
+        var r = math.stats.pearson(v1, v2);
         var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
 
@@ -131,4 +133,8 @@
     };
 
     textpanel.prototype.update = textpanel.prototype.draw;
-})();
+
+    return {
+        textpanel: textpanel
+    };
+});

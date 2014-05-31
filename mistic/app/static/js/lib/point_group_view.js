@@ -1,5 +1,9 @@
-(function() {
-    PointGroupSettingsView = Backbone.View.extend({
+define(["underscore", "backbone", "jquery", "d3"], function(_, Backbone, $, d3) {
+    "use strict"; // jshint ;_;
+
+    require(["spectrum"]);
+
+    var PointGroupSettingsView = Backbone.View.extend({
         tagName: 'div',
         className: 'modal hide',
         id: 'point-group-settings',
@@ -104,6 +108,7 @@
             var self = this;
 
             this.$el.html(this.template({
+                d3: d3,
                 capitalize: function(x) { return x.charAt(0).toUpperCase() + x.slice(1); },
                 get_state:  function(x) {
                     switch (x) {
@@ -158,7 +163,7 @@
 
 
 
-    PointGroupView = Backbone.View.extend({
+    var PointGroupView = Backbone.View.extend({
         tagName: 'div',
         className: 'point-group',
         template: _.template($('#tmpl-point-group').html()),
@@ -275,6 +280,8 @@
 
         render: function() {
             this.$el.html(this.template({
+                d3:    d3,
+                _:     _,
                 view:  this,
                 group: this.group,
                 style: this.group.get('style'),
@@ -296,7 +303,7 @@
 
 
 
-    PointGroupListView = Backbone.View.extend({
+    var PointGroupListView = Backbone.View.extend({
         tagName: 'div',
         className: 'point-group-list',
         events: {
@@ -357,5 +364,11 @@
             this.groups.on('sort',   _.bind(this.groupsReordered, this));
         },
     });
-})();
+
+    return {
+        PointGroupSettingsView: PointGroupSettingsView,
+        PointGroupView:         PointGroupView,        
+        PointGroupListView:     PointGroupListView
+    };
+});
 

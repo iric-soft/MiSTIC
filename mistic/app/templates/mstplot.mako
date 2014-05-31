@@ -69,10 +69,6 @@ path.arc:hover {
 <%block name="pagetail">
 ${parent.pagetail()}
 
-<script src="${request.static_url('mistic:app/static/js/lib/djset.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
-<script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
-
 <script type="text/javascript">
 <%
   ds = data.datasets.get(dataset)
@@ -84,76 +80,86 @@ ${parent.pagetail()}
    )) for g in nodes ])
 %>
 
-$(document).ready(function() {
-  var nodes = ${json.dumps(nodes)|n};
-  var edges = ${json.dumps(edges)|n};
-  var pos   = ${json.dumps(  pos)|n};
-  var info  = ${json.dumps( info)|n};
+require([
+    "jquery", "underscore", "backbone",
+    "gene_dropdown", "geneset_selector",
+    "node", "math", "colour",
+    "mstplot", "domReady!"
+], function(
+    $, _, Backbone,
+    gene_dropdown, geneset_selector,
+    node, math, colour,
+    mstplot, doc) {
+    var nodes = ${json.dumps(nodes)|n};
+    var edges = ${json.dumps(edges)|n};
+    var pos   = ${json.dumps(  pos)|n};
+    var info  = ${json.dumps( info)|n};
 
-  current_graph = new mstplot();
+    current_graph = new mstplot.mstplot();
 
-  $('div#graph').append(current_graph.svg);
+    $('div#graph').append(current_graph.svg);
 
-  var doResize = function() {
-    var graph = $('div#graph');
-    var container = graph.closest('.container-fluid');
-    var enclosing_div = graph.parent();
-    var height = $(window).height()
-      - container.offset().top
-      - container.children("#graph-header").height()
-      - container.children("#graph-footer").height()
-      - 14;
-    var width = graph.width();
+    var doResize = function() {
+        var graph = $('div#graph');
+        var container = graph.closest('.container-fluid');
+        var enclosing_div = graph.parent();
+        var height = $(window).height()
+            - container.offset().top
+            - container.children("#graph-header").height()
+            - container.children("#graph-footer").height()
+            - 14;
+        var width = graph.width();
 
-    graph.height(height);
+        graph.height(height);
 
-    current_graph.resize(width, height);
-  };
+        current_graph.resize(width, height);
+    };
 
-  $(window).resize(doResize);
-  doResize();
+    $(window).resize(doResize);
+    doResize();
 
-  current_graph.setData(nodes, edges, info, pos);
-  current_graph.draw();
+    current_graph.setData(nodes, edges, info, pos);
+    current_graph.draw();
 
-  $('#clear_all').on('click', function() {
-    current_graph.selected_ids = {};
-    current_graph.updateLabels();
-  });
+    $('#clear_all').on('click', function() {
+        current_graph.selected_ids = {};
+        current_graph.updateLabels();
+        event.preventDefault();
+    });
 
-  var gene_entry = new GeneDropdown({ el: $("#gene") });
-  gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=ds.id)}");
+    var gene_entry = new gene_dropdown.GeneDropdown({ el: $("#gene") });
+    gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=ds.id)}");
 
-  gene_entry.on('change', function(item) {
-    if (item === null) return;
-    current_graph.selected_ids[item.id] = true;
-    current_graph.updateLabels();
-  });
+    gene_entry.on('change', function(item) {
+        if (item === null) return;
+        current_graph.selected_ids[item.id] = true;
+        current_graph.updateLabels();
+    });
 
-  var geneset_selector = new GenesetSelector({
-    el: $("#geneset_selector"),
-    dataset: "${ds.id}",
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"
-  });
+    var geneset_selector = new geneset_selector.GenesetSelector({
+        el: $("#geneset_selector"),
+        dataset: "${ds.id}",
+        url: "${request.route_url('mistic.json.annotation.gs', annotation=ds.annotation.id)}"
+    });
 
-  geneset_selector.on('GenesetSelector:change', function(item) {
-      if (item === null) return;
-      console.log('item', item);
-      $.ajax({
-        url: "${request.route_url('mistic.json.annotation.gene_ids', annotation=ds.annotation.id)}",
-        data: { filter_gsid: item.id },
-        dataype: 'json',
-        success: function(data) {
-          _.each(data, function(item) {
-            current_graph.selected_ids[item] = true;
-            current_graph.updateLabels();
-          });
-        },
-        error: function() {
-          // inform the user something went wrong.
-        }
-      });
-  });
+    geneset_selector.on('GenesetSelector:change', function(item) {
+        if (item === null) return;
+        console.log('item', item);
+        $.ajax({
+            url: "${request.route_url('mistic.json.annotation.gene_ids', annotation=ds.annotation.id)}",
+            data: { filter_gsid: item.id },
+            dataype: 'json',
+            success: function(data) {
+                _.each(data, function(item) {
+                    current_graph.selected_ids[item] = true;
+                    current_graph.updateLabels();
+                });
+            },
+            error: function() {
+                // inform the user something went wrong.
+            }
+        });
+    });
 });
 </script>
 </%block>

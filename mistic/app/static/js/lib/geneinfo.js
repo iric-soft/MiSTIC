@@ -1,5 +1,7 @@
-(function() {
-    geneinfo = function(options, data) {
+define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone, $, d3, math) {
+    "use strict"; // jshint ;_;
+
+    var geneinfo = function(options, data) {
         this.options = {
             width: 1000,
             height: 1000,
@@ -47,9 +49,9 @@
         
         var expr = _.map(this.data.data, function(d) {return d.expr});
 
-        var sd_e = stats.stdev(expr);
-        var mu_e = stats.average(expr);
-        var rg_e = stats.range(expr);
+        var sd_e = math.stats.stdev(expr);
+        var mu_e = math.stats.average(expr);
+        var rg_e = math.stats.range(expr);
 
         var head = this.data.symbol ? this.data.symbol : this.data.gene;
         var name = this.data.name ? this.data.name : this.data.gene;
@@ -101,7 +103,7 @@
             .exit()
             .remove();
 
-        y = this.height / 2 - total_height / 2;
+        var y = this.height / 2 - total_height / 2;
 
         g.selectAll('text')
             .each(function(d) {
@@ -113,4 +115,8 @@
     };
 
     geneinfo.prototype.update = geneinfo.prototype.draw;
-})();
+
+    return {
+        geneinfo: geneinfo
+    };
+});

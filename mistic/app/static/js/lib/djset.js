@@ -1,5 +1,7 @@
-(function(){
-    djset = function(N) {
+define([], function() {
+    "use strict"; // jshint ;_;
+
+    var djset = function(N) {
         this.reset(N);
     };
 
@@ -43,4 +45,8 @@
             }
         }
     };
-})();
+
+    return {
+        djset: djset
+    };
+});
