@@ -231,9 +231,7 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
             .on("brush",      _.bind(this.brushed,    this))
             .on("brushend",   _.bind(this.brushend,   this));
 
-        svg.append("g")
-            .classed("brush", true)
-            .call(this.brush);
+        svg.append("g").classed("brush", true).call(this.brush);
 
         d3.select(this.svg).append("g").classed("axes", true);
 
