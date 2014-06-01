@@ -75,6 +75,39 @@ define([], function() {
         return result;
     };
 
+    var pdf = {};
+
+    pdf.gauss = function(mu, sigma) {
+        var a = 1.0 / (sigma * Math.sqrt(2.0 * Math.PI));
+        return function(x) {
+            var k = (x - mu) / sigma;
+            return Math.exp(-.5 * k * k);
+        }
+    }
+
+    var range = function(lo, hi, N) {
+        var buffer = new Float64Array(N);
+        for (var i = 0; i < N; ++i) {
+            buffer[i] = ((i-N-1)*lo + i*hi) / (N-1);
+        }
+        return buffer;
+    };
+
+    var smooth = {};
+
+    smooth.kde = function(samples, lo, hi, N, pdf) {
+        var x = range(lo, hi, N);
+        var y = new Float64Array(N);
+        for (var i = 0; i < N; ++i) {
+            y[i] = 0.0;
+            for (var j = 0; j < samples.length; ++j) {
+                y[i] += pdf(samples[j] - x[i]);
+            }
+            y[i] /= samples.length;
+        }
+        return { x: x, y: y };
+    };
+
     var stats = {};
 
     stats.erfc = function(a) {
@@ -473,6 +506,8 @@ define([], function() {
     };
 
     return {
+        pdf:       pdf,
+        smooth:    smooth,
         hypergeom: hypergeom,
         stats:     stats
     };
