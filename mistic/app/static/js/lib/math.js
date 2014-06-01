@@ -506,6 +506,7 @@ define([], function() {
     };
 
     return {
+        atanh:     function(x) { return .5 * Math.log((1+x)/(1-x)); },
         pdf:       pdf,
         smooth:    smooth,
         hypergeom: hypergeom,

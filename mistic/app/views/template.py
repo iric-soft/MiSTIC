@@ -47,6 +47,20 @@ class Graph(object):
     args = dict()
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
+  @view_config(route_name="mistic.template.corrdistrib")
+  def corrdistrib(self):
+    dataset = self.request.matchdict['dataset']
+
+    _dataset = data.datasets.get(dataset)
+    if _dataset is None:
+      raise HTTPNotFound()
+
+    args = dict(
+      dataset = dataset,
+      xform = _dataset.transforms[0],
+    )
+    return render_to_response('mistic:app/templates/corrdistrib.mako', args, request = self.request)
+
   @view_config(route_name="mistic.template.corrgraph")
   def corrgraph(self):
     args = dict()

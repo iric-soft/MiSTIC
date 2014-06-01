@@ -296,6 +296,12 @@ class Dataset(object):
 
     @key_cache_region('mistic', 'genecorr', lambda args: (args[0].dataset.id,) + args[1:])
     def _random_corr(self, N, xform):
+        def eff_samples(corr):
+            x = numpy.array([ c for c in corr if abs(c) != 1.0 ])
+            z = .5 * numpy.log((1.0+x)/(1.0-x))
+            z_sd = numpy.std(z)
+            return (1/z_sd)**2 + 3
+
         N_samples = self.dataset.data.df.shape[1]
         gauss = sorted([
             numpy.corrcoef(numpy.random.randn(N_samples), numpy.random.randn(N_samples))[0,1]
@@ -303,11 +309,18 @@ class Dataset(object):
         ])
         corr = sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = False))
         permuted = sorted(self.dataset.data.randompaircorr(N = N, transform = self.dataset._makeTransform(xform), permute = True))
+        pc_labels = [ '_05', '_25', '_50', '_75', '_95' ]
         return {
-            'n_samples': N_samples,
-            'corr':      corr,
-            'permuted':  permuted,
-            'gauss':     gauss
+            'n_samples':   N_samples,
+            'n_eff':       eff_samples(corr),
+            'n_eff_perm':  eff_samples(permuted),
+            'n_eff_gauss': eff_samples(gauss),
+            'r_pc':        dict(zip(pc_labels, numpy.percentile(corr,     [ 5, 25, 50, 75, 95 ]))),
+            'rperm_pc':    dict(zip(pc_labels, numpy.percentile(permuted, [ 5, 25, 50, 75, 95 ]))),
+            'rgauss_pc':   dict(zip(pc_labels, numpy.percentile(gauss,    [ 5, 25, 50, 75, 95 ]))),
+            'corr':        corr,
+            'permuted':    permuted,
+            'gauss':       gauss
         }
 
     @view_config(route_name="mistic.json.dataset.randomcorr", request_method="GET", renderer="json")
