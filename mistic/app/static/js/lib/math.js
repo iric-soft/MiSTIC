@@ -81,7 +81,7 @@ define([], function() {
         var a = 1.0 / (sigma * Math.sqrt(2.0 * Math.PI));
         return function(x) {
             var k = (x - mu) / sigma;
-            return Math.exp(-.5 * k * k);
+            return a * Math.exp(-.5 * k * k);
         }
     }
 
