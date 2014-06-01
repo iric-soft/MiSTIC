@@ -1,6 +1,19 @@
 define(["jquery", "underscore", "dt_plugins"], function($, _) {
     "use strict"; // jshint ;_;
 
+    var merge = function(target, source) {
+        _.each(source, function(val, key) {
+            if (!_.isObject(val) ||
+                _.isFunction(val)) {
+                target[key] = val;
+            } else if (_.isArray(val)) {
+                target[key] = merge((target[key] || []), val);
+            } else {
+                target[key] = merge((target[key] || {}), val);
+            }
+        });
+        return target;
+    };
 
     var info = {};
 
@@ -154,6 +167,7 @@ define(["jquery", "underscore", "dt_plugins"], function($, _) {
 
 
     return {
+        merge:  merge,
         info:   info,
         table:  table,
         cookie: cookie
