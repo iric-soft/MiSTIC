@@ -141,7 +141,7 @@ ${parent.graph()}
   </div>
 </div>
 </%block>
-
+<%block name="info"></%block>
 <%block name="style">
 ${parent.style()}
 </%block>

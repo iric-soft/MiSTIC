@@ -111,6 +111,8 @@ mistic = {
       </div>
     </div>
   </div>
+</%block>
+<%block name="info">
   <div class="row-fluid">
     <div class="span12" id ="more-information"></div>
   </div>

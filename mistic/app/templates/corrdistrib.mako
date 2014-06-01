@@ -29,11 +29,7 @@ ${parent.style()}
 </div>
 </%block>
 
-<%block name="graph">
-    <div class="span9">
-      <div id="graph"></div>
-    </div>
-</%block>
+<%block name="info"></%block>
 
 <%block name="pagetail">
 ${parent.pagetail()}
