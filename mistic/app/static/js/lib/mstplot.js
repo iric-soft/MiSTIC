@@ -3,8 +3,8 @@ define(["underscore", "d3", "djset", "node", "colour"], function(_, d3, dj, node
 
     var GRID_DIV = 16;
     var distance = function(a, b) {
-        var x = Math.abs(a.x - b.x);
-        var y = Math.abs(a.y - b.y);
+        var x = a.x - b.x;
+        var y = a.y - b.y;
         return Math.sqrt(x*x + y*y);
     };
 
