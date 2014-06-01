@@ -1,11 +1,6 @@
-define(["jquery", "underscore"], function($, _) {
+define(["jquery", "underscore", "dt_plugins"], function($, _) {
     "use strict"; // jshint ;_;
 
-    require(["datatables",
-             "datatables.colreorderwithresize",
-             "datatables.rowgrouping",
-             "datatables.scientificsorting",
-             "datatables.columnfilter"]);
 
     var info = {};
 

@@ -132,11 +132,7 @@ require([
     node, math, colour, utils,
     mstplot, doc) {
 
-    require(["datatables",
-             "datatables.colreorderwithresize",
-             "datatables.rowgrouping",
-             "datatables.scientificsorting",
-             "datatables.columnfilter"]);
+    require(["dt_plugins"]);
 
     var json = {
         "nodes": ${json.dumps(V)|n},

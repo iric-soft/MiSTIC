@@ -132,15 +132,10 @@ dat = [dict([(k, ds.__dict__[k]) for k in ds.__dict__.keys() if isinstance(ds.__
 <input id="csvdata" type="hidden" name="csvdata" value=""></input></form>
 
 <script type="text/javascript" charset="utf-8">
-require([
-    "jquery",
-    "utils",
-    "datatables",
-    "datatables.colreorderwithresize",
-    "datatables.rowgrouping",
-    "datatables.scientificsorting",
-    "datatables.columnfilter"
-], function($, utils) {
+require(["jquery", "utils"], function($, utils) {
+
+    require(["dt_plugins"]);
+
     var dat = ${json.dumps(dat)|n};
 
     $(document).ready(function() {

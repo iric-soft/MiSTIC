@@ -1,11 +1,5 @@
-define(["underscore", "backbone", "jquery", "modal_base"], function(_, Backbone, $, mb) {
+define(["underscore", "backbone", "jquery", "modal_base", "dt_plugins"], function(_, Backbone, $, mb) {
     "use strict"; // jshint ;_;
-
-    require(["datatables",
-             "datatables.colreorderwithresize",
-             "datatables.rowgrouping",
-             "datatables.scientificsorting",
-             "datatables.columnfilter"]);
 
     var DatasetSelector = mb.ModalBase.extend({
         title: 'Dataset selector',
