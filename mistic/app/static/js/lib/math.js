@@ -86,9 +86,10 @@ define([], function() {
     }
 
     var range = function(lo, hi, N) {
-        var buffer = new Float64Array(N);
+        var buffer = new Float32Array(N);
         for (var i = 0; i < N; ++i) {
-            buffer[i] = ((i-N-1)*lo + i*hi) / (N-1);
+            var f = i / (N-1);
+            buffer[i] = f*hi + (1-f)*lo;
         }
         return buffer;
     };
@@ -97,7 +98,7 @@ define([], function() {
 
     smooth.kde = function(samples, lo, hi, N, pdf) {
         var x = range(lo, hi, N);
-        var y = new Float64Array(N);
+        var y = new Float32Array(N);
         for (var i = 0; i < N; ++i) {
             y[i] = 0.0;
             for (var j = 0; j < samples.length; ++j) {
