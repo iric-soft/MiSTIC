@@ -10,6 +10,7 @@ import pickle
   ${parent.actions()}
 </%block>
 <%block name="controls">
+<div id="controls" class="span3">
   <form class="form-inline">
   
     <div class="accordion" id="accordion">
@@ -83,6 +84,7 @@ import pickle
       </div>
     </div>
   </form>
+</div>
 </%block>
 
 <%block name="style">

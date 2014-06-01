@@ -9,6 +9,7 @@
   ${parent.actions()}<button class="btn" id="static_url" href="">Static URL</button>
 </%block>
 <%block name="controls">
+<div id="controls" class="span3">
   <form class="form-inline">
     <label for="datasets">Dataset:</label>
     <select id="datasets">
@@ -21,14 +22,9 @@
     <input type="text" id="gene1">
     <label for="gene2">Gene 2:</label>
     <input type="text" id="gene2">
-    
     <button class="btn btn-primary" data-toggle="button" style="float:right;display:none;"  id="show_labels"> Toggle labels </button>
-    
-  
   </form>
-  
-  
-     
+</div>
 </%block>
 
 

@@ -7,8 +7,6 @@ import json
 <%block name="actions">
   <button class="btn" id="download">CSV</button>${parent.actions()}
 </%block>
-<%block name="controls">
-</%block>
 
 <%block name="pagetail">
 ${parent.pagetail()}

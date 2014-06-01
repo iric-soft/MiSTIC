@@ -8,6 +8,7 @@ import mistic.app.data as data
   ${parent.actions()}
 </%block>
 <%block name="controls">
+<div id="controls" class="span3">
   <form class="form-inline">
 
     <div class="accordion" id="accordion">
@@ -57,6 +58,7 @@ import mistic.app.data as data
 
     </div>
   </form>
+</div>
 </%block>
 <%block name="style">
 ${parent.style()}

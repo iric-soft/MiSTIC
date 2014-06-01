@@ -98,29 +98,24 @@ mistic = {
   
   
 <%block name="pagecontent">
-  <div class="container-fluid">
-  
-  
-  
+<div class="container-fluid">
   <div class="row-fluid">
-    <div class="span3">
-        <%block name="controls"></%block>
-     </div>
-    
-    <%block name="graph">
-     <div class="span9">
-        <div id="graph">
-        </div>
+<%block name="controls">
+    <div id="controls" class="span3">
+    </div>
+</%block>
+
+<%block name="graph">
+    <div class="span9">
+      <div id="graph">
       </div>
-   
-   
-   <div class="row-fluid">
-     <div class="span12" id ="more-information"></div>
+    </div>
   </div>
-   </%block>
- </div>  
+  <div class="row-fluid">
+    <div class="span12" id ="more-information"></div>
   </div>
-  
+</%block>
+</div>
 </%block>
 
 

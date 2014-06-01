@@ -13,7 +13,7 @@ import json
 </%block>
 
 <%block name="controls">
-<div class="row-fluid">
+<div id="controls" class="span3">
   <div id="menu">
     <div class="accordion" id="accordion">
       <div class="accordion-group">

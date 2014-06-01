@@ -16,67 +16,65 @@ ${parent.style()}
 
 
 <%block name="controls">
-  <form class="form-inline">
+<div id="controls" class="span3">
+  <div class="accordion" id="accordion">
+    <div class="accordion-group">
+      <div class="accordion-heading"><h4 class="accordion-title">
+          <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset </a></h4>
+      </div>
 
-<div class="accordion" id="accordion">
-  <div class="accordion-group">
-    <div class="accordion-heading"><h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset </a></h4>
-    </div>
-
-    <div id="dataset_menu" class="accordion-body collapse in">
-      <div class="accordion-inner">
-        <ul id="current_dataset">
-        </ul>
-        <button class='btn' id="add_dataset">Choose dataset</button>
+      <div id="dataset_menu" class="accordion-body collapse in">
+        <div class="accordion-inner">
+          <ul id="current_dataset">
+          </ul>
+          <button class='btn' id="add_dataset">Choose dataset</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="accordion-group">
-    <div class="accordion-heading"><h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Gene </a></h4>
-    </div>
+    <div class="accordion-group">
+      <div class="accordion-heading"><h4 class="accordion-title">
+          <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Gene </a></h4>
+      </div>
 
-    <div id="gene_menu" class="accordion-body collapse in">
-      <div class="accordion-inner">
-        <input type="text" id="gene" autocomplete='off'>
-        <button class="btn" id="plot">Plot</button>
+      <div id="gene_menu" class="accordion-body collapse in">
+        <div class="accordion-inner">
+          <input type="text" id="gene" autocomplete='off'>
+          <button class="btn" id="plot">Plot</button>
+        </div>
       </div>
     </div>
-  </div>
 
-  <div class="accordion-group">
-    <div class="accordion-heading"><h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a></h4>
-    </div>
-    <div id="options_menu" class="accordion-body collapse ">
-      <div class="accordion-inner">
-        <form class="form-inline">
-          <fieldset>
-            <div class="control-group">
-              <label for="nlabel">Display
-                <input type="text" style="width:20px;" id="nlabel" autocomplete="off" value="10">
-                labels
-              </label>
-            </div>
-            <div class="control-group">
-              <label for="geneset_selector">Show geneset members
-                <div id="geneset_selector"></div>
-              </label>
-            </div>
-            <div class="control-group">
-              <label>Transformation:</label>
-              <div class="btn-group btn-group-justified" data-toggle="buttons-radio" id="transform-buttons"></div>
-            </div>
-          </fieldset>
-        </form>
+    <div class="accordion-group">
+      <div class="accordion-heading"><h4 class="accordion-title">
+          <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a></h4>
+      </div>
+      <div id="options_menu" class="accordion-body collapse ">
+        <div class="accordion-inner">
+          <form class="form-inline">
+            <fieldset>
+              <div class="control-group">
+                <label for="nlabel">Display
+                  <input type="text" style="width:20px;" id="nlabel" autocomplete="off" value="10">
+                  labels
+                </label>
+              </div>
+              <div class="control-group">
+                <label for="geneset_selector">Show geneset members
+                  <div id="geneset_selector"></div>
+                </label>
+              </div>
+              <div class="control-group">
+                <label>Transformation:</label>
+                <div class="btn-group btn-group-justified" data-toggle="buttons-radio" id="transform-buttons"></div>
+              </div>
+            </fieldset>
+          </form>
+        </div>
       </div>
     </div>
   </div>
 </div>
-
-</form>
 </%block>
 
 <%block name="pagetail">

@@ -24,7 +24,9 @@ ${parent.style()}
 </%block>
 
 <%block name="controls">
+<div id="controls" class="span3">
   <div id="info"></div>
+</div>
 </%block>
 
 <%block name="pagetail">
