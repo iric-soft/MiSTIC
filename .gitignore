@@ -1,4 +1,5 @@
 mst/build
 *.pyc
 *~
+mistic.egg-info
 data/*/transformed
