@@ -9,6 +9,7 @@ import csv
 import pandas
 import random
 import logging
+import scipy
 
 logger = logging.getLogger(__name__)
 
@@ -44,7 +45,7 @@ class RankTransform(object):
   def __init__(self):
     pass
 
-  def rankRow(self, row):
+  def rankRow_old(self, row):
     idx = [ i for i, j in enumerate(row) if not numpy.isnan(j) ]
     idx.sort(key = lambda x: row[x])
 
@@ -66,6 +67,12 @@ class RankTransform(object):
         row[idx[i]] = v
         i += 1
 
+  def rankRow(self, row):
+    N = len(row)
+    mean = (N - 1) / 2.0
+    sd = math.sqrt((N * N - 1) / 12.0)
+    row[:] = (scipy.stats.rankdata(row) - mean) / sd
+
   def __call__(self, matrix):
     r = matrix.copy()
     if hasattr(r, 'values'):
@@ -77,7 +84,7 @@ class RankTransform(object):
     else:
       for i in range(len(d)):
         self.rankRow(d[i])
-        
+
     if hasattr(r, 'values'):
         if isinstance(r, pandas.DataFrame) : 
           d = pandas.DataFrame(d, index=matrix.index, columns=matrix.columns, dtype=float)
