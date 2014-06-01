@@ -135,7 +135,8 @@ class DataSet(object):
       data = data.values
 
     if permute:
-      data = numpy.random.permutation(data.T).T
+      for i in xrange(data.shape[0]):
+        data[i] = numpy.random.permutation(data[i])
 
     logging.info('transform done')
 
