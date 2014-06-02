@@ -306,10 +306,10 @@ define(["underscore", "d3", "djset", "node"], function(_, d3, dj, node) {
         return { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1] }
     };
 
-    arcplot.prototype.collapseUnbranched = function(n) {
+    arcplot.prototype.collapseUnbranched = function(subtree) {
         var p, n;
 
-        for (p = new node.PostorderTraversal(n); (n = p.next()) !== null; ) {
+        for (p = new node.PostorderTraversal(subtree); (n = p.next()) !== null; ) {
             if (n.children.length === 1) {
                 var c = n.children[0];
                 n.lev = n.lev.concat(c.lev);
@@ -350,8 +350,9 @@ define(["underscore", "d3", "djset", "node"], function(_, d3, dj, node) {
         }
 
         var n_clusters = c_counts.length;
+        var n, p;
 
-        for (var p = new node.PostorderTraversal(this.root); (n = p.next()) !== null; ) {
+        for (p = new node.PostorderTraversal(this.root); (n = p.next()) !== null; ) {
             n.__pp = new Array(n_clusters);
             n.__pn = new Array(n_clusters);
 
@@ -584,8 +585,7 @@ define(["underscore", "d3", "djset", "node"], function(_, d3, dj, node) {
             arc_dir:  this.options.plot_dir
         });
 
-        var p;
-        var n;
+        var n, p;
 
         for (p = new node.PreorderTraversal(this.root); (n = p.next()) !== null; ) {
             n.lev = [ [n.weight, n.size] ];
