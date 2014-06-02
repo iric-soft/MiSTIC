@@ -209,7 +209,7 @@
         });
     };
     arcplot.prototype._zoom = function() {
-        
+       
         this.zoom.scale(this.xform.S).translate(this.xform.T);
         this.body
             .transition()
@@ -231,7 +231,7 @@
     
     arcplot.prototype.dezoom = function(){
         this.xform = { T: [0,0], S: 1 };
-        //this._zoom();
+        this._zoom();
     };
     
     
@@ -543,7 +543,7 @@
         this.findBestMatches(clusters, statistic, comparator);
         this.body
             .selectAll('path.arc')
-            .attr('fill', function(d) { return d.__x_max_i == -1 ? ramp (0) : ramp(d.__x_max); });
+            .attr('fill', function(d) { return d.__x_max_i == -1 ? "#bdbdbd" : ramp(d.__x_max); });
     };
 
     arcplot.prototype.removeColour = function() {
@@ -666,7 +666,6 @@
         
         var self = this;
         
-        
         this.width = this.elem.width();
         this.height = this.elem.height();
 
@@ -685,13 +684,13 @@
 
         this.svg  = d3.select(this.elem[0]).select('svg');
         
-        var zoom = d3.behavior.zoom()
-                    .scaleExtent([0.75, 50])
-                    .on("zoom", _.bind(this.zoom, this))
-        
-        this.zoom_g = this.svg
+       this.zoom_g = this.svg
             .append('g')
-            .call(zoom);
+            .call(
+                this.zoom = d3.behavior.zoom()
+                    .scaleExtent([0.75, 50])
+                    .on("zoom", _.bind(this.zoom, this)));
+
  
         this.xform = { T: [ 0, 0 ], S: 1.0 };
         

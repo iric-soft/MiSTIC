@@ -1,4 +1,6 @@
+
 (function() {
+
     var _interp = function(ramp, w) {
         w = w * (ramp.length - 1);
         var i = Math.floor(w);
@@ -10,15 +12,16 @@
 
     var _ylgnbl =_.map(
         [
-            "#FFFFD9",
-            "#EDF8B1",
-            "#C7E9B4",
+           // "#FFFFD9",
+           // "#EDF8B1",
+           // "#C7E9B4",
             "#7FCDBB",
             "#41B6C4",
             "#1D91C0",
             "#225EA8",
             "#253494",
-            "#081D58"
+            "#081D58",
+            "#08306b" // last of the blues
         ],
         function(c) { return d3.rgb(c); });
 
@@ -29,7 +32,9 @@
         ],
         function(c) { return d3.rgb(c); });
 
-    YlGnBl = function(w) { return _interp(_ylgnbl, w); };
+ 
 
+    YlGnBl = function(w) { return _interp(_ylgnbl, w); };
+   
     Red4 = function(w) { return _interp(_red, Math.pow(w, 1/4.0)); };
 })();

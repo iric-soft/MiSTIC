@@ -138,9 +138,6 @@ $(document).ready(function() {
 <%
   ds = data.datasets.get(dataset)
   my_annotation = ds.annotation.id
-  #print dir(ds.annotation)
-  #print [(k,v.description) for k,v in ds.annotation.genesets.items()]
-  #print ds.annotation.genesets['CNV']
   
   if xform == 'log': 
     xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
@@ -167,34 +164,40 @@ $(document).ready(function() {
   });
 
   current_graph.setData(cluster_roots);
-  current_graph.setGraphInfo(["Dataset: ${dataset}", 
-                              "Transform: ${xf}"]); 
+  current_graph.setGraphInfo(["Dataset: ${dataset}",  "Transform: ${xf}"]); 
  
-
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
+  
+  newGSDropdown = function (elem, suff) {
+    return  new GODropdown({
+        el: $("#"+elem),
+        url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+ suff
+     });  
+  }
+  
+  clickGSDropdown = function (elem, entry) {
+     $("#"+elem+"_drop").on('click', function() {
+        
+        if (level1_entry.$el.val()=='' & level2_entry.$el.val()==''){
+            level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;";
+            level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;";
+        }
+        entry.$el.val('');
+        entry.update();
+        entry.$el.focus();
+    });
+  }
 
-  var go_entry = new GODropdown({
-    el: $("#goterm"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"
-  });
+  //var go_entry = newGSDropdown ('go', '');
+  var level1_entry = newGSDropdown ('level1', '?v=1');
+  var level2_entry = newGSDropdown ('level2', '?v=2');
+  var level3_entry = newGSDropdown ('level3', '?v=3');
   
-  
-  var level1_entry = new GODropdown({
-    el: $("#level1"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=1"
-  });
-  
-  var level2_entry = new GODropdown({
-    el: $("#level2"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2"
-  });
-  
-  var level3_entry = new GODropdown({
-    el: $("#level3"),
-    url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3"
-  });
-  
+  clickGSDropdown ('level1', level1_entry);
+  clickGSDropdown ('level2', level2_entry);
+  clickGSDropdown ('level3', level3_entry);
+ 
   $('#clear_input').on('click', function() {
     level1_entry.$el.val('');
     level2_entry.$el.val('');
@@ -203,41 +206,19 @@ $(document).ready(function() {
     level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;";
   });
   
-  
-  $('#level1_drop').on('click', function() {
-    level1_entry.$el.val('');
-    level1_entry.update();
-    level1_entry.$el.focus();
-  });
-  
   level1_entry.on('change', function() {
     level2_entry.$el.val('');
     level3_entry.$el.val('');
     gstype = $("#level1").val().split(':')[0];
-    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;q="+gstype;
-    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gstype;
+    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;q=ty:"+gstype;
+    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q=ty:"+gstype;
   });
   
    level2_entry.on('change', function() {
     level3_entry.$el.val('');
     gsid = $("#level2").val();
-    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q="+gsid;
+    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;q=id:"+gsid;
   });
-  
-  
-  
-   $('#level2_drop').on('click', function() {
-    level2_entry.$el.val('');
-    level2_entry.update();
-    level2_entry.$el.focus();
-  });
-  
-   $('#level3_drop').on('click', function() { 
-    level3_entry.$el.val('');
-    level3_entry.update();
-    level3_entry.$el.focus();
-  });
-  
   
   level3_entry.on('change', function(item) {
     if (item === null) {
@@ -369,6 +350,7 @@ $(document).ready(function() {
   current_graph.on('click:cluster', function(selection) {
     $('#geneset').val(JSON.stringify(selection));
     $('#genesetform').submit();
+  
   });
 
   $('#clear_plot').on("click", function(event){
@@ -380,7 +362,7 @@ $(document).ready(function() {
     
   });
 
-
+ 
   $(window).resize(resizeGraph);
   resizeGraph();  
 });
