@@ -219,7 +219,7 @@
             d3.select(this).select('rect').attr('width', w);
         });
 
-        l
+        l.exit()
           .exit()
             .remove();
 
