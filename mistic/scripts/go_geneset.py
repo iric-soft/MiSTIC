@@ -46,10 +46,13 @@ def run(args):
   if annotation is None:
     raise RuntimeError('Could not find config entry for annotation [%s]' % (args.annotation,))
 
-  for go, ids in annotation.go_genes.iteritems():
-    ids = sorted(ids)
-    print go, json.dumps(
-      dict(
-        ids = ids,
-        evidence = [ [ x[1] for x in annotation.attrs[i]['go'] if x[0] == go ][0] for i in ids ]
-      ))
+  table = {}
+  for i, row in annotation.data.iterrows():
+    for go_id, evidence in row['go']:
+      if go_id not in table:
+        table[go_id] = dict(ids=[], evidence = [])
+      table[go_id]['ids'].append(row.name)
+      table[go_id]['evidence'].append(evidence)
+
+  for k,v in sorted(table.items()):
+    print k, json.dumps(v)
