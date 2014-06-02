@@ -165,8 +165,7 @@
         this.zoom_behaviour.scale(S).translate(T);
 
         this.body
-            .attr("transform",
-                  "translate(" + T + ")" + " scale(" + S + ")");
+            .attr("transform", "translate(" + T + ")" + " scale(" + S + ")");
 
         this.updateLabels();
     };
@@ -220,13 +219,11 @@
         });
 
         l.exit()
-          .exit()
-            .remove();
+         .remove();
 
-        l
-            .attr('transform', function(d) {
-                var pos = self.viewToScreen(d.x, d.y);
-                return 'translate(' + String(pos.x) + ',' + String(pos.y) + ')';
+        l.attr('transform', function(d) {
+             var pos = self.viewToScreen(d.x, d.y);
+             return 'translate(' + String(pos.x) + ',' + String(pos.y) + ')';
             });
     };
 
@@ -277,8 +274,12 @@
         }
 
         for (var i = 0; i < this.nodes.length; ++i) {
-            var gx = Math.min(GRID_DIV-1, Math.floor(this.nodes[i].x / this.options.scale * GRID_DIV));
-            var gy = Math.min(GRID_DIV-1, Math.floor(this.nodes[i].y / this.options.scale * GRID_DIV));
+            var gx = Math.min(GRID_DIV-1, Math.floor(Math.max(0,this.nodes[i].x) / this.options.scale * GRID_DIV));
+            var gy = Math.min(GRID_DIV-1, Math.floor(Math.max(0,this.nodes[i].y) / this.options.scale * GRID_DIV));
+           
+            if (this.nodes[i].y < 0 ) {
+                console.debug(this.nodes[i]);
+            }
             this.grid[gy][gx].push(this.nodes[i]);
         }
 
