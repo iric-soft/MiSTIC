@@ -64,13 +64,6 @@ circle {
 }
 
 
-div#more-information {
-   font-family: helvetica,arial,sans-serif;
-   font-size: 11px; 
-   padding: 10px 0px 0px 0px;
-   overflow:hidden;
-}
-
 div#more-information a,
 div#more-information a:hover
 {
@@ -78,6 +71,75 @@ div#more-information a:hover
   color : rgb(58, 55, 55);
   pointer-events : none;
 }
+
+div#more-information, .information{
+   font-family: helvetica,arial,sans-serif;
+   font-size: 11px;
+   color: #cc7400;
+   font-weight:bold;
+   padding: 10px 0px 0px 0px;
+   float: right;
+   overflow:hidden;
+}
+
+div#more-information a  {
+  text-decoration:none;
+  color: grey;
+}
+div#more-information a:hover  {
+  cursor : default;
+}
+
+
+
+
+
+#go_table {
+  max-height: 600px;
+  overflow-y: visible;
+  overflow-x: hidden;
+  font-family: helvetica; 
+  font-size: 11px; 
+  float: right;
+  padding-bottom:10px;
+ 
+}
+
+table#gotable {
+    width : 90%;
+}
+table#gotable  th, td {
+ padding-right:14px;
+ padding-left:10px;
+}
+
+
+table#gotable td {
+ word-break:keep-all;
+ word-wrap: normal;
+ white-space:pre-wrap;
+}
+
+
+#gotable.table-striped tbody tr:nth-child(odd) td, .table-striped tbody tr:nth-child(odd) th {
+    background-color: #ccc;
+}
+
+
+#gotable tr.selected { 
+  background-color: #cc7400;
+  color: #fff;
+}
+#gotable tr:hover{
+  background-color: #E6BA80;
+ }
+
+#gotable tr {
+  cursor: pointer;
+}
+
+
+
 
 
 

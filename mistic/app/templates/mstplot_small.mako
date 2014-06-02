@@ -30,16 +30,13 @@ import scipy.stats
         </div>
     </form>
    
-    
-   
-    
-    
+
     </div>
   </div>
     
   <div class="row-fluid">
   <div class="span12">
-    <div class="span12 information"> Selection :</span>
+    <div class="span12 information"> Selection :</div>
     <div class="span12" id="more-information"> </div>
     </div></div>
 
@@ -61,33 +58,14 @@ import scipy.stats
 <%block name="style">
 ${parent.style()}
 
-#go_table {
-  max-height: 400px;
-  overflow-y: visible;
-  overflow-x: hidden;
-  font-family: helvetica; 
-  font-size: 10.5px; 
-  float: right;
-  padding-bottom:10px;
-  border-bottom : 1px solid #ddd;
-}
-
-
 div#more-information, .information{
-   font-family: helvetica,arial,sans-serif;
-   font-size: 11px;
    color: #cc7400;
    font-weight:bold;
+   padding: 10px 0px 0px 0px;
    float: right;
+   overflow:hidden;
 }
 
-div#more-information a  {
-  text-decoration:none;
-  color: grey;
-}
-div#more-information a:hover  {
-  cursor : default;
-}
 
 th, td {
   white-space: nowrap;
@@ -95,18 +73,6 @@ th, td {
   text-align: left;
 }
 
-tr {
-  cursor: pointer;
-}
-
-tr:hover {
-  background-color: #f0f0f0;
-}
-
-tr.selected{
-  background-color: #cc7400;
-  color: #fff;
-}
 
 rect {
   fill: #0074cc;
@@ -159,7 +125,9 @@ var updateEnrichmentTable = function() {
     var table = d3.select('#go_table')
                 .insert('table', ':first-child')
                 .attr('id', 'gotable');
-    
+               
+              
+                
     var thead = table.append('thead');
     var tbody = table.append('tbody');
     var tfoot = table.append('tfoot');
@@ -169,25 +137,19 @@ var updateEnrichmentTable = function() {
         .enter()
         .append("tr");
 
+
+    var tr_header = [ 'P-value', 'Odds',  'Name', 'Type','Cat', 'ID' ];
     var th = thr.selectAll('th')
-        .data([ 'P-value', 'Odds',  'Type', 'Cat', 'ID', 'Name' ])
+        .data(tr_header)
         .enter()
         .append('th')
         .text(function(d) { return d; });
-
 
     var thr = tfoot.selectAll("tr")
         .data([ 1 ])
         .enter()
         .append("tr");
 
-    var th = thr.selectAll('th')
-        .data([ 'P-value', 'Odds',  'Type', 'Cat', 'ID', 'Name' ])
-        .enter()
-        .append('th')
-        .text(function(d) { return d; });
-
-   
     var tr = tbody.selectAll('tr')
         .data(json.gstab);
     
@@ -203,10 +165,10 @@ var updateEnrichmentTable = function() {
                 sel[d.genes[i]] = true;
             }
             
-            d3.select('#graph').selectAll('rect').classed('selected', function(d) { return sel[d.node.id]; });
+            d3.select('#graph').selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
             info.clear();
             d3.select('#graph').selectAll('rect.selected').each(function(d) {
-                info.toggle(d.node.name); 
+                info.toggle(d.name); 
        });
     });
 
@@ -214,10 +176,11 @@ var updateEnrichmentTable = function() {
         .data(function(d) { return [
         { value: (typeof(d.p_val) === 'string') ? d.p_val : d.p_val.toExponential(2) },
         { value: (typeof(d.odds)  === 'string') ? d.odds  : d.odds.toFixed(2) },
+        { value: d.name, title: d.desc },
         { value: d.gs },
         { value: d.cat },
         { value: d.id },
-        { value: d.name, title: d.desc },
+        
         ];});
 
     td.enter()
@@ -226,7 +189,7 @@ var updateEnrichmentTable = function() {
         .attr('title',   function(d) {return d.title; })
         .attr('classed', function(d) {return d.class; })
         ;
-    $('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": [ 0 ], 'aaSorting':["asc"] },
+    $('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": [ 0 ],  'aaSorting':["asc"] },
                                                { "sType": "numeric", "aTargets": [ 1 ]},
                                                ],
                          
@@ -240,10 +203,15 @@ var updateEnrichmentTable = function() {
                           "bInfo": true,
           
     }).columnFilter({sPlaceHolder: "tfoot", 
-                    aoColumns:[null,null, {type:'text', bRegex:true},{type:'text', bRegex:true},{type:'text', bRegex:true},{type:'text', bRegex:true}]});
+                    aoColumns:[null,
+                               null, 
+                               {type:'text', bRegex:true},
+                               {type:'text', bRegex:true},
+                               {type:'text', bRegex:true},
+                               {type:'text', bRegex:true}]});
     
    
-    console.debug('w');
+   
     }
     
    
@@ -279,6 +247,7 @@ var clickOnLink = function(d) {
        var url = "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}";     
        url += '/' + d.source.id;
        url += '/' + d.target.id;
+       console.debug(d.weight);
        window.open(url); 
 }
 
@@ -423,7 +392,7 @@ getContent = function(d) {
   var part2 = $("#part2");
   part2.html('').append('<p><div class="accordion" id="info"></div>');
   
-  h = d.name +' : '+d.title;
+  h = 'Gene : ' + d.name +' : '+d.title;
   c = '<ul id="links" class="source-links" style="padding:5px;"><li>GO TO : </li></ul>';
   $('#part2 > .accordion').append(getAccordionGroup('info','ttle', h, c ))
   
@@ -497,7 +466,7 @@ getAnnotationContent = function(d) {
                 }
                 else {
                   if (i[0]=='url'){ 
-                    h = h +"<a href='"+i[1]+"'>"+i[1] +"</a>";
+                    h = h +"<a href='"+i[1]+"' target='_blank'>"+i[1] +"</a>";
                   }
                   else {
                     h = h + i[1];
@@ -518,7 +487,7 @@ getAnnotationContent = function(d) {
   h = h + '<tr><th>Not in gene set</th><td>'+d.tab[0][1]+'</td> <td>'+d.tab[1][1]+'</td></tr>';
   h = h + '</tbody>';
   h = h + '</table></div></div>';
-  $('#part2 > .accordion').append(getAccordionGroup('info', '1', d.name.replace(/_/g, ' '), h))
+  $('#part2 > .accordion').append(getAccordionGroup('info', '1', 'Geneset: '+d.name.replace(/_/g, ' '), h))
   $('.accordion-body:first').addClass('collapse in');
   
 };
@@ -536,11 +505,12 @@ hideMore = function() {
 };
 
 $('#select_all').on('click', function(event) {
+  console.debug('select_all');
   d3.selectAll('tr.selected').classed('selected', false);
   d3.select('#graph').selectAll('rect').classed('selected', true);
   info.clear();
-  graph.selectAll('rect.selected').each(function(d){
-         info.add(d.node.name); 
+  d3.select('#graph').selectAll('rect.selected').each(function(d){
+         info.add(d.name); 
          
          });
   return false;
@@ -551,9 +521,7 @@ var showName = false;
 $('#show_labels').on("click", function(event){
     console.debug('show_labels');
     showName = !showName;
-   
-  
-    
+
     if (showName) {d3.select('#graph').selectAll('text').each(function(d) {d3.select(this).text(d.name);});}
     if (!showName){d3.select('#graph').selectAll('text').each(function(d) {d3.select(this).text(d.title);});}
     
@@ -582,7 +550,7 @@ $('#scatterplot').on('click', function(event) {
   var ids = [];
   d3.selectAll('tr.selected').classed('selected', false);
   d3.select('#graph').selectAll('rect.selected').each(function(d) {
-    ids.push(d.node.id);
+    ids.push(d.id);
   });
   if (ids.length > 1) {
     var url = "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}";
