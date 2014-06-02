@@ -5,48 +5,156 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
 
 
 
+    var selection =  function() {
+        this.sel = {};
+    };
+
+    _.extend(selection.prototype, Backbone.Events, {
+        add: function(key) { this.sel[key] = true; },
+        rem: function(key) { delete this.sel[key]; },
+        xor: function(key) { if (this.sel[key]) { delete this.sel[key]; } else { this.sel[key] = true; } },
+
+        click: function(key, modifiers) {
+            if (!modifiers.shift) {
+                this.sel = {};
+            }
+            this.add(key);
+            this.notify();
+        },
+
+        notify: function() {
+            this.trigger("selection-changed", this.sel);
+        },
+
+        addSelection: function(keys, quiet) {
+            if (!_.isArray(keys)) keys = _.keys(keys);
+            _.each(keys, _.bind(this.add, this));
+            if (!quiet) this.notify();
+        },
+
+        remSelection: function(keys, quiet) {
+            if (!_.isArray(keys)) keys = _.keys(keys);
+            _.each(keys, _.bind(this.rem, this));
+            if (!quiet) this.notify();
+        },
+
+        setSelection: function(keys, quiet) {
+            if (!_.isArray(keys)) keys = _.keys(keys);
+            this.sel = {};
+            _.each(keys, _.bind(this.add, this));
+            if (!quiet) this.notify();
+        },
+
+        clearSelection: function(quiet) {
+            this.sel = {};
+            if (!quiet) this.notify();
+        },
+
+        getSelection: function() {
+            return this.sel;
+        },
+
+        brushStart: function(modifiers) {
+            this.prior_sel = _.extend({}, this.sel);
+            this.brush_modifiers = modifiers;
+        },
+
+        brushUpdate: function(key_list) {
+            if (this.brush_modifiers.shift) {
+                this.sel = _.extend({}, this.prior_sel);
+                _.each(key_list, _.bind(this.add, this));
+            } else {
+                this.sel = {};
+                _.each(key_list, _.bind(this.add, this));
+            }
+            this.notify();
+        },
+
+        brushEnd: function() {
+            delete this.prior_sel;
+            delete this.brush_modifiers;
+        }
+    });
+
+    selection.extend = Backbone.Model.extend;
+
+
+
     var e_base = function() {
         this.id = ++next_id;
     };
 
-    e_base.prototype.extent = function() {
-        return { x: [0.0, 0.0], y: [0.0, 0.0] };
-    };
+    _.extend(e_base.prototype, Backbone.Events, {
+        extent: function() {
+            return { x: [0.0, 0.0], y: [0.0, 0.0] };
+        },
 
-    e_base.prototype.draw = function(plot, g) {
-    };
+        pointClick: function(k) {},
+        pointIn:    function(k) {},
+        pointOut:   function(k) {},
+
+        create: function(plot, g) {
+            var self = this;
+            this.plot = plot;
+            this.g = d3.select(g);
+
+            this.g.on("click", function() {
+                self.pointClick(d3.event.srcElement.__data__);
+            });
+            this.g.on("mouseover", function() {
+                self.pointIn(d3.event.srcElement.__data__);
+            });
+            this.g.on("mouseout", function(k) {
+                self.pointOut(d3.event.srcElement.__data__);
+            });
+        },
+
+        destroy: function() {},
+
+        brushStart:  function(extent) {},
+        brushUpdate: function(extent) {},
+        brushEnd:    function(extent) {},
+    });
 
     e_base.extend = Backbone.Model.extend;
 
 
 
-    var e_points = e_base.extend({
-        constructor: function(x, y, attr) {
+    var e_xy = e_base.extend({
+        constructor: function(x, y) {
             e_base.call(this);
 
             this.x = x;
             this.y = y;
-            this.attr = attr;
         },
 
         extent: function() {
             return { x: d3.extent(this.x), y: d3.extent(this.y) };
         },
+    });
 
-        draw: function(plot, g) {
+
+
+    var e_points = e_xy.extend({
+        constructor: function(x, y, attr) {
+            e_xy.call(this, x, y);
+
+            this.attr = attr;
+        },
+
+        draw: function() {
             var self = this;
-
-            var pt = d3.select(g)
-                .selectAll('path')
+            var pt = this.g
+                .selectAll("path")
                 .data({ length: Math.min(this.x.length, this.y.length) })
 
-            pt.enter().append('path');
+            pt.enter().append("path");
 
             var sym = d3.svg.symbol().type(this.shape).size(this.size);
             pt
                 .attr(_.extend({}, e_points.defaults, this.attr))
-                .attr('transform', function(d,i) {
-                    return 'translate(' + String([ plot._x(self.x[i]), plot._y(self.y[i]) ]) + ')';
+                .attr("transform", function(d,i) {
+                    return "translate(" + String([ self.plot._x(self.x[i]), self.plot._y(self.y[i]) ]) + ")";
                 });
             pt.exit().remove();
         }
@@ -56,45 +164,174 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
             "fill":         "black",
             "stroke":       "none",
             "opacity":      1.0,
-            "d":            d3.svg.symbol().type('circle').size(16)()
+            "d":            d3.svg.symbol().type("circle").size(16)()
         }
     });
 
-    var e_line = e_base.extend({
-        constructor: function(x, y, attr) {
-            e_base.call(this);
 
-            this.x = x;
-            this.y = y;
-            this.attr = attr;
+
+    var e_grouped_points = e_xy.extend({
+        constructor: function(x, y, keys, labels, point_groups) {
+            e_xy.call(this, x, y);
+
+            this.keys = keys;
+            this.labels = labels;
+            this.point_groups = point_groups;
+
+            this.selection_delegate = null;
         },
 
-        extent: function() {
-            return { x: d3.extent(this.x), y: d3.extent(this.y) };
+        setSelectionDelegate: function(delegate) {
+            if (this.selection_delegate) {
+                this.selection_delegate.off(null, null, this);
+            }
+            this.selection_delegate = delegate;
+            if (this.selection_delegate) {
+                this.selection_delegate.on("selection-changed", _.bind(this.reflectSelection, this), this);
+            }
+        },
+
+        reflectSelection: function(sel) {
+            if (_.isArray(sel)) {
+                sel = _.reduce(sel, function(a, b) { a[b] = true; return a; }, {});
+            }
+
+            this.g
+                .selectAll("g.node")
+                .classed("selected", function(d) { return sel[d]; });
+        },
+
+        pointClick: function(k) {
+            this.selection_delegate && this.selection_delegate.click(k, {
+                "shift": d3.event.shiftKey,
+            });
+        },
+
+        brushStart: function(extent) {
+            this.selection_delegate && this.selection_delegate.brushStart({
+                "shift": d3.event.sourceEvent.shiftKey,
+            });
+        },
+
+        brushUpdate: function(extent) {
+            var self = this;
+            var in_rect = [];
+            var x, y, i;
+
+            for (i = 0; i < this.keys.length; ++i) {
+                x = this.plot._x(this.x[i]);
+                y = this.plot._y(this.y[i]);
+                if (extent[0][0] <= x && x <= extent[1][0] &&
+                    extent[0][1] <= y && y <= extent[1][1]) {
+                    in_rect.push(this.keys[i]);
+                }
+            }
+            this.selection_delegate && this.selection_delegate.brushUpdate(in_rect);
+        },
+
+        brushEnd: function(extent) {
+            this.selection_delegate && this.selection_delegate.brushEnd();
+        },
+
+        title: function(k, i) {
+            return "ID=" + k + " (" + d3.format(".2f")(this.x[i]) + "," + d3.format(".2f")(this.y[i]) + ")";
+        },
+
+        label: function(k, i) {
+            return this.labels[i];
+        },
+
+        attrs: function(k) {
+            var self = this;
+
+            var result = _.extend({}, e_grouped_points.defaults);
+
+            if (this.point_groups) {
+                this.point_groups.each(function(pg) {
+                    if (pg.hasPoint(k)) {
+                        _.extend(result, pg.get("style"));
+                    }
+                });
+            }
+
+            if (!result.fill)   result.fill = "none";
+            if (!result.stroke) result.stroke = "none";
+
+            return _.omit(result, ["_shape"]);
+        },
+
+        draw: function() {
+            var self = this;
+
+            var pt = this.g
+                .selectAll(".node")
+                .data(this.keys, function(d) { return d; })
+
+            var n = pt.enter().append("g").classed("node", true);
+
+            n.append( "path");
+            n.append( "text").attr(e_grouped_points.default_label_style);
+            n.append("title");
+
+            pt.attr("transform", function(k, i) {
+                return "translate(" + String([ self.plot._x(self.x[i]), self.plot._y(self.y[i]) ]) + ")";
+            });
+
+            pt.select( "path").each(function(k, i) { d3.select(this).attr(self.attrs(k, i)); })
+            pt.select( "text").text(function(k, i) { return self.label(k, i); });
+            pt.select("title").text(function(k, i) { return self.title(k, i); });
+
+            pt.exit().remove();
+        }
+    }, {
+        default_label_style: {
+            "dy":          "3px",
+            "x":           "6px",
+            "y":           "0px",
+            "style":       "font-family: helvetica; font-size: 8px; font-weight: 400",
+            "pointer-events": "auto",
+        },
+
+        defaults: {
+            "_shape":       "circle",
+            "d":            d3.svg.symbol().type("circle")(),
+            "fill":         "rgba(0,0,0,.65)",
+            "stroke":       null,
+            "stroke-width": "1px"
+        }
+    });
+
+
+
+    var e_line = e_xy.extend({
+        constructor: function(x, y, attr) {
+            e_xy.call(this, x, y);
+
+            this.attr = attr;
         },
 
         makeLine: function() {
             return d3.svg.line();
         },
 
-        makePath: function(plot) {
+        makePath: function() {
             var self = this;
 
             var path = this.makeLine()
-                .x(function(d, i) { return plot._x(self.x[i]); })
-                .y(function(d, i) { return plot._y(self.y[i]); })(
+                .x(function(d, i) { return self.plot._x(self.x[i]); })
+                .y(function(d, i) { return self.plot._y(self.y[i]); })(
                     { length: Math.min(this.x.length, this.y.length) }
                 );
 
             return path;
         },
 
-        draw: function(plot, g) {
-            d3.select(g).selectAll('path').remove();
-            d3.select(g)
-                .append('path')
+        draw: function() {
+            this.g.selectAll("path").remove();
+            this.g
+                .append("path")
                 .attr(_.extend({}, e_line.defaults, this.attr))
-                .attr('d', this.makePath(plot));
+                .attr("d", this.makePath());
         }
     }, {
         defaults: {
@@ -108,40 +345,40 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
 
     var e_smoothline = e_line.extend({
         makeLine: function() {
-            return d3.svg.line().interpolate('basis');
+            return d3.svg.line().interpolate("basis");
         }
     });
 
 
 
     var label_defaults = {
-        'dy': '6px',
-        'text-anchor': 'middle',
-        'style': 'font-family: helvetica; font-size: 12px; font-weight: 600'
+        "dy": "6px",
+        "text-anchor": "middle",
+        "style": "font-family: helvetica; font-size: 12px; font-weight: 600"
     };
 
     var title_defaults = {
-        'dy': '7px',
-        'text-anchor': 'middle',
-        'style': 'font-family: helvetica; font-size: 14px; font-weight: 600'
+        "dy": "7px",
+        "text-anchor": "middle",
+        "style": "font-family: helvetica; font-size: 14px; font-weight: 600"
     };
 
     var axis_defaults = {
-        'fill':            'none',
-        'stroke':          '#aaa',
-        'opacity':         1.0,
-        'shape-rendering': 'crispEdges'
+        "fill":            "none",
+        "stroke":          "#aaa",
+        "opacity":         1.0,
+        "shape-rendering": "crispEdges"
     }
 
     var tick_defaults = {
-        'style': 'font-family: helvetica; font-size: 11px; font-weight: 100'
+        "style": "font-family: helvetica; font-size: 11px; font-weight: 100"
     }
 
     var background_defaults = {
-        'fill':            'white',
-        'stroke':          '#aaa',
-        'stroke-width':    '1',
-        'shape-rendering': 'crispEdges'
+        "fill":            "white",
+        "stroke":          "#aaa",
+        "stroke-width":    "1",
+        "shape-rendering": "crispEdges"
     };
 
     var defaults = {
@@ -170,7 +407,7 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
                 odp: [ 0,0 ],
                 axis_attrs: axis_defaults,
                 label_attrs: label_defaults,
-                tick_attrs: _.extend({}, tick_defaults, { 'text-anchor': 'middle' })
+                tick_attrs: _.extend({}, tick_defaults, { "text-anchor": "middle" })
             },
             y: {
                 label: "Y",
@@ -180,7 +417,7 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
                 odp: [ 0,0 ],
                 axis_attrs: axis_defaults,
                 label_attrs: label_defaults,
-                tick_attrs: _.extend({}, tick_defaults, { 'text-anchor': 'end' })
+                tick_attrs: _.extend({}, tick_defaults, { "text-anchor": "end" })
             },
         }
     };
@@ -202,7 +439,7 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
     };
 
     plotbase.prototype.initialize = function() {
-        this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+        this.svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
         var svg = d3.select(this.svg);
 
         this.width  = this.config.width;
@@ -211,11 +448,11 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
         d3.select(this.svg)
             .attr("width",             this.width)
             .attr("height",            this.height)
-            .attr('version',           "1.1")
-            .attr('baseProfile',       "full")
+            .attr("version",           "1.1")
+            .attr("baseProfile",       "full")
             .attr("xmlns",             "http://www.w3.org/2000/svg")
             .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink")
-            .classed('plot',           this.config.svgclass);
+            .classed("plot",           this.config.svgclass);
 
         svg
             .append("g")
@@ -227,9 +464,9 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
         this.brush = d3.svg.brush()
             .x(this.xScaleBrush)
             .y(this.yScaleBrush)
-            .on("brushstart", _.bind(this.brushstart, this))
-            .on("brush",      _.bind(this.brushed,    this))
-            .on("brushend",   _.bind(this.brushend,   this));
+            .on("brushstart", _.bind(this.brushStart,  this))
+            .on("brush",      _.bind(this.brushUpdate, this))
+            .on("brushend",   _.bind(this.brushEnd,    this));
 
         svg.append("g").classed("brush", true).call(this.brush);
 
@@ -260,13 +497,34 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
         this.updatePlotArea();
     };
 
-    plotbase.prototype.brushstart = function() {
+    plotbase.prototype.brushStart = function() {
+        var self = this;
+        var e = d3.event.target.extent();
+        d3.select(this.svg)
+            .select("g.plotarea")
+            .selectAll("g.elem").each(function(d, i) {
+                d.brushStart(e);
+            });
     };
 
-    plotbase.prototype.brushed = function() {
+    plotbase.prototype.brushUpdate = function() {
+        var self = this;
+        var e = d3.event.target.extent();
+        d3.select(this.svg)
+            .select("g.plotarea")
+            .selectAll("g.elem").each(function(d, i) {
+                d.brushUpdate(e);
+            });
     };
 
-    plotbase.prototype.brushend = function() {
+    plotbase.prototype.brushEnd = function() {
+        var self = this;
+        var e = d3.event.target.extent();
+        d3.select(this.svg)
+            .select("g.plotarea")
+            .selectAll("g.elem").each(function(d, i) {
+                d.brushEnd(e);
+            });
     };
 
     plotbase.prototype.updateBackground = function() {
@@ -289,17 +547,17 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
         svg.select("g.brush").call(this.brush);
 
         var bkg = svg
-            .select('g.background')
-            .selectAll('rect')
+            .select("g.background")
+            .selectAll("rect")
             .data(this.config.background ? [rect] : [])
 
-        bkg.enter().append('rect')
+        bkg.enter().append("rect")
 
         bkg .attr(this.config.background_attrs)
-            .attr('x',               function(d) { return d.x })
-            .attr('y',               function(d) { return d.y })
-            .attr('width',           function(d) { return d.w })
-            .attr('height',          function(d) { return d.h });
+            .attr("x",               function(d) { return d.x })
+            .attr("y",               function(d) { return d.y })
+            .attr("width",           function(d) { return d.w })
+            .attr("height",          function(d) { return d.h });
 
         bkg.exit().remove();
     };
@@ -346,22 +604,22 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
         var svg = d3.select(this.svg);
 
         if (this.config.axes.x.visible) {
-            svg.select('g.axis-x')
+            svg.select("g.axis-x")
                 .attr("transform", "translate(0," + (this.height - this.config.padding[2] + this.config.outer) + ")")
                 .call(this.xAxis);
         }
 
         if (this.config.axes.y.visible) {
-            svg.select('g.axis-y')
+            svg.select("g.axis-y")
                 .attr("transform", "translate(" + (this.config.padding[3] - this.config.outer) + ",0)")
                 .call(this.yAxis);
         }
 
-        svg .selectAll('.axis-x path, .axis-y line').attr(this.config.axes.x.axis_attrs);
-        svg .selectAll('.axis-x .tick text').attr(this.config.axes.x.tick_attrs);
+        svg .selectAll(".axis-x path, .axis-y line").attr(this.config.axes.x.axis_attrs);
+        svg .selectAll(".axis-x .tick text").attr(this.config.axes.x.tick_attrs);
 
-        svg .selectAll('.axis-y path, .axis-y line').attr(this.config.axes.y.axis_attrs);
-        svg .selectAll('.axis-y .tick text').attr(this.config.axes.y.tick_attrs);
+        svg .selectAll(".axis-y path, .axis-y line").attr(this.config.axes.y.axis_attrs);
+        svg .selectAll(".axis-y .tick text").attr(this.config.axes.y.tick_attrs);
     };
 
     plotbase.prototype.updateAxisLabels = function() {
@@ -374,12 +632,12 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
             this.config.axes.x.offset[1]
         ];
 
-        lab = svg.select('g.axis-x g.axis-label');
+        lab = svg.select("g.axis-x g.axis-label");
 
-        lab.attr('transform', 'translate(' + String(pos) + ')')
+        lab.attr("transform", "translate(" + String(pos) + ")")
 
-        lab = lab.selectAll('text').data(this.config.axes.x.label ? [this.config.axes.x.label] : [])
-        lab.enter().append('text').attr(this.config.axes.x.label_attrs);
+        lab = lab.selectAll("text").data(this.config.axes.x.label ? [this.config.axes.x.label] : [])
+        lab.enter().append("text").attr(this.config.axes.x.label_attrs);
         lab.text(function (d) { return d; });
         lab.exit().remove();
 
@@ -389,12 +647,12 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
             (this.yScale.range()[0] + this.yScale.range()[1])/2.0 + this.config.axes.y.offset[1],
         ];
 
-        lab = svg.select('g.axis-y g.axis-label');
+        lab = svg.select("g.axis-y g.axis-label");
 
-        lab.attr('transform', 'translate(' + String(pos) + ') rotate(-90)')
+        lab.attr("transform", "translate(" + String(pos) + ") rotate(-90)")
 
-        lab = lab.selectAll('text').data(this.config.axes.y.label ? [this.config.axes.y.label] : [])
-        lab.enter().append('text').attr(this.config.axes.y.label_attrs);
+        lab = lab.selectAll("text").data(this.config.axes.y.label ? [this.config.axes.y.label] : [])
+        lab.enter().append("text").attr(this.config.axes.y.label_attrs);
         lab.text(function (d) { return d; });
         lab.exit().remove();
     };
@@ -408,12 +666,12 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
             this.yScale.range()[1] + this.config.title_offset[1]
         ];
 
-        lab = svg.select('g.title');
+        lab = svg.select("g.title");
 
-        lab.attr('transform', 'translate(' + String(pos) + ')')
+        lab.attr("transform", "translate(" + String(pos) + ")")
 
-        lab = lab.selectAll('text').data(this.config.title ? [this.config.title] : [])
-        lab.enter().append('text').attr(this.config.title_attrs);
+        lab = lab.selectAll("text").data(this.config.title ? [this.config.title] : [])
+        lab.enter().append("text").attr(this.config.title_attrs);
         lab.text(function (d) { return d; });
         lab.exit().remove();
     };
@@ -444,12 +702,12 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
 
     plotbase.prototype.updatePlotArea = function() {
         var self = this;
-        var plot = d3.select(this.svg).select('g.plotarea')
-        var elems = plot.selectAll('g.elem').data(this.elems, function(d) { return d.id; });
+        var plot = d3.select(this.svg).select("g.plotarea")
+        var elems = plot.selectAll("g.elem").data(this.elems, function(d) { return d.id; });
 
-        elems.enter().append('g').classed('elem', true);
-        elems.each(function(d) { d.draw(self, this); });
-        elems.exit().remove();
+        elems.enter().append("g").classed("elem", true).each(function(d) { d.create(self, this); });
+        elems.each(function(d) { d.draw(); });
+        elems.exit().each(function(d) { d.destroy(); }).remove();
     };
 
     plotbase.prototype.resize = function(width, height) {
@@ -491,10 +749,13 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
     plotbase.extend = Backbone.Model.extend;
 
     return {
-        e_base:       e_base,
-        e_points:     e_points,
-        e_smoothline: e_smoothline,
-        e_line:       e_line,
-        plotbase:     plotbase
+        selection:        selection,
+        e_base:           e_base,
+        e_xy:             e_xy,
+        e_points:         e_points,
+        e_grouped_points: e_grouped_points,
+        e_line:           e_line,
+        e_smoothline:     e_smoothline,
+        plotbase:         plotbase
     };
 });
