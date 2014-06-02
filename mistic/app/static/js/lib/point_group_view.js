@@ -130,21 +130,16 @@ define(["underscore", "backbone", "jquery", "d3"], function(_, Backbone, $, d3) 
                 showAlpha: true,
                 clickoutFiresChange: true,
                 change: function(colour) {
-                    
                     try { 
                         $('span', this).css('background-color', $(this).spectrum('get').toRgbString());
-                        $('.action-save').prop('disabled', false); 
-                    }
-                    catch (err) {
-                        
-
+                        self.$('.action-save').prop('disabled', false); 
+                    } catch (err) {
                     }
                 },
                 beforeShow: function(colour) {
                     if ($(this).hasClass('disabled')) return false;
                     $(this).spectrum('set', $('span', this).css('background-color'));
-                    $('.action-save').prop('disabled', true);
-                    //console.log(this);
+                    self.$('.action-save').prop('disabled', true);
                 },
             });
 
