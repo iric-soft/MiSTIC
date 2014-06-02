@@ -52,7 +52,7 @@ define(["underscore", "backbone", "jquery", "d3"], function(_, Backbone, $, d3) 
                 attrs.d = d3.svg.symbol().type(shape)();
             }
 
-            this.group.set('name', $('.group-name').val() || undefined);
+            this.group.set('name', this.$('.group-name').val() || undefined);
             this.group.set('style', attrs);
         },
 
