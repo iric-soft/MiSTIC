@@ -182,7 +182,6 @@ define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone,
         $(this.svg).trigger('brushstart', [this]);
         var b = d3.select(this.svg).select('.brush');
         b.append('text');
-        
     };
 
     scatterplot.prototype.brushed = function() {
@@ -215,7 +214,7 @@ define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone,
     };
 
     scatterplot.prototype.brushend = function() {
-        $(this.svg).trigger('brushstart', [this]);
+        $(this.svg).trigger('brushend', [this]);
     };
 
     scatterplot.prototype._transform = function(v, scale) {
