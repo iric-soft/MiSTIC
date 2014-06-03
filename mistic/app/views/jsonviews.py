@@ -253,11 +253,11 @@ class Annotation(object):
       
     @view_config(route_name="mistic.json.annotation.gs", request_method="GET", renderer="json")
     def genesets(self):
-        level = int(self.request.GET.get('v')) 
+        level = int(self.request.GET.get('v', 3)) 
         query = self.request.GET.getall('q')
         query = tuple(sum([ q.split() for q in query ], []))
         limit = self.request.GET.get('l')
-       
+        
         try:
             limit = int(limit)
         except:

@@ -45,27 +45,40 @@ ${parent.style()}
       </div>
     </div>
   </div>
+  
+   <div class="accordion-group">
+    <div class="accordion-heading"><h4 class="accordion-title">
+        <a class="accordion-toggle" data-toggle="collapse"  href="#geneset_menu">Geneset </a></h4>
+    </div>
+
+    <div id="geneset_menu" class="accordion-body collapse in">
+      <div class="accordion-inner">
+       
+            <label for="gsterm">Geneset members to hightlight : </label>
+            <input type="text" autocomplete='off' id="gsterm" placeholder='Search for geneset here'>
+          
+            
+       
+      </div>
+    </div>
+  </div>
+  
 
   <div class="accordion-group">
     <div class="accordion-heading"><h4 class="accordion-title">
         <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a></h4>
     </div>
-    <div id="options_menu" class="accordion-body collapse ">
+    <div id="options_menu" class="accordion-body collapse in ">
       <div class="accordion-inner">
         <ul id="options" class="nav nav-list">
           <li>
-            <label for="nlabel">Display </label>
+            <label for="nlabel">Number of labels to display :  </label>
             <input type="text" style="width:20px;" id="nlabel"  autocomplete='off' value=10>
-            labels
+            
           </li>
-          <li>
-            <label for="goterm">Show GO term members </label>
-            <input type="text" autocomplete='off' id="goterm">
-          </li>
-          <li>
-            Transformation:
-            <div class="btn-group btn-group-justified" data-toggle="buttons-radio" id="transform-buttons">
-            </div>
+          <p>
+           <li>
+            <div class="btn-group btn-group-justified" data-toggle="buttons-radio" id="transform-buttons"></div>
           </li>
         </ul>
       </div>
@@ -159,11 +172,11 @@ $(document).ready(function() {
     $('#plot').attr('disabled', item === null);
   });
 
-  var go_entry = new GODropdown({ el: $("#goterm") });
+  var gs_entry = new GODropdown({ el: $("#gsterm") });
 
-  go_entry.on('change', function(item) {
+  gs_entry.on('change', function(item) {
     current_go_term = item;
-    go_entry.$el.toggleClass('valid', item !== null);
+    gs_entry.$el.toggleClass('valid', item !== null);
     updateURLTarget({ go: item === null ? undefined : item.id });
 
     if (item === null) {
@@ -186,7 +199,7 @@ $(document).ready(function() {
   var addDataset = function(dataset, sync) {
     var disable = function() {
       dataset_info = {};
-      go_entry.setSearchURL(undefined);
+      gs_entry.setSearchURL(undefined);
       current_dataset = null;
       gene_entry.setSearchURL(undefined);
       gene_entry.$el.val('');
@@ -195,7 +208,9 @@ $(document).ready(function() {
 
     var enable = function(data) {
       dataset_info = data;
-      go_entry.setSearchURL("${request.route_url('mistic.json.annotation.gs', annotation='_annotation_')}".replace('_annotation_', dataset_info.anot));
+      if (current_graph.data.length>0){
+        gs_entry.setSearchURL("${request.route_url('mistic.json.annotation.gs', annotation='_annotation_')}".replace('_annotation_', dataset_info.anot));
+      }
       current_dataset = dataset;
       gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_dataset));
       gene_entry.$el.val('');
@@ -214,6 +229,7 @@ $(document).ready(function() {
       success: function(data) {
         var xf = $('#transform-buttons');
         xf.empty();
+        xf.append("Transformation : ");
         current_transform = data['xfrm'][0];
         _.each(data['xfrm'], function(val) {
           var btn = $('<button class="btn btn-default">');
@@ -266,6 +282,8 @@ $(document).ready(function() {
         current_graph.setData(data.data[0]);
         current_graph.draw();
         updateURLTarget({ dataset: dataset, gene: gene });
+        gs_entry.setSearchURL("${request.route_url('mistic.json.annotation.gs', annotation='_annotation_')}".replace('_annotation_', dataset_info.anot));
+     
       },
       error: function() {
         // inform the user something went wrong.
