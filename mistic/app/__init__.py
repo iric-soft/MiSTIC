@@ -214,6 +214,7 @@ def main(global_config, **settings):
 
     config.add_route('mistic.json.dataset.sampleinfo.search',     '/datasets/{dataset}/sampleinfo/search')
 
+    config.add_route('mistic.json.dataset.mds',            '/datasets/{dataset}/mds/{xform}/{N:\d+}')
     config.add_route('mistic.json.dataset.mst',            '/datasets/{dataset}/mst/{xform}')
     config.add_route('mistic.json.dataset.mapped_mst',     '/datasets/{dataset}/mst/{xform}/{tgt_annotation}')
 
@@ -235,6 +236,7 @@ def main(global_config, **settings):
     config.add_route('mistic.json.saveValueInSession',     '/saveInSession')
 
     config.add_route('mistic.template.corrdistrib',        '/corrdistrib/{dataset}')
+    config.add_route('mistic.template.mds',                '/mds/{dataset}/{xform}/{N:\d+}')
     config.add_route('mistic.template.corrgraph',          '/genecorr')
     config.add_route('mistic.template.corrgraph_static',   '/genecorr/{dataset}/{gene}')
     config.add_route('mistic.template.scatterplot',        '/scatterplot')
