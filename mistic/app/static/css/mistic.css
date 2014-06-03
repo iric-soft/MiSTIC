@@ -63,7 +63,6 @@ circle {
  
 }
 
-
 div#more-information a,
 div#more-information a:hover
 {
@@ -75,8 +74,6 @@ div#more-information a:hover
 div#more-information, .information{
    font-family: helvetica,arial,sans-serif;
    font-size: 11px;
-   color: #cc7400;
-   font-weight:bold;
    padding: 10px 0px 0px 0px;
    float: right;
    overflow:hidden;
