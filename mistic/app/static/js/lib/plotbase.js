@@ -177,6 +177,7 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
             this.keys = keys;
             this.labels = labels;
             this.point_groups = point_groups;
+            this.point_groups.on('change:point_ids change:style add remove reset sort', function() { this.draw(); }, this);
 
             this.selection_delegate = null;
         },
