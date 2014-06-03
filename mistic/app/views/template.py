@@ -67,7 +67,7 @@ class Graph(object):
     return render_to_response('mistic:app/templates/corrdistrib.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.mds")
-  def corrdistrib(self):
+  def mds(self):
     dataset = self.request.matchdict['dataset']
 
     _dataset = data.datasets.get(dataset)
@@ -84,7 +84,7 @@ class Graph(object):
       n_genes = 500
 
     try:
-      n_genes = int(self.request.GET.get('s'))
+      n_skip = int(self.request.GET.get('s'))
     except (ValueError, TypeError):
       n_skip = 0
 
