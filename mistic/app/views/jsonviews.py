@@ -508,13 +508,30 @@ class Dataset(object):
         return gs_tab
 
     @key_cache_region('mistic', 'genecorr', lambda args: (args[0].dataset.id,) + args[1:])
-    def _mds(self, xform, N_skip, N_genes):
-        mds_matrix, eigenvalues = self.dataset.calcMDS(xform, N_skip, N_genes)
+    def _mds(self, xform, N_skip, N_genes, pairwise):
+        mds_matrix, eigenvalues = self.dataset.calcMDS(xform, N_skip, N_genes, pairwise)
         return dict(dimensions = map(list, mds_matrix), eigenvalues = list(eigenvalues))
 
     @view_config(route_name="mistic.json.dataset.mds", request_method="GET", renderer="json")
     def mds(self):
-        return self._mds(self.request.matchdict['xform'], 0, int(self.request.matchdict['N']))
+
+        xform = self.request.GET.get('x')
+        if xform not in self.dataset.transforms:
+            xform = self.dataset.transforms[0]
+
+        try:
+            n_genes = int(self.request.GET.get('n'))
+        except (ValueError, TypeError):
+            n_genes = 500
+
+        try:
+            n_skip = int(self.request.GET.get('s'))
+        except (ValueError, TypeError):
+            n_skip = 0
+
+        pairwise = False if self.request.GET.get('p') == 'false' else True
+
+        return self._mds(xform, n_skip, n_genes, pairwise)
 
 
 

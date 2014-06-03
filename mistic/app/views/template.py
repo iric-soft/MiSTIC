@@ -13,6 +13,11 @@ class Graph(object):
   def __init__(self, request):
     self.request = request
 
+  @view_config(route_name="mistic.template.test")
+  def test(self):
+    args = dict()
+    return render_to_response('mistic:app/templates/test.mako', args, request = self.request)
+
   @view_config(route_name="mistic.modal.datasets")
   def dataset_modal(self):
     datasets = data.datasets.all()
@@ -64,18 +69,35 @@ class Graph(object):
   @view_config(route_name="mistic.template.mds")
   def corrdistrib(self):
     dataset = self.request.matchdict['dataset']
-    xform = self.request.matchdict['xform']
-    N = int(self.request.matchdict['N'])
 
     _dataset = data.datasets.get(dataset)
     if _dataset is None:
       raise HTTPNotFound()
 
+    xform = self.request.GET.get('x')
+    if xform not in _dataset.transforms:
+      xform = _dataset.transforms[0]
+
+    try:
+      n_genes = int(self.request.GET.get('n'))
+    except (ValueError, TypeError):
+      n_genes = 500
+
+    try:
+      n_genes = int(self.request.GET.get('s'))
+    except (ValueError, TypeError):
+      n_skip = 0
+
+    pairwise = self.request.GET.get('p') == 't'
+
     args = dict(
-      dataset = dataset,
+      dataset = _dataset,
       xform = xform,
-      N_genes = N
+      n_genes = n_genes,
+      n_skip = n_skip,
+      pairwise = pairwise,
     )
+
     return render_to_response('mistic:app/templates/mdsplot.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.corrgraph")

@@ -7,6 +7,26 @@ import json
 <%block name="style">
 ${parent.style()}
 
+#options_menu .form-horizontal {
+  margin-bottom: 0px;
+}
+
+#options_menu .control-group {
+  margin-bottom: 5px;
+}
+
+#options_menu .control-label {
+  width: 80px;
+}
+
+#options_menu .controls {
+  margin-left: 85px;
+}
+
+#options_menu .checkbox-adjust {
+  margin-top: -5px;
+}
+
 rect.bar.selected {
   fill: #cc7400;
 }
@@ -28,7 +48,53 @@ rect.bar.selected:hover {
 </%block>
 
 <%block name="controls">
+
 <div id="controls" class="span3">
+  <div class="accordion-group">
+    <div class="accordion-heading">
+      <h4 class="accordion-title">
+        <a class="accordion-toggle" data-toggle="collapse" href="#options_menu">Options</a>
+      </h4>
+    </div>
+
+    <div id="options_menu" class="accordion-body collapse ">
+      <div class="accordion-inner">
+        <div>
+          <form class="form-horizontal">
+            <div class="control-group">
+              <label class="control-label" for="param_skip">Transform</label>
+              <div class="controls">
+                <div class="btn-group" id="param_xform">
+%for xf in dataset.transforms:
+                  <button data-xform="${xf}" type="button" class="btn xform${' active' if xf == xform else ''}">${xf}</button>
+%endfor
+                </div>
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="param_genes">Count</label>
+              <div class="controls">
+                <input class="input-mini" type="text" value="${n_genes}" id="param_genes">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="control-label" for="param_skip">Skip</label>
+              <div class="controls">
+                <input class="input-mini" type="text" value="${n_skip}" id="param_skip">
+              </div>
+            </div>
+            <div class="control-group">
+              <label class="checkbox-adjust control-label" for="param_pairwise">Pairwise</label>
+              <div class="controls">
+                <input type="checkbox" checked style="margin-top: 0px" id="param_pairwise" >
+              </div>
+            </div>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <div class="accordion-group">
     <div class="accordion-heading">
       <h4 class="accordion-title">
@@ -63,16 +129,12 @@ rect.bar.selected:hover {
   <div class="accordion-group">
     <div class="accordion-heading">
       <h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">Options</a>
+        <a class="accordion-toggle" data-toggle="collapse"  href="#dimensions_menu">Dimensions</a>
       </h4>
     </div>
 
-    <div id="options_menu" class="accordion-body collapse ">
+    <div id="dimensions_menu" class="accordion-body collapse ">
       <div class="accordion-inner">
-        <div class="btn-group">
-          <button type="button" class="btn" id="show_labels">Show labels</button>
-          <button type="button" class="btn" id="clear_labels">Clear labels</button>
-        </div>
         <div id="dimension_barchart"></div>
       </div>
     </div>
@@ -101,12 +163,10 @@ rect.bar.selected:hover {
 <%block name="pagetail">
 <%include file="mistic:app/templates/fragments/tmpl_point_group.mako"/>
 ${parent.pagetail()}
-
-<script type="text/javascript">
 <%
   ds = data.datasets.get(dataset)
 %>
-
+<script type="text/javascript">
 require([
     "jquery", "underscore", "d3",
     "math",
@@ -123,7 +183,7 @@ require([
     doc) {
 
     var current_graph = new plotbase.plotbase({
-        title: "MDS plot (${ds.name})",
+        title: "MDS plot (${dataset.name})",
         inner: 5,
         outer: 10,
         axes: {
@@ -150,7 +210,7 @@ require([
 
     var sample_ids = null;
     $.ajax({
-        url: "${request.route_url('mistic.json.dataset.samples', dataset=dataset)}",
+        url: "${request.route_url('mistic.json.dataset.samples', dataset=dataset.id)}",
         data: {},
         async: false,
         dataType: 'json',
@@ -242,6 +302,8 @@ require([
         var xAxis = d3.svg.axis().scale(x).orient("bottom").innerTickSize(2).outerTickSize(0);
         var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5).innerTickSize(2).outerTickSize(0);
 
+        d3.select("#dimension_barchart").selectAll('svg').remove();
+
         var svg = d3.select("#dimension_barchart")
             .append("svg")
             .attr("width", width + margin.left + margin.right)
@@ -291,7 +353,7 @@ require([
     };
 
     var sample_annotation_entry = new sad.SampleAnnotationDropdown({
-        url: "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset=dataset)}",
+        url: "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset=dataset.id)}",
         el: $('#sample_annotation')
     });
 
@@ -314,21 +376,55 @@ require([
         event.preventDefault();
     });
 
-    $.ajax({
-        url: "${request.route_url('mistic.json.dataset.mds', dataset=dataset, xform=xform, N=N_genes)}",
-        data: {},
-        async: true,
-        dataType: 'json',
-        success: function(data) {
-            mds_data = data;
+    var _update = { active: false, pending: undefined };
 
-            dimension_barchart();
+    var updateMDS = function() {
+        if (_update.active) {
+            _update.pending = true;
+        } else {
+            var xform = $('button.xform.active').data('xform');
+            var n_genes = +$('#param_genes').val();
+            var n_skip = +$('#param_skip').val();
+            var pairwise = $('#param_pairwise').is(':checked');
+            if (_.isNaN(n_genes) || _.isNaN(n_skip)) return;
 
-            select_dimensions(0, 1);
+            _update.active = true;
+            _update.pending = false;
+
+            $.ajax({
+                url: "${request.route_url('mistic.json.dataset.mds', dataset=dataset.id)}",
+                dataType: 'json',
+                type: 'GET',
+                data: { x: xform, n: n_genes, s: n_skip, p: pairwise },
+                error: function(req, status, error) {
+                    console.log('got an error', status, error);
+                },
+                success: function(data) {
+                    mds_data = data;
+                    dimension_barchart();
+                    select_dimensions(0, 1);
+                },
+                complete: function() {
+                    _update.active = false;
+                    window.setTimeout(function() {
+                        if (!_update.active && _update.pending) updateMDS();
+                    }, 0);
+                }
+            });
         }
+    }
+
+    updateMDS();
+
+    $('#param_genes, #param_skip').on('keyup', function(event) {
+        $(event.currentTarget).closest('.control-group').toggleClass('error', _.isNaN(+$(event.currentTarget).val()));
     });
-
-
+    $('#param_genes, #param_skip').on('change', updateMDS);
+    $('#param_pairwise').on('change', updateMDS);
+    $('#param_xform .btn').on('click', function(event) {
+        $('#param_xform .btn').each(function(i, elem) { $(elem).toggleClass('active', elem === event.currentTarget); });
+        updateMDS();
+    });
 
     $('#sample_annotation_drop').on('click', function() {
         sample_annotation_entry.$el.val('');
@@ -346,7 +442,7 @@ require([
         var kv = {};
         kv[l1] = l2
         $.ajax({
-            url:  "${request.route_url('mistic.json.dataset.samples', dataset=dataset)}",
+            url:  "${request.route_url('mistic.json.dataset.samples', dataset=dataset.id)}",
             data: kv,
             datatype: 'json',
             success: function(data) {
@@ -433,7 +529,7 @@ require([
             _selection.active = true;
             _selection.pending = undefined;
             $.ajax({
-                url: "${request.route_url('mistic.json.dataset.samples.enrich', dataset=dataset)}",
+                url: "${request.route_url('mistic.json.dataset.samples.enrich', dataset=dataset.id)}",
                 dataType: 'json',
                 type: 'POST',
                 data: { samples: JSON.stringify(selection) },

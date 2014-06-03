@@ -133,14 +133,18 @@ class DataSet(object):
       data = data.values
     return data
 
-  def calcMDS(self, transform, N_skip, N_genes, common = False):
+  def calcMDS(self, transform, N_skip, N_genes, pairwise):
     data = self._getTransformedMatrix(transform).T
     Ns = data.shape[0]
     Ng = data.shape[1]
+
+    N_genes = max(1, min(1000, Ng, N_genes))
+    N_skip = max(0, min(Ng - N_genes, N_skip))
+
     dist = numpy.zeros((Ns, Ns), float)
 
-    if common:
-      variance = numpy.variance(data, axis=1)
+    if not pairwise:
+      variance = numpy.var(data, axis=0)
       sel = numpy.argpartition(-variance, N_skip + N_genes)[N_skip:N_skip+N_genes]
       for i in range(Ns):
         for j in range(i+1, Ns):
