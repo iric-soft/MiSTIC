@@ -60,6 +60,7 @@ rect.bar.selected:hover {
     <div id="options_menu" class="accordion-body collapse ">
       <div class="accordion-inner">
         <div>
+          <img style="float: right; visibility: hidden" src="${request.application_url}/static/img/ajax-loader.gif"/>
           <form class="form-horizontal">
             <div class="control-group">
               <label class="control-label" for="param_skip">Transform</label>
@@ -391,6 +392,7 @@ require([
             _update.active = true;
             _update.pending = false;
 
+            $('#options_menu img').css('visibility', 'visible');
             $.ajax({
                 url: "${request.route_url('mistic.json.dataset.mds', dataset=dataset.id)}",
                 dataType: 'json',
@@ -405,6 +407,7 @@ require([
                     select_dimensions(0, 1);
                 },
                 complete: function() {
+                    $('#options_menu img').css('visibility', 'hidden');
                     _update.active = false;
                     window.setTimeout(function() {
                         if (!_update.active && _update.pending) updateMDS();
