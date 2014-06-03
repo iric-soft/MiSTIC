@@ -2,6 +2,7 @@ import sys
 import os
 import math
 import numpy
+import numpy.linalg
 import csv
 import itertools
 import exceptions
@@ -123,16 +124,53 @@ class DataSet(object):
     data = numpy.ma.masked_array(data, numpy.isnan(data))
     return numpy.ma.corrcoef(data)
 
-  def randompaircorr(self, N = 10000, transform = None, permute = False):
-    logging.info('randompaircorr begin')
-    out = []
-
+  def _getTransformedMatrix(self, transform):
     if transform is None:
       data = self.df
     else:
       data = transform(self.df)
     if isinstance(data, pandas.DataFrame):
       data = data.values
+    return data
+
+  def calcMDS(self, transform, N_skip, N_genes, common = False):
+    data = self._getTransformedMatrix(transform).T
+    Ns = data.shape[0]
+    Ng = data.shape[1]
+    dist = numpy.zeros((Ns, Ns), float)
+
+    if common:
+      variance = numpy.variance(data, axis=1)
+      sel = numpy.argpartition(-variance, N_skip + N_genes)[N_skip:N_skip+N_genes]
+      for i in range(Ns):
+        for j in range(i+1, Ns):
+          diff = data[i,sel]-data[j,sel]
+          diff = diff * diff
+          dist[i,j] = dist[j,i] = math.sqrt(numpy.mean(diff))
+    else:
+      for i in range(Ns):
+        for j in range(i+1, Ns):
+          diff = data[i] - data[j]
+          diff = diff * diff
+          sel = numpy.argpartition(-diff, N_skip + N_genes)[N_skip:N_skip+N_genes]
+          dist[i,j] = dist[j,i] = math.sqrt(numpy.mean(diff[sel]))
+
+    def cmdscale(d):
+      N = d.shape[0]
+      x = d * d
+      x_cen = x - x.mean(axis=1).reshape((N,1)) - x.mean(axis=0)
+      x_cen = -x_cen/2
+      eigvals, eigvecs = numpy.linalg.eigh(x_cen)
+      vec = eigvecs.T * numpy.sqrt(abs(eigvals)).reshape((N,1))
+      return vec[-2::-1,:], eigvals[-2::-1]
+
+    return cmdscale(dist)[0][:2]
+
+  def randompaircorr(self, N = 10000, transform = None, permute = False):
+    logging.info('randompaircorr begin')
+    out = []
+
+    data = self._getTransformedMatrix(transform)
 
     if permute:
       for i in xrange(data.shape[0]):
