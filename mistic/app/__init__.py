@@ -252,8 +252,6 @@ def main(global_config, **settings):
     config.add_route('mistic.template.clustering',         '/clustering/{dataset}/{xform}')
     config.add_route('mistic.template.mstplot',            '/mstplot/{dataset}/{xform}')
    
-    config.add_route('mistic.template.test',               '/test')
-
     config.add_static_view('static',      'mistic:app/static', cache_max_age=3600)
     config.add_static_view('cdnjs',       'mistic:app/cdnjs', cache_max_age=3600)
     config.add_static_view('datatables',  'mistic:app/datatables', cache_max_age=3600)
