@@ -7,6 +7,19 @@ import json
 <%block name="style">
 ${parent.style()}
 
+rect.bar.selected {
+  fill: #cc7400;
+}
+
+rect.bar:hover {
+  fill: #005799;
+  cursor: pointer;
+}
+
+rect.bar.selected:hover {
+  fill: #995700;
+}
+
 #controls {
   overflow-y: scroll;
   margin-top: 5px;
@@ -60,6 +73,7 @@ ${parent.style()}
           <button type="button" class="btn" id="show_labels">Show labels</button>
           <button type="button" class="btn" id="clear_labels">Clear labels</button>
         </div>
+        <div id="dimension_barchart"></div>
       </div>
     </div>
   </div>
@@ -107,28 +121,6 @@ require([
     pg, pgv,
     sad,
     doc) {
-
-    var sample_annotation_entry = new sad.SampleAnnotationDropdown({
-        url: "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset=dataset)}",
-        el: $('#sample_annotation')
-    });
-
-    var group_colours = d3.scale.category20();
-    var next_group = 0;
-
-    $('#clear_all').on('click', function(event) { 
-        pgc.reset();
-        event.preventDefault();
-    });
-
-    $('#new_group').on('click', function(event) { 
-        var g = new pg.PointGroup({
-            style: { fill: group_colours(next_group % 20) }
-        });
-        pgc.add(g);
-        ++next_group;
-        event.preventDefault();
-    });
 
     var current_graph = new plotbase.plotbase({
         title: "MDS plot (${ds.name})",
@@ -204,30 +196,139 @@ require([
       pgc
     );
 
+    pt.setSelectionDelegate(sel);
+
+    current_graph.addElem(pt);
+    current_graph.update();
+
     var mds_data = null;
+    var plot_dimensions = [ 0, 1 ];
+
+    var select_dimensions = function(dim1, dim2) {
+        plot_dimensions = [ dim1, dim2 ];
+
+        pt.x = mds_data.dimensions[dim1];
+        pt.y = mds_data.dimensions[dim2];
+        pt.keys = sample_ids;
+
+        current_graph.config.axes.x.label = 'Dimension ' + (dim1+1);
+        current_graph.config.axes.y.label = 'Dimension ' + (dim2+1);
+
+        current_graph.fitElems();
+        current_graph.update();
+
+        var svg = d3.select("#dimension_barchart")
+            .selectAll('.bar')
+            .classed('selected', function(d, i) { return i == dim1 || i == dim2; });
+    };
+
+    var dimension_barchart = function() {
+        if (mds_data === null) return;
+
+        var ht = mds_data.eigenvalues;
+        ht = ht.slice(0, 20);
+        console.log(ht);
+        var margin = { top: 30, right: 10, bottom: 30, left: 16 };
+        var width = 300;
+        var height = 100;
+
+        var x = d3.scale.ordinal()
+            .domain(d3.range(1,ht.length+1))
+            .rangeRoundBands([0, width], .1);
+        var y = d3.scale.linear()
+            .domain([0, d3.max(ht) ])
+            .range([height, 0]);
+
+        var xAxis = d3.svg.axis().scale(x).orient("bottom").innerTickSize(2).outerTickSize(0);
+        var yAxis = d3.svg.axis().scale(y).orient("left").ticks(5).innerTickSize(2).outerTickSize(0);
+
+        var svg = d3.select("#dimension_barchart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom)
+
+        svg.append('text')
+            .attr('x', width/2 + margin.left)
+            .attr('y', 26)
+            .attr('text-anchor', 'middle')
+            .attr({ 'style': 'font: 12px helvetica; font-weight: 400;' })
+            .text('Dimension eigenvalues');
+
+        svg = svg.append("g")
+            .attr("transform", "translate(" + [margin.left, margin.top] + ")");
+
+        svg.append("g")
+            .attr("class", "axis-x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+        svg.append("g").attr("class", "axis-y axis").call(yAxis);
+
+        svg.selectAll('.axis text').attr({ 'style': 'font: 10px helvetica; font-weight: 100' });
+        svg.selectAll('.axis-x text').attr({ 'text-anchor': 'end', 'dy': '-2px', 'transform': 'translate(0,7)rotate(-90)' });
+        svg.selectAll('.axis-y text').attr({ 'text-anchor': 'end', 'dy': '4px' });
+        svg.selectAll('.axis path, .axis line').attr({ 'fill': 'none', 'stroke': '#aaa', 'shape-rendering': 'crispEdges' });
+
+        svg.selectAll(".bar")
+            .data(ht)
+          .enter()
+            .append("rect").classed('bar', true)
+            .attr('fill', '#0074cc')
+            .attr("x", function(d, i) { return x(i+1); })
+            .attr("y", function(d, i) { return y(d); })
+            .attr("width", x.rangeBand())
+            .attr("height", function(d) { return height - y(d); })
+            .on("click", function(d, i) {
+                if (d3.event.shiftKey) {
+                    if (i < plot_dimensions[0]) {
+                        select_dimensions(i, plot_dimensions[1]);
+                    } else if (i > plot_dimensions[0] || i != plot_dimensions[1]) {
+                        select_dimensions(plot_dimensions[0], i);
+                    }
+                } else {
+                    select_dimensions(i, i+1);
+                }
+            });
+    };
+
+    var sample_annotation_entry = new sad.SampleAnnotationDropdown({
+        url: "${request.route_url('mistic.json.dataset.sampleinfo.search', dataset=dataset)}",
+        el: $('#sample_annotation')
+    });
+
+
+
+    var group_colours = d3.scale.category20();
+    var next_group = 0;
+
+    $('#clear_all').on('click', function(event) { 
+        pgc.reset();
+        event.preventDefault();
+    });
+
+    $('#new_group').on('click', function(event) { 
+        var g = new pg.PointGroup({
+            style: { fill: group_colours(next_group % 20) }
+        });
+        pgc.add(g);
+        ++next_group;
+        event.preventDefault();
+    });
+
     $.ajax({
         url: "${request.route_url('mistic.json.dataset.mds', dataset=dataset, xform=xform, N=N_genes)}",
         data: {},
         async: true,
         dataType: 'json',
         success: function(data) {
-            pt.x = data[0];
-            pt.y = data[1];
-            pt.keys = sample_ids;
-            current_graph.fitElems();
-            current_graph.update();
+            mds_data = data;
+
+            dimension_barchart();
+
+            select_dimensions(0, 1);
         }
     });
 
 
-    pt.setSelectionDelegate(sel);
-
-    current_graph.addElem(pt);
-    current_graph.fitElems();
-    current_graph.update();
-
-    current_graph.updatePlotArea();
-    pt.reflectSelection([ 'id1', 'id3' ]);
 
     $('#sample_annotation_drop').on('click', function() {
         sample_annotation_entry.$el.val('');

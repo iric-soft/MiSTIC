@@ -164,7 +164,7 @@ class DataSet(object):
       vec = eigvecs.T * numpy.sqrt(abs(eigvals)).reshape((N,1))
       return vec[-2::-1,:], eigvals[-2::-1]
 
-    return cmdscale(dist)[0][:2]
+    return cmdscale(dist)
 
   def randompaircorr(self, N = 10000, transform = None, permute = False):
     logging.info('randompaircorr begin')
