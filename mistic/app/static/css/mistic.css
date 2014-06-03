@@ -139,29 +139,49 @@ ul.geneset-cat-list {
 
 
 
+.accordion-group {
+  border: 1px solid #7aa8cc;
+  -webkit-border-radius: 5px 5px 0px 0px;
+     -moz-border-radius: 5px 5px 0px 0px;
+          border-radius: 5px 5px 0px 0px;
+  margin-bottom: 5px;
+}
+
 .accordion-body {
   background-color: #ffffff;
-  
+  border: 0px;
+}
+
+.accordion-inner {
+  border: 0px;
 }
 
 .accordion-heading {
-  background-color:#EAE9E9;
-  border-bottom: 1px solid transparent;
-  border-top-right-radius: 3px;
-  border-top-left-radius: 3px;
- 
-   
+  background-color: #7aa8cc;
+  -webkit-border-radius: 4px 4px 0px 0px;
+     -moz-border-radius: 4px 4px 0px 0px;
+          border-radius: 4px 4px 0px 0px;
+  margin: 0px;
+}
+
+.accordion-heading h4 {
+  font-size: 15px;
+  line-height: 15px;
+}
+
+.accordion-title {
+  margin: 0px;
 }
 
 .accordion-toggle, .accordion-toggle:hover,
 .accordion-toggle:focus  {
   cursor: pointer;
   text-decoration: none;
-  color:#333333;
-  
+  color: #ffffff;
 }
 
-
+.accordion-inner {
+}
 
 div#sample_enrichment {
   font-size: 80%;
