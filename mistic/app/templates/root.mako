@@ -74,6 +74,7 @@ th { padding:0px;}
 <th>n</th>
 <th>Icicle</th>
 <th></th>
+<th></th>
 </tr>
 </thead>
 
@@ -92,6 +93,19 @@ th { padding:0px;}
         <a class="btn btn-small icicle-link" target="_blank" href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a>
   %endif
 %endfor
+      </div>
+    </td>
+    <td>
+      <div class="btn-group">
+        <a class="dropdown-toggle btn btn-small" href="#" data-toggle="dropdown">
+          More plots <span class="caret"></span>
+        </a>
+        <ul style="text-align: left" class="dropdown-menu" role="menu">
+          <li><a target="_blank" href="${request.route_url('mistic.template.mds', dataset=ds.id)}">MDS plot</a></li>
+          <li><a target="_blank" href="${request.route_url('mistic.template.corrdistrib', dataset=ds.id)}">Correlation plot</a></li>
+          <li><a target="_blank" href="${request.route_url('mistic.template.corrgraph.2', dataset=ds.id)}">Waterfall plot</a></li>
+          <li><a target="_blank" href="${request.route_url('mistic.template.pairplot', dataset=ds.id, genes=[])}">Multi-way scatterplot</a></li>
+        </ul>
       </div>
     </td>
     <td class='td_add_favorite'>
@@ -138,10 +152,6 @@ require(["jquery", "utils"], function($, utils) {
 
     var dat = ${json.dumps(dat)|n};
 
-    $(document).ready(function() {
-        var oTable = initTable();
-    });
-
     function initTable() {
         var aoc = [null];
         var bsc = [true];
@@ -149,8 +159,8 @@ require(["jquery", "utils"], function($, utils) {
             aoc.push(null);
             bsc.push(true);
         }
-        aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": true , "sType": "html"}]);
-        bsc = bsc.concat([true, false, false ]);
+        aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": false }, { "bSortable": true , "sType": "html"}]);
+        bsc = bsc.concat([true, false, false, false ]);
         var n = bsc.length-1;
 
         return $('#datasets-table').dataTable({
@@ -211,7 +221,8 @@ require(["jquery", "utils"], function($, utils) {
     });
 
     $('#datasets-table tbody td').on('click', function(event) {
-        if ($(this).find('.icicle-link').length > 1) return;
+        if ($(event.target).prop("tagName") != 'TD') return;
+
         if ($(this).hasClass('td_add_favorite')) return;
 
         var tr = $(this).parents('tr');
@@ -270,7 +281,11 @@ require(["jquery", "utils"], function($, utils) {
         });
     };
 
-    manageFavorites();
+    require(['domReady!'], function(doc) {
+        // initTable();
+        manageFavorites();
+    });
+
 });
 </script>
 
