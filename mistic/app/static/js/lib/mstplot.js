@@ -170,6 +170,15 @@
         this.updateLabels();
     };
     
+    mstplot.prototype.zoomTo = function () {
+        var selected = _.keys(this.selected_ids);
+        var l = _.filter(this.labels.selectAll('g').data(),function(d) {return (_.indexOf(selected, d.id) !=-1) ;});
+        var e = _.last(l);
+        if (_.isUndefined(e)) {console.debug('Not in cluster');return;}
+        this.centerOn(e.x, e.y, 10.0); 
+        
+    };
+    
     mstplot.prototype.updateLabels = function() {
         var self = this;
         var labels = [];
@@ -180,7 +189,7 @@
                 labels.push(this.nodes_by_id[selected[i]]);
             }
         }
-
+        
         if (this.options.node_r * this.S >= 10) {
             var visible = this.visibleLabels(this.T, this.S);
             for (var i = 0; i < visible.length; ++i) {
@@ -203,11 +212,15 @@
             .attr('stroke', '#eee')
             .attr('stroke-width', 2)
             .attr('fill',   '#000');
+            
         g.append('rect')
             .attr('height', 15)
             .attr('x', 6).attr('y', -7.5)
-            .attr('fill', '#0074cc')
-            .attr('stroke', '#000');
+            .attr('fill', function(d) { c = '#0074cc'; if (_.indexOf(selected, d.id) !=-1) {c = '#cc7400'}; return c;})
+            .attr('stroke', '#000')
+            .append("title")
+            .text(function(d) { return self.info[d.id].name; });
+            
         g.append('text')
             .attr('x', 10)
             .attr('y', 3.5)
@@ -217,7 +230,7 @@
             var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
             d3.select(this).select('rect').attr('width', w);
         });
-
+       
         l.exit()
          .remove();
 

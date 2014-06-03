@@ -94,11 +94,25 @@ $(document).ready(function() {
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=ds.id)}");
-
+  
+  // restrict choices to the genes in the cluster
+  
+  gene_entry.afterFetch =  function() {
+            this.fetching_items = false;
+            this.beginFetching(this.searchURL(), this.searchData());
+            //this.collection = _.filter(this.collection_.keys(this.collection._byId));
+            toremove = _.filter(this.collection.models, function(d) {return _.indexOf(nodes, d.id)==-1;}); 
+            //console.debug(_.map(toremove, function(m) {return m.id;}));
+            this.collection = this.collection.remove(toremove);
+        }
+    
   gene_entry.on('change', function(item) {
     if (item === null) return;
     current_graph.selected_ids[item.id] = true;
     current_graph.updateLabels();
+    current_graph.zoomTo();
+   
+    
   });
 });
 </script>
