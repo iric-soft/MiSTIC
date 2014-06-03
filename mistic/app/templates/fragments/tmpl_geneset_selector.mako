@@ -7,7 +7,7 @@
       </button>
       <span></span>
     </div>
-    <input type="text" placeholder="Gene set">
+    <input type="text" class="input-medium" placeholder="Gene set">
     <div class="btn-group">
       <button class="btn dropdown-toggle" data-toggle="dropdown">
         <span class="caret"></span>
