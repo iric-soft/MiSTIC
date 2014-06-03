@@ -238,6 +238,7 @@ def main(global_config, **settings):
     config.add_route('mistic.template.corrdistrib',        '/corrdistrib/{dataset}')
     config.add_route('mistic.template.mds',                '/mds/{dataset}')
     config.add_route('mistic.template.corrgraph',          '/genecorr')
+    config.add_route('mistic.template.corrgraph.2',        '/genecorr/{dataset}')
     config.add_route('mistic.template.corrgraph_static',   '/genecorr/{dataset}/{gene}')
     config.add_route('mistic.template.scatterplot',        '/scatterplot')
     config.add_route('mistic.template.scatterplot_static', '/scatterplot/{dataset}/{gene1}/{gene2}')
@@ -251,6 +252,7 @@ def main(global_config, **settings):
     config.add_route('mistic.template.clustering',         '/clustering/{dataset}/{xform}')
     config.add_route('mistic.template.mstplot',            '/mstplot/{dataset}/{xform}')
    
+    config.add_route('mistic.template.test',               '/test')
 
     config.add_static_view('static',      'mistic:app/static', cache_max_age=3600)
     config.add_static_view('cdnjs',       'mistic:app/cdnjs', cache_max_age=3600)

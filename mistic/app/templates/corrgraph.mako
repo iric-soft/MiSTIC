@@ -235,11 +235,9 @@ require([
             error: disable,
         });
     };
-
-    $('#datasets').on('change', function(event) {
-        addDataset(event.target.value);
-    });
-
+%if dataset is not None:
+    addDataset("${dataset.id}", true);
+%endif
     var plot = function(dataset, gene, name_labels) {
         $('#plot').button('loading');
 
