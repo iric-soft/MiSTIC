@@ -699,6 +699,9 @@ class DataSet(object):
   def genecorr(self, gene, xform = None, absthresh = None, thresh = None):
     return self._genecorr(gene, xform, absthresh, thresh)
 
+  def calcMDS(self, xform, N_skip, N_genes, common = False):
+    return self.data.calcMDS(self._makeTransform(xform), N_skip, N_genes, common = common)
+
   def readPositionData(self, pos):
     node_re = re.compile(r'^\s*(\S*)\s+\[(.*?)\];$', re.S|re.M)
     attr_re = re.compile(r'(\S+=(?:[^"\s]+|"[^"]*"))\s*,\s*', re.S|re.M)

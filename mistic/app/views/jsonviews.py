@@ -507,6 +507,17 @@ class Dataset(object):
 
         return gs_tab
 
+    @key_cache_region('mistic', 'genecorr', lambda args: (args[0].dataset.id,) + args[1:])
+    def _mds(self, xform, N_skip, N_genes):
+        mds_matrix = self.dataset.calcMDS(xform, N_skip, N_genes)
+        return map(list, mds_matrix)
+
+    @view_config(route_name="mistic.json.dataset.mds", request_method="GET", renderer="json")
+    def mds(self):
+        return self._mds(self.request.matchdict['xform'], 0, int(self.request.matchdict['N']))
+
+
+
 
 class DatasetSample(Dataset):
     def __init__(self, request):
