@@ -1,5 +1,6 @@
 <%!
 import mistic.app.data as data
+import mistic.app.tables as tables
 import json
 %>
 <%inherit file="mistic:app/templates/base.mako"/>
@@ -45,6 +46,11 @@ rect.bar.selected:hover {
   margin-top: 5px;
 }
 
+</%block>
+
+<%block name="actions">
+  ${parent.actions()}
+   <button type="button" id="share_url" class="btn" >Link to share</a>
 </%block>
 
 <%block name="controls">
@@ -156,6 +162,24 @@ rect.bar.selected:hover {
   </div>
 
 </div>
+
+<div class="modal hide" id="link_to_share">
+  <div class="modal-dialog" >
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Permanent link for this plot</h4>
+      </div>
+      <div class="modal-body">
+        <span id="share"></span>
+      </div>
+    </div>
+    <div class="modal-footer">
+      <button type="button" class="btn" data-clipboard-target="share" id="copy-to-clipboard">Copy to clipboard</button>
+      <button type="button" class="btn btn-primary" data-dismiss="modal">Done</button>
+    </div>
+  </div>
+</div>
 </%block>
 
 <%block name="info">
@@ -169,19 +193,21 @@ ${parent.pagetail()}
 %>
 <script type="text/javascript">
 require([
-    "jquery", "underscore", "d3",
+    "jquery", "underscore", "d3", "zeroclipboard",
     "math",
     "plotbase",
     "point_group", "point_group_view",
     "sample_annotation_dropdown",
     "domReady!"
 ], function(
-    $, _, d3,
+    $, _, d3, ZeroClipboard,
     math,
     plotbase,
     pg, pgv,
     sad,
     doc) {
+
+    var clip = new ZeroClipboard($("#copy-to-clipboard"));
 
     var current_graph = new plotbase.plotbase({
         title: "MDS plot (${dataset.name})",
@@ -368,26 +394,47 @@ require([
         event.preventDefault();
     });
 
-    $('#new_group').on('click', function(event) { 
+    var newGroup = function() {
         var g = new pg.PointGroup({
             style: { fill: group_colours(next_group % 20) }
         });
         pgc.add(g);
         ++next_group;
+    };
+
+    $('#new_group').on('click', function(event) { 
+        newGroup();
         event.preventDefault();
     });
 
+<%
+    hl = request.GET.get('hl')
+    if hl is not None:
+        hl = tables.JSONStore.fetch(tables.DBSession(), hl)
+%>
+%if hl is not None:
+    pgc.reset(${hl|n});
+%else:
+    newGroup();
+%endif
+
     var _update = { active: false, pending: undefined };
+
+    var getOptions = function() {
+        return {
+            x: $('button.xform.active').data('xform'),
+            n: +$('#param_genes').val(),
+            s: +$('#param_skip').val(),
+            p: $('#param_pairwise').is(':checked')
+        };
+    };
 
     var updateMDS = function() {
         if (_update.active) {
             _update.pending = true;
         } else {
-            var xform = $('button.xform.active').data('xform');
-            var n_genes = +$('#param_genes').val();
-            var n_skip = +$('#param_skip').val();
-            var pairwise = $('#param_pairwise').is(':checked');
-            if (_.isNaN(n_genes) || _.isNaN(n_skip)) return;
+            var opt = getOptions();
+            if (_.isNaN(opt.n) || _.isNaN(opt.s)) return;
 
             _update.active = true;
             _update.pending = false;
@@ -397,7 +444,7 @@ require([
                 url: "${request.route_url('mistic.json.dataset.mds', dataset=dataset.id)}",
                 dataType: 'json',
                 type: 'GET',
-                data: { x: xform, n: n_genes, s: n_skip, p: pairwise },
+                data: opt,
                 error: function(req, status, error) {
                     console.log('got an error', status, error);
                 },
@@ -556,6 +603,30 @@ require([
         selectionSearch(_.keys(selection));
         $('#sample_enrichment_panel').collapse('show');
     });
+
+    $("#share_url").on('click', function(event){
+        var url = "${request.route_url('mistic.template.mds', dataset=dataset.id)}";
+        var opt = getOptions();
+        url += '?' + $.param(opt);
+
+        $.ajax({
+            url: "${request.route_url('mistic.json.attr.set')}",
+            dataType: 'json',
+            type: 'POST',
+            data: JSON.stringify(pgc.toJSON()),
+            error: function(req, status, error) {
+                console.log('failed to construct a URL');
+            },
+            success: function(data) {
+                $("span#share").html(url + '&hl=' + data);
+                $("#link_to_share").modal({keyboard : true, 
+                                           backdrop: true });
+
+            },
+        });
+        event.preventDefault();
+    });
+
 });
 </script>
 </%block>
