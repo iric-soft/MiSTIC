@@ -469,7 +469,7 @@
         this.label_g.selectAll('g').remove();
     };
 
-    arcplot.prototype.colourByClusterNumber = function(clusters, statistic, comparator, cluster_info) {
+    arcplot.prototype.colourByClusterNumber = function(clusters, statistic, comparator, cluster_info, statsName) {
         this.findBestMatches(clusters, statistic, comparator);
 
         var n_nodes = 0;
@@ -533,23 +533,31 @@
             )
         }
         cids[-1] = '#000';
-
+        
+        this.body.selectAll('path.arc').selectAll('title').remove();
         this.body
             .selectAll('path.arc')
-            .attr('fill', function(d) { return cids[d.__x_max_i]; });
+            .attr('fill', function(d) { return cids[d.__x_max_i]; })
+            .append('title')
+            .text(function(d) {return statsName + ":" + d.__x_max.toFixed(3);});
     };
 
-    arcplot.prototype.colourByClusterMatch = function(clusters, statistic, comparator, ramp) {
+    arcplot.prototype.colourByClusterMatch = function(clusters, statistic, comparator, ramp, statsName) {
         this.findBestMatches(clusters, statistic, comparator);
+        this.body.selectAll('path.arc').selectAll('title').remove();
         this.body
             .selectAll('path.arc')
-            .attr('fill', function(d) { return d.__x_max_i == -1 ? "#bdbdbd" : ramp(d.__x_max); });
+            .attr('fill', function(d) { return d.__x_max_i == -1 ? "#bdbdbd" : ramp(d.__x_max); })
+            .append('title')
+            .text(function(d) {return statsName + " :" + d.__x_max.toFixed(3);})
+            ;
     };
 
     arcplot.prototype.removeColour = function() {
         var arcs = this.body
             .selectAll('path.arc')
             .attr('fill', '#000');
+        arcs.selectAll('title').remove();
     };
 
     arcplot.prototype.setGraphInfo = function(graph_info) {

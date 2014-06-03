@@ -49,13 +49,13 @@ import pickle
       </div>
     </div>
           
-          
-   <div class="accordion-group">     
+       
+  <div class="accordion-group">     
        <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#go_colour">Geneset enrichment</a></h4>
+         <a class="accordion-toggle" data-toggle="collapse"  href="#gs_dropdown">Geneset enrichment</a></h4>
       </div>
   
-   <div id="go_colour" class="accordion-body collapse in">
+    <div id="gs_dropdown" class="accordion-body collapse in">
        <div class="accordion-inner">  
            
             
@@ -85,8 +85,8 @@ import pickle
           
       </div>
       </div>
-    </div>
-  
+    </div> 
+    
   
   <div class="accordion-group">
        <div class="accordion-heading">
@@ -168,8 +168,7 @@ $(document).ready(function() {
  
   var gene_entry = new GeneDropdown({ el: $("#gene") });
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
-  
-  newGSDropdown = function (elem, suff) {
+   newGSDropdown = function (elem, suff) {
     return  new GODropdown({
         el: $("#"+elem),
         url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+ suff
@@ -189,7 +188,6 @@ $(document).ready(function() {
     });
   }
 
-  //var go_entry = newGSDropdown ('go', '');
   var level1_entry = newGSDropdown ('level1', '?v=1');
   var level2_entry = newGSDropdown ('level2', '?v=2');
   var level3_entry = newGSDropdown ('level3', '?v=3');
@@ -241,7 +239,7 @@ $(document).ready(function() {
             function (a,b) {
               return a > b;
             },
-            Red4);
+            Red4, 'Fisher exact');
             current_graph.dezoom();
         },
         error: function() {
@@ -282,7 +280,7 @@ $(document).ready(function() {
             function (a,b) {
               return a > b;
             },
-            YlGnBl);
+            Pal, 'Kappa coefficient');
             
         },
         error: function() {
@@ -323,7 +321,7 @@ $(document).ready(function() {
                             function (a,b) {
                               return a > b;
                             },
-                            go_info);
+                            go_info, 'Chi2 yates');
         current_graph.goLabels();
         $('#all_go').button('compute...');
       },
