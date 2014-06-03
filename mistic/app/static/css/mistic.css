@@ -2,7 +2,15 @@
 /*
  * Mistic general css
  */
- 
+
+/*
+ * colours:
+ *   #7aa8cc     - accordion headers
+ *   #0074cc     - table hover rows, mst nodes, bar graph
+ *   #005799     - darker blue variant, bar graph hover
+ *   #cc7400     - selected mst nodes
+ */
+
 body {
   font-family: helvetica,arial,sans-serif;
   background-color: #f0f0f0;
