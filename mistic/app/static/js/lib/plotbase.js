@@ -528,6 +528,11 @@ define(["underscore", "backbone", "jquery", "d3", "math", "utils"], function(_, 
             });
     };
 
+    plotbase.prototype.clearBrush = function() {
+        this.brush.clear();
+        d3.select(this.svg).select('g.brush').call(this.brush);
+    };
+
     plotbase.prototype.updateBackground = function() {
         var svg = d3.select(this.svg);
 
