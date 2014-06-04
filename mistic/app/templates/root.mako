@@ -26,23 +26,31 @@ for ds in data.datasets.all():
 ${parent.style()}
 
 #datasets-table tbody tr:hover {
-background-color:#DAD9DB;
-cursor:pointer;
+  cursor: pointer;
+}
+
+#datasets-table tr td.no-hover {
+  background-color: #fff !important;
+  cursor: auto;
 }
 
 td.group {
-  background-color: #EAE9E9;
-  text-align:left;
+  text-align: left;
 }
+
 td.subgroup {
-  background-color: #EAE9E9;
-  text-align:left;
+  text-align: left;
   padding : 10px;
 }
 
-th { padding:0px;}
+th {
+  padding: 0px;
+}
 
-
+a.small-pill {
+  padding: 2px 10px;
+  line-height: 20px;
+}
 
 </%block>
 <%block name="actions">
@@ -86,29 +94,31 @@ th { padding:0px;}
     <td>${ds.tags.get(term, '')}</td>
 %endfor
     <td>${ds.numberSamples}</td>
-    <td>
-      <div class="btn-group">
+    <td class="no-hover">
+      <ul class="nav nav-pills" style="padding: 0px; margin: 0px;">
 %for tf in transforms:
   %if tf in ds.transforms:
-        <a class="btn btn-small icicle-link" target="_blank" href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a>
+        <li><a class="icicle-link small-pill" target="_blank" href="${request.route_url('mistic.template.clustering', dataset=ds.id, xform=tf)}">${tf}</a></li>
   %endif
 %endfor
-      </div>
+      </ul>
     </td>
-    <td>
-      <div class="btn-group">
-        <a class="dropdown-toggle btn btn-small" href="#" data-toggle="dropdown">
-          More plots <span class="caret"></span>
-        </a>
-        <ul style="text-align: left" class="dropdown-menu" role="menu">
-          <li><a target="_blank" href="${request.route_url('mistic.template.mds', dataset=ds.id)}">MDS plot</a></li>
-          <li><a target="_blank" href="${request.route_url('mistic.template.corrdistrib', dataset=ds.id)}">Correlation plot</a></li>
-          <li><a target="_blank" href="${request.route_url('mistic.template.corrgraph.2', dataset=ds.id)}">Waterfall plot</a></li>
-          <li><a target="_blank" href="${request.route_url('mistic.template.pairplot', dataset=ds.id, genes=[])}">Multi-way scatterplot</a></li>
+    <td class="no-hover">
+      <div>
+        <ul class="nav nav-pills" style="padding: 0px; margin: 0px;">
+          <li class="dropdown">
+            <a class="dropdown-toggle small-pill" href="#" data-toggle="dropdown">More plots <span class="caret"></span></a>
+            <ul style="text-align: left" class="dropdown-menu" role="menu">
+              <li><a target="_blank" href="${request.route_url('mistic.template.mds', dataset=ds.id)}">MDS plot</a></li>
+              <li><a target="_blank" href="${request.route_url('mistic.template.corrdistrib', dataset=ds.id)}">Correlation plot</a></li>
+              <li><a target="_blank" href="${request.route_url('mistic.template.corrgraph.2', dataset=ds.id)}">Waterfall plot</a></li>
+              <li><a target="_blank" href="${request.route_url('mistic.template.pairplot', dataset=ds.id, genes=[])}">Multi-way scatterplot</a></li>
+            </ul>
+          </li>
         </ul>
       </div>
     </td>
-    <td class='td_add_favorite'>
+    <td class="td_add_favorite no-hover">
       <a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'><span class="dummy" id="dummy" style="display:none">a</span>&#x2736</a>
     </td>
   </tr>
@@ -175,7 +185,7 @@ require(["jquery", "utils"], function($, utils) {
         });
     }
 
-    $('#datasets-table th a ').on('click', function(event) {
+    $('#datasets-table th a').on('click', function(event) {
         event.stopPropagation();
         var cell = this.parentElement;
         var cellContent = cell.innerHTML;
@@ -222,11 +232,10 @@ require(["jquery", "utils"], function($, utils) {
 
     $('#datasets-table tbody td').on('click', function(event) {
         if ($(event.target).prop("tagName") != 'TD') return;
-
         if ($(this).hasClass('td_add_favorite')) return;
 
         var tr = $(this).parents('tr');
-        var link = $(tr).find('span > a')[0];
+        var link = $(tr).find('a.icicle-link')[0];
         window.open($(link).attr("href"));
     });
 
