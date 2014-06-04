@@ -93,7 +93,7 @@ import json
               <li><a id="change_axes"  href="#">Change axes</a></li>
               <li>
                 Transformation:
-                <div class="btn-group btn-group-justified" data-toggle="buttons-radio" id="transform-buttons">
+                <div class="btn-group btn-group-justified" id="transform-buttons">
                 </div>
               </li>
             </ul>
@@ -253,42 +253,40 @@ require([
 %>
 
     var setCurrentTransform = function(xfrm) {
-        
         if (current_transform !== xfrm) {
-            var avail_xfrms = dataset_info[0]['xfrm']
-            if (_.contains(avail_xfrms, xfrm)) {
-                $('#transform-buttons button').toggleClass('active', current_transform == xfrm);
-                current_transform = xfrm;
-                reloadAll();
-                // choose log scales if 'log' is a valid transformation, and the selected transformation is 'none'
-                var lg = current_transform === 'none' && _.contains(avail_xfrms, 'log');
-                current_graph.setScaleType(lg, lg);
-            }
+            current_transform = xfrm;
+            var lg = current_transform === 'none' && _.contains(dataset_info[0]['xfrm'], 'log');
+            current_graph.setScaleType(lg, lg);
+            reloadAll(true);
         }
-        else {
-            $('#transform-buttons button:contains("'+xfrm+'")').toggleClass('active', current_transform == xfrm);
-        }
+
+        $('#transform-buttons .btn').each(function(i, btn) { $(btn).toggleClass('active', $(btn).data('xform') == current_transform); });
+
         var xform_text = current_transform;
-        if (current_transform==='log') { xform_text = "${xf['log']}"; }
-        if (current_transform==='none') { xform_text = "${xf['none']}"; }
+        if (current_transform === 'log') { xform_text = "${xf['log']}"; }
+        if (current_transform === 'none') { xform_text = "${xf['none']}"; }
         current_graph.updateXform(xform_text);
-        
     };
 
     var setAvailableTransforms = function(xfrm_list) {
         var xf = $('#transform-buttons');
         xf.empty();
-        
-        current_transform = xfrm_list[0];
+        xfrm_list = _.without(xfrm_list, 'none');
+        xfrm_list.splice(0,0, 'none');
+
         _.each(xfrm_list, function(val) {
             var btn = $('<button class="btn btn-default">');
+            btn.data('xform', val);
             btn.on('click', function(event) {
-                setCurrentTransform($(this).text());
+                setCurrentTransform($(this).data('xform'));
                 event.preventDefault();
             });
             btn.text(val);
             xf.append(btn);
         });
+
+        current_transform = null;
+        setCurrentTransform('none');
     };
 
     var addDataset = function(dataset, sync) {
@@ -301,10 +299,9 @@ require([
             success: function(data) {
                 $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
                 
-                setAvailableTransforms(data['xfrm']);
-                setCurrentTransform(data['xfrm'][0]);
-                current_datasets = [dataset];
                 dataset_info = [data];
+                current_datasets = [dataset];
+                setAvailableTransforms(data['xfrm']);
                 
                 
                 gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]));
@@ -635,8 +632,6 @@ require([
         
         event.preventDefault();
     });
-
-    $("#transform-buttons").button();
 });
 </script>
 </%block>

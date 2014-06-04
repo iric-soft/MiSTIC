@@ -295,13 +295,11 @@ define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone,
 
         if (this.xAxis !== null && !(_.isUndefined(this.xAxis))) {
             svg.select('g.axis-x')
-                //.transition()
                 .call(this.xAxis);
         }
 
         if (this.yAxis !== null && !(_.isUndefined(this.yAxis))) {
             svg.select('g.axis-y')
-                //.transition()
                 .call(this.yAxis);
         }
 
@@ -457,17 +455,13 @@ define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone,
             .classed('circlelabel invisible', true);
         g.append('title');
 
-        var transition = this.nodes.transition();
-
-        transition
-            .duration(500)
-            .ease("linear")
+        this.nodes
             .attr("transform", function(d) {
                 var t = self.transform(d);
                 return "translate(" + [t.x, t.y] + ")";
             });
 
-        transition
+        this.nodes
           .select('path')
             .each(function(d, i) {
                 var a = self.pointAttrs(d, i);
@@ -477,13 +471,13 @@ define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone,
                 }
             });
 
-        transition
+        this.nodes
           .select('text')
             .attr('x', pt_size + 2)
             .attr('y', pt_size)
             .text(function(d) {return d.k;} );
 
-        transition
+        this.nodes
           .select('title')
             .text(function(d) {
                 return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
@@ -491,10 +485,7 @@ define(["underscore", "backbone", "jquery", "d3", "math"], function(_, Backbone,
 
         this.nodes
           .exit()
-            .transition()
             .remove();
-            
-       
     }
 
     scatterplot.prototype.getXYData = function() {
