@@ -3,11 +3,11 @@ define(["underscore", "backbone", "jquery", "d3"], function(_, Backbone, $, d3) 
 
     var corrgraph = function(data, elem) {
         this.options = {
-            padding: [ 80, 80, 80, 80 ],
+            padding: [ 80, 80, 100, 80 ],
             inner: 10,
             outer: 15,
             xlab_offset: -50,
-            ylab_offset: 40,
+            ylab_offset: 60,
             show:10,
             nameAsLabel: false
             
@@ -355,9 +355,10 @@ define(["underscore", "backbone", "jquery", "d3"], function(_, Backbone, $, d3) 
             .exit()
               .remove();
 
+          console.log('subset =', subset);
           var lines = label_g
               .selectAll('.label-path')
-              .data(subset, function(d) { return d.gene; });
+              .data(subset, function(d) { return d.id; });
           
           lines
               .attr('d', function(d, i) { return d.p; })
@@ -473,7 +474,9 @@ define(["underscore", "backbone", "jquery", "d3"], function(_, Backbone, $, d3) 
             .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
 
         axes.selectAll('.axis-x text')
-            .attr('text-anchor', 'middle');
+            .attr('dy', '-5px')
+            .attr('transform', 'translate(0,10)rotate(90)')
+            .attr('text-anchor', 'begin');
 
         axes.selectAll('.axis-y text')
             .attr('text-anchor', 'end');
