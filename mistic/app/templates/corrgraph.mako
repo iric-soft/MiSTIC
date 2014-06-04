@@ -239,9 +239,6 @@ require([
             error: disable,
         });
     };
-%if dataset is not None:
-    addDataset("${dataset.id}", true);
-%endif
     var plot = function(dataset, gene, name_labels) {
         $('#plot').button('loading');
 
@@ -273,15 +270,25 @@ require([
 
     $('#plot').click(function (event) {
         if (current_dataset !== null && current_gene !== null) {
-            var expt = dataset_info['expt']
+            var expt = dataset_info['expt'];
             plot(current_dataset, current_gene.id, (expt=='hts' || expt=='ngs,hts'));
         }
         event.preventDefault();
     });
 
-    $('#datasets').change();
-    gene_entry.trigger('change', null);
     updateURLTarget({ dataset: null });
+
+%if dataset is not None:
+    addDataset("${dataset.id}", true);
+%endif
+
+%if gene is not None:
+    (function() {
+      var expt = dataset_info['expt'];
+      plot(current_dataset, "${gene}", (expt=='hts' || expt=='ngs,hts'));
+    })();
+%endif
+
     $(window).resize(resizeGraph);
     resizeGraph();
 });

@@ -97,18 +97,24 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.corrgraph")
   def corrgraph(self):
-    args = dict(dataset = None)
+    args = dict(dataset = None, gene = None)
     return render_to_response('mistic:app/templates/corrgraph.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.corrgraph.2")
-  def corrgraph(self):
+  def corrgraph2(self):
     dataset = self.request.matchdict['dataset']
 
     _dataset = data.datasets.get(dataset)
     if _dataset is None:
       raise HTTPNotFound()
 
-    args = dict(dataset = _dataset)
+    gene = self.request.GET.get('gene')
+    if gene is not None:
+      _row = _dataset.data.r(gene)
+      if _row == -1:
+        raise HTTPNotFound()
+
+    args = dict(dataset = _dataset, gene = gene)
     return render_to_response('mistic:app/templates/corrgraph.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.corrgraph_static")
