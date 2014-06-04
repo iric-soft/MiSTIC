@@ -353,7 +353,7 @@ require([
         svg.append("g").attr("class", "axis-y axis").call(yAxis);
 
         svg.selectAll('.axis text').attr({ 'style': 'font: 10px helvetica; font-weight: 100' });
-        svg.selectAll('.axis-x text').attr({ 'text-anchor': 'end', 'dy': '-2px', 'transform': 'translate(0,7)rotate(-90)' });
+        svg.selectAll('.axis-x text').attr({ 'text-anchor': 'begin', 'dy': '-2px', 'transform': 'translate(0,5)rotate(90)' });
         svg.selectAll('.axis-y text').attr({ 'text-anchor': 'end', 'dy': '4px' });
         svg.selectAll('.axis path, .axis line').attr({ 'fill': 'none', 'stroke': '#aaa', 'shape-rendering': 'crispEdges' });
 
