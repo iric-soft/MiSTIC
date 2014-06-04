@@ -22,12 +22,12 @@ body {
 table.dataTable tr.odd { background-color: #f8f8f8; }
 table.dataTable tr.even { background-color: white; }
 
-table.dataTable tr.odd td.sorting_1 { background-color: #e8e8e8; }
-table.dataTable tr.odd td.sorting_2 { background-color: #ececec; }
-table.dataTable tr.odd td.sorting_3 { background-color: #f0f0f0; }
-table.dataTable tr.even td.sorting_1 { background-color: #f0f0f0; }
-table.dataTable tr.even td.sorting_2 { background-color: #f4f4f4; }
-table.dataTable tr.even td.sorting_3 { background-color: #f8f8f8; }
+table.dataTable tr.odd td.sorting_1 { background-color: inherit; }
+table.dataTable tr.odd td.sorting_2 { background-color: inherit; }
+table.dataTable tr.odd td.sorting_3 { background-color: inherit; }
+table.dataTable tr.even td.sorting_1 { background-color: inherit; }
+table.dataTable tr.even td.sorting_2 { background-color: inherit; }
+table.dataTable tr.even td.sorting_3 { background-color: inherit; }
 
 table.dataTable tr:hover td {
   background-color: #bfdcf2 !important;
