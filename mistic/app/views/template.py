@@ -13,11 +13,6 @@ class Graph(object):
   def __init__(self, request):
     self.request = request
 
-  @view_config(route_name="mistic.template.test")
-  def test(self):
-    args = dict()
-    return render_to_response('mistic:app/templates/test.mako', args, request = self.request)
-
   @view_config(route_name="mistic.modal.datasets")
   def dataset_modal(self):
     datasets = data.datasets.all()
