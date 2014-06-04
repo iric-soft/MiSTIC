@@ -39,8 +39,12 @@ ${parent.style()}
 
       <div id="gene_menu" class="accordion-body collapse in">
         <div class="accordion-inner">
-          <input type="text" id="gene" autocomplete='off'>
-          <button class="btn" id="plot">Plot</button>
+          <div class="input-append">
+            <input type="text" id="gene" value="" autocomplete='off'>
+            <div class="btn-group">
+              <button class="btn" id="plot">Plot</button>
+            </div>
+          </div>
         </div>
       </div>
     </div>
