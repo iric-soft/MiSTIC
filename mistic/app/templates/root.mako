@@ -157,7 +157,7 @@ function initTable() {
     "bSearch": bsc,
     "bPaginate": false, 
     "bSort":true,
-    "bProcessing": false,,
+    "bProcessing": false,
     "bRetrieve":true,
     "aaSorting": [[n, 'asc'],[0,'asc']],
     "sDom": '<toolbar>T<"clear">Rfrtip' ,
