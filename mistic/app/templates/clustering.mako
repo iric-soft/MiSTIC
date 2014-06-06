@@ -144,8 +144,6 @@ $(document).ready(function() {
   else : 
     xf = xform 
 
- 
-
 %>
 
   resizeGraph = function() {
@@ -239,7 +237,7 @@ $(document).ready(function() {
             function (a,b) {
               return a > b;
             },
-            Red4, 'Fisher exact');
+            Red4, 'Fisher exact weight');
             current_graph.dezoom();
         },
         error: function() {
@@ -280,7 +278,7 @@ $(document).ready(function() {
             function (a,b) {
               return a > b;
             },
-            Pal, 'Kappa coefficient');
+            YlGnBl, 'Kappa coefficient');
             
         },
         error: function() {
