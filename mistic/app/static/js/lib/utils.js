@@ -104,7 +104,7 @@
 
 (function() {
    setColReorder = function (oTable){
-     oTable.fnSettings().sDom = "Rlfrtip";
+     oTable.fnSettings().sDom = "<toolbar>T<clear>Rlfrtip";
      oTable.fnSettings().oInstance._oPluginColReorder.s['allowReorder']= true;
      return oTable;
    };
@@ -113,12 +113,33 @@
 
 (function() {
    removeColReorder = function (oTable){
-     oTable.fnSettings().sDom = "";
+     oTable.fnSettings().sDom = "<toolbar>T<clear>lfrtip";
      oTable.fnSettings().oInstance._oPluginColReorder.s['allowReorder']= false;
      return oTable;
    };
 })();
 
+(function() {
+
+   defineStandardTableTools = function (swfPath, filename, mColumns) {
+
+     return {
+       "sSwfPath": swfPath,
+       "aButtons": [{'sExtends' : 'copy', 'sButtonText':'Copy','mColumns':mColumns}, 
+                    {"sExtends":    "collection",
+                         "sButtonText": "Save as",
+                         "aButtons":    [
+                             {'sExtends':"csv", 'sFileName' : filename+'.txt', 'sButtonText':'Text', 
+                              'sFieldSeperator':'\t', 'sFieldBoundary': '', 'mColumns':mColumns},
+                            // {'sExtends':"csv", 'sTitle': filename}, 
+                             {'sExtends':"csv", 'sTitle': filename, 'sButtonText':'Excel', 'mColumns':mColumns}
+                        ]
+                    }
+                   ]
+             };
+     };
+   
+})();
 
 (function() {
     getCookie = function(key) {

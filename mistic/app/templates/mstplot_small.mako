@@ -199,8 +199,11 @@ var updateEnrichmentTable = function() {
                           "bLengthChange": false,
                           "bFilter": true,
                           "bSort": true,
-                         
                           "bInfo": true,
+                          "sDom": '<toolbar>T<"clear">frtip' ,
+                          "oTableTools": defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_geneset_enrichment', 'visible'),
+                          
+                      
           
     }).columnFilter({sPlaceHolder: "tfoot", 
                     aoColumns:[null,

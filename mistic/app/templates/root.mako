@@ -150,15 +150,18 @@ function initTable() {
   bsc = bsc.concat([true, false, false ]);
   var n = bsc.length-1;
   
+  
+  exportedCol = _.range(n-1);
   return $('#datasets-table').dataTable({
     "aoColumns": aoc,
     "bSearch": bsc,
     "bPaginate": false, 
     "bSort":true,
-    "bProcessing": false,
-    "sDom": 'Rlfrtip',
+    "bProcessing": false,,
     "bRetrieve":true,
     "aaSorting": [[n, 'asc'],[0,'asc']],
+    "sDom": '<toolbar>T<"clear">Rfrtip' ,
+    "oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
   });
 }
 

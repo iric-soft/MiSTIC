@@ -502,7 +502,12 @@ $(document).ready(function() {
         "bLengthChange": false,
         "bFilter": false,
         "bSort": true,
-        "bInfo": false
+        "bInfo": false,
+        "sDom": '<toolbar>T<"clear">frtip' ,
+        "oTableTools": defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_sample_enrichment'),
+       
+       
+      
     });
   }
 
