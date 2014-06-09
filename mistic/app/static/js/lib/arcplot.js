@@ -210,7 +210,7 @@
     };
     arcplot.prototype._zoom = function() {
        
-        this.zoom.scale(this.xform.S).translate(this.xform.T);
+        this.zoom_behavior.scale(this.xform.S).translate(this.xform.T);
         this.body
             .transition()
             .duration(1000)
@@ -264,11 +264,12 @@
 
         } else {
             console.log(id+' not found'); 
-            return;
+            return -1;
         }
 
         this.xform = { T: T, S: S };
         this._zoom();
+        return 0;
     };
 
     arcplot.prototype.arcAngle = function(arc) {
@@ -691,15 +692,15 @@
             .attr('xmlns', 'http://www.w3.org/2000/svg');
 
         this.svg  = d3.select(this.elem[0]).select('svg');
+      
+        this.zoom_behavior = d3.behavior.zoom()
+                    .scaleExtent([0.75, 50])
+                    .on("zoom", _.bind(this.zoom, this));
         
        this.zoom_g = this.svg
             .append('g')
-            .call(
-                this.zoom = d3.behavior.zoom()
-                    .scaleExtent([0.75, 50])
-                    .on("zoom", _.bind(this.zoom, this)));
-
- 
+            .call(this.zoom_behavior);
+     
         this.xform = { T: [ 0, 0 ], S: 1.0 };
         
         this.body = this.zoom_g

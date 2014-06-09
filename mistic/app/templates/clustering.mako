@@ -335,7 +335,15 @@ $(document).ready(function() {
   gene_entry.on('change', function(item) {
    
     if (item !== null) {
-      current_graph.zoomTo(item.id);
+      exit_var = current_graph.zoomTo(item.id);
+      console.debug(exit_var);
+      if (exit_var == -1 ) { 
+            s = '<p><div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>';
+            s = s + '<strong>Warning!</strong> '+item.id+'is not found in any cluster.</div>'
+            $("#locate_gene > .accordion-inner").append(s);
+       
+      }
+      
     } else {
       current_graph.zoomTo(null);
     }
