@@ -159,7 +159,7 @@ function initTable() {
     "bSort":true,
     "bProcessing": false,
     "bRetrieve":true,
-    "aaSorting": [[n, 'asc'],[0,'asc']],
+    "aaSorting": [[n, 'asc']],
     "sDom": '<toolbar>T<"clear">Rfrtip' ,
     "oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
   });
