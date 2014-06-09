@@ -146,8 +146,15 @@
         this.current_selection = [];
         this.draw();
         this.setSelection(my_selection, true);
-    }
+    };
     
+    pairplot.prototype.showLabels = function() {
+        _.each(this.subgraphs, function(g) { g.showLabels(); });
+    };
+    
+    pairplot.prototype.clearLabels = function() {
+        _.each(this.subgraphs, function(g) { g.clearLabels(); });
+    };
     
     pairplot.prototype.clearBrush = function() {
         _.each(this.subgraphs, function(g) { g.clearBrush(); });

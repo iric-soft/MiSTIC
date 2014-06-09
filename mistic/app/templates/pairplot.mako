@@ -634,22 +634,12 @@ $(document).ready(function() {
   $(window).resize(resizeGraph);
 
   $('#show_labels').on("click", function(event){
-    var selected;
-    selected = d3.select(current_graph.svg).selectAll("g.node.selected .circlelabel");
-    if (selected[0].length == 0 ) {
-      selected = d3.select(current_graph.svg).selectAll("g.node .circlelabel");
-    }
-    selected.classed('invisible', false);
+    current_graph.showLabels()
     event.preventDefault();
   });
 
   $('#clear_labels').on("click", function(event){
-    var selected;
-    selected = d3.select(current_graph.svg).selectAll("g.node.selected .circlelabel");
-    if (selected[0].length == 0 ) {
-      selected = d3.select(current_graph.svg).selectAll("g.node .circlelabel");
-    }
-    selected.classed('invisible', true);
+    current_graph.clearLabels()
     event.preventDefault();
   });
 
