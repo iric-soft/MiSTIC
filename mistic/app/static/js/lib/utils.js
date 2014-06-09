@@ -131,8 +131,8 @@
                          "aButtons":    [
                              {'sExtends':"csv", 'sFileName' : filename+'.txt', 'sButtonText':'Text', 
                               'sFieldSeperator':'\t', 'sFieldBoundary': '', 'mColumns':mColumns},
-                            // {'sExtends':"csv", 'sTitle': filename}, 
-                             {'sExtends':"csv", 'sTitle': filename, 'sButtonText':'Excel', 'mColumns':mColumns}
+                             {'sExtends':"csv", 'sTitle': filename, 'sButtonText':'CSV', 'mColumns':mColumns}, 
+                             {'sExtends':"xls", 'sTitle': filename, 'sButtonText':'Excel', 'mColumns':mColumns}
                         ]
                     }
                    ]
