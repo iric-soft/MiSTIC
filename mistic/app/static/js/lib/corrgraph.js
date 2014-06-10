@@ -365,8 +365,7 @@
               .append('path')
               .attr('class', 'label-path')
               .attr('fill', 'none')
-              .attr('stroke', '#123')
-              .attr('opacity', .5)
+              .attr('stroke', '#bbb')
               .attr('stroke-width', '0.5')
               .attr('d', function(d, i) { return d.p; })
           
@@ -426,6 +425,7 @@
     };
 
     corrgraph.prototype.makeAxes = function() {
+       // console.log('makeAxes');
         var self = this;
         var xScale = this.xScale;
         var yScale = this.yScale;
@@ -470,7 +470,7 @@
         axes.selectAll('.axis text')
             .attr('style', 'font-family: helvetica; font-size: 11px; font-weight: 100');
 
-        axes.append('g').attr('class', 'grid-lines').attr('opacity', .5);
+        axes.append('g').attr('class', 'grid-lines');
 
         axes.select('g.grid-lines')
             .append('g').attr('class', 'grid-lines-y')
@@ -478,7 +478,7 @@
             .data(yAxis.tickValues())
             .enter()
             .append('line')
-            .attr('stroke', '#aaa')
+            .attr('stroke', '#ddd')
             .attr('stroke-width', '0.5')
             .attr('x1', xScale(0))
             .attr('y1', function (y) { return yScale(y); })
@@ -514,7 +514,7 @@
         if (this.data === undefined) {
             return;
         }
-
+       
         this.width = this.elem.width();
         this.height = this.elem.height();
 
@@ -554,9 +554,9 @@
             .attr('stroke-width', '1')
             .attr('shape-rendering', 'crispEdges');
 
-	svg.append('g').attr('class', 'gene-ticks')
-        svg.append('g').attr('class', 'labels')
+	    svg.append('g').attr('class', 'gene-ticks')
         svg.append('g').attr('class', 'axes')
+        svg.append('g').attr('class', 'labels')
 
         this.makeAxes();
         this.updateGeneTicks();
