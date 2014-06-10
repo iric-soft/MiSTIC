@@ -73,7 +73,6 @@ th, td {
   text-align: left;
 }
 
-
 rect {
   fill: #0074cc;
 }
@@ -81,13 +80,7 @@ text {
  fill: #fff;
 }
 
-rect.selected {
-  fill: #cc7400;
-}
-text.selected {
-  fill: #fff;
 
-}
 
 </%block>
 
@@ -117,6 +110,21 @@ var json = {
   "links": ${json.dumps(E)|n},
   "gstab": {},
 };
+
+
+var updateNodeStatus = function (nodes, selected, clear) {
+    
+    if (clear) {
+        d3.select('#graph').selectAll('rect').classed('selected', false).style('fill',  '#0074cc');
+        info.clear();
+    }    
+   if (!_.isNull(nodes)) {
+    nodes.classed('selected', selected).style('fill',  selected ? '#cc7400' : '#0074cc');  
+    nodes.each(function(d) {info.toggle(d.name);});
+   }
+};
+
+
 
 var updateEnrichmentTable = function() {
     
@@ -165,11 +173,12 @@ var updateEnrichmentTable = function() {
                 sel[d.genes[i]] = true;
             }
             
-            d3.select('#graph').selectAll('rect').classed('selected', function(d) { return sel[d.id]; });
-            info.clear();
-            d3.select('#graph').selectAll('rect.selected').each(function(d) {
-                info.toggle(d.name); 
-       });
+         
+            selected_nodes = d3.select('#graph').selectAll('rect').filter(function (d,i ) {return sel[d.id]});
+            updateNodeStatus(selected_nodes, true, true);
+           
+            
+       
     });
 
     var td = tr.selectAll('td')
@@ -231,26 +240,17 @@ var svg = d3.select("#graph").append("svg")
     .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink");
  
 var clickOnNode = function(d) {
-    
+ 
+      updateNodeStatus(d3.select(this), !d3.select(this).classed('selected'), false);
       d3.selectAll('tr.selected').classed('selected', false);
-      d3.select(this).classed('selected', !d3.select(this).classed('selected'));
-      var sibling = d3.select(this)[0][0].nextSibling;
-      d3.select(sibling).classed('selected', !d3.select(sibling).classed('selected'));
+      d3.select(this).classed('selected') ?  getContent(d) : hideMore(); 
       
-      if (!d3.select(this).classed('selected')){ hideMore(); }
-      
-      info.toggle((_.isUndefined(d.name) ? d.node.name : d.name));
-
-      if (d3.select(this).classed('selected')){  
-        getContent(d);
-       }   
     }
     
 var clickOnLink = function(d) {
        var url = "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}";     
        url += '/' + d.source.id;
        url += '/' + d.target.id;
-       console.debug(d.weight);
        window.open(url); 
 }
 
@@ -508,46 +508,37 @@ hideMore = function() {
 };
 
 $('#select_all').on('click', function(event) {
-  console.debug('select_all');
   d3.selectAll('tr.selected').classed('selected', false);
-  d3.select('#graph').selectAll('rect').classed('selected', true);
-  info.clear();
-  d3.select('#graph').selectAll('rect.selected').each(function(d){
-         info.add(d.name); 
-         
-         });
+  updateNodeStatus(d3.select('#graph').selectAll('rect'), true, true);
+  return false;
+});
+
+$('#clear_selection').on('click', function(event) {
+  d3.selectAll('tr.selected').classed('selected', false);
+  updateNodeStatus(null, false, true);
   return false;
 });
 
 
 var showName = false;
 $('#show_labels').on("click", function(event){
-    console.debug('show_labels');
-    showName = !showName;
-
-    if (showName) {d3.select('#graph').selectAll('text').each(function(d) {d3.select(this).text(d.name);});}
-    if (!showName){d3.select('#graph').selectAll('text').each(function(d) {d3.select(this).text(d.title);});}
-    
-  
+   
+    showName = !showName; 
+    d3.select('#graph').selectAll('text').each(function(d) {showName ? d3.select(this).text(d.title) :d3.select(this).text(d.name) ;});
+   
     d3.select('#graph').selectAll('.node').each(function(d) {
        var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
        d3.select(this).select('rect').attr('width',w); 
       });
-        
-   
-  
+
     return false;
     
   });
 
 
 
-$('#clear_selection').on('click', function(event) {
-  d3.selectAll('tr.selected').classed('selected', false);
-  d3.select('#graph').selectAll('rect.selected').classed('selected', false);
-  info.clear();
-  return false;
-});
+
+
 
 $('#scatterplot').on('click', function(event) {
   var ids = [];

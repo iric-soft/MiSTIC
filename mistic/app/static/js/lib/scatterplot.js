@@ -418,7 +418,26 @@
             .nice();
     };
 
-
+    scatterplot.prototype.showLabels = function() {
+       var pt_size = this.options.pt_size;
+       var font_size = pt_size + 8;
+      
+       l = d3.selectAll('.circlelabel')[0].length;
+       
+       if ( l == 0) {
+       d3.selectAll('.node')
+            .append("text")
+            .text(function(d) { return _.isUndefined(d) ? '' : d.k })
+            .attr('style', 'font-size:'+ font_size+"px;")
+            .classed('circlelabel' , true);
+       } 
+    };
+    
+    scatterplot.prototype.clearLabels = function() {
+       d3.selectAll('.circlelabel').remove();  
+    };
+    
+    
     scatterplot.prototype.updatePoints = function(xy) {
         
         var self = this;
@@ -444,10 +463,7 @@
 
         g.append('path')
             .on('click', _.bind(this.toggleSelected, this));
-
-        g.append("text")
-            .attr('style', 'font-size:'+ font_size+"px;")
-            .classed('circlelabel invisible', true);
+        
         g.append('title');
 
         var transition = this.nodes.transition();
@@ -489,7 +505,7 @@
             
        
     }
-
+    
     scatterplot.prototype.getXYData = function() {
         var keys = _.intersection(_.keys(this.xdata), _.keys(this.ydata));
 

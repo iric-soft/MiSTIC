@@ -54,7 +54,7 @@ ${parent.style()}
     <div id="geneset_menu" class="accordion-body collapse in">
       <div class="accordion-inner">
        
-            <label for="gsterm">Geneset members to hightlight : </label>
+            <label for="gsterm">Geneset members to highlight : </label>
             <input type="text" autocomplete='off' id="gsterm" placeholder='Search for geneset here'>
           
             
