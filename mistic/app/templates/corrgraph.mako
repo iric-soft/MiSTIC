@@ -3,7 +3,7 @@ import mistic.app.data as data
 import json
 %>
 <%inherit file="mistic:app/templates/base.mako"/>
-<%block name="pagetitle">Correlation waterfall plot</%block>
+<%block name="pagetitle">Single gene correlation</%block>
 <%block name="style">
 ${parent.style()}
 </%block>

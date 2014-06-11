@@ -59,7 +59,7 @@ mistic = {
         %if request.matched_route.name == 'mistic.template.corrgraph':
             <li class="active"><a href="#">Waterfall</a></li>
         %else:
-            <li><a href="${request.route_url('mistic.template.corrgraph')}">Waterfall</a></li>
+            <li><a href="${request.route_url('mistic.template.corrgraph')}">Single gene correlation</a></li>
         %endif
 
 
@@ -76,7 +76,7 @@ mistic = {
       %else: 
             <li>
       %endif
-      <a href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Multi-way Scatterplot</a></li>
+      <a href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Pairwise correlation scatterplots</a></li>
 
 
           </ul>
