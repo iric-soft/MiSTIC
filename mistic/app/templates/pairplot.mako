@@ -5,7 +5,7 @@ import json
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
-<%block name="pagetitle">Multi-way scatterplot</%block>
+<%block name="pagetitle">Pairwise correlation scatterplots</%block>
 
 <%block name="actions">
   ${parent.actions()}
