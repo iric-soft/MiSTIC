@@ -79,7 +79,9 @@ rect {
 text {
  fill: #fff;
 }
-
+#go_table {
+overflow-x : auto;
+}
 
 
 </%block>
@@ -94,7 +96,7 @@ ${parent.pagetail()}
 <%
   ds = data.datasets.get(dataset)
   a = ds.annotation
-
+  
   E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
   V = [ dict(
     id    = n,
