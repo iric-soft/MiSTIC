@@ -766,8 +766,8 @@ class DataSet(object):
     for l in lines:
       if l[0] == 'n':
         l = l.split()
-        nodes[int(l[1])-1] = l[2].replace('id=', '')
-
+        nodes[int(l[1])-1] = l[2].replace('id=', '').split(':')[0]
+    
     def E(l):
       l = l.split()
       e1 = int(l[1]) - 1
