@@ -387,9 +387,9 @@ getContent = function(d) {
   var gcLink = 'http://www.genecards.org/cgi-bin/carddisp.pl?gene='+d.name+'&search='+d.name+'';
   var egLink = 'http://www.ncbi.nlm.nih.gov/gene?cmd=search&term='+d.name+'[sym] AND human[ORGN]';
   var wkLink = 'http://en.wikipedia.org/wiki/'+d.name;
-  var urlEnsembl = 'http://beta.rest.ensembl.org/lookup/symbol/homo_sapiens/'+d.name+'?content-type=application/json';
+  var urlEnsembl = 'http://rest.ensembl.org/lookup/symbol/homo_sapiens/'+d.name+'?content-type=application/json';
   var urlNCBI  = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=_id_&retmode=txt'; 
-  var urlEnsemblId = 'http://beta.rest.ensembl.org/xrefs/id/_id_?content-type=application/json';
+  var urlEnsemblId = 'http://rest.ensembl.org/xrefs/id/_id_?content-type=application/json';
   
   var links = {'Ensembl':ebLink, 'GeneCards':gcLink, 'EntrezGene': egLink, 'Wikipedia': wkLink};
   var infos = ['Ensembl','EntrezGene']
