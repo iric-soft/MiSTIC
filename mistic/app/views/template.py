@@ -43,55 +43,14 @@ class Graph(object):
     args = dict()
     return render_to_response('mistic:app/templates/corrgraph.mako', args, request = self.request)
 
-  @view_config(route_name="mistic.template.corrgraph_static")
-  def corrgraph_static(self):
-    dataset = self.request.matchdict['dataset']
-    gene = self.request.matchdict['gene']
-    go_term = self.request.GET.getall('go')
-
-    _dataset = data.datasets.get(dataset)
-    if _dataset is None:
-      raise HTTPNotFound()
-
-    _row = _dataset.data.r(gene)
-    if _row == -1:
-      raise HTTPNotFound()
-
-    args = dict(
-      dataset = dataset,
-      gene = gene,
-      go = None if len(go_term) == 0 else go_term[0]
-    )
-    return render_to_response('mistic:app/templates/corrgraph_static.mako', args, request = self.request)
+ 
 
   @view_config(route_name="mistic.template.scatterplot")
   def scatterplot(self):
     args = dict()
     return render_to_response('mistic:app/templates/scatterplot.mako', args, request = self.request)
 
-  @view_config(route_name="mistic.template.scatterplot_static")
-  def scatterplot_static(self):
-    dataset = self.request.matchdict['dataset']
-    gene1 = self.request.matchdict['gene1']
-    gene2 = self.request.matchdict['gene2']
-
-    _dataset = data.datasets.get(dataset)
-    if _dataset is None:
-      raise HTTPNotFound()
-
-    _row1 = _dataset.data.r(gene1)
-    if _row1 == -1:
-      raise HTTPNotFound()
-    _row2 = _dataset.data.r(gene2)
-    if _row2 == -1:
-      raise HTTPNotFound()
-
-    args = dict(
-      dataset = dataset,
-      gene1 = gene1,
-      gene2 = gene2,
-    )
-    return render_to_response('mistic:app/templates/scatterplot_static.mako', args, request = self.request)
+ 
 
 
   @view_config(route_name="mistic.template.pairplot")
