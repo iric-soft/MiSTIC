@@ -2,7 +2,7 @@ from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPBadRequest
 from pyramid.view import view_config
 from pyramid.response import Response
 from pyramid.renderers import render_to_response
-
+from pyramid.security import authenticated_userid
 from mistic.app import data
 
 import json
@@ -34,7 +34,8 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.root")
   def root(self):
-    args = dict()
+   
+    args = dict(user=authenticated_userid(self.request))
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.corrgraph")

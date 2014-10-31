@@ -93,6 +93,13 @@ mistic = {
             %endif
             </%block>
           </div>
+        
+         <a href='/' id='logout' title="${user}">
+         <i class="icon-user icon-white">
+     
+         </i>
+         </a>
+             
         </div>
       </div>
     </div>
@@ -266,6 +273,9 @@ mistic = {
   
 
   
+$('#logout').click(function ()  {  clearAuthentication("${request.url}"); });
+
+ 
   
 })(jQuery);
 </script>

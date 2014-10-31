@@ -20,7 +20,7 @@ from pyramid.security import Everyone
 from pyramid.security import Authenticated
 from pyramid.security import NO_PERMISSION_REQUIRED
 from pyramid.authorization import ACLAuthorizationPolicy
-
+from pyramid.security import authenticated_userid
 from pyramid_beaker import set_cache_regions_from_settings
 from pyramid.session import UnencryptedCookieSessionFactoryConfig
 
@@ -66,8 +66,7 @@ class BasicAuthenticationPolicy(object):
         Default: ``Realm``.  The Basic Auth realm string.
 
     """
-    implements(IAuthenticationPolicy)
-
+   
     def __init__(self, check, realm='Realm'):
         self.check = check
         self.realm = realm
@@ -145,6 +144,7 @@ def load_datasets_settings (configurationFile, global_config):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
+    print 'settings', settings
     set_cache_regions_from_settings(settings)
 
     engine = engine_from_config(settings, 'sqlalchemy.')
@@ -154,14 +154,24 @@ def main(global_config, **settings):
     if 'mistic.datasets' in settings:
       settings.update(load_datasets_settings (settings['mistic.datasets'], global_config))
 
-    config_args = dict(root_factory=Root,
-                       settings=settings,
-                       default_permission='view')
+    config_args = dict(root_factory=Root,settings=settings,default_permission='view')
 
+    
+    
+    
     if 'mistic.basic.auth' in settings:
+      
+        if '=' not in settings['mistic.basic.auth'] : 
+            authorized_credentials = open(settings['mistic.basic.auth'], 'r').readlines()
+            authorized_credentials = ' '.join([a.strip() for a in authorized_credentials])
+            
+            authorized_credentials = authorized_credentials.strip()
+        else : 
+            authorized_credentials = settings['mistic.basic.auth']
+       
         config_args.update(dict(
                 authentication_policy=BasicAuthenticationPolicy(
-                    http_basic_authenticator(settings['mistic.basic.auth']),
+                    http_basic_authenticator(authorized_credentials),
                     realm=settings.get('mistic.basic.realm', 'mistic')),
                 authorization_policy=ACLAuthorizationPolicy() ))
 
