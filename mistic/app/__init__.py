@@ -144,7 +144,6 @@ def load_datasets_settings (configurationFile, global_config):
 def main(global_config, **settings):
     """ This function returns a Pyramid WSGI application.
     """
-    print 'settings', settings
     set_cache_regions_from_settings(settings)
 
     engine = engine_from_config(settings, 'sqlalchemy.')
@@ -156,9 +155,6 @@ def main(global_config, **settings):
 
     config_args = dict(root_factory=Root,settings=settings,default_permission='view')
 
-    
-    
-    
     if 'mistic.basic.auth' in settings:
       
         if '=' not in settings['mistic.basic.auth'] : 
