@@ -12,6 +12,7 @@ import json
 class Graph(object):
   def __init__(self, request):
     self.request = request
+    self.args = dict(user = authenticated_userid(self.request))
 
   @view_config(route_name="mistic.modal.datasets")
   def dataset_modal(self):
@@ -30,28 +31,28 @@ class Graph(object):
       datasets = [ ds for ds in datasets if ds.annotation.id in anot ]
 
     args = dict(datasets = datasets)
+    args.update(self.args)
     return render_to_response('mistic:app/templates/fragments/dataset_modal.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.root")
   def root(self):
    
-    args = dict(user=authenticated_userid(self.request))
+    args = self.args
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.corrgraph")
   def corrgraph(self):
-    args = dict()
+    args = self.args
     return render_to_response('mistic:app/templates/corrgraph.mako', args, request = self.request)
 
  
 
   @view_config(route_name="mistic.template.scatterplot")
   def scatterplot(self):
-    args = dict()
+    args = self.args
     return render_to_response('mistic:app/templates/scatterplot.mako', args, request = self.request)
 
- 
-
+  
 
   @view_config(route_name="mistic.template.pairplot")
   def pairplot(self):
@@ -62,7 +63,7 @@ class Graph(object):
       dataset = dataset,
       genes = genes,
     )
-
+    args.update(self.args)
     return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)
 
 
@@ -91,7 +92,7 @@ class Graph(object):
       edges = mst[1],
       pos = mst[2]
     )
-
+    args.update(self.args)
     return render_to_response('mistic:app/templates/clustering.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.mstplot", request_method="POST")
@@ -117,7 +118,7 @@ class Graph(object):
       edges = mst[1],
       pos = mst[2]
     )
-
+    args.update(self.args)
     if len(mst[0]) < 200:
 
       if _dataset.experiment=="ngs":
@@ -152,7 +153,8 @@ class Graph(object):
       edges = mst[1],
       pos = mst[2]
     )
-
+    args.update(self.args)
+    
     if len(mst[0]) < 200:
       return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
     else:

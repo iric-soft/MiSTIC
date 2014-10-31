@@ -92,13 +92,10 @@ mistic = {
                 <button type="submit" class="btn" id="pdf" href="">PDF</button>
             %endif
             </%block>
+           <a href='/' id='logout' class='pull-right' style='padding-left:10px; vertical-align:middle;' title="${user}"><i class="icon-user icon-white"></i></a>
           </div>
-        
-         <a href='/' id='logout' title="${user}">
-         <i class="icon-user icon-white">
-     
-         </i>
-         </a>
+         
+         
              
         </div>
       </div>
