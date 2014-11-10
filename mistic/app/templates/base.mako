@@ -29,15 +29,22 @@
 <![endif]-->
 
 <script type="text/javascript">
-mistic = {
-  url: "${request.application_url}"
-};
+<%
+    environ =  request.__dict__.get('environ', {})
+    root_url = environ.get('HTTP_X_FORWARDED_HOST', '')
+    if root_url!= '' : 
+        root_url ='http://'+ root_url+'/'+request.registry.settings['web.version.dir']
+    else : 
+        root_url = request.url
+   print root_url
+%>
+
+mistic = {  url: "${root_url}"};
+
 </script>
  
 <style type="text/css">
 <%block name="style">
-
-
 
 </%block>
 </style>
