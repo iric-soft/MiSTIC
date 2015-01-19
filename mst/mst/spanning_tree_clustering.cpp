@@ -105,18 +105,25 @@ void readMatrix(std::istream &in,
     std::getline(in, line);
     if (!line.size()) break;
     vals = str::split(line, '\t');
-
+    
     row_labels.push_back(vals[id_col]);
     temp.push_back(std::valarray<T>(n_cols));
 
     std::valarray<T> &rowdata = temp.back();
     for (size_t i = 0; i < n_cols; ++i) {
-      std::istringstream ins(vals[first_data_col + i]);
-      ins >> rowdata[i];
-      if (ins.fail()) {
-        rowdata[i] = missing_val;
-        contains_missing_vals = true;
-        // throw std::runtime_error("failed to read matrix");
+      if (first_data_col + i < vals.size()){
+        std::istringstream ins(vals[first_data_col + i]);
+        if (ins.fail()) {
+          rowdata[i] = missing_val;
+          contains_missing_vals = true;
+          // throw std::runtime_error("failed to read matrix");
+        } else {
+          ins >> rowdata[i];
+        }
+      }
+      else {
+          rowdata[i] = missing_val;
+          contains_missing_vals = true;
       }
     }
   }
