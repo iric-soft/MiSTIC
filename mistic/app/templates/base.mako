@@ -29,6 +29,7 @@
 <![endif]-->
 
 <script type="text/javascript">
+
 <%
     environ =  request.__dict__.get('environ', {})
     root_url = environ.get('HTTP_X_FORWARDED_HOST', '')
@@ -40,6 +41,7 @@
 %>
 
 mistic = {  url: "${root_url}"};
+
 
 </script>
  
