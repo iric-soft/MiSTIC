@@ -67,12 +67,12 @@ mistic = {  url: "${request.host}"};
       <div class="container-fluid">
       <a href="#" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
        <span class="icon-th-list icon-white"></span></a>
-        <a class="brand" href="${request.route_url('mistic.template.root')}">[MiSTIC]</a>
+        <a class="brand" href="${request.route_url('mistic.template.root')}">[Datasets and Icicle]</a>
         <div class="nav-collapse">
           <ul class="nav">
       
         %if request.matched_route.name == 'mistic.template.corrgraph':
-            <li class="active"><a href="#">Waterfall</a></li>
+            <li class="active"><a href="#">Single gene correlation</a></li>
         %else:
             <li><a href="${request.route_url('mistic.template.corrgraph')}">Single gene correlation</a></li>
         %endif
@@ -107,7 +107,11 @@ mistic = {  url: "${request.host}"};
                 <button type="submit" class="btn" id="pdf" href="">PDF</button>
             %endif
             </%block>
+           <a href='/' id='logout' class='pull-right' style='padding-left:10px; vertical-align:middle;' title="${user}"><i class="icon-user icon-white"></i></a>
           </div>
+         
+         
+             
         </div>
       </div>
     </div>
@@ -281,6 +285,9 @@ mistic = {  url: "${request.host}"};
   
 
   
+$('#logout').click(function ()  {  clearAuthentication("${request.url}"); });
+
+ 
   
 })(jQuery);
 </script>

@@ -132,7 +132,7 @@
                              {'sExtends':"csv", 'sFileName' : filename+'.txt', 'sButtonText':'Text', 
                               'sFieldSeperator':'\t', 'sFieldBoundary': '', 'mColumns':mColumns},
                              {'sExtends':"csv", 'sTitle': filename, 'sButtonText':'CSV', 'mColumns':mColumns}, 
-                             {'sExtends':"xls", 'sTitle': filename, 'sButtonText':'Excel', 'mColumns':mColumns}
+                             {'sExtends':"xls", 'sFileName' : filename+'.xls', 'sButtonText':'Excel', 'mColumns':mColumns}
                         ]
                     }
                    ]
@@ -171,3 +171,44 @@
      }  
     };
 })();
+
+(function(){
+ clearAuthentication = function(LogOffPage) {
+     var IsInternetExplorer = false;    
+
+     try {
+         var agt=navigator.userAgent.toLowerCase();
+         if (agt.indexOf("msie") != -1) { IsInternetExplorer = true; }
+     }
+     catch(e)  { IsInternetExplorer = false;  };
+
+     if (IsInternetExplorer)  {
+        document.execCommand("ClearAuthenticationCache");
+        window.location = LogOffPage;
+     }
+     else 
+     {
+     $.ajax({
+         username: 'unknown',
+         password: 'WrongPassword',
+         type: 'GET',
+         beforeSend: function(xhr)  {
+            xhr.setRequestHeader("Authorization", "Basic AAAAAAAAAAAAAAAAAAA=");
+         },
+
+         error: function(err)  {
+           $('body').addClass('fade');
+           window.location = LogOffPage;
+          }
+    });
+   }
+  };
+ })();
+
+
+
+
+
+
+
+

@@ -68,7 +68,7 @@ th { padding:0px;}
 <tr>
   <th>Dataset</th>
 %for term in terms :
-  <th><a class="unicode-icon group-data">&#x2630</a> ${term}</th>
+  <th><span><a class="unicode-icon group-data">&#x2630</a>${term}</span></th>
   
 %endfor
 <th>n</th>
@@ -95,7 +95,8 @@ th { padding:0px;}
 %endfor
     </td>
     <td class='td_add_favorite'>
-      <a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'><span class="dummy" id="dummy" style="display:none">a</span>&#x2736</a>
+      <a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'>
+      <span class="dummy" id="dummy" style="display:none">a</span>&#x2736</a>
     </td>
   </tr>
   %endfor

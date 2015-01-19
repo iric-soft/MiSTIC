@@ -10,7 +10,7 @@ import pybel
 <%block name="controls_buttons">
  ${parent.controls_buttons()}
 
-    <a id='tanimoto-button' href="#document-tanimoto" role="button" class="btn" data-toggle="modal">Tanimoto</a>
+    <a id='tanimoto-button' href="#document-tanimoto" role="button" class="btn">Tanimoto</a>
 </%block>
 
 <%block name="style">
@@ -90,7 +90,7 @@ ${parent.style()}
 <%block name="subcontent">
 
 
- <div class="modal hide fade " id="document-tanimoto">
+ <div class="modal fade hide" id="document-tanimoto">
   <div class='modal-body'>
      <div class="row-fluid" id="document-tanimoto">
      <div class="span5" id="tanimoto_table" ></div>
@@ -339,7 +339,6 @@ if (title.length < maxNodes) {
   
   if (title.length>20) {inr=0.21; dnm=3;}
 
-
   var width = Math.min(200 +20 * title.length, 1050);
   var height = Math.min(200 +20 * title.length, 850);
   var innerRadius = Math.min(width, height) * inr;
@@ -443,7 +442,11 @@ if (title.length < maxNodes) {
       .style("text-anchor", function(d) { return d.angle > Math.PI ? "end" : null; })
       .text(function(d) { return d.label });
   }
+}
+else {
+    $("#tanimoto_chord").html('Chord is to big and will not be displayed.  Click on the ID in the table or use the form above to get information');
 
+    
 }
 // Returns an array of tick angles and labels, given a group.
  function groupTicks(d) {
@@ -546,10 +549,10 @@ search2_entry.on('change', function() {
  showSearched (i1,i2)
   
 });
-
- $("#document-tanimoto").modal({keyboard : true, 
-                                backdrop: true });
-
+$("#document-tanimoto").modal({keyboard : true, backdrop: true , show:false});
+$('#tanimoto-button').on('click', function(){
+    $('#document-tanimoto').modal('toggle')
+});
 
 </script>
 
