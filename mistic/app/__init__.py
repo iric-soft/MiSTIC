@@ -184,6 +184,10 @@ def main(global_config, **settings):
     if 'mistic.phantomjs' in settings:
         mistic.app.views.pdffile.PDFData.phantomjs = settings['mistic.phantomjs']
 
+    if 'mistic.forward_host' in settings:
+      config.registry.settings['mistic_forward_host'] = settings['mistic.forward_host']
+
+
     config.add_route('mistic.template.root',               '/')
 
     config.add_route('mistic.modal.datasets',              '/modal/datasets')

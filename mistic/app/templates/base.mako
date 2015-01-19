@@ -1,5 +1,16 @@
 <!DOCTYPE html>
 <html>
+<%
+from pyramid.security import authenticated_userid 
+environ =  request.__dict__.get('environ', {})
+root_url = request.registry.settings.get('mistic_forward_host', request.url)
+
+if 'mistic_forward_host' in request.registry.settings.keys() and environ.get('HTTP_X_FORWARDED_HOST', None): 
+    request.host = root_url
+    request.port = ''
+print authenticated_userid(request), 'request host:', request.host
+
+%>
 
 
 
@@ -21,6 +32,14 @@
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic_svg.css')}" type="text/css" media="screen" charset="utf-8">
 
 
+
+<script type="text/javascript">
+
+
+mistic = {  url: "${request.host}"};
+
+</script>
+
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->
@@ -28,11 +47,7 @@
     <script src="${request.static_url('mistic:app/static/js/lib/json2.js')}" type="text/javascript" />
 <![endif]-->
 
-<script type="text/javascript">
-mistic = {
-  url: "${request.application_url}"
-};
-</script>
+
  
 <style type="text/css">
 <%block name="style">

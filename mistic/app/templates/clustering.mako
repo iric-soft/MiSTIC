@@ -165,6 +165,10 @@ $(document).ready(function() {
   current_graph.setGraphInfo(["Dataset: ${dataset}",  "Transform: ${xf}"]); 
  
   var gene_entry = new GeneDropdown({ el: $("#gene") });
+  url = "${request.route_url('mistic.json.dataset.search', dataset=dataset)}".replace('${request.host}', mistic.url);
+  
+
+  //gene_entry.setSearchURL(url);
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
    newGSDropdown = function (elem, suff) {
     return  new GODropdown({

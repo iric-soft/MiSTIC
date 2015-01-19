@@ -36,7 +36,7 @@
             this.$el.html(this.template());
 
             $.ajax({
-                url: '/modal/datasets',
+                url: 'http://'+mistic.url+'/modal/datasets',
                 data: {},
                 async: false,
                 dataType: 'html',
