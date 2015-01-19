@@ -29,9 +29,7 @@
 <![endif]-->
 
 <script type="text/javascript">
-mistic = {
-  url: "${request.application_url}"
-};
+mistic = {  url: "${request.url}"};
 </script>
  
 <style type="text/css">
