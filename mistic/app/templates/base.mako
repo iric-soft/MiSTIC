@@ -8,8 +8,7 @@ root_url = request.registry.settings.get('mistic_forward_host', request.url)
 if 'mistic_forward_host' in request.registry.settings.keys() and environ.get('HTTP_X_FORWARDED_HOST', None): 
     request.host = root_url
     request.port = ''
-print authenticated_userid(request), 'request host:', request.host
-
+#print authenticated_userid(request), 'request host:', request.host, request.remote_addr
 %>
 
 
