@@ -9,6 +9,7 @@ if 'mistic_forward_host' in request.registry.settings.keys() and environ.get('HT
     request.host = root_url
     request.port = ''
 #print authenticated_userid(request), 'request host:', request.host, request.remote_addr
+
 %>
 
 
@@ -46,12 +47,8 @@ mistic = {  url: "${request.host}"};
     <script src="${request.static_url('mistic:app/static/js/lib/json2.js')}" type="text/javascript" />
 <![endif]-->
 
-
- 
-<style type="text/css">
+ <style type="text/css">
 <%block name="style">
-
-
 
 </%block>
 </style>

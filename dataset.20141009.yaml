@@ -1,0 +1,958 @@
+ontology: data/ontology
+
+orthology: data/annotation/orthology.txt
+
+annotations:
+- id: official_symbol
+  name: Human official gene symbol
+  path: data/annotation/official_symbol.txt
+
+#- id: entrez_gi 
+#  name: Entrez Gene ID
+#  path: data/annotation/entrez_gi.txt
+
+- id: entrez_gi
+  name: Entrez Gene ID
+  path: data/annotation/entrez_gi.mirna_genes.hgnc.201311.json.txt
+
+- id:  chemical_screen_annotation
+  name: chemical_screen_annotation
+  path: data/annotation/chemical.annotations
+
+- id:  chemical_gene
+  name: chemical_gene
+  path: data/annotation/chimere2.txt
+
+dataset_annotations:
+- id: AML_TCGA_sample_annotation
+  name: TCGA patient annotations
+  path: data/annotation/sample/AML_TCGA_sample_annotations.txt
+- id: BRCA_TCGA_sample_annotation
+  name: BRCA_TCGA patient annotations
+  path: data/annotation/sample/BRCA_TCGA_sample_annotations.txt
+- id: LUAD_TCGA_sample_annotation
+  name: LUAD_TCGA patient annotations
+  path: data/annotation/sample/LUAD_TCGA_sample_annotations.txt
+- id: LUSC_TCGA_sample_annotation
+  name: LUSC_TCGA patient annotations
+  path: data/annotation/sample/LUSC_TCGA_sample_annotations.txt
+- id: CD34_sample_annotation
+  name: CD34 sample annotations (leucegene-related)
+  path: data/annotation/sample/CD34_sample_annotations.json
+- id: leucegene_combined_annotation
+  name: AML, ALL and related project 
+  path: data/annotation/sample/leucegene_combined_annotation.json
+- id: NPB_sample_annotation
+  name: Normal peripheral blood samples annotations 
+  path: data/annotation/sample/NPB_sample_annotations.json
+- id: bodymap_annotation
+  name: Bodymap annotation  
+  path: data/annotation/sample/bodymap.json
+- id: tcga_allsamples
+  name: TCGA all samples  
+  path: data/annotation/sample/clinical_info_TCGA.json
+
+
+datasets:
+
+- id: AML_leucegene_rnaseq_new
+  name: AML leucegene rnaseq_new
+  path: data/datasets_db/AML_leucegene_rnaseq_new.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (all patients). Based on new RefSeq annotations, 2014-04-16
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 2
+    other :  based on RefSeq, 2014-04-16
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: AML_normal_combined_leucegene_rnaseq_new
+  name: AML normal combined leucegene rnaseq_new
+  path: data/datasets_db/AML_normal_combined_leucegene_rnaseq_new.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (all patients) and normal samples.  Based on new RefSeq annotations, 2014-04-16
+  expt: ngs
+  tags: 
+    tissue: Blood AML, normal
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 2
+    other :  based on RefSeq, 2014-04-16
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: AML_leucegene_rnaseq_prognostic_new
+  name: AML leucegene rnaseq_prognostic_new
+  path: data/datasets_db/AML_leucegene_rnaseq_prognostic_new.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (identified patients usable for prognostic). Based on new RefSeq annotations, 2014-04-16
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 2
+    other :  based on RefSeq, 2014-04-16
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: AML_leucegene_rnaseq
+  name: AML leucegene rnaseq
+  path: data/datasets/AML_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (all patients)
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: AML_leucegene_rnaseq-freezed
+  name: AML leucegene rnaseq
+  path: data/datasets/AML_leucegene_rnaseq.freeze-152samples.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (152 patients). 
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other: Freezed for analysis. Only contains the first 152 patients
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+
+
+- id: DSP169_AML leucegene_rnaseq
+  name: DSP169 AML leucegene rnaseq
+  path: data/datasets/DSP169_AML_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (all patients)
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+#- id: EXT001_AML leucegene_rnaseq
+#  name: EXT001 AML leucegene rnaseq
+#  path: data/datasets/EXT001_AML_leucegene_rnaseq.txt
+#  annc: leucegene_combined_annotation
+#  annr: official_symbol
+#  desc: Leucegene AML.  New batch of samples processed at McGill.  Using new gene annotations.
+#  expt: ngs
+#  tags: 
+#    tissue: Blood AML 
+#    project: Leucegene 
+#    technology: RNA-Seq
+#	 version : 2
+#    other : samples done at McGill
+#  txid: '9606'
+#  type: rpkm
+#  xfrm: ["log","rank","none"]
+
+
+- id: AML_ALL_leucegene_rnaseq
+  name: AML ALL leucegene rnaseq
+  path: data/datasets/AML_ALL_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (all patients) and ALL
+  expt: ngs
+  tags: 
+    tissue: Blood AML,ALL
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: AML NK leucegene rnaseq
+  name: AML NK leucegene_rnaseq
+  path: data/datasets/AML_NK_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML Normal Karyotype
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    other: Normal karyotype
+    version : 1
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+
+- id: ALL_leucegene_rnaseq
+  name: ALL leucegene rnaseq
+  path: data/datasets/ALL_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene ALL
+  expt: ngs
+  tags: 
+   tissue: Blood ALL 
+   project: Leucegene
+   technology: RNA-Seq
+   version : 1
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+
+- id: AML_leucegene_hts
+  name: AML leucegene HTS
+  path: data/datasets/AML_leucegene_hts.txt
+  annc: leucegene_combined_annotation
+  annr: chemical_screen_annotation
+  desc: chemical screen AML
+  expt: hts
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: HTS
+  txid: '9606'
+  type: Percent of inhibition
+  xfrm: ["rank", "none"]
+
+#- id: AML_leucegene_hts-rnaseq
+#  name: AML leucegene RNA-Seq/HTS 
+#  path: data/datasets/AML_leucegene_hts-rnaseq.txt
+#  annc: leucegene_combined_annotation
+#  annr: chemical_gene
+#  desc: Chemical, RPKM AML
+#  expt: ngs,hts
+#  tags: 
+#    tissue: Blood AML 
+#    project: Leucegene 
+#    technology: RNA-Seq,HTS
+#  txid: '9606'
+#  type: RPKM, Perc.of inhibition
+#  xfrm: ["none"]
+
+- id: AML_leucegene_hts.norm.inv
+  name: AML leucegene HTS normalized (inversed)
+  path: data/datasets/AML_leucegene_hts.norm.inv.txt
+  annc: leucegene_combined_annotation
+  annr: chemical_screen_annotation
+  desc: Normalized chemical screen
+  expt: hts
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: HTS
+    other: normalized(1:inhibited)
+  txid: '9606'
+  type: rpkm
+  xfrm: ["rank", "none"]
+
+#- id: AML_leucegene_hts-rnaseq.norm.inv
+#  name: AML leucegene RNA-Seq/HTS normalized (inversed)
+#  path: data/datasets/AML_leucegene_hts-rnaseq.norm.inv.txt
+#  annc: leucegene_combined_annotation
+#  annr: chemical_gene
+#  desc: Normalized chemical, log RPKM AML(1:inhibition)
+#  expt: ngs,hts
+#  tags: 
+#    tissue: Blood AML 
+#    project: Leucegene 
+#    technology: RNA-Seq, HTS
+#    other: normalized(1:inhibited)
+#  txid: '9606'
+#  type: logRPKM, normalized chemical data
+#  xfrm: ["none"]
+
+- id: MLL_leucegene_rnaseq
+  name: AML MLL leucegene
+  path: data/datasets/MLL_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: 
+  expt: ngs
+  tags: 
+    tissue: Blood AML MLL 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other: MLL, DSP103, DSP104
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: inv16_leucegene_rnaseq
+  name: inv(16)/t(16;16) AML
+  path: data/datasets/inv16_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other: inv16, DSP125, DSP143
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: t8-21_inv16_leucegene_rnaseq
+  name: t8-21 and inv(16)/t(16;16) AML
+  path: data/datasets/t8-21_inv16_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other: inv16, t8-21
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: t_8-21_leucegene_rnaseq
+  name: t(8;21) AML
+  path: data/datasets/t_8-21_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other: t(8;21), DSP150
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+
+- id: evi1_translocation_rnaseq
+  name: evi1_translocation_rnaseq
+  path: data/datasets/evi1_translocation_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: EVI1 translocation AML
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other: EVI1 translocation
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: AML_normal_combined_leucegene_rnaseq
+  name: AML and Normal cells 
+  path: data/datasets/AML_normal_combined_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Mixed
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other:  AML, CD34+, NPB, Normal marrow 
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: AML_CD34_LNCipedia_rnaseq
+  name: AML and Normal cells(FPKM) 
+  path: data/datasets/fpkm-AML-CD34-LNCipedia.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: FPKM test
+  expt: ngs
+  tags: 
+    tissue: Mixed
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other:  AML, CD34+, FPKM, LNCipedia
+  txid: '9606'
+  type: fpkm
+  xfrm: ["log","rank","none"]
+
+- id: AML_CD34_leucegene_rnaseq
+  name: AML and CD34 cells 
+  path: data/datasets/AML_CD34_leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Mixed
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other:  AML, CD34+
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: CEBPAbm_leucegene_rnaseq
+  name: cEBPAbm AML 
+  path: data/datasets/CEBPAbm-leucegene_rnaseq.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Mixed
+    project: Leucegene 
+    technology: RNA-Seq
+    version : 1
+    other:  CEBPAbm DSP144
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: CD34pool_leucegene_rnaseq
+  name: Pool CD34
+  path: data/datasets/DSP100_rnaseq.txt
+  annc: ''
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: CD34
+    project: Leucegene 
+    version : 1
+    technology: RNA-Seq
+    other:   DSP100
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: NPB_leucegene_rnaseq
+  name: Normal peripheral blood samples
+  path: data/datasets/NPB_leucegene_rnaseq.txt
+  annc: NPB_sample_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Normal Blood
+    project: Leucegene related
+    technology: RNA-Seq
+    version : 1
+    other:   DSP113
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: NBM_leucegene_rnaseq
+  name: Normal bone marrow samples
+  path: data/datasets/NBM_leucegene_rnaseq.txt
+  annc: NBM_sample_annotation
+  annr: official_symbol
+  desc: RPKM
+  expt: ngs
+  tags: 
+    tissue: Normal Bone Marrow
+    project: Leucegene related
+    technology: RNA-Seq
+    version : 1
+    other:   DSP159
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+
+- id: CD34pCD34pCD45RAn_leucegene_rnaseq
+  name: CD34+CD34+CD45RA- leucegene rnaseq
+  path: data/datasets/CD34pCD34pCD45RAn_leucegene_rnaseq.txt
+  annc: CD34_sample_annotation
+  annr: official_symbol
+  desc: Leucegene CD34+ and CD34+CD45RA-
+  expt: ngs
+  tags: 
+    tissue: CD34+
+    project: Leucegene related
+    technology: RNA-Seq
+    version : 1
+    other:   DSP068
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: BRCA_normal_TCGA_rnaseq
+  name: BRCA normal TCGA rnaseq
+  path: data/datasets/BRCA_normal_TCGA_rnaseq.txt
+  annc: BRCA_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Breast Invasive Carcinoma (normal, n=102)
+  expt: ngs
+  tags: 
+    tissue: Breast
+    project: TCGA
+    technology: RNA-Seq
+    other: normal, [BRCA]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+
+- id: BRCA_tumour_TCGA_rnaseq
+  name: BRCA tumour TCGA rnaseq
+  path: data/datasets/BRCA_tumour_TCGA_rnaseq.txt
+  annc: BRCA_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Breast invasive carcinoma (tumour, n=756)
+  expt: ngs
+  tags: 
+    tissue: Breast
+    project: TCGA
+    technology: RNA-Seq
+    other: tumour, invasive carcinoma, [BRCA]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: COAD_tumour_TCGA_rnaseq
+  name: COAD tumour TCGA rnaseq
+  path: data/datasets/COAD_tumour_TCGA_rnaseq.txt
+  annc: ''
+  annr: entrez_gi
+  desc: TCGA Colon adenocarcinoma (tumour, n=192)
+  expt: ngs
+  tags: 
+    tissue: Colon
+    project: TCGA
+    technology: RNA-Seq
+    other: tumour, adenocarcinoma, [COAD]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: KIRC_normal_TCGA_rnaseq
+  name: KIRC normal TCGA rnaseq
+  path: data/datasets/KIRC_normal_TCGA_rnaseq.txt
+  annc: ''
+  annr: entrez_gi
+  desc: TCGA Kidney renal clear cell carcinoma (normal, n=68)
+  expt: ngs
+  tags: 
+    tissue: Kidney
+    project: TCGA
+    technology: RNA-Seq
+    other: normal, [KIRC]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: KIRC_tumour_TCGA_rnaseq
+  name: KIRC tumour TCGA rnaseq
+  path: data/datasets/KIRC_tumour_TCGA_rnaseq.txt
+  annc: ''
+  annr: entrez_gi
+  desc: TCGA Kidney renal clear cell carcinoma (tumour, n=470)
+  expt: ngs
+  tags: 
+    tissue: Kidney
+    project: TCGA
+    technology: RNA-Seq
+    other: tumour, [KIRC]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: AML_tumour_TCGA_rnaseq
+  name: LAML tumour TCGA rnaseq
+  path: data/datasets/AML_tumour_TCGA_rnaseq.txt
+  annc: AML_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Acute Myeloid Leukemia (tumour, n=179)
+  expt: ngs  
+  tags: 
+    tissue: Blood AML
+    project: TCGA
+    technology: RNA-Seq
+    other: tumour, [LAML]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: AML tumour NK TCGA rnaseq
+  name: LAML_tumour_NK_TCGA_rnaseq
+  path: data/datasets/AML_tumour_NK_TCGA_rnaseq.txt
+  annc: AML_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Acute Myeloid Leukemia (normal karyotype)  (tumour, n=89)
+  expt: ngs
+  tags: 
+    tissue: Blood AML
+    project: TCGA
+    technology: RNA-Seq
+    other: tumour, karyotype nk, [LAML]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: LUAD normal TCGA rnaseq
+  name: LUAD_normal_TCGA_rnaseq
+  path: data/datasets/LUAD_normal_TCGA_rnaseq.txt
+  annc: LUAD_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Lung adenocarcinoma (normal, n=37)
+  expt: ngs
+  tags: 
+    tissue: Lung
+    project: TCGA
+    technology: RNA-Seq
+    other: normal, [LUAD]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: LUAD_tumour_TCGA_rnaseq
+  name: LUAD tumour TCGA rnaseq
+  path: data/datasets/LUAD_tumour_TCGA_rnaseq.txt
+  annc: LUAD_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Lung adenocarcinoma (tumour, n=129)
+  expt: ngs
+  
+  tags: 
+    tissue: Lung
+    project: TCGA
+    technology: RNA-Seq
+    other: tumour, adenocarcinoma, [LUAD]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: LUSC_normal_TCGA_rnaseq
+  name: LUSC_normal_TCGA_rnaseq
+  path: data/datasets/LUSC_normal_TCGA_rnaseq.txt
+  annc: LUSC_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Lung squamous cell carcinoma
+  expt: ngs
+  tags: 
+    tissue: Lung
+    project: TCGA
+    technology: RNA-Seq
+    other: normal, [LUSC]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: LUSC_tumour_TCGA_rnaseq
+  name: LUSC tumour TCGA rnaseq
+  path: data/datasets/LUSC_tumour_TCGA_rnaseq.txt
+  annc: LUSC_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA Lung squamous cell carcinoma
+  expt: ngs
+  tags: 
+    tissue: Lung
+    project: TCGA
+    technology: RNA-Seq
+    other: tumour, carcinoma, [LUSC]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank"]
+
+- id: bodymap_illumina_rnaseq
+  name: Illumina bodymap
+  path: data/datasets/bodymap_illumina_rnaseq.txt
+  annc: bodymap_annotation
+  annr: official_symbol
+  desc: Illumina Bodymap (n=16)
+  expt: ngs
+  tags: 
+    tissue: Mixed
+    project: Illumina
+    technology: RNA-Seq
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log"]
+
+- id: BRCA_miRNA_coding_tumor_rnaseq
+  name: BRCA_miRNA_coding_tumor_rnaseq
+  path: data/datasets/com.BRCA_RNAseq_MiRNAseq.txt
+  annc: BRCA_TCGA_sample_annotations
+  annr: entrez_gi
+  desc: BRCA_miRNA_coding_tumor_rnaseq
+  expt: ngs 
+  tags: 
+     tissue: Breast 
+     project: TCGA 
+     technology: miRNA-Seq and RNA-Seq 
+     other: tumour [BRCA]
+  txid: 9606
+  type: rpkm
+  xfrm: ["log"]
+
+- id: BRCA_miRNA_coding_normal_rnaseq
+  name: BRCA_miRNA_coding_normal_rnaseq
+  path: data/datasets/com.BRCA_normal_RNAseq_MiRNAseq.txt
+  annc: BRCA_TCGA_sample_annotations
+  annr: entrez_gi
+  desc: BRCA_miRNA_coding_normal_rnaseq
+  expt: ngs 
+  tags: 
+    tissue: Breast 
+    project: TCGA 
+    technology: miRNA-Seq and RNA-Seq
+    other: normal [BRCA]
+  txid: 9606
+  type: rpkm
+  xfrm: ["log"]
+
+- id: BRCA_miRNA_TF_tumor_rnaseq
+  name: BRCA_miRNA_TF_tumor_rnaseq
+  path: data/datasets/com.BRCA_TF_RNAseq_MiRNAseq.txt
+  annc: BRCA_TCGA_sample_annotations
+  annr: entrez_gi
+  desc: BRCA_miRNA_TF_tumor_rnaseq
+  expt: ngs 
+  tags: 
+     tissue: Breast  
+     project: TCGA 
+     technology: miRNA-Seq and TF RNA-Seq
+     other :  tumour [BRCA]
+  txid: 9606
+  type: rpkm
+  xfrm: ["log"]
+
+- id: BRCA_miRNA_TF_normal_rnaseq
+  name: BRCA_miRNA_TF_normal_rnaseq
+  path: data/datasets/com.BRCA_normal_TF_RNAseq_MiRNAseq.txt
+  annc: BRCA_TCGA_sample_annotations
+  annr: entrez_gi
+  desc: BRCA_miRNA_TF_normal_rnaseq
+  expt: ngs 
+  tags: 
+     tissue: Breast
+     project: TCGA 
+     technology: miRNA-Seq and TF RNA-Seq 
+     other: normal [BRCA]
+  txid: 9606
+  type: rpkm
+  xfrm: ["log"]
+
+- id: AML_tumour_mirna_coding_TCGA_rnaseq
+  name: AML_tumour_mirna_coding_TCGA_rnaseq
+  path: data/datasets/com.LAML_tumor_coding_mirna_rnaseq.txt
+  annc: AML_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA AML miRNA and coding genes
+  expt: ngs
+  tags: 
+     tissue: Blood AML 
+     project: TCGA 
+     technology: miRNA-Seq and RNA-Seq
+     other: tumour [LAML]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log"]
+
+- id: AML_tumour_mirna_TF_TCGA_rnaseq
+  name: AML_tumour_mirna_TF_TCGA_rnaseq
+  path: data/datasets/com.LAML_tumor_TF_coding_mirna_rnaseq.txt
+  annc: AML_TCGA_sample_annotation
+  annr: entrez_gi
+  desc: TCGA AML miRNA and TF
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: TCGA 
+    technology: miRNA-Seq and TF RNA-Seq
+    other: tumour [LAML]
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log"]
+
+- id: AML_leucegene_rnaseq.survival
+  name: AML leucegene rnaseq survival
+  path: data/datasets/AML_leucegene_rnaseq.survival.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: Leucegene AML (all patients) for survival analysis
+  expt: ngs
+  tags: 
+    tissue: Blood AML 
+    project: Leucegene 
+    technology: RNA-Seq
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log","rank","none"]
+
+- id: lincRNA_catalog_rnaseq
+  name: lincRNA catalog rnaseq
+  path: data/datasets/lincRNA_catalog_fpkm.txt
+  annc: leucegene_combined_annotation
+  annr: official_symbol
+  desc: LincRNA catalog for AML, CD34 and normal samples generated by cufflinks pipeline by Bernhard Lehnertz
+  expt: ngs
+  tags: 
+    tissue: Blood AML, CD34, Normal
+    project: Leucegene 
+    technology: RNA-Seq
+    other: FPKM 
+  txid: '9606'
+  type: fpkm
+  xfrm: ["log","rank","none"]
+
+- id: ALLSAMPLE_TCGA_rnaseq
+  name: ALLSAMPLE_TCGA_rnaseq
+  path: data/datasets/ALLSAMPLE_TCGA_rnaseq_20140401.txt
+  annc: tcga_allsamples
+  annr: entrez_gi
+  desc: TCGA 
+  expt: ngs
+  tags: 
+    tissue: Mixed 
+    project: TCGA 
+    technology: RNA-Seq
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log", "rank", "none"]
+
+- id: CONTROLSAMPLE_TCGA_rnaseq
+  name: CONTROLSAMPLE_TCGA_rnaseq
+  path: data/datasets/CONTROLSAMPLE_TCGA_rnaseq_20140416.txt
+  annc: tcga_allsamples
+  annr: entrez_gi
+  desc: TCGA (control samples)
+  expt: ngs
+  tags: 
+    tissue: Mixed controls
+    project: TCGA 
+    technology: RNA-Seq
+  txid: '9606'
+  type: rpkm
+  xfrm: ["log", "rank","none"]
+
+genesets:
+- id: go
+  name: Gene Ontology
+  desc: Gene Ontology
+  anot: 
+    official_symbol: data/genesets/go/official_symbol.txt
+- id: msigdb
+  name: MSigDB
+  desc: Gene sets extracted from MSigDB
+  path: data/genesets/msigdb/info.txt
+  anot: 
+    official_symbol: data/genesets/msigdb/official_symbol.txt
+    entrez_gi: data/genesets/msigdb/entrez_gi.txt
+
+- id: GeneSigDB
+  name: GeneSigDB
+  desc: GeneSigDB Release4 - a curated database of gene expression signatures
+  path: data/genesets/GeneSigDB/info.txt
+  anot: 
+    official_symbol: data/genesets/GeneSigDB/official_symbol.txt
+    entrez_gi: data/genesets/GeneSigDB/entrez_gi.txt
+
+- id: chipseq
+  name: ChipSeq
+  desc: Gene sets extracted from ChipSeq experiment 5kb-25kb
+  path: data/genesets/chipseq/info.txt
+  anot: 
+    official_symbol: data/genesets/chipseq/official_symbol.txt
+    entrez_gi: data/genesets/chipseq/entrez_gi.txt
+
+
+- id: Chromosome
+  name: Chromosome
+  desc: Gene sets chromosome and cytoband for refseq genes and mirna
+  path: data/genesets/chromosome/info.txt
+  anot: 
+    official_symbol: data/genesets/chromosome/official_symbol.txt
+    entrez_gi: data/genesets/chromosome/entrez_gi.txt
+
+- id: CPDB
+  name: CPDB
+  desc: Gene sets extracted from the ConsensusPathDB
+  path: data/genesets/CPDB/info.txt
+  anot: 
+    official_symbol: data/genesets/CPDB/official_symbol.txt
+    entrez_gi: data/genesets/CPDB/entrez_gi.txt
+
+- id: microarrays 
+  name: microarrays
+  desc: Gene sets extracted from microarray experiments
+  path: data/genesets/microarrays/info.txt
+  anot: 
+    official_symbol: data/genesets/microarrays/official_symbol.txt 
+    entrez_gi: data/genesets/microarrays/entrez_gi.txt
+
+- id: target_genes
+  name: target_genes
+  desc: Target genes sets
+  path: data/genesets/target_genes/info.txt
+  anot: 
+    official_symbol: data/genesets/target_genes/official_symbol.txt
+    entrez_gi: data/genesets/target_genes/entrez_gi.txt
+
+- id: TFBS
+  name: TFBS
+  desc: Transcription factor binding site predictions Transfac2010
+  path: data/genesets/tfbs_predictions/info.txt
+  anot: 
+    official_symbol: data/genesets/tfbs_predictions/official_symbol.txt
+    entrez_gi: data/genesets/tfbs_predictions/entrez_gi.txt
+
+- id: miRNA
+  name: miRNA
+  desc:  miRecords miRNA-target interactions
+  path: data/genesets/miRNA/info.txt
+  anot: 
+    official_symbol: data/genesets/miRNA/official_symbol.txt
+    entrez_gi: data/genesets/miRNA/entrez_gi.txt
+
+
+- id: CNV
+  name: TCGA CNV
+  desc: TCGA Copy Number Analysis
+  path: data/genesets/CNV/info.txt
+  anot:
+    official_symbol: data/genesets/CNV/official_symbol.txt
+    entrez_gi: data/genesets/CNV/entrez_gi.txt
+
+- id: GeneFamilies
+  name: GeneFamilies
+  desc: Gene Families / Transcription Factor genes sets
+  path: data/genesets/GeneFamilies/info.txt
+  anot:
+    official_symbol: data/genesets/GeneFamilies/official_symbol.txt
+    entrez_gi: data/genesets/GeneFamilies/entrez_gi.txt
