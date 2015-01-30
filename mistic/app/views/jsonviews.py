@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPBadRequest
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -481,6 +482,19 @@ class Dataset(object):
 
         return (out + additional)[:limit]
 
+    @view_config(route_name="mistic.json.dataset.mds", request_method="GET", renderer="json")
+    def mds(self):
+
+        xform = self.request.GET.get('x')
+        if xform not in self.dataset.transforms:
+            xform = self.dataset.transforms[0]
+
+        #genes = self.request.GET.get('genes')
+        genes = json.loads(self.request.GET.get('genes'))
+
+        mds_matrix, eigenvalues = self.dataset.calcMDS(genes, xform)
+        return dict(id_samples = list(self.dataset.data.colnames), dimensions = map(list, mds_matrix), eigenvalues = list(eigenvalues))
+
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")
     def mst(self):
         return self.dataset.mst(self.request.matchdict['xform'])
@@ -623,8 +637,6 @@ class DatasetGene(Dataset):
     @view_config(route_name="mistic.json.gene.expr", request_method="GET", renderer="json")
     def expr(self):
         return self.dataset.expndata(self.gene, self.x)
-
-
 
 class Attr(object):
     def __init__(self, request):

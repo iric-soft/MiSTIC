@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from pyramid.httpexceptions import HTTPFound, HTTPNotFound, HTTPBadRequest
 from pyramid.view import view_config
 from pyramid.response import Response
@@ -65,6 +66,23 @@ class Graph(object):
     )
     args.update(self.args)
     return render_to_response('mistic:app/templates/pairplot.mako', args, request = self.request)
+
+
+
+  @view_config(route_name="mistic.template.mds")
+  def mds(self):
+
+    dataset = self.request.matchdict.get('dataset', None)
+    genes = self.request.matchdict.get('genes', [])
+
+    args = dict(
+      dataset = dataset,
+      genes = genes,
+    )
+
+    args.update(self.args)
+    return render_to_response('mistic:app/templates/mdsplot.mako', args, request = self.request)
+
 
 
   @view_config(route_name="mistic.template.clustering")

@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import os
 import math
@@ -7,7 +8,7 @@ import itertools
 import exceptions
 import csv
 import pandas
-
+import traceback
 
 
 class AnscombeTransform(object):
@@ -95,6 +96,23 @@ class DataSet(object):
   def colnames(self):
     return list(self.df.columns)
 
+  @property
+  def nrows(self):
+    return self.df.shape[0]
+
+  @property
+  def ncols(self):
+    return self.df.shape[1]
+
+  @property
+  def row_medians(self):
+    return numpy.median(self.df, axis=1)
+
+  @property
+  def col_medians(self):
+    return numpy.median(self.df, axis=0)
+
+
   def __init__(self, df):
     self.df = df
 
@@ -156,6 +174,44 @@ class DataSet(object):
         
       out.append((i, r, c))
     return out
+
+  def calcMDS(self, genesfilters, transform, pairwise = True):
+    
+    data = self.df.loc[genesfilters]
+
+    Ns = len(data.columns)
+    Ng = len(data.index)
+
+    dist = numpy.zeros((Ns, Ns), float)
+
+    if not pairwise:
+      #variance = numpy.var(data, axis=0)
+      #sel = numpy.argpartition(-variance, N_skip + N_genes)[N_skip:N_skip+N_genes]
+      #for i in range(Ns):
+        #for j in range(i+1, Ns):
+          #diff = data[i,sel]-data[j,sel]
+          #diff = diff * diff
+          #dist[i,j] = dist[j,i] = math.sqrt(numpy.mean(diff))
+      print("TODO : need write this part")
+      return
+    else:
+      for i in range(Ns):
+        for j in range(i+1, Ns):
+          diff = data.iloc[:,i] - data.iloc[:,j]
+          diff = diff * diff
+          dist[i,j] = dist[j,i] = math.sqrt(numpy.mean(diff))
+
+    def cmdscale(d):
+      N = d.shape[0]
+      x = d * d
+      x_cen = x - x.mean(axis=1).reshape((N,1)) - x.mean(axis=0)
+      x_cen = -x_cen/2
+      eigvals, eigvecs = numpy.linalg.eigh(x_cen)
+      vec = eigvecs.T * numpy.sqrt(abs(eigvals)).reshape((N,1))
+      return vec[-2::-1,:], eigvals[-2::-1]
+
+    res, d = cmdscale(dist)
+    return res, d
 
   def row(self, rownum, transform = None):
     row = self.df.values[rownum,:]

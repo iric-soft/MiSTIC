@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import sys
 import io
 import os
@@ -703,6 +704,9 @@ class DataSet(object):
   def genecorr(self, gene, xform = None, absthresh = None, thresh = None):
     return self._genecorr(gene, xform, absthresh, thresh)
 
+  def calcMDS(self, genes, xform, pairwise = True):
+    return self.data.calcMDS(genes, self._makeTransform(xform), pairwise)
+
   def readPositionData(self, pos):
     node_re = re.compile(r'^\s*(\S*)\s+\[(.*?)\];$', re.S|re.M)
     attr_re = re.compile(r'(\S+=(?:[^"\s]+|"[^"]*"))\s*,\s*', re.S|re.M)
@@ -779,6 +783,7 @@ class DataSet(object):
 
     return nodes, edges, self.readPositionData(pos)
 
+
   def mst_subset(self, xform, geneset):
     mst = self.mst(xform)
     if mst is None:
@@ -822,7 +827,7 @@ class DataSet(object):
       xform = xform,
       data = tuple([[dict(sample=a, expr=float(b), row=int(row[i])) for a, b in zip(self.samples, expn[i,])] for i in range(expn.shape[0]) ])
     )
-    
+
   def getSamplesByCharacteristic (self, ki, vi):
     return [k for k,v in d.items() if v[ki]==vi]
     
