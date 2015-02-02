@@ -22,6 +22,7 @@
     };
 
     mdsplot = function(elem, options) {
+//         console.log("in init mds graph")
 
 // init graph
         this.options = {};
@@ -80,7 +81,7 @@
     };
 
     mdsplot.prototype.removeData = function(matcher) {
-        console.log("remove data")
+//         console.log("remove data")
         this.data = _.reject(this.data, matcher);
         this.xdata = [];
         this.ydata = [];
@@ -88,7 +89,7 @@
     };
 
     mdsplot.prototype.reset = function () {
-        console.log("reset data")
+//         console.log("reset data")
         this.point_groups = null;
         this.data = [];
         this.current_selection = [];
@@ -98,7 +99,7 @@
     };
 
     mdsplot.prototype.datadict = function(vdata, ids) {
-        console.log("in datadict")
+//         console.log("in datadict")
 
         var vals = {};
         for (var i=0; i<vdata.length; i++) {
@@ -108,7 +109,7 @@
     };
 
     mdsplot.prototype.update = function() {
-        console.log("in update")
+//         console.log("in update")
         var xy = this.getXYData();
         this.updatePoints(xy);
     };
@@ -142,7 +143,7 @@
     };
 
     mdsplot.prototype.pointIDs = function() {
-        console.log("in point ID")
+//         console.log("in point ID")
         
         var ids = {};
         for (var i in this.data) {
@@ -186,7 +187,7 @@
     };
     
     mdsplot.prototype.updateData = function(data) {
-        console.log("in updateData")
+//         console.log("in updateData")
                
         var idxs = [];
         for (idx = 0; idx < this.data.length; ++idx) {
@@ -206,7 +207,7 @@
     };
 
     mdsplot.prototype.getXYData = function() {
-        console.log("in getXYData")
+//         console.log("in getXYData")
         var keys = _.intersection(_.keys(this.xdata), _.keys(this.ydata));
 
         var xy = [];
@@ -231,17 +232,17 @@
 // ##########################################################################################################################  
 
 
-//     mdsplot.prototype.getSelection = function() {
-//         var nodes = d3
-//             .select(this.svg)
-//             .selectAll("g.node.selected");
-//         var selected = _.map(nodes.data(), function(d) { return d.k; });
-//         return selected;
-//     };
-
     mdsplot.prototype.getSelection = function() {
-        return this.current_selection;
+        var nodes = d3
+            .select(this.svg)
+            .selectAll("g.node.selected");
+        var selected = _.map(nodes.data(), function(d) { return d.k; });
+        return selected;
     };
+
+//     mdsplot.prototype.getSelection = function() {
+//         return this.current_selection;
+//     };
 
     mdsplot.prototype.setSelection = function(selection, quiet) {
         if (!_.isEqual(this.current_selection, selection)) {
@@ -266,6 +267,60 @@
         this.draw();
         this.setSelection(my_selection, true);
     };
+
+// ##########################################################################################################################   
+// ##########################################################################################################################  
+// function : brush
+// ##########################################################################################################################   
+// ##########################################################################################################################  
+
+    mdsplot.prototype.clearBrush = function() {
+        this.brush.clear();
+        d3.select(this.svg).select('.brush').select('text').remove();
+        d3.select(this.svg).select('g.brush').call(this.brush);
+    };
+
+    mdsplot.prototype.brushstart = function() {
+        var b = d3.select(this.svg).select('.brush').select('text').remove();
+        $(this.svg).trigger('brushstart', [this]);
+        var b = d3.select(this.svg).select('.brush');
+        b.append('text');
+        
+    };
+
+    mdsplot.prototype.brushed = function() {
+        var self = this;
+        var e = d3.event.target.extent();
+        var circles  = d3
+            .select(this.svg)
+            .selectAll("g.node");
+        var ntotal  = circles[0].length;
+        circles = circles.filter(function(d) {
+                var t = self.transformScale(d);
+                return e[0][0] <= t.x && t.x <= e[1][0] && e[0][1] <= t.y && t.y <= e[1][1]
+            });
+        var selected = _.map(circles.data(), function(d) { return d.k; });
+        this.setSelection(selected);
+        nselected = selected.length;
+        
+        var p = nselected/ntotal*100;
+        var r = d3.select(this.svg).select('rect.extent')
+        var b = d3.select(this.svg).select('.brush').select('text');
+        if (nselected > 0) {
+          
+            b.attr('x', r.attr('x'))
+             .attr('y', r.attr('y'))
+             .attr('text-anchor', 'right')
+             .attr('fill','grey')
+             .attr('style', 'font-family: helvetica; font-size: 11px;')
+             .text(p.toFixed(2)+'%');
+       }
+    };
+
+    mdsplot.prototype.brushend = function() {
+        $(this.svg).trigger('brushstart', [this]);
+    };
+
 
 // ##########################################################################################################################   
 // ##########################################################################################################################  
@@ -432,45 +487,87 @@
             .text(this.ylab);
     };
 
-    mdsplot.prototype.updatePoints = function() {
+    mdsplot.prototype.updatePoints = function(xy) {
         
         var self = this;
-        xy = this.getXYData();
+        if (xy === undefined) xy = this.getXYData();
 
-        var svg = d3.select(this.svg)
-        var nodes = svg.selectAll(".node")
-            .data(xy)
-            .enter()
-              .append("g")
-              .attr("class","node")
-              .attr("transform", function(d) {
-                                    var t = self.transformScale(d);
-                                    return "translate(" + [t.x, t.y] + ")";
-                                 });
+        var pt_size = this.options.pt_size;
+        var font_size = pt_size + 8;
 
+        this.nodes =
+          d3.select(this.svg)
+            .select('.nodes')
+            .selectAll('.node')
+            .data(xy, function (d) { return d.k; });
 
-        nodes.append("circle")
-          .attr("r", function(d) {return 2})
+        var g = this.nodes
+          .enter()
+            .append('g')
+            .classed('node', true)
+            .attr("transform", function(d) {
+                var t = self.transformScale(d);
+                return "translate(" + [t.x, t.y] + ")";
+            });
 
-//         this.nodes =
-//           d3.select(this.svg)
-//             .select('.nodes')
-//             .selectAll('.node')
-//             .data(xy, function (d) { return d.k; });
+        g.append('path')
+            .on('click', _.bind(this.toggleSelected, this));
+        
+        g.append('title');
+
+        var transition = this.nodes.transition();
+
+        transition
+            .duration(500)
+            .ease("linear")
+            .attr("transform", function(d) {
+                var t = self.transformScale(d);
+                return "translate(" + [t.x, t.y] + ")";
+            });
+
+        transition
+          .select('path')
+            .each(function(d, i) {
+                var a = self.pointAttrs(d, i);
+                // this can be done better in d3 v3
+                for (var i in a) {
+                    d3.select(this).attr(i, a[i]);
+                }
+            });
+
+        transition
+          .select('text')
+            .attr('x', pt_size + 2)
+            .attr('y', pt_size)
+            .text(function(d) {return d.k;} );
+
+        transition
+          .select('title')
+            .text(function(d) {
+                return 'ID=' + d.k + ' (' + d.x.toFixed(2) + ', ' + d.y.toFixed(2) + ')';
+            });
+
+        this.nodes
+          .exit()
+            .transition()
+            .remove();
+            
+       
+// version without nodes
+
+//         var svg = d3.select(this.svg)
+//         var nodes = svg.selectAll(".node")
+//             .data(xy)
+//             .enter()
+//               .append("g")
+//               .attr("class","node")
+//               .attr("transform", function(d) {
+//                                     var t = self.transformScale(d);
+//                                     return "translate(" + [t.x, t.y] + ")";
+//                                  });
 // 
-//         var g = this.nodes
-//           .enter()
-//             .append('g')
-//             .classed('node', true)
-//             .attr('cx', function(d) { return this.xScale(d.x); })
-//             .attr('cy', function(d) { return this.yScale(d.y); })
-// 
-//         g.append('path')
-//             .on('click', _.bind(this.toggleSelected, this));
-//         
-//         g.append('title');
-
-
+//         nodes.append("circle")
+//           .attr("r", function(d) {return 2})
     };
 
     mdsplot.prototype.draw = function() {
@@ -489,11 +586,6 @@
         }
         
         xy = this.getXYData()
-//         if (xy.length == 0){
-//             return;
-//         }
-//         deltaX = d3.max(this.xdata) - d3.min(this.xdata)
-//         deltaY = d3.max(this.ydata) - d3.min(this.ydata)
 
 
 // init the scale
@@ -525,12 +617,24 @@
         svg.append('g').attr('class', 'axes')
         this.makeAxes();
 
+        this.brush = d3.svg.brush()
+            .x(this.xScaleBrush)
+            .y(this.yScaleBrush)
+            .on("brushstart", _.bind(this.brushstart, this))
+            .on("brush",      _.bind(this.brushed,    this))
+            .on("brushend",   _.bind(this.brushend,   this));
 
-        this.updatePoints();
+        svg.append("g")
+            .classed("brush", true)
+            .call(this.brush);
+
 
         // draw points
         svg.append('g')
             .classed('nodes', true);
+
+        this.updatePoints();
+
      
 /*
         
@@ -556,6 +660,7 @@
     };
 
     mdsplot.prototype.addData = function(data) {
+//         console.log("in addData")
         this.data.push(data);
         this.draw();
 //         this.reloadSelection();

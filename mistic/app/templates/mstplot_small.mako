@@ -23,6 +23,7 @@ import scipy.stats
                <button class="btn btn-primary" id="select_all">Select all</button>
                <button class="btn btn-primary" id="clear_selection">Clear selection</button>
                <button class="btn btn-primary" id="scatterplot">Scatterplot</button>
+               <button class="btn btn-primary" id="mdsplot">MDSplot</button>
                <button class="btn btn-primary" id="show_labels">Toggle labels</button>
                
                
@@ -558,6 +559,22 @@ $('#scatterplot').on('click', function(event) {
   return false;
 });
 
+
+$('#mdsplot').on('click', function(event) {
+  var ids = [];
+  d3.selectAll('tr.selected').classed('selected', false);
+  d3.select('#graph').selectAll('rect.selected').each(function(d) {
+    ids.push(d.id);
+  });
+  if (ids.length > 1) {
+    var url = "${request.route_url('mistic.template.mds', dataset=dataset, genes=[])}";
+    for (var i = 0; i < ids.length; ++i) {
+      url += '/' + ids[i];
+    }
+    window.open(url);
+  }
+  return false;
+});
 
 
 $(document).keyup(function(e) {

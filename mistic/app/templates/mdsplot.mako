@@ -56,33 +56,52 @@ import json
              <h4 class="accordion-title">
                 <a class="accordion-toggle" data-toggle="collapse"  href="#sample_menu">Samples
                 <div id="nb_samples" class='text-info' style='display:inline;'>(0)</div></a>
-            </h4>
-       </div>
+             </h4>
+           </div>
 
-      <div id="sample_menu" class="accordion-body collapse in ">
-        <div class="accordion-inner">
-          <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Highlight groups</a></h5>
-          <div id="current_selection" class="accordion-body collapse in ">
-          </div>
+          <div id="sample_menu" class="accordion-body collapse in ">
+            <div class="accordion-inner">
+              <h5><a class="accordion-toggle" data-toggle="collapse"  href="#current_selection">Highlight groups</a></h5>
+              <div id="current_selection" class="accordion-body collapse in ">
+              </div>
 
-          <br>
-          <button type="button" class='btn' id="new_group">New group</button>
+              <br>
+              <button type="button" class='btn' id="new_group">New group</button>
 
-          <hr>
+              <hr>
 
-          <div id='sample_characteristic'>
-          <div class="btn-group">
-          <input id='sample_annotation' type=text autocomplete="off" placeholder='Select a characteristic'></input>
-          <button id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
-          <span class="caret"></span>
-          </button>
-          </div>
-          </div>
-          
+              <div id='sample_characteristic'>
+                <div class="btn-group">
+                  <input id='sample_annotation' type=text autocomplete="off" placeholder='Select a characteristic'></input>
+                  <button id='sample_annotation_drop' class="btn dropdown-toggle" data-toggle="dropdown" href="#">
+                    <span class="caret"></span>
+                  </button>
+                </div>
+              </div>
+              
+            </div>
+         </div>
+
         </div>
-      </div>
 
-    </div>
+        
+
+        <div class="accordion-group">
+          <div class="accordion-heading">
+            <h4 class="accordion-title">
+              <a class="accordion-toggle" data-toggle="collapse"  href="#dimensions_menu">Dimensions</a>
+            </h4>
+          </div>
+
+          <div id="dimensions_menu" class="accordion-body collapse ">
+            <div class="accordion-inner">
+              <div id="dimension_barchart"></div>
+            </div>
+          </div>
+        </div>
+
+
+
 
      <div class="accordion-group">
        <div class="accordion-heading">
@@ -241,19 +260,16 @@ $(document).ready(function() {
     };
 
     var updateMDS = function() {
-        console.log("updateMDS")
 
         if (current_datasets.length != 0){
           if (_update.active) {
               _update.pending = true;
           } else {
               var opt = getOptions();
-              console.log(opt)
 
               _update.active = true;
               _update.pending = false;
 
-              console.log("send MDS")
               $('#options_menu img').css('visibility', 'visible');
               $.ajax({
                   url: "${request.route_url('mistic.json.dataset.mds', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
@@ -263,8 +279,8 @@ $(document).ready(function() {
                   error: function(req, status, error) {
                       console.log('got an error', status, error);
                   },
+      
                   success: function(data) {
-                      console.log("receive MDS")
                       mds_data = data;
                       dimension_barchart();
                       select_dimensions(0, 1);
@@ -284,7 +300,7 @@ $(document).ready(function() {
     updateMDS();
 
   var updateInfo = function() { 
-    
+
     // Update counts label (dataset, genes, samples)
     var nsamples = 0;
 
@@ -318,8 +334,100 @@ $(document).ready(function() {
 
 
     var dimension_barchart = function() {
-        select_dimensions(0,1)
-    }
+        if (mds_data === null) return;
+
+        var ht = mds_data.eigenvalues;
+        ht = ht.slice(0, 20);
+        var margin = { top: 30, right: 10, bottom: 30, left: 25 };
+        var width = 300;
+        var height = 100;
+
+        var x = d3.scale.ordinal()
+            .domain(d3.range(1,ht.length+1))
+            .rangeRoundBands([0, width], .1);
+        var y = d3.scale.linear()
+            .domain([0, d3.max(ht) ])
+            .range([height, 0]);
+
+        var xAxis = d3.svg.axis()
+        xAxis
+            .scale(x)
+            .orient("bottom")
+
+        var yAxis = d3.svg.axis()
+        yAxis
+            .scale(y)
+            .orient("left")
+            .ticks(5)
+
+        d3.select("#dimension_barchart").selectAll('svg').remove();
+        var svg = d3.select("#dimension_barchart")
+            .append("svg")
+            .attr("width", width + margin.left + margin.right)
+            .attr("height", height + margin.top + margin.bottom);
+
+        var axes = d3.select("#dimension_barchart")
+              .select('g.axes');
+
+        svg.append('text')
+            .attr('x', width/2 + margin.left)
+            .attr('y', 26)
+            .attr('text-anchor', 'middle')
+            .attr('style', 'font-family: helvetica; font-size: 12px; font-weight: 400')
+            .text('Dimension eigenvalues');
+
+        svg = svg.append("g")
+            .attr("transform", "translate(" + [margin.left, margin.top] + ")");
+
+        svg.append("g")
+            .attr("class", "axis-x axis")
+            .attr("transform", "translate(0," + height + ")")
+            .call(xAxis);
+        svg.append("g").attr("class", "axis-y axis").call(yAxis);
+
+        svg.selectAll('.axis text').attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 100');
+
+        
+        axes.select('g.axis-x')
+            .append('g')
+            .attr('class', 'axis-label-x')
+            .attr('transform', 'translate(0,5)rotate(90)')
+            .append('text')
+            .attr('dy', '-2px')
+            .attr('text-anchor', 'begin')
+
+        axes.select('g.axis-y')
+            .append('text')
+            .attr('dy', '4px')
+            .attr('text-anchor', 'end')
+
+        axes.selectAll('.axis path, .axis line')
+            .attr('fill', 'none')
+            .attr('stroke', 'black')
+            .attr('shape-rendering', 'crispEdges');
+
+        svg.selectAll(".bar")
+            .data(ht)
+          .enter()
+            .append("rect").classed('bar', true)
+            .attr('fill', 'grey')
+            .attr("x", function(d, i) { return x(i+1); })
+            .attr("y", function(d, i) { return y(d); })
+            .attr("width", x.rangeBand())
+            .attr("height", function(d) { return height - y(d); })
+            .on("click", function(d, i) {
+                if (d3.event.shiftKey) {
+                    if (i < plot_dimensions[0]) {
+                        select_dimensions(i, plot_dimensions[1]);
+                    } else if (i > plot_dimensions[0] || i != plot_dimensions[1]) {
+                        select_dimensions(plot_dimensions[0], i);
+                    }
+                } else {
+                    select_dimensions(i, i+1);
+                }
+            });
+    };
+
     var select_dimensions = function(dim1, dim2) {
         plot_dimensions = [ dim1, dim2 ];
 
@@ -329,18 +437,18 @@ $(document).ready(function() {
         current_graph.ylab = 'Dimension ' + (dim2+1);
 
         current_graph.draw();
+
+        var svg = d3.select("#dimension_barchart")
+            .selectAll('.bar')
+            .classed('selected', function(d, i) { return i == dim1 || i == dim2; });
     };
 
   var setCurrentTransform = function(xfrm) {
-     console.log("in setCurrentTransform")
-     console.log(current_transform)
-     console.log(xfrm)
      if (current_transform !== xfrm) {
       var avail_xfrms = dataset_info[0]['xfrm']
       if (_.contains(avail_xfrms, xfrm)) {
          $('#transform-buttons button').toggleClass('active', current_transform == xfrm);
         current_transform = xfrm;
-        console.log(current_transform)
         reloadAll();
       }
     }
@@ -417,9 +525,9 @@ $(document).ready(function() {
 
   
   var reloadAll = function(sync) {
-    _.each(current_graph.data, function(data) {
-      reloadGene(data.gene, sync);
-    });
+      _.each(current_graph.data, function(data) {
+          reloadGene(data.gene, sync);
+      });
   };
 
    
@@ -459,7 +567,7 @@ $(document).ready(function() {
   };
 
   var addGene = function(gene_id, gene_symbol, sync) {
-   
+
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_datasets[0]).replace('_gene_id_', gene_id),
       dataype: 'json',
@@ -500,13 +608,13 @@ $(document).ready(function() {
         $('#genelist').append(label);       
             });
             
-       
-
         updateInfo();
       },
+
       error: function() {
         // inform the user something went wrong.
-      }
+      },
+
     });
   };
 
@@ -744,6 +852,30 @@ $(document).ready(function() {
   $('#clear_labels').on("click", function(event){
     current_graph.clearLabels()
     event.preventDefault();
+  });
+
+  $('#sample_annotation_drop').on('click', function() {
+    sample_annotation_entry.$el.val('');
+    sample_annotation_entry.update();
+    sample_annotation_entry.$el.focus();
+  });
+ 
+  sample_annotation_entry.on("change", function(item){
+    if (item === null) return;
+    var val = item.id.split('.');
+    
+    var l1 = _.initial(val).join('.');
+    var l2 = val[val.length-1];
+    var kv = {};
+    kv[l1] = l2
+    $.ajax({
+      url:  "${request.route_url('mistic.json.dataset.samples', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
+      data: kv,
+      datatype: 'json',
+      success: function(data) {
+        current_graph.setSelection(data);
+      }
+    });
   });
 
   $('#add_dataset').on('click', function(event) {
