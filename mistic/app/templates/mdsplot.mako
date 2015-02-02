@@ -5,7 +5,7 @@ import json
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
-<%block name="pagetitle">Multidimensional scaling scatterplots</%block>
+<%block name="pagetitle">Pairwise correlation scatterplots</%block>
 
 <%block name="actions">
   ${parent.actions()}
@@ -44,7 +44,7 @@ import json
             <div id="gene_menu" class="accordion-body collapse ">
               <div class="accordion-inner">
 
-                  <input type="text" id="gene" autocomplete="off" placeholder='Select a gene'/> <br>	
+                  <input type="text" id="gene" autocomplete="off" placeholder='Select a gene'/> <br>    
 
                   <span id="genelist"></span>
               </div>
@@ -122,7 +122,7 @@ import json
      </div>
     </div>
 
-  </div>	
+  </div>        
 </div>
 
 </%block>
@@ -190,11 +190,13 @@ $(document).ready(function() {
                         "rgba(155,42,141,.65)", "rgba(255,3,79,.65)","rgba(11,162,162,.65)"  ,
                         "rgba(204,0,0,.65)", "rgba(0,76,153,.65)", "rgba(0,204,0,.65)" ];
   var next_group = 0;
-  var pgs = new PointGroupCollection();
   var mds_data = null;
   var plot_dimensions = [ 0, 1 ];
 
+  var pgs = new PointGroupCollection();
   current_graph.setPointGroups(pgs);
+
+  var pgs_view = new PointGroupListView({ groups: pgs, graph: current_graph, el: $("#current_selection") })
 
   var newGroup = function() {
     next_group = $('.point-group').length;
@@ -216,23 +218,30 @@ $(document).ready(function() {
   newGroup();
 %endif
 
+  $('#new_group').on('click', function(event) { 
+      newGroup(); 
+      $('.sg-ops').bind('click', function(event) { 
+       _.defer(updateInfo);
+      });
+      event.preventDefault(); 
+  });
+    
+    $('.sg-ops').on('click', function(event) { 
+    _.defer(updateInfo);
+   });
+
   
     var _update = { active: false, pending: undefined };
 
     var getOptions = function() {
         return {
-            x: $('button.xform.active').data('xform'),
+            x: current_transform,
             genes: JSON.stringify(current_graph.getGenes()),
         };
     };
 
     var updateMDS = function() {
         console.log("updateMDS")
-        console.log(current_datasets[0])
-        _.each(current_graph.data, function(data) {
-          console.log(data.gene);
-        });
-        console.log(current_graph.getGenes())
 
         if (current_datasets.length != 0){
           if (_update.active) {
@@ -256,7 +265,6 @@ $(document).ready(function() {
                   },
                   success: function(data) {
                       console.log("receive MDS")
-                      console.log(data)
                       mds_data = data;
                       dimension_barchart();
                       select_dimensions(0, 1);
@@ -295,10 +303,8 @@ $(document).ready(function() {
     $("#nb_genes").text('('+current_graph.data.length+')');
     $("#options").css('display', 'none');
 
-
-    console.log("length data")
-    console.log(current_graph.data.length)
     if (current_graph.data.length > 1) {
+      $("#options").css('display', 'inline');
       updateMDS();
     }
   };
@@ -326,16 +332,16 @@ $(document).ready(function() {
     };
 
   var setCurrentTransform = function(xfrm) {
-     
+     console.log("in setCurrentTransform")
+     console.log(current_transform)
+     console.log(xfrm)
      if (current_transform !== xfrm) {
       var avail_xfrms = dataset_info[0]['xfrm']
       if (_.contains(avail_xfrms, xfrm)) {
          $('#transform-buttons button').toggleClass('active', current_transform == xfrm);
         current_transform = xfrm;
+        console.log(current_transform)
         reloadAll();
-        // choose log scales if 'log' is a valid transformation, and the selected transformation is 'none'
-        var lg = current_transform === 'none' && _.contains(avail_xfrms, 'log');
-        current_graph.setScaleType(lg, lg);
       }
     }
     else {
@@ -643,6 +649,7 @@ $(document).ready(function() {
 
   <%
     ds = data.datasets.get(dataset)
+    gene_data = [ ds.expndata(gene) for gene in genes ]
   %>
 
 

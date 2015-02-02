@@ -99,15 +99,11 @@
 
     mdsplot.prototype.datadict = function(vdata, ids) {
         console.log("in datadict")
-        console.log(vdata)
-        console.log(ids)
 
         var vals = {};
         for (var i=0; i<vdata.length; i++) {
             vals[ids[i]] = vdata[i];
         }
-        console.log("show vals")
-        console.log(vals)
         return vals;
     };
 
@@ -119,40 +115,30 @@
 
 
     mdsplot.prototype.setXData = function(xdata, id_samples, redraw) {
-        console.log("start add xdata")
         if (xdata !== undefined) {
             this.xdata = this.datadict(xdata, id_samples);
         } else {
-            console.log("xdata undef")
             this.xdata = undefined;
         }
-        console.log(this.xdata)
         if (redraw !== false) {
             this.update();
         }
     };
 
     mdsplot.prototype.setYData = function(ydata, id_samples, redraw) {
-        console.log("start add ydata")
         if (ydata !== undefined) {
             this.ydata = this.datadict(ydata, id_samples);
         } else {
-            console.log("ydata undef")
             this.ydata = undefined;
         }
-        console.log(this.ydata)
         if (redraw !== false) {
             this.update();
         }
     };
 
     mdsplot.prototype.setXYmds = function(xdata, ydata, id_samples) {
-        console.log("start add data")
         this.setXData(xdata, id_samples, false);
         this.setYData(ydata, id_samples, false);
-        console.log("end add data")
-        console.log(this.xdata)
-        console.log(this.ydata)
     };
 
     mdsplot.prototype.pointIDs = function() {
@@ -165,7 +151,6 @@
                 ids[d[j].sample] = true;
             }
         }
-        console.log(ids)
 
         return _.keys(ids);
     };
@@ -201,7 +186,8 @@
     };
     
     mdsplot.prototype.updateData = function(data) {
-       
+        console.log("in updateData")
+               
         var idxs = [];
         for (idx = 0; idx < this.data.length; ++idx) {
             if (data.gene == this.data[idx].gene) idxs.push(idx);
@@ -287,6 +273,26 @@
 // ##########################################################################################################################   
 // ##########################################################################################################################  
 
+    mdsplot.prototype.legendSymbol = function(node, pg) {
+        var attrs = {};
+
+        _.extend(attrs, this.options.base_attrs);
+        _.extend(attrs, pg.get('style'));
+        if (attrs.fill === null) attrs.fill = 'none';
+        if (attrs.fill === undefined) attrs.fill = '#aaa';
+
+        var g = node
+            .append('g')
+            .classed('node', true);
+
+        g.append('path')
+            .each(function(d, i) {
+                for (var i in attrs) {
+                    d3.select(this).attr(i, attrs[i]);
+                }
+            });
+    };
+
 
     // Info : add style of point groups in the graph (ie: color of each group)
     // comment : 
@@ -320,7 +326,7 @@
             this.point_groups.on('change:point_ids change:style add remove reset sort', function() { this.updatePoints(); }, this);
         }
 
-//         this.updatePoints();
+        this.updatePoints();
     };
 
 

@@ -484,7 +484,6 @@ class Dataset(object):
 
     @view_config(route_name="mistic.json.dataset.mds", request_method="GET", renderer="json")
     def mds(self):
-
         xform = self.request.GET.get('x')
         if xform not in self.dataset.transforms:
             xform = self.dataset.transforms[0]

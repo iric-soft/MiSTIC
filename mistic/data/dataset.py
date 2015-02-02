@@ -176,8 +176,9 @@ class DataSet(object):
     return out
 
   def calcMDS(self, genesfilters, transform, pairwise = True):
-    
     data = self.df.loc[genesfilters]
+    if transform is not None:
+      data = transform(data)
 
     Ns = len(data.columns)
     Ng = len(data.index)
