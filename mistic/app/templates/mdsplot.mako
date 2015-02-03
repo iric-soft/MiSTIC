@@ -12,6 +12,11 @@ import json
    <a id="share_url" href="#link_to_share" role="button" class="btn" >Link to share</a>
 </%block>
 
+rect.bar.selected {
+  fill: grey;
+}
+
+
 <%block name="controls">
 
 <div class="row-fluid">
@@ -260,7 +265,6 @@ $(document).ready(function() {
     };
 
     var updateMDS = function() {
-
         if (current_datasets.length != 0){
           if (_update.active) {
               _update.pending = true;
@@ -297,10 +301,7 @@ $(document).ready(function() {
         }
     }
 
-    updateMDS();
-
   var updateInfo = function() { 
-
     // Update counts label (dataset, genes, samples)
     var nsamples = 0;
 
@@ -353,11 +354,13 @@ $(document).ready(function() {
         xAxis
             .scale(x)
             .orient("bottom")
+            .tickSize(1)
 
         var yAxis = d3.svg.axis()
         yAxis
             .scale(y)
             .orient("left")
+            .tickSize(1)
             .ticks(5)
 
         d3.select("#dimension_barchart").selectAll('svg').remove();
@@ -410,11 +413,11 @@ $(document).ready(function() {
             .data(ht)
           .enter()
             .append("rect").classed('bar', true)
-            .attr('fill', 'grey')
+            .attr('fill', 'black')
             .attr("x", function(d, i) { return x(i+1); })
             .attr("y", function(d, i) { return y(d); })
             .attr("width", x.rangeBand())
-            .attr("height", function(d) { return height - y(d); })
+            .attr("height", function(d) { return (height - y(d) > 0) ? height - y(d) : 0; })
             .on("click", function(d, i) {
                 if (d3.event.shiftKey) {
                     if (i < plot_dimensions[0]) {
@@ -554,10 +557,7 @@ $(document).ready(function() {
                
                 current_graph.updateData(obj);       
         
-       });
-        
-        
-        
+       });      
         updateInfo();
       },
       error: function() {
@@ -583,32 +583,30 @@ $(document).ready(function() {
             $('.alert-modal-body').html(row.length + ' entries found for ' + data.gene);
             $('.alert-modal').modal('toggle');
         }
-       _.each(row, function(e,i) {
-            
-               dat = data.data[i];
-               obj = {data:dat, 
-                       row:e, 
-                       symbol: (row.length > 1 ? data.symbol+'_'+i  : data.symbol),
-                       gene : data.gene,
-                       xform : data.xform,
-                       name : data.name,
-                       dataset: data.dataset                       
-                       };
+       _.each(row, function(e,i) { 
+            dat = data.data[i];
+            obj = {data:dat, 
+                   row:e, 
+                   symbol: (row.length > 1 ? data.symbol+'_'+i  : data.symbol),
+                   gene : data.gene,
+                   xform : data.xform,
+                   name : data.name,
+                   dataset: data.dataset                       
+            };
                
-                current_graph.addData(obj);       
+            current_graph.addData(obj);       
                 
-                 var label = $('<span>')
-          .addClass('badge')
-          .css({ 'margin': '0px 5px' })
-          .attr({ 'data-idx': current_graph.data.length - 1 })
-          .html(gene_symbol ? gene_symbol : gene_id);
-        label.append($('<i>')
-          .addClass('icon-white icon-remove-sign')
-          .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
-        $('#genelist').append(label);       
-            });
-            
-        updateInfo();
+            var label = $('<span>')
+              .addClass('badge')
+              .css({ 'margin': '0px 5px' })
+              .attr({ 'data-idx': current_graph.data.length - 1 })
+              .html(gene_symbol ? gene_symbol : gene_id);
+            label.append($('<i>')
+              .addClass('icon-white icon-remove-sign')
+              .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
+            $('#genelist').append(label);       
+        });
+        if (sync == undefined || sync == false) updateInfo();
       },
 
       error: function() {
@@ -767,6 +765,7 @@ $(document).ready(function() {
     %for g in genes:
       addGene(${json.dumps(g)|n}, undefined, true);
     %endfor
+    updateInfo();
   %else:
     gene_entry.setSearchURL(undefined);
     sample_annotation_entry.setSearchURL(undefined);

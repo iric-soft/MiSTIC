@@ -704,8 +704,8 @@ class DataSet(object):
   def genecorr(self, gene, xform = None, absthresh = None, thresh = None):
     return self._genecorr(gene, xform, absthresh, thresh)
 
-  def calcMDS(self, genes, xform, pairwise = True):
-    return self.data.calcMDS(genes, self._makeTransform(xform), pairwise)
+  def calcMDS(self, genes, xform):
+    return self.data.calcMDS(genes, self._makeTransform(xform))
 
   def readPositionData(self, pos):
     node_re = re.compile(r'^\s*(\S*)\s+\[(.*?)\];$', re.S|re.M)

@@ -175,7 +175,7 @@ class DataSet(object):
       out.append((i, r, c))
     return out
 
-  def calcMDS(self, genesfilters, transform, pairwise = True):
+  def calcMDS(self, genesfilters, transform):
     data = self.df.loc[genesfilters]
     if transform is not None:
       data = transform(data)
@@ -185,22 +185,11 @@ class DataSet(object):
 
     dist = numpy.zeros((Ns, Ns), float)
 
-    if not pairwise:
-      #variance = numpy.var(data, axis=0)
-      #sel = numpy.argpartition(-variance, N_skip + N_genes)[N_skip:N_skip+N_genes]
-      #for i in range(Ns):
-        #for j in range(i+1, Ns):
-          #diff = data[i,sel]-data[j,sel]
-          #diff = diff * diff
-          #dist[i,j] = dist[j,i] = math.sqrt(numpy.mean(diff))
-      print("TODO : need write this part")
-      return
-    else:
-      for i in range(Ns):
-        for j in range(i+1, Ns):
-          diff = data.iloc[:,i] - data.iloc[:,j]
-          diff = diff * diff
-          dist[i,j] = dist[j,i] = math.sqrt(numpy.mean(diff))
+    for i in range(Ns):
+      for j in range(i+1, Ns):
+        diff = data.iloc[:,i] - data.iloc[:,j]
+        diff = diff * diff
+        dist[i,j] = dist[j,i] = math.sqrt(numpy.mean(diff))
 
     def cmdscale(d):
       N = d.shape[0]

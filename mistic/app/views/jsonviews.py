@@ -488,7 +488,6 @@ class Dataset(object):
         if xform not in self.dataset.transforms:
             xform = self.dataset.transforms[0]
 
-        #genes = self.request.GET.get('genes')
         genes = json.loads(self.request.GET.get('genes'))
 
         mds_matrix, eigenvalues = self.dataset.calcMDS(genes, xform)
