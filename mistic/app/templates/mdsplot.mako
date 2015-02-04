@@ -5,17 +5,12 @@ import json
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
-<%block name="pagetitle">Pairwise correlation scatterplots</%block>
+<%block name="pagetitle">Multidimensional scaling plots</%block>
 
 <%block name="actions">
   ${parent.actions()}
    <a id="share_url" href="#link_to_share" role="button" class="btn" >Link to share</a>
 </%block>
-
-rect.bar.selected {
-  fill: grey;
-}
-
 
 <%block name="controls">
 
@@ -206,7 +201,7 @@ $(document).ready(function() {
   current_genes = [];
   dataset_info = [];
   current_transform = "none";
-  current_graph = new mdsplot($('#graph'));
+  current_graph = new mdsplot();
 
   $("#options").css('display', 'none');
 
@@ -333,7 +328,6 @@ $(document).ready(function() {
     
   %>
 
-
     var dimension_barchart = function() {
         if (mds_data === null) return;
 
@@ -413,9 +407,10 @@ $(document).ready(function() {
             .data(ht)
           .enter()
             .append("rect").classed('bar', true)
-            .attr('fill', 'black')
+            .attr("fill", 'black')
             .attr("x", function(d, i) { return x(i+1); })
             .attr("y", function(d, i) { return y(d); })
+            .attr("id", function(d, i) { return "rect-"+i; })
             .attr("width", x.rangeBand())
             .attr("height", function(d) { return (height - y(d) > 0) ? height - y(d) : 0; })
             .on("click", function(d, i) {
@@ -440,10 +435,11 @@ $(document).ready(function() {
         current_graph.ylab = 'Dimension ' + (dim2+1);
 
         current_graph.draw();
+        console.log(dim1)
 
-        var svg = d3.select("#dimension_barchart")
-            .selectAll('.bar')
-            .classed('selected', function(d, i) { return i == dim1 || i == dim2; });
+        d3.select("#dimension_barchart").selectAll(".bar").attr("fill", "black")
+        d3.select("#dimension_barchart").select("#rect-"+ dim1).attr("fill","grey")
+        d3.select("#dimension_barchart").select("#rect-"+ dim2).attr("fill","grey")
     };
 
   var setCurrentTransform = function(xfrm) {

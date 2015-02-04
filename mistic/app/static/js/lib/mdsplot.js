@@ -21,7 +21,7 @@
         },
     };
 
-    mdsplot = function(elem, options) {
+    mdsplot = function(options) {
 //         console.log("in init mds graph")
 
 // init graph
