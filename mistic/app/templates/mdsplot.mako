@@ -279,16 +279,23 @@ $(document).ready(function() {
                       console.log('got an error', status, error);
                   },
       
+                  beforeSend : function() {
+                      $("#graph").html('<div id="loading"><center><img src="${request.application_url}/static/img/ajax-loader.gif"/></center> </div>');
+                  },
                   success: function(data) {
                       mds_data = data;
+                      $("div#loading").remove();
                       dimension_barchart();
                       select_dimensions(0, 1);
+                      $('div#graph').append(current_graph.svg);
                   },
                   complete: function() {
                       $('#options_menu img').css('visibility', 'hidden');
                       _update.active = false;
                       window.setTimeout(function() {
-                          if (!_update.active && _update.pending) updateMDS();
+                          if (!_update.active && _update.pending){
+                              updateMDS();
+                          }
                       }, 0);
                   }
               });
@@ -834,7 +841,6 @@ $(document).ready(function() {
       $('div#graph').height());
   };
 
-  $('div#graph').append(current_graph.svg);
 
   resizeGraph();
   $(window).resize(resizeGraph);
