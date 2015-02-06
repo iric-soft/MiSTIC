@@ -5,6 +5,7 @@
  
 body {
   font-family: helvetica,arial,sans-serif;
+  font-size : 12px; 
   background-color: #f0f0f0;
   padding: 60px 0px 0px 0px;
   z-index:10;
@@ -18,6 +19,11 @@ form#pdfform {
 
 input {
   width:230px;
+ 
+}
+
+table {
+    font-size : 12px; 
 }
 
 select {
@@ -197,6 +203,9 @@ div#sample_enrichment {
   max-height: 200px;
   overflow-y: auto;
 }
+div#sample_enrichment > table{
+    font-size:small;
+}
 
 ul#menu1 {
   position:relative;
@@ -375,6 +384,10 @@ div.point-group .sg-ops i {
     cursor: pointer;
 }
 
+div.point-group input {
+    height: auto;
+}
+
 div#point-group-settings label.control-label {
     width: 8ex;
 }
@@ -415,6 +428,7 @@ div#point-group-settings .colour div.alpha-image {
 div#sample_characteristic input {
     display: inline-block;
     margin-bottom:0px;
+    height:28px;
 }
 
 div#sample_characteristic button {
@@ -547,8 +561,8 @@ div#sample_characteristic button {
 #sample_annotation_drop {
     display: inline-block;
     width: 24px;
+    height:28px;
     position :absolute;
-    
     background-clip : padding-box;
 }
 
@@ -561,6 +575,10 @@ div#sample_characteristic button {
 #point-group-settings {
     margin: 0;
     width: auto;
+}
+
+div#gs_dropdown > input {
+    height:28px;
 }
 
 input.search_init,input.text_filter:focus {

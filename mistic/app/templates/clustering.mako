@@ -142,8 +142,7 @@ $(document).ready(function() {
   if xform == 'log': 
     xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
   else : 
-    xf = xform 
-
+    xf = xform
 %>
 
   resizeGraph = function() {
@@ -165,8 +164,13 @@ $(document).ready(function() {
   current_graph.setGraphInfo(["Dataset: ${dataset}",  "Transform: ${xf}"]); 
  
   var gene_entry = new GeneDropdown({ el: $("#gene") });
-  gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}".replace('${request.route_url}', mistic.url));
-   newGSDropdown = function (elem, suff) {
+
+  //url = "${request.route_url('mistic.json.dataset.search', dataset=dataset)}".replace('${request.host}', mistic.url);
+  //gene_entry.setSearchURL(url);
+
+  gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
+
+  newGSDropdown = function (elem, suff) {
     return  new GODropdown({
         el: $("#"+elem),
         url: "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+ suff
