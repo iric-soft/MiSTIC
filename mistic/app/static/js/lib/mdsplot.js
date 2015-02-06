@@ -585,6 +585,9 @@
             return;
         }
         
+        if (this.data.length == 0) return;
+        if (this.xdata.length == 0 || this.ydata.length == 0) return;
+
         xy = this.getXYData()
 
 
@@ -617,6 +620,21 @@
         svg.append('g').attr('class', 'axes')
         this.makeAxes();
 
+
+// init brush 
+
+        
+        // background rectangle
+        var bkgx = this.options.padding[3] - this.options.inner;
+        var bkgy = this.options.padding[0] - this.options.inner;
+
+        var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
+        var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
+
+        this.xScaleBrush = d3.scale.linear().domain([ bkgx, bkgx+width ]).range([ bkgx, bkgx+width ]);
+        this.yScaleBrush = d3.scale.linear().domain([ bkgy+height, bkgy ]).range([ bkgy+height, bkgy ]);
+
+
         this.brush = d3.svg.brush()
             .x(this.xScaleBrush)
             .y(this.yScaleBrush)
@@ -629,7 +647,7 @@
             .call(this.brush);
 
 
-        // draw points
+// draw points
         svg.append('g')
             .classed('nodes', true);
 

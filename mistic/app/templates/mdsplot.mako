@@ -279,15 +279,10 @@ $(document).ready(function() {
                       console.log('got an error', status, error);
                   },
       
-                  beforeSend : function() {
-                      $("#graph").html('<div id="loading"><center><img src="${request.application_url}/static/img/ajax-loader.gif"/></center> </div>');
-                  },
                   success: function(data) {
                       mds_data = data;
-                      $("div#loading").remove();
                       dimension_barchart();
                       select_dimensions(0, 1);
-                      $('div#graph').append(current_graph.svg);
                   },
                   complete: function() {
                       $('#options_menu img').css('visibility', 'hidden');
@@ -414,7 +409,7 @@ $(document).ready(function() {
             .data(ht)
           .enter()
             .append("rect").classed('bar', true)
-            .attr("fill", 'black')
+            .attr("fill", 'grey')
             .attr("x", function(d, i) { return x(i+1); })
             .attr("y", function(d, i) { return y(d); })
             .attr("id", function(d, i) { return "rect-"+i; })
@@ -444,9 +439,9 @@ $(document).ready(function() {
         current_graph.draw();
         console.log(dim1)
 
-        d3.select("#dimension_barchart").selectAll(".bar").attr("fill", "black")
-        d3.select("#dimension_barchart").select("#rect-"+ dim1).attr("fill","grey")
-        d3.select("#dimension_barchart").select("#rect-"+ dim2).attr("fill","grey")
+        d3.select("#dimension_barchart").selectAll(".bar").attr("fill", "grey")
+        d3.select("#dimension_barchart").select("#rect-"+ dim1).attr("fill","black")
+        d3.select("#dimension_barchart").select("#rect-"+ dim2).attr("fill","black")
     };
 
   var setCurrentTransform = function(xfrm) {
@@ -485,13 +480,16 @@ $(document).ready(function() {
   };
 
   var addDataset = function(dataset, sync) {
+    console.log("addDataset")
     current_graph.removeData(function() { return true; });
+    console.log("removeDAta")
     
     $.ajax({
       url: "${request.route_url('mistic.json.dataset', dataset='_dataset_')}".replace('_dataset_', dataset),
       dataype: 'json',
       async: !sync,
       success: function(data) {
+        console.log("success")
         $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
         
         setAvailableTransforms(data['xfrm']);
@@ -723,39 +721,6 @@ $(document).ready(function() {
   }
   var _selection = { active: false, pending: undefined };
 
-  var selectionSearch = function(selection) {
-    
-    if (_selection.active) {
-      _selection.pending = selection;
-    } else {
-      if (_.isUndefined(selection) || !selection.length) {
-        updateEnrichmentTable([])
-        return;
-      }
-      _selection.active = true;
-      _selection.pending = undefined;
-      $.ajax({
-        url: "${request.route_url('mistic.json.dataset.samples.enrich', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
-        dataType: 'json',
-        type: 'POST',
-        data: { samples: JSON.stringify(selection) },
-        error: function(req, status, error) {
-          console.log('got an error', status, error);
-        },
-        success: function(data) {
-          updateEnrichmentTable(data);
-        },
-        complete: function() {
-          _selection.active = false;
-          window.setTimeout(function() {
-            if (!_selection.active && _selection.pending !== undefined) selectionSearch(_selection.pending);
-          }, 0);
-        }
-      });
-    }
-  }
-
-
   <%
     ds = data.datasets.get(dataset)
     gene_data = [ ds.expndata(gene) for gene in genes ]
@@ -842,6 +807,7 @@ $(document).ready(function() {
   };
 
 
+  $('div#graph').append(current_graph.svg);
   resizeGraph();
   $(window).resize(resizeGraph);
 
