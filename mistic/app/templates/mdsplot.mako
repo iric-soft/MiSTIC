@@ -750,7 +750,7 @@ $(document).ready(function() {
   %endif
 
   $("#share_url").on('click', function(event){
-    var url = "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}"
+    var url = "${request.route_url('mistic.template.mds', dataset='_dataset_', genes=[])}"
               .replace('_dataset_', current_datasets[0]);
 
     if (current_graph.data.length>0){
