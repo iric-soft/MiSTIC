@@ -699,7 +699,6 @@
 
     mdsplot.prototype.updateXform = function(xform) {
         this.xform=xform;
-        this.draw();
     };
 
 

@@ -192,12 +192,22 @@ ${parent.pagetail()}
 <script type="text/javascript">
 $(document).ready(function() {
 
+  resizeGraph = function() {
+    $('div#graph').height($(window).height() - 124);
+
+    current_graph.resize(
+      $('div#graph').width(),
+      $('div#graph').height());
+  };
+
   current_datasets = [];
   current_genes = [];
   dataset_info = [];
   current_transform = "none";
   current_graph = new mdsplot();
   $('div#graph').append(current_graph.svg);
+  resizeGraph();
+  $(window).resize(resizeGraph);
 
   var clip = new ZeroClipboard($("#copy-to-clipboard"), {
     moviePath: "${request.static_url('mistic:app/static/swf/ZeroClipboard.swf')}"
@@ -263,7 +273,6 @@ $(document).ready(function() {
     };
 
     var updateMDS = function() {
-        console.log("updateMDS")
         if (current_datasets.length != 0){
           if (_update.active) {
               _update.pending = true;
@@ -284,24 +293,16 @@ $(document).ready(function() {
                   },
       
                   beforeSend : function() {
-                      console.log("send spinner")
                       current_graph.loader();
                   },
                   success: function(data) {
-                      console.log("success updateMDS")
                       mds_data = data;
                       dimension_barchart();
                       select_dimensions(0, 1);
                   },
                   complete: function() {
-                      console.log("complet updateMDS")
                       $('#options_menu img').css('visibility', 'hidden');
                       _update.active = false;
-                      window.setTimeout(function() {
-                          if (!_update.active && _update.pending){
-                              updateMDS();
-                          }
-                      }, 0);
                   }
               });
           }
@@ -447,7 +448,6 @@ $(document).ready(function() {
         current_graph.ylab = 'Dimension ' + (dim2+1);
 
         current_graph.draw();
-        console.log(dim1)
 
         d3.select("#dimension_barchart").selectAll(".bar").attr("fill", "grey")
         d3.select("#dimension_barchart").select("#rect-"+ dim1).attr("fill","black")
@@ -455,21 +455,20 @@ $(document).ready(function() {
     };
 
   var setCurrentTransform = function(xfrm) {
-     if (current_transform !== xfrm) {
+    if (current_transform !== xfrm) {
       var avail_xfrms = dataset_info[0]['xfrm']
       if (_.contains(avail_xfrms, xfrm)) {
          $('#transform-buttons button').toggleClass('active', current_transform == xfrm);
         current_transform = xfrm;
+        var xform_text = current_transform;
+        if (current_transform==='log') { xform_text = "${xf['log']}"; }
+        if (current_transform==='none') { xform_text = "${xf['none']}"; }
+        current_graph.updateXform(xform_text);
         reloadAll();
       }
-    }
-    else {
+    } else {
      $('#transform-buttons button:contains("'+xfrm+'")').toggleClass('active', current_transform == xfrm);
     }
-    var xform_text = current_transform;
-    if (current_transform==='log') { xform_text = "${xf['log']}"; }
-    if (current_transform==='none') { xform_text = "${xf['none']}"; }
-    current_graph.updateXform(xform_text);
    
   };
 
@@ -490,16 +489,13 @@ $(document).ready(function() {
   };
 
   var addDataset = function(dataset, sync) {
-    console.log("addDataset")
     current_graph.removeData(function() { return true; });
-    console.log("removeDAta")
     
     $.ajax({
       url: "${request.route_url('mistic.json.dataset', dataset='_dataset_')}".replace('_dataset_', dataset),
       dataype: 'json',
       async: !sync,
       success: function(data) {
-        console.log("success")
         $('ul#current_datasets').html('').append('<li>' + dataset + '</li>');
         
         setAvailableTransforms(data['xfrm']);
@@ -806,18 +802,6 @@ $(document).ready(function() {
     selectionSearch(selection);
     $('#sample_enrichment_panel').collapse('show');
   });
-
-  resizeGraph = function() {
-    $('div#graph').height($(window).height() - 124);
-
-    current_graph.resize(
-      $('div#graph').width(),
-      $('div#graph').height());
-  };
-
-
-  resizeGraph();
-  $(window).resize(resizeGraph);
 
   $('#show_labels').on("click", function(event){
     current_graph.showLabels()
