@@ -385,6 +385,7 @@
     };
 
 
+
 // ##########################################################################################################################   
 // ##########################################################################################################################  
 // function : display all the graphe
@@ -552,22 +553,6 @@
             .transition()
             .remove();
             
-       
-// version without nodes
-
-//         var svg = d3.select(this.svg)
-//         var nodes = svg.selectAll(".node")
-//             .data(xy)
-//             .enter()
-//               .append("g")
-//               .attr("class","node")
-//               .attr("transform", function(d) {
-//                                     var t = self.transformScale(d);
-//                                     return "translate(" + [t.x, t.y] + ")";
-//                                  });
-// 
-//         nodes.append("circle")
-//           .attr("r", function(d) {return 2})
     };
 
     mdsplot.prototype.draw = function() {
@@ -653,29 +638,76 @@
 
         this.updatePoints();
 
-     
-/*
-        
-        var data = svg
-            .append('g')
-            .attr('class', 'data')
-            .selectAll('circle')
-            .data(xy, function(d) { return d.k; })
-
-        data
-          .enter()
-            .append('circle')
-            .attr('fill', '#050')
-            .attr('cx', function(d) { return xScale(d.x); })
-            .attr('cy', function(d) { return yScale(d.y); })
-            .attr('r',  2)*/
-
     };
+
+
+
+
+    mdsplot.prototype.loader = function (config) {
+//         console.log("draw");
+
+// reset svg        
+        var svg = d3.select(this.svg)
+        svg.selectAll('*').remove();
+        var width = this.width / 8;
+        var height = this.height / 8;
+
+        var radius = Math.min(width, height) / 2;
+        var tau = 2 * Math.PI;
+
+        var arc = d3.svg.arc()
+                .innerRadius(radius*0.5)
+                .outerRadius(radius*0.9)
+                .startAngle(0);
+
+        var svg = d3.select(this.svg).append("svg")
+            .attr("id", "loader")
+            .attr("width", width)
+            .attr("height", height)
+          .append("g")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+
+        var background = svg.append("path")
+                .datum({endAngle: 0.33*tau})
+                .style("fill", "#4D4D4D")
+                .attr("d", arc)
+                .call(spin, 1200)
+
+        function spin(selection, duration) {
+            selection.transition()
+                .ease("linear")
+                .duration(duration)
+                .attrTween("transform", function() {
+                    return d3.interpolateString("rotate(0)", "rotate(360)");
+                });
+
+            setTimeout(function() { spin(selection, duration); }, duration);
+        }
+
+        function transitionFunction(path) {
+            path.transition()
+                .duration(7500)
+                .attrTween("stroke-dasharray", tweenDash)
+                .each("end", function() { d3.select(this).call(transition); });
+        }
+    }
+
+
+
+
+
 
     mdsplot.prototype.updateXform = function(xform) {
         this.xform=xform;
         this.draw();
     };
+
+
+
+
+
+
+
 
     mdsplot.prototype.addData = function(data) {
 //         console.log("in addData")

@@ -187,21 +187,24 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/geneinfo.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/dataset_selector.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/ZeroClipboard.min.js')}" type="text/javascript"></script>
+<script src="${request.static_url('mistic:app/static/js/lib/spin.min.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
 $(document).ready(function() {
-  var clip = new ZeroClipboard($("#copy-to-clipboard"), {
-    moviePath: "${request.static_url('mistic:app/static/swf/ZeroClipboard.swf')}"
-  });
-
-  var gene_entry = new GeneDropdown({ el: $("#gene") });
-  var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
 
   current_datasets = [];
   current_genes = [];
   dataset_info = [];
   current_transform = "none";
   current_graph = new mdsplot();
+  $('div#graph').append(current_graph.svg);
+
+  var clip = new ZeroClipboard($("#copy-to-clipboard"), {
+    moviePath: "${request.static_url('mistic:app/static/swf/ZeroClipboard.swf')}"
+  });
+
+  var gene_entry = new GeneDropdown({ el: $("#gene") });
+  var sample_annotation_entry = new SampleAnnotationDropdown({el:$('#sample_annotation')});
 
   $("#options").css('display', 'none');
 
@@ -260,6 +263,7 @@ $(document).ready(function() {
     };
 
     var updateMDS = function() {
+        console.log("updateMDS")
         if (current_datasets.length != 0){
           if (_update.active) {
               _update.pending = true;
@@ -270,7 +274,7 @@ $(document).ready(function() {
               _update.pending = false;
 
               $('#options_menu img').css('visibility', 'visible');
-              $.ajax({
+              var req = $.ajax({
                   url: "${request.route_url('mistic.json.dataset.mds', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]),
                   dataType: 'json',
                   type: 'GET',
@@ -279,12 +283,18 @@ $(document).ready(function() {
                       console.log('got an error', status, error);
                   },
       
+                  beforeSend : function() {
+                      console.log("send spinner")
+                      current_graph.loader();
+                  },
                   success: function(data) {
+                      console.log("success updateMDS")
                       mds_data = data;
                       dimension_barchart();
                       select_dimensions(0, 1);
                   },
                   complete: function() {
+                      console.log("complet updateMDS")
                       $('#options_menu img').css('visibility', 'hidden');
                       _update.active = false;
                       window.setTimeout(function() {
@@ -726,7 +736,6 @@ $(document).ready(function() {
     gene_data = [ ds.expndata(gene) for gene in genes ]
   %>
 
-
   %if ds is not None:
     addDataset("${dataset}", true);
     // Gene symbols were passed in the URL
@@ -807,7 +816,6 @@ $(document).ready(function() {
   };
 
 
-  $('div#graph').append(current_graph.svg);
   resizeGraph();
   $(window).resize(resizeGraph);
 
