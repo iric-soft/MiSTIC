@@ -36,81 +36,104 @@ import pickle
     <div class="accordion-group">     
        <div class="accordion-heading"><h4 class="accordion-title">
          <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  </a></h4>
-      </div>
+       </div>
   
-   <div id="locate_gene" class="accordion-body collapse in">
-       <div class="accordion-inner">  
-    
-    
-    <label for="gene1"></label>
-    <input type="text" id="gene">
-  
-    </div>
+       <div id="locate_gene" class="accordion-body collapse in">
+          <div class="accordion-inner">  
+             <label for="gene1"></label>
+             <input type="text" id="gene">
+          </div>
       </div>
     </div>
           
+    <div class="accordion-group">     
+       <div class="accordion-heading"><h4 class="accordion-title">
+         <a class="accordion-toggle" data-toggle="collapse"  href="#extract_peak">Extract peaks </a></h4>
+       </div>
+  
+       <div id="extract_peak" class="accordion-body collapse in">
+          <div class="accordion-inner">
+              <form class="form-horizontal">
+                  <div class="control-group">
+                      <label class="control-label" for="inputEmail">Number of elements in a peak:</label>
+                      <div class="controls">
+                          <input class="input-mini" type="text" id="min_elt" value="5">
+                          <input class="input-mini" type="text" id="max_elt" value="500">
+                      </div>
+                  </div>
+                  <div class="control-group">
+                      <label class="control-label" for="inputEmail">Height of a peak: </label>
+                      <div class="controls">
+                          <input class="input-mini" type="text" id="min_h" value="0.01">
+                          <input class="input-mini" type="text" id="max_h" value="1">
+                          <button type="submit" class="btn" id="extract_peak">Extract</button>
+                      </div>
+                  </div>
+              </form>
+          </div>
+      </div>
+    </div>
+        
+          
        
-  <div class="accordion-group">     
+    <div class="accordion-group">     
        <div class="accordion-heading"><h4 class="accordion-title">
          <a class="accordion-toggle" data-toggle="collapse"  href="#gs_dropdown">Geneset enrichment</a></h4>
-      </div>
+       </div>
   
-    <div id="gs_dropdown" class="accordion-body collapse in">
-       <div class="accordion-inner">  
-           
-            
-            <div class="input-append btn-group"  style='margin-left:0px;'>
+       <div id="gs_dropdown" class="accordion-body collapse in">
+          <div class="accordion-inner">  
+             <div class="input-append btn-group"  style='margin-left:0px;'>
                 <input type="text" id="level1" placeholder='Restrict geneset search to this type'>
                 <a id='level1_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
                 <span class="caret"></span>
                 </a>
-            </div>
-           <div class="input-append btn-group"  style='margin-left:0px;'>
+             </div>
+             <div class="input-append btn-group"  style='margin-left:0px;'>
                  <input type="text" id="level2" placeholder='Restrict geneset search to this category'>
                 <a id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
                 <span class="caret"></span>
                 </a>
-            </div>
+             </div>
            
-           <div class="input-append btn-group" style='margin-left:0px;'>
+             <div class="input-append btn-group" style='margin-left:0px;'>
                 <input type="text" id="level3" placeholder='Search for a geneset'>
                 <a id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'> 
                 <span class="caret"></span>
                 </a>
-            </div>
+             </div>
          
-         
-          <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
+             <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
          
           
-      </div>
+         </div>
       </div>
     </div> 
     
   
-  <div class="accordion-group">
+    <div class="accordion-group">
        <div class="accordion-heading">
          <h4 class="accordion-title">
            <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
          </h4>
        </div>
 
-      <div id="options_menu" class="accordion-body collapse ">
-        <div class="accordion-inner">
+       <div id="options_menu" class="accordion-body collapse ">
+         <div class="accordion-inner">
            <ul id="options" class="nav nav-list">
             <li><a id='clear_plot' href="#">Clear plot</a></li>
           
             <li class="divider"></li>
             
             <div>
-            <label for="odds">Set odds ratio: </label>          
-            <input id="odds" value='2' size=3 disabled type='text' style='width:10px;height:10px'></input>
-           </div>
-          </ul>
-        </div>
-      </div>
-     </div>
-   </div>
+              <label for="odds">Set odds ratio: </label>          
+              <input id="odds" value='2' size=3 disabled type='text' style='width:10px;height:10px'></input>
+            </div>
+           </ul>
+         </div>
+       </div>
+    </div>
+ </div>
   
     
   </form>
@@ -334,7 +357,31 @@ $(document).ready(function() {
     return req;
   };
 
-  
+  var getParmExtract = function() {
+      return {
+          w: document.getElementById("min_elt").value,
+          W: document.getElementById("max_elt").value,
+          h: document.getElementById("min_h").value,
+          H: document.getElementById("max_h").value
+      };
+  };
+
+  var extract = function() {
+      var parm = getParmExtract();
+      $.ajax({
+          url: "${request.route_url('mistic.json.dataset.extract', dataset=dataset, xform=xform)}",
+          data: parm,
+          dataype: 'json',
+          success: function(data) {
+              console.log(data)
+            
+          },
+          error: function() {
+            // inform the user something went wrong.
+          }
+     });
+  };
+ 
  
   gene_entry.on('change', function(item) {
    
@@ -368,6 +415,10 @@ $(document).ready(function() {
     $('#gene').val('');
     $('#goterm').val('');
     
+  });
+  
+  $('#extract_peak').on("click", function(event){
+    extract();
   });
 
  

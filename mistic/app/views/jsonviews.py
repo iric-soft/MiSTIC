@@ -172,7 +172,6 @@ class Annotation(object):
         result = self.annotation.get_gene_ids(self.request.GET.getall('filter_gsid'))
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
-
     def _query_to_regex (self, query):
       if query: 
         query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
@@ -492,6 +491,22 @@ class Dataset(object):
 
         mds_matrix, eigenvalues = self.dataset.calcMDS(genes, xform)
         return dict(id_samples = list(self.dataset.data.colnames), dimensions = map(list, mds_matrix), eigenvalues = list(eigenvalues))
+
+    @view_config(route_name="mistic.json.dataset.extract", request_method="GET", renderer="json")
+    def extract_peaks(self):
+        print ("Extract peak")
+
+        min_w = int(self.request.GET.get('w')) 
+        max_w = int(self.request.GET.get('W')) 
+        min_h = float(self.request.GET.get('h')) 
+        max_h = float(self.request.GET.get('H')) 
+
+        print ("Width:" + str(min_w) + " - "+ str(max_w))
+        print ("Height:" + str(min_h) + " - "+ str(max_h))
+
+        genes_in_peaks = self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h)
+        #print(genes_in_peaks) 
+        return dict(id_genes = genes_in_peaks.split(";"))
 
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")
     def mst(self):

@@ -15,6 +15,7 @@ import copy
 
 from beaker.cache import *
 from cache_helpers import *
+from mistic.util.extractPeaks import *
 
 
 
@@ -807,6 +808,13 @@ class DataSet(object):
         new_pos[dataset_idx[n]] = pos[i]
 
     return new_nodes, new_edges, new_pos
+
+  def extract_peaks(self, xform, min_w, max_w, min_h, max_h):
+    d, f = os.path.split(self.source)
+    file_g = os.path.join(d, 'transformed', xform, os.path.splitext(f)[0] + '.g')
+
+    return exec_extract_peaks(file_g, min_w, max_w, min_h, max_h) #see mistic/util/extractPeaks.py
+
 
   def expndata(self, gene, xform = None):
     expn = self.data.row(self.data.r(gene), transform = self._makeTransform(xform))
