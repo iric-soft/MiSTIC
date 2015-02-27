@@ -226,6 +226,7 @@ def main(global_config, **settings):
     config.add_route('mistic.json.dataset.mst',            '/datasets/{dataset}/mst/{xform}')
     config.add_route('mistic.json.dataset.mapped_mst',     '/datasets/{dataset}/mst/{xform}/{tgt_annotation}')
     config.add_route('mistic.json.dataset.extract',        '/datasets/{dataset}/extract/{xform}')
+    config.add_route('mistic.json.dataset.extractSave',    '/datasets/{dataset}/extractSave/{xform}')
 
     config.add_route('mistic.json.dataset.genes',          '/datasets/{dataset}/genes')
     config.add_route('mistic.json.gene',                   '/datasets/{dataset}/genes/{gene_id}')

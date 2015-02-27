@@ -5,6 +5,7 @@ import os
 import sys
 import string
 import getopt
+import tempfile
 
 # ###########################################################################################
 # Object 
@@ -49,8 +50,10 @@ class Extract_peak() :
         for i_gene in self.genes :
             genes_in_peaks += self.genes[i_gene].gene_id + ";"
 
+        peaks = "" + self.id + "\t" + str(len(self.genes)) + "\t" + str(self.min_corr) + "\t" + str(self.max_corr) + "\t" + genes_in_peaks
         if not (outF is None):
-            outF.write("" + self.id + "\t" + str(len(self.genes)) + "\t" + str(self.min_corr) + "\t" + str(self.max_corr) + "\t" + genes_in_peaks + "\n")
+            outF.write(peaks + "\n")
+
         return genes_in_peaks
 
     def len_peak(self) :
@@ -110,7 +113,7 @@ def create_peak(node1, node2, corr, peaks, id_peak, max_diff_corr):
     peaks[id_peak] = Extract_peak(id_peak, node1, node2, corr, max_diff_corr)
 
 def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr, max_diff_corr, peaks, outF=None) :
-    genes_in_peaks = ""
+    peaks_str = []
 
     if node1.peak_id == "0" :
         peak = get_peak(peaks,node2.peak_id)
@@ -122,7 +125,8 @@ def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr, max_diff_c
             stay_valid = stay_valid and (delta <= max_diff_corr)
 
         if peak.valid_peak and stay_valid == False :
-            genes_in_peaks = peak.print_peak(min_gene, min_diff_corr, outF)
+            peak_str = peak.print_peak(min_gene, min_diff_corr, outF)
+            if len(peak_str) != 0 :  peaks_str.append(peak_str)
 
         peak.add_gene(node1, corr, stay_valid)
     else :
@@ -136,7 +140,8 @@ def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr, max_diff_c
                 stay_valid = stay_valid and (delta <= max_diff_corr)
 
             if peak.valid_peak and stay_valid == False :
-                genes_in_peaks = peak.print_peak(min_gene, min_diff_corr, outF)
+                peak_str = peak.print_peak(min_gene, min_diff_corr, outF)
+                if len(peak_str) != 0 :  peaks_str.append(peak_str)
 
             peak.add_gene(node2, corr, stay_valid)
         else :
@@ -152,10 +157,12 @@ def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr, max_diff_c
 
                 if stay_valid == False:
                     if peak1.valid_peak :
-                        genes_in_peaks = peak1.print_peak(min_gene, min_diff_corr, outF)
+                        peak_str = peak1.print_peak(min_gene, min_diff_corr, outF)
+                        if len(peak_str) != 0 :  peaks_str.append(peak_str)
                         peak1.invalid_peak()
                     if peak2.valid_peak :
-                        genes_in_peaks = genes_in_peaks + peak2.print_peak(min_gene, min_diff_corr, outF)
+                        peak_str = peak_str + peak2.print_peak(min_gene, min_diff_corr, outF)
+                        if len(peak_str) != 0 :  peaks_str.append(peak_str)
                         peak2.invalid_peak()
                 else :
                     if len(peak1.genes) <= len(peak2.genes) :
@@ -166,13 +173,15 @@ def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr, max_diff_c
                         del peaks[peak2.id]
             else :
                 if peak1.valid_peak :
-                    genes_in_peaks = peak1.print_peak(min_gene, min_diff_corr, outF)
+                    peak_str = peak1.print_peak(min_gene, min_diff_corr, outF)
+                    if len(peak_str) != 0 :  peaks_str.append(peak_str)
                     peak1.invalid_peak()
                 if peak2.valid_peak :
-                    genes_in_peaks = genes_in_peaks + peak2.print_peak(min_gene, min_diff_corr, outF)
+                    peak_str = peak2.print_peak(min_gene, min_diff_corr, outF)
+                    if len(peak_str) != 0 :  peaks_str.append(peak_str)
                     peak2.invalid_peak()
 
-    return genes_in_peaks
+    return peaks_str
       
       
 
@@ -199,7 +208,7 @@ def read_nodes (reader) :
 
 def extract_peaks (reader, last_line, nodes, min_gene, max_gene, min_diff_corr, max_diff_corr, outF=None) :
     peaks = {}
-    genes_in_peaks = ""
+    peaks_str = []
     line = last_line
     cpt_id = 1
 
@@ -210,7 +219,7 @@ def extract_peaks (reader, last_line, nodes, min_gene, max_gene, min_diff_corr, 
         node2 = get_node(nodes, attribute[2])
 
         if (node1.peak_id !="0" or node2.peak_id != "0") :
-            genes_in_peaks = genes_in_peaks + merge_peak(node1, node2, float(attribute[3].split("=")[1]), min_gene, max_gene, min_diff_corr, max_diff_corr, peaks, outF)
+            peaks_str = peaks_str + merge_peak(node1, node2, float(attribute[3].split("=")[1]), min_gene, max_gene, min_diff_corr, max_diff_corr, peaks, outF)
         else :
             create_peak(node1, node2, float(attribute[3].split("=")[1]), peaks, str(cpt_id), max_diff_corr)
             cpt_id += 1
@@ -218,23 +227,27 @@ def extract_peaks (reader, last_line, nodes, min_gene, max_gene, min_diff_corr, 
                 
 
         line = reader.readline().rstrip('\n')
-    return genes_in_peaks
+    return peaks_str
 
 
 # ###########################################################################################
 # Main function
-def exec_extract_peaks(inF, min_gene, max_gene, min_diff_corr, max_diff_corr):
-                    
+def exec_extract_peaks(inF, min_gene, max_gene, min_diff_corr, max_diff_corr, writter_out=None):
+    print("in extract")    
+    print(writter_out)                
     reader_in = open(inF,'r')
     nodes, last_line = read_nodes(reader_in)
 
-    genes_in_peaks = extract_peaks(reader_in, last_line, nodes, min_gene, max_gene, min_diff_corr, max_diff_corr)
+    if not (writter_out is None) :
+        writter_out.write("PICK_ID\tN_GENES\tMIN_CORR\tMAX_CORR\tGENES\n")
+    
+    peaks_str = extract_peaks(reader_in, last_line, nodes, min_gene, max_gene, min_diff_corr, max_diff_corr, writter_out)
     
     print("end of extract")
 
     reader_in.close()
     
-    return genes_in_peaks
+    return peaks_str
         
 
 

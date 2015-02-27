@@ -18,6 +18,7 @@ import pickle
 import os
 import logging
 
+from tempfile import NamedTemporaryFile
 from beaker.cache import *
 from mistic.app.cache_helpers import *
 from mistic.app.tables import *
@@ -493,20 +494,37 @@ class Dataset(object):
         return dict(id_samples = list(self.dataset.data.colnames), dimensions = map(list, mds_matrix), eigenvalues = list(eigenvalues))
 
     @view_config(route_name="mistic.json.dataset.extract", request_method="GET", renderer="json")
-    def extract_peaks(self):
-        print ("Extract peak")
+    def extract_view_peaks(self):
 
         min_w = int(self.request.GET.get('w')) 
         max_w = int(self.request.GET.get('W')) 
         min_h = float(self.request.GET.get('h')) 
         max_h = float(self.request.GET.get('H')) 
 
-        print ("Width:" + str(min_w) + " - "+ str(max_w))
-        print ("Height:" + str(min_h) + " - "+ str(max_h))
+        peaks_str = self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h)
+        print(peaks_str) 
+        return peaks_str
 
-        genes_in_peaks = self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h)
-        #print(genes_in_peaks) 
-        return dict(id_genes = genes_in_peaks.split(";"))
+    @view_config(route_name="mistic.json.dataset.extractSave", request_method="GET")
+    def extract_save_peaks(self):
+
+        min_w = int(self.request.GET.get('w')) 
+        max_w = int(self.request.GET.get('W')) 
+        min_h = float(self.request.GET.get('h')) 
+        max_h = float(self.request.GET.get('H')) 
+
+        response = Response(content_type='application/csv', content_disposition='filename=peak.txt')
+        with NamedTemporaryFile(delete=True) as file_tmp:
+            print(file_tmp.name)
+ 
+            self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h, file_tmp)
+            file_tmp.flush()
+            response.app_iter = open(file_tmp.name ,'rb')
+
+            return response
+
+
+
 
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")
     def mst(self):

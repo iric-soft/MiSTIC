@@ -809,11 +809,11 @@ class DataSet(object):
 
     return new_nodes, new_edges, new_pos
 
-  def extract_peaks(self, xform, min_w, max_w, min_h, max_h):
+  def extract_peaks(self, xform, min_w, max_w, min_h, max_h, file_out=None):
     d, f = os.path.split(self.source)
     file_g = os.path.join(d, 'transformed', xform, os.path.splitext(f)[0] + '.g')
 
-    return exec_extract_peaks(file_g, min_w, max_w, min_h, max_h) #see mistic/util/extractPeaks.py
+    return exec_extract_peaks(file_g, min_w, max_w, min_h, max_h, file_out) #see mistic/util/extractPeaks.py
 
 
   def expndata(self, gene, xform = None):

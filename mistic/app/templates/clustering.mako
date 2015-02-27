@@ -58,7 +58,7 @@ import pickle
                       <label class="control-label" for="inputEmail">Number of elements in a peak:</label>
                       <div class="controls">
                           <input class="input-mini" type="text" id="min_elt" value="5">
-                          <input class="input-mini" type="text" id="max_elt" value="500">
+                          <input class="input-mini" type="text" id="max_elt" value="300">
                       </div>
                   </div>
                   <div class="control-group">
@@ -66,7 +66,8 @@ import pickle
                       <div class="controls">
                           <input class="input-mini" type="text" id="min_h" value="0.01">
                           <input class="input-mini" type="text" id="max_h" value="1">
-                          <button type="submit" class="btn" id="extract_peak">Extract</button>
+                          <button class="btn" id="extract_view_btn">Extract</button>
+                          <button class="btn" id="extract_save_btn">Save</button>
                       </div>
                   </div>
               </form>
@@ -294,6 +295,7 @@ $(document).ready(function() {
             }
           });
 
+          console.log(node_content)
           current_graph.colourByClusterMatch(
             node_content,
             // function (a, b, c, d, cur_max) {
@@ -357,34 +359,8 @@ $(document).ready(function() {
     return req;
   };
 
-  var getParmExtract = function() {
-      return {
-          w: document.getElementById("min_elt").value,
-          W: document.getElementById("max_elt").value,
-          h: document.getElementById("min_h").value,
-          H: document.getElementById("max_h").value
-      };
-  };
-
-  var extract = function() {
-      var parm = getParmExtract();
-      $.ajax({
-          url: "${request.route_url('mistic.json.dataset.extract', dataset=dataset, xform=xform)}",
-          data: parm,
-          dataype: 'json',
-          success: function(data) {
-              console.log(data)
-            
-          },
-          error: function() {
-            // inform the user something went wrong.
-          }
-     });
-  };
- 
- 
   gene_entry.on('change', function(item) {
-   
+    console.log("gene_entry")
     if (item !== null) {
       exit_var = current_graph.zoomTo(item.id);
       console.debug(exit_var);
@@ -399,7 +375,6 @@ $(document).ready(function() {
       current_graph.zoomTo(null);
     }
     return false;
-    event.preventDefault();
   });
 
   current_graph.on('click:cluster', function(selection) {
@@ -416,9 +391,58 @@ $(document).ready(function() {
     $('#goterm').val('');
     
   });
+
+  var getParmExtract = function() {
+      return {
+          w: document.getElementById("min_elt").value,
+          W: document.getElementById("max_elt").value,
+          h: document.getElementById("min_h").value,
+          H: document.getElementById("max_h").value
+      };
+  };
   
-  $('#extract_peak').on("click", function(event){
-    extract();
+  $('#extract_view_btn').click(function(event){
+      console.log("in extract view")
+      var parm = getParmExtract();
+
+      $.ajax({
+          url: "${request.route_url('mistic.json.dataset.extract', dataset=dataset, xform=xform)}",
+          data: parm,
+          dataype: 'json',
+          success: function(data) {
+              console.log(data);
+              node_content = [];
+              for (var i = 0; i < data.length; ++i) {
+                  var d = data[i];
+                  var gene_ids = d.split(";");
+                  gene_ids.pop(); //delete last empty element
+                  dic_gene = {};
+                  for (var j = 0; j < gene_ids.length; ++j) {
+                      dic_gene[gene_ids[j]] = true;
+                      node_content.push(dic_gene);
+                  }
+              }
+
+              console.log(node_content)
+          },
+          error: function() {
+            // inform the user something went wrong.
+          }
+     });
+  });
+
+  
+  
+  $('#extract_save_btn').click(function(event){
+      var param = "?"
+      param = param.concat("w=".concat(document.getElementById("min_elt").value));
+      param = param.concat("&W=".concat(document.getElementById("max_elt").value));
+      param = param.concat("&h=".concat(document.getElementById("min_h").value));
+      param = param.concat("&H=".concat(document.getElementById("max_h").value));
+      var url = "${request.route_url('mistic.json.dataset.extractSave', dataset=dataset, xform=xform)}";
+      url = url.concat(param);
+      window.open(url)
+     
   });
 
  
