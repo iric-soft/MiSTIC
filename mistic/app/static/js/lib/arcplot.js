@@ -1,6 +1,6 @@
 (function() {
-    var degrees = function(r) { return r * 180.0 / Math.PI; }
-    var radians = function(d) { return d * Math.PI / 180.0; }
+    var degrees = function(r) { return r * 180.0 / Math.PI; };
+    var radians = function(d) { return d * Math.PI / 180.0; };
     var hypot = function(x, y) {
         var t;
         x = Math.abs(x);
@@ -17,7 +17,7 @@
     var c2p = function(x, y) {
         var ang = degrees(Math.atan2(y, x));
         return [ ang, hypot(x, y) ];
-    }
+    };
 
     arcplot = function(elem, options) {
         this.options = {
@@ -45,9 +45,9 @@
     };
 
     arcplot.prototype.zoom = function() {
-        
-        var S = d3.event.scale
-        var T = d3.event.translate
+
+        var S = d3.event.scale;
+        var T = d3.event.translate;
 
 /*        if (T[0] > 0) T[0] = 0;
         if (T[1] > 0) T[1] = 0;
@@ -72,7 +72,7 @@
         if (!svg.empty()) {
             curr_width = svg.attr('width');
             curr_height = svg.attr('height');
-        } 
+        }
 
         var width = this.elem.width();
         var height = this.elem.height();
@@ -83,7 +83,7 @@
     };
 
     arcplot.prototype.updateLabels = function() {
-    	
+
         var self = this;
         var l = this.label_g.selectAll('g').data(this.labels);
 
@@ -152,7 +152,7 @@
             [0.0,   1]
         ];
         ticks = ticks.reverse();
-        
+
         var w_lo = Math.min(this.options.weight_outer, this.options.weight_inner);
         var w_hi = Math.max(this.options.weight_outer, this.options.weight_inner);
 
@@ -193,7 +193,7 @@
                 .attr('stroke-width', '0.5')
                 .on ('click', function(d) {d3.select(this).classed('selected', !d3.select(this).classed('selected')); })
                 ;
-                
+
 
             var p1 = p2c(self.options.plot_dir + 180, r);
             axes
@@ -209,7 +209,7 @@
         });
     };
     arcplot.prototype._zoom = function() {
-       
+
         this.zoom_behavior.scale(this.xform.S).translate(this.xform.T);
         this.body
             .transition()
@@ -226,27 +226,27 @@
                 var _y = self.xform.T[1] + self.xform.S * (d.pos[1] + self.height / 2);
                 return 'translate(' + String(_x) + ',' + String(_y) + ')';
             });
-        
+
     };
-    
+
     arcplot.prototype.dezoom = function(){
         this.xform = { T: [0,0], S: 1 };
         this._zoom();
     };
-    
-    
+
+
     arcplot.prototype.zoomTo = function(id) {
-        
+
         var arc = this.body
             .selectAll('path.arc')
             .classed('highlight', function(d) { return d.content.hasOwnProperty(id); });
 
-        
+
         var hl = this.body
             .selectAll('path.arc.highlight');
-        
+
         var S, T;
-        
+
         if (hl[0].length === 1) {
             var bbox = hl[0][0].getBBox();
 
@@ -263,7 +263,7 @@
             if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
 
         } else {
-            console.log(id+' not found'); 
+            console.log(id+' not found');
             return -1;
         }
 
@@ -273,7 +273,7 @@
     };
 
     arcplot.prototype.arcAngle = function(arc) {
-        var weight = arc[0]
+        var weight = arc[0];
         var count = arc[1];
         var scale = this.scale(weight);
         var arc_divisions = this.arc_divisions * (1 + this.options.arc_increase * scale);
@@ -283,7 +283,7 @@
     };
 
     arcplot.prototype.arc = function(arc_dir, arc) {
-        var weight = arc[0]
+        var weight = arc[0];
         var count = arc[1];
         var scale = this.scale(weight);
         var arc_divisions = this.arc_divisions * (1 + this.options.arc_increase * scale);
@@ -299,7 +299,7 @@
 
         var p1 = p2c(a[0], r);
         var p2 = p2c(a[1], r);
-        return { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1] }
+        return { x1: p1[0], y1: p1[1], x2: p2[0], y2: p2[1] };
     };
 
     arcplot.prototype.collapseUnbranched = function(node) {
@@ -316,20 +316,18 @@
         }
     };
 
-    arcplot.prototype.findBestMatches = function(
-        clusters,
-        statistic,
-        comparator) {
+    arcplot.prototype.findBestMatches = function(clusters, statistic, comparator) {
         var i, j;
 
         var my_ids = this.root.getContent();
-        var cids = {}
+        var cids = {};
         var c_counts = [];
 
         var total = 0;
 
         var r = this.root.getContent();
 
+        //
         for (i = 0; i < clusters.length; ++i) {
             var k = _.keys(clusters[i]);
             var k_count = 0;
@@ -365,7 +363,7 @@
 
             var content = _.keys(n.content);
 
-            var __pn = 0
+            var __pn = 0;
             for (i = 0; i < content.length; ++i) {
                 if (_.has(cids, content[i])) ++__pn;
             }
@@ -405,8 +403,9 @@
                 if (__pp + __pn > __np + __nn) continue;
 
                 var x = statistic (__pp, __pn, __np, __nn);
+                //console.log("stat : " + x);
                 if (x === undefined) continue;
-                
+
                 if (comparator (x, x_max)) {
                     // if (x > 0.001) {
                     //   console.log ("significant", __pp, __pn, __np, __nn, x);
@@ -427,6 +426,33 @@
                 delete c.__pn;
             }
         }
+    };
+
+    arcplot.prototype.findExtactMatches = function(clusters) {
+        var num_found = 0;
+        var content = [];
+        var id_extract = _.keys(clusters);
+        console.log(id_extract);
+
+        var num_extact = 0;
+        for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
+            content = _.keys(n.content);
+            num_found = 0;
+            for (i = 0; i < content.length; ++i) {
+
+                if (_.has(clusters, content[i])){
+                    num_found += 1;
+                }
+            }
+            if (num_found === content.length) {
+                n.__x_max = 1;
+                n.__x_max_i = 1;
+            } else {
+                n.__x_max = -1;
+                n.__x_max_i = -1;
+            }
+        }
+
     };
 
     arcplot.prototype._goLabels = function() {
@@ -531,10 +557,10 @@
                 Math.min(255, Math.floor(Math.random() * 256)),
                 Math.min(255, Math.floor(Math.random() * 256)),
                 Math.min(255, Math.floor(Math.random() * 256))
-            )
+            );
         }
         cids[-1] = '#000';
-        
+
         this.body.selectAll('path.arc').selectAll('title').remove();
         this.body
             .selectAll('path.arc')
@@ -543,6 +569,18 @@
             .text(function(d) {return statsName + ":" + d.__x_max.toFixed(3);});
     };
 
+    arcplot.prototype.colourByFullyCoveredCluster = function(clusters, statsName) {
+        this.findExtactMatches(clusters);
+        this.body.selectAll('path.arc').selectAll('title').remove();
+        this.body
+            .selectAll('path.arc')
+            .attr('fill', function(d) { return d.__x_max_i == -1 ? "#bdbdbd" : "#181CF6"; })
+            .append('title')
+            .text(function(d) {return statsName + " :" + d.__x_max.toFixed(3);})
+            ;
+    };
+
+
     arcplot.prototype.colourByClusterMatch = function(clusters, statistic, comparator, ramp, statsName) {
         this.findBestMatches(clusters, statistic, comparator);
         this.body.selectAll('path.arc').selectAll('title').remove();
@@ -550,7 +588,7 @@
             .selectAll('path.arc')
             .attr('fill', function(d) { return d.__x_max_i == -1 ? "#bdbdbd" : ramp(d.__x_max); })
             .append('title')
-            .text(function(d) {return statsName + " :" + d.__x_max.toFixed(3);})
+            .text(function(d) {return statsName;})
             ;
     };
 
@@ -562,9 +600,9 @@
     };
 
     arcplot.prototype.setGraphInfo = function(graph_info) {
-        // graph_info is a list of element to be displayed at the top-left position in the svg image 
+        // graph_info is a list of element to be displayed at the top-left position in the svg image
         // see .draw function for actual display
-        
+
         this.graph_info = graph_info;
     };
 
@@ -672,16 +710,16 @@
     };
 
     arcplot.prototype.draw = function() {
-        
+
         var self = this;
-        
+
         this.width = this.elem.width();
         this.height = this.elem.height();
 
-        // reset the container 
+        // reset the container
         this.elem.empty();
-        
-        
+
+
         d3.select(this.elem[0])
             .append('svg')
             .attr("width", this.width)
@@ -692,17 +730,17 @@
             .attr('xmlns', 'http://www.w3.org/2000/svg');
 
         this.svg  = d3.select(this.elem[0]).select('svg');
-      
+
         this.zoom_behavior = d3.behavior.zoom()
                     .scaleExtent([0.75, 50])
                     .on("zoom", _.bind(this.zoom, this));
-        
+
        this.zoom_g = this.svg
             .append('g')
             .call(this.zoom_behavior);
-     
+
         this.xform = { T: [ 0, 0 ], S: 1.0 };
-        
+
         this.body = this.zoom_g
             .append('g');
 
@@ -714,7 +752,7 @@
             .attr('style', 'font-family: helvetica; font-size: 10px; font-weight: 400')
             .attr('dy', 5)
             .attr('fill', '#fff')
-            .attr("pointer-events", "none");        
+            .attr("pointer-events", "none");
 
         this.body
             .append('rect')
@@ -731,17 +769,17 @@
             .append('g')
             .attr('class', 'graph_info')
             .attr('transform', 'translate(10,20)');
-            
-        // should have a better way than a fixed offset? http://www.w3.org/TR/SVG/text.html    
-        for (var i=0;i<this.graph_info.length;i++) {    
+
+        // should have a better way than a fixed offset? http://www.w3.org/TR/SVG/text.html
+        for (var i=0;i<this.graph_info.length;i++) {
             this.body
                 .select('g.graph_info')
                 .append('text')
                 .attr('x', 0)
                 .attr('y', i*15)
-                .text(this.graph_info[i])
+                .text(this.graph_info[i]);
         }
-        
+
         this.drawAxes();
 
         this.body
@@ -754,7 +792,7 @@
         for (p = new PreorderTraversal(this.root); (n = p.next()) !== null; ) {
             nodes.push(n);
         }
-        
+
         this.body
             .select('g.plot')
             .selectAll('path.arc')
@@ -766,7 +804,7 @@
             .attr('fill', 'black')
             .attr('stroke', 'none')
             .on('click', _.bind(this.click, this));
-            
-    
+
+
     };
 })();

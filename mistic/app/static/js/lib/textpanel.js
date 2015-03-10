@@ -79,7 +79,8 @@
 
     textpanel.prototype.setXform = function(xform) {
         this.xform = xform;
-    }
+    };
+
     textpanel.prototype.draw = function(data) {
         var self = this;
 
@@ -87,10 +88,10 @@
             return;
         }
 
-        var svg = d3.select(this.svg)
+        var svg = d3.select(this.svg);
 
         svg.selectAll('*').remove();
-     
+
         var keys = _.intersection(_.keys(this.xdata), _.keys(this.ydata));
 
         var v1 = [];
@@ -104,7 +105,7 @@
             v2.push(y);
         }
 
- 
+
         var r = stats.pearson(v1, v2);
         var width = this.width - this.options.padding[1] - this.options.padding[3] + this.options.inner * 2;
         var height = this.height - this.options.padding[0] - this.options.padding[2] + this.options.inner * 2;
@@ -123,10 +124,10 @@
                 .attr('y', this.options.padding[0]+ height/3)
                 .attr('text-anchor', 'left')
                 .attr('style', 'font-family: helvetica; font-size: '+ fsize+ 'px; font-weight: 300');
-           
+
                 var rtext = fsize>=11 ? 'r('+this.xform +')= ' : '';
                 this.corr.text(rtext + r.toFixed(2));
-          
+
         }
     };
 

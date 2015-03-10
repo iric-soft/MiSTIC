@@ -29,7 +29,7 @@
         this.selected_ids = {};
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
- 
+
         this.width = this.options.width;
         this.height = this.options.height;
 
@@ -87,28 +87,28 @@
             x: (x - this.T[0]) / this.S,
             y: (y - this.T[1]) / this.S
         };
-    }
+    };
 
     mstplot.prototype.viewToScreen = function(x, y) {
         return {
             x: (x * this.S) + this.T[0],
             y: (y * this.S) + this.T[1]
         };
-    }
+    };
 
     mstplot.prototype.screenToPlot = function(x, y) {
         return {
             x: ((x - this.T[0]) / this.S) / this.options.scale,
             y: ((y - this.T[1]) / this.S) / this.options.scale
         };
-    }
+    };
 
     mstplot.prototype.plotToScreen = function(x, y) {
         return {
             x: ((x - this.T[0]) / this.S) / this.options.scale,
             y: ((y - this.T[1]) / this.S) / this.options.scale
         };
-    }
+    };
 
     mstplot.prototype.visibleLabels = function(translate, scale) {
         var xlo = Math.floor(((-100 - translate[0]) / scale) / this.options.scale * GRID_DIV);
@@ -159,7 +159,7 @@
     };
 
     mstplot.prototype.setTransform = function(S, T) {
-        this.S = S
+        this.S = S;
         this.T = [ T[0], T[1] ];
 
         this.zoom_behaviour.scale(S).translate(T);
@@ -169,16 +169,16 @@
 
         this.updateLabels();
     };
-    
+
     mstplot.prototype.zoomTo = function () {
         var selected = _.keys(this.selected_ids);
         var l = _.filter(this.labels.selectAll('g').data(),function(d) {return (_.indexOf(selected, d.id) !=-1) ;});
         var e = _.last(l);
         if (_.isUndefined(e)) {console.debug('Not in cluster');return;}
-        this.centerOn(e.x, e.y, 10.0); 
-        
+        this.centerOn(e.x, e.y, 10.0);
+
     };
-    
+
     mstplot.prototype.updateLabels = function() {
         var self = this;
         var labels = [];
@@ -189,7 +189,7 @@
                 labels.push(this.nodes_by_id[selected[i]]);
             }
         }
-        
+
         if (this.options.node_r * this.S >= 10) {
             var visible = this.visibleLabels(this.T, this.S);
             for (var i = 0; i < visible.length; ++i) {
@@ -212,15 +212,15 @@
             .attr('stroke', '#eee')
             .attr('stroke-width', 2)
             .attr('fill',   '#000');
-            
+
         g.append('rect')
             .attr('height', 15)
             .attr('x', 6).attr('y', -7.5)
-            .attr('fill', function(d) { c = '#0074cc'; if (_.indexOf(selected, d.id) !=-1) {c = '#cc7400'}; return c;})
+            .attr('fill', function(d) { c = '#0074cc'; if (_.indexOf(selected, d.id) !=-1) {c = '#cc7400';} return c;})
             .attr('stroke', '#000')
             .append("title")
             .text(function(d) { return self.info[d.id].name; });
-            
+
         g.append('text')
             .attr('x', 10)
             .attr('y', 3.5)
@@ -230,7 +230,7 @@
             var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
             d3.select(this).select('rect').attr('width', w);
         });
-       
+
         l.exit()
          .remove();
 
@@ -269,8 +269,8 @@
             y: (y_range[1] + y_range[0]) / 2.0
         };
 
-        var xform_x = function(x) { return self.options.scale * ((x - centre.x) / scale + 0.5); }
-        var xform_y = function(y) { return self.options.scale * ((y - centre.y) / scale + 0.5); }
+        var xform_x = function(x) { return self.options.scale * ((x - centre.x) / scale + 0.5); };
+        var xform_y = function(y) { return self.options.scale * ((y - centre.y) / scale + 0.5); };
 
         for (var i = 0; i < this.nodes.length; ++i) {
             this.nodes[i].x = xform_x(this.nodes[i].x);
@@ -289,7 +289,7 @@
         for (var i = 0; i < this.nodes.length; ++i) {
             var gx = Math.min(GRID_DIV-1, Math.floor(Math.max(0,this.nodes[i].x) / this.options.scale * GRID_DIV));
             var gy = Math.min(GRID_DIV-1, Math.floor(Math.max(0,this.nodes[i].y) / this.options.scale * GRID_DIV));
-           
+
             if (this.nodes[i].y < 0 ) {
                 console.debug(this.nodes[i]);
             }
@@ -363,7 +363,7 @@
 
             d3.select(this.svg)
                 .attr("width", this.width)
-                .attr("height", this.height)
+                .attr("height", this.height);
 
             this.zoom_g.select('rect.background')
                 .attr('width', this.width)

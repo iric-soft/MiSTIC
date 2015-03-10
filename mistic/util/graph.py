@@ -193,8 +193,8 @@ class Graph(object):
     return self.edges.get(s, {}).get(t, None)
 
   def addEdge(self, edge):
-    self.nodes.add(edge.source) 
-    self.nodes.add(edge.target) 
+    self.nodes.add(edge.source)
+    self.nodes.add(edge.target)
 
     self.edges.setdefault(edge.source, {})[edge.target] = edge
     self.edges.setdefault(edge.target, {})[edge.source] = edge
@@ -567,7 +567,7 @@ def dfs(graph, node, vis):
 
   while len(stack):
     node, edge_list = stack.pop()
-    i = 0 
+    i = 0
     while i < len(edge_list):
       child, edge = edge_list[i]
       i += 1

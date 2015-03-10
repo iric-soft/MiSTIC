@@ -24,7 +24,7 @@
             info_div.append(info_span);
         }
     };
-    
+
      info.add = function(information) {
         var info_div = $('div#more-information');
 
@@ -38,12 +38,12 @@
 
 (function() {
   tableToJSON = function (table) {
-  
+
   var rows = table.rows;
   var propCells = rows[0].cells;
   var propNames = [];
-  
-  var json = "{\"table\": {"
+
+  var json = "{\"table\": {";
   var obj, row, cells;
 
   // Use the first row for the property names
@@ -53,14 +53,14 @@
     var tx = propCells[i].textContent || propCells[i].innerText;
     if (tx!='') { propNames.push(tx);}
   }
- 
+
   // Use the rows for data
   // Could use tbody rows here to exclude header & footer
   // but starting from 1 gives required result
-  
+
   for (var j=1, jLen=rows.length; j<jLen; j++) {
     cells = rows[j].cells;
-    
+
     if (cells.length>1) {
       json += "\""+j+"\":{ ";
       obj = {};
@@ -70,15 +70,15 @@
         json += "\""+propNames[k]+"\":\""+obj[propNames[k]]+"\"";
         if (k<(propNames.length-1)){ json+= ",";}
       }
-     ;
-      
+
+
       json += "}";
       if (j<(rows.length-1)) {    json += "," ; }
       }
-      
+
   }
   json += "}}";
- 
+
   return json;
 };
 })();
@@ -125,35 +125,35 @@
 
      return {
        "sSwfPath": swfPath,
-       "aButtons": [{'sExtends' : 'copy', 'sButtonText':'Copy','mColumns':mColumns}, 
+       "aButtons": [{'sExtends' : 'copy', 'sButtonText':'Copy','mColumns':mColumns},
                     {"sExtends":    "collection",
                          "sButtonText": "Save as",
                          "aButtons":    [
-                             {'sExtends':"csv", 'sFileName' : filename+'.txt', 'sButtonText':'Text', 
+                             {'sExtends':"csv", 'sFileName' : filename+'.txt', 'sButtonText':'Text',
                               'sFieldSeperator':'\t', 'sFieldBoundary': '', 'mColumns':mColumns},
-                             {'sExtends':"csv", 'sTitle': filename, 'sButtonText':'CSV', 'mColumns':mColumns}, 
+                             {'sExtends':"csv", 'sTitle': filename, 'sButtonText':'CSV', 'mColumns':mColumns},
                              {'sExtends':"xls", 'sFileName' : filename+'.xls', 'sButtonText':'Excel', 'mColumns':mColumns}
                         ]
                     }
                    ]
              };
      };
-   
+
 })();
 
 (function() {
     getCookie = function(key) {
        cookies = document.cookie.split('; ');
-  
+
        for(var i=0; i<cookies.length; i++){
          name = cookies[i].split('=')[0];
          value = cookies[i].split('=')[1];
-    
+
          if (name==key) {
            return value.split(',');
-         } 
-       }    
-      return [] 
+         }
+       }
+      return [];
     };
 })();
 
@@ -167,26 +167,26 @@
         cookies = document.cookie.split('; ');
         for (i in cookies) {
            var c = (/^[^=]+/.exec(cookies[i])[0]);
-           if (c == key)   { document.cookie =c+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT";}    
-     }  
+           if (c == key)   { document.cookie =c+"=;expires=Thu, 01 Jan 1970 00:00:00 GMT";}
+     }
     };
 })();
 
 (function(){
  clearAuthentication = function(LogOffPage) {
-     var IsInternetExplorer = false;    
+     var IsInternetExplorer = false;
 
      try {
          var agt=navigator.userAgent.toLowerCase();
          if (agt.indexOf("msie") != -1) { IsInternetExplorer = true; }
      }
-     catch(e)  { IsInternetExplorer = false;  };
+     catch(e)  { IsInternetExplorer = false;  }
 
      if (IsInternetExplorer)  {
         document.execCommand("ClearAuthenticationCache");
         window.location = LogOffPage;
      }
-     else 
+     else
      {
      $.ajax({
          username: 'unknown',

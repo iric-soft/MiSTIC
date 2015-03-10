@@ -106,7 +106,7 @@
         if (a < 0.0) {
             y = 2.0 - y;
         }
-    
+
         if (y == 0.0) {
             // underflow
             return (a < 0.0) ? 2.0 : 0.0;
@@ -184,7 +184,7 @@
     };
 
     stats.z_low = function(x) {
-        // Returns left-hand tail of z distribution (0 to x). 
+        // Returns left-hand tail of z distribution (0 to x).
         // x ranges from -infinity to +infinity; result ranges from 0 to 1
 
         var y = x * M_SQRT1_2;
@@ -200,7 +200,7 @@
     };
 
     stats.z_high = function(x) {
-        // Returns right-hand tail of z distribution (0 to x). 
+        // Returns right-hand tail of z distribution (0 to x).
         // x ranges from -infinity to +infinity; result ranges from 0 to 1
 
         var y = x * M_SQRT1_2;
@@ -222,19 +222,19 @@
   stats.sum = function(a) {
      var sz = a.length;
      var sum_a = a[0];
-       
-     for (var i = 1; i < sz; ++i) {    
+
+     for (var i = 1; i < sz; ++i) {
         sum_a += a[i];
     }
     return sum_a;
     };
-  
-   
+
+
   stats.average = function(a) {
       var sz = a.length;
       var mean_a = a[0];
-       
-      for (var i = 1; i < sz; ++i) {    
+
+      for (var i = 1; i < sz; ++i) {
         var delta_a = a[i] - mean_a;
         mean_a += delta_a / (i+1);
     }
@@ -243,13 +243,13 @@
 
   stats.stdev = function(a) {
      var sz = a.length;
-     var sum_sq_a = 0.0; 
+     var sum_sq_a = 0.0;
      var mean_a = a[0];
-        
+
     for (var i = 1; i < sz; ++i) {
         var sweep = i / (i+1);
-        var delta_a = a[i] - mean_a;    
-        sum_sq_a += delta_a * delta_a * sweep;   
+        var delta_a = a[i] - mean_a;
+        sum_sq_a += delta_a * delta_a * sweep;
         mean_a += delta_a / (i+1);
        }
 
@@ -259,9 +259,9 @@
   stats.range = function (a) {
       var sz = a.length;
       var range = [a[0], a[0]];
-      for (var i = 1; i < sz; ++i) { 
-        if (a[i]<range[0]) { range[0] = a[i];} 
-        if (a[i]>range[1]) { range[1] = a[i];} 
+      for (var i = 1; i < sz; ++i) {
+        if (a[i]<range[0]) { range[0] = a[i];}
+        if (a[i]>range[1]) { range[1] = a[i];}
       }
       return range
   };
@@ -354,6 +354,21 @@
     };
 
     stats.kappa = function(a, b, c, d) {
+        if (a < 0 || b < 0 || c < 0 || d < 0) {
+            throw "all values must be nonnegative.";
+        }
+
+        var tot = a + b + c + d;
+        var Pa  = (a + d) / tot;
+        var PA1 = (a + b) / tot;
+        var PA2 = 1 - PA1;
+        var PB1 = (a + c) / tot;
+        var PB2 = 1 - PB1;
+        var Pe  = PA1*PB1 + PA2*PB2;
+        return (Pa - Pe) / (1.0 - Pe);
+    };
+
+    stats.forPeak = function(a, b, c, d) {
         if (a < 0 || b < 0 || c < 0 || d < 0) {
             throw "all values must be nonnegative.";
         }

@@ -126,7 +126,7 @@ class Annotation(object):
         self.annotation = data.annotations.get(request.matchdict['annotation'])
         if self.annotation is None:
             raise HTTPNotFound()
-            
+
         self._genesets_search = {3 : self._genesets, 2: self._genesets_cat, 1: self._genesets_type}
 
     def gene_record(self, gene, genesets = None):
@@ -174,107 +174,107 @@ class Annotation(object):
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
 
     def _query_to_regex (self, query):
-      if query: 
+      if query:
         query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
         query = [ re.compile(q, re.I) for q in query ]
-      return query 
-      
+      return query
+
     @key_cache_region('mistic', 'jsonviews', lambda args: args[1])
     def _genesets(self, query, limit):
         out = []
-        
+
         query_type = [q.split(':')[1] for q in query if 'ty:' in q ]
         query_catg = [q.split(':')[1] for q in query if 'ct:' in q ]
         query = [q.split(':')[1] if ':' in q else q for q in query]
-        
+
         query = self._query_to_regex(query)
-        
+
         for gsid in sorted(self.annotation.get_geneset_ids()):
-          if limit and len(out) > limit : 
+          if limit and len(out) > limit :
             break
-            
+
           geneset_id, ident = gsid.rsplit(':', 1)
           geneset_id = geneset_id.split('.')
           geneset_id, geneset_cat = geneset_id[0], geneset_id[1:]
           geneset = self.annotation.genesets.get(geneset_id)
-              
+
           row = geneset.genesets.ix[ident]
           name = row['name']
-          
-          if len(query_type)==0 or geneset_id in query_type: 
+
+          if len(query_type)==0 or geneset_id in query_type:
             if (all([ q.search(gsid+' '+name) is not None for q in query ])):
               out.append(dict(name = name, id = gsid))
-            
+
 
         return out
-    
-      
+
+
     def _genesets_cat (self, query, limit):
-      
+
       out = []
-      
+
       query_type = [q.split(':')[1] for q in query if 'ty:' in q ]
       query = [q.split(':')[1] if ':' in q else q for q in query]
       geneset_types = self.annotation.genesets.keys()
       geneset_type = [q for q in query_type if q in geneset_types]
-      
-      
-      if len(geneset_type)>0 : 
+
+
+      if len(geneset_type)>0 :
         geneset_type = geneset_type[0]
         query = tuple([q for q in query if q != geneset_type])   # Use the type only to restrict the list
         genesets_data = {geneset_type : self.annotation.genesets[geneset_type]}
-      else : 
+      else :
         genesets_data = self.annotation.genesets
 
       query = self._query_to_regex(query)
-      
+
       for k,v in genesets_data.items() :
-        if limit and len(out) > limit : 
-          break 
-       
+        if limit and len(out) > limit :
+          break
+
         ss = sorted(list(set(list(v.genesets['cat']))))
-       
-        for s in ss : 
+
+        for s in ss :
           if (all([q.search(k+' '+s) is not None for q in query ])) or not query:
             out.append(dict(id = k+'.'+s, name = ''))
       return out
 
 
     def _genesets_type (self, query, limit):
-     
+
       out = []
       query = self._query_to_regex(query)
       genesets_data =  self.annotation.genesets
-      for k,v in genesets_data.items() :      
+      for k,v in genesets_data.items() :
         if (all([ q.search(k) is not None for q in query ])) or not query:
           out.append(dict(id = k,name = v.description))
-        
+
       return out
-      
-      
+
+
     @view_config(route_name="mistic.json.annotation.gs", request_method="GET", renderer="json")
     def genesets(self):
-        level = int(self.request.GET.get('v', 3)) 
+        level = int(self.request.GET.get('v', 3))
         query = self.request.GET.getall('q')
         query = tuple(sum([ q.split() for q in query ], []))
         limit = self.request.GET.get('l')
-        
+
         try:
             limit = int(limit)
         except:
             limit = 100
 
-        
+
         #out = self._genesets(query, limit)
-       
+
         out = self._genesets_search[level](query, limit)
-        
+
         #if limit is not None:
         #    out = out[:limit]
         return out
 
-   
-    
+
+
 
 
 class AnnotationGene(Annotation):
@@ -344,7 +344,7 @@ class Dataset(object):
               out.append(dict(id='%s.%s' %(k,e), key = k, values = e))
         return out
 
-      
+
       query = sum([ q.split() for q in query ], [])
       query = [ re.compile(re.escape(q), re.I) for q in query if q != '' ]
 
@@ -368,16 +368,16 @@ class Dataset(object):
         if not self.dataset.cannotation:
             return []
         anns = self.dataset.cannotation.data
-        
+
         samples = set(json.loads(self.request.POST['samples']))
 
         out = []
-        
+
         for col in anns.columns:
 
             all_samples = set(anns.index[anns[col].map(lambda x: x not in ("", None))])
             all_samples = all_samples & set(self.dataset.samples)
-            
+
             tst_samples = samples & all_samples
 
             col_vals = set(anns[col]) - set(("", None))
@@ -402,14 +402,14 @@ class Dataset(object):
                     tab = tab
                 ))
         out.sort(key = lambda x: x['p_val'])
-        
+
         return out
 
     @view_config(route_name="mistic.json.dataset.samples", request_method="GET", renderer="json")
     def samples(self):
         filters = self.request.GET.items()
         samples = set(self.dataset.cannotation.data.index) & set(self.dataset.samples)
-        
+
         for k,v in filters:
             if k in self.dataset.cannotation.data.columns:
                 samples = [ s for s in samples if self.dataset.cannotation.data[k][s] == v ]
@@ -496,27 +496,25 @@ class Dataset(object):
     @view_config(route_name="mistic.json.dataset.extract", request_method="GET", renderer="json")
     def extract_view_peaks(self):
 
-        min_w = int(self.request.GET.get('w')) 
-        max_w = int(self.request.GET.get('W')) 
-        min_h = float(self.request.GET.get('h')) 
-        max_h = float(self.request.GET.get('H')) 
+        min_w = int(self.request.GET.get('w'))
+        max_w = int(self.request.GET.get('W'))
+        min_h = float(self.request.GET.get('h'))
+        max_h = float(self.request.GET.get('H'))
 
         peaks_str = self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h)
-        print(peaks_str) 
-        return peaks_str
+        return dict(peaks=peaks_str)
 
     @view_config(route_name="mistic.json.dataset.extractSave", request_method="GET")
     def extract_save_peaks(self):
 
-        min_w = int(self.request.GET.get('w')) 
-        max_w = int(self.request.GET.get('W')) 
-        min_h = float(self.request.GET.get('h')) 
-        max_h = float(self.request.GET.get('H')) 
+        min_w = int(self.request.GET.get('w'))
+        max_w = int(self.request.GET.get('W'))
+        min_h = float(self.request.GET.get('h'))
+        max_h = float(self.request.GET.get('H'))
 
         response = Response(content_type='application/csv', content_disposition='filename=peak.txt')
         with NamedTemporaryFile(delete=True) as file_tmp:
-            print(file_tmp.name)
- 
+
             self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h, file_tmp)
             file_tmp.flush()
             response.app_iter = open(file_tmp.name ,'rb')
@@ -540,16 +538,16 @@ class Dataset(object):
         mapped_nodes = [ list(x)[0] if len(x) == 1 else None for x in mapped_nodes ]
 
         return mapped_nodes, edges, pos
-        
+
     @view_config(route_name="mistic.json.dataset.geneset.enrich", request_method="POST", renderer="json")
     def genesets_enrichment (self):
-     
+
      genes = set(json.loads(self.request.POST['genes']))
      a = self.dataset.annotation
 
      from mistic.util import geneset
      gs_tab = geneset.genesetOverRepresentation(genes, a.genes, a.all_genesets())
-  
+
      for r in gs_tab:
          x = r['id']
          info = a.geneset_info(x)
@@ -558,12 +556,12 @@ class Dataset(object):
          r['name'] = info.get('name', '')
          r['desc'] = info.get('desc', '')
          x, r['id'] = x.rsplit(':', 1)
-   
+
          if '.' in x:
            r['gs'], r['cat'] = x.split('.', 1)
          else:
            r['gs'], r['cat'] = x, ''
-     
+
      return gs_tab
 
 
@@ -585,7 +583,7 @@ class DatasetGene(Dataset):
     def __init__(self, request):
         super(DatasetGene, self).__init__(request)
         self.gene = request.matchdict['gene_id']
-        self.row = self.dataset.data.r(self.gene)      
+        self.row = self.dataset.data.r(self.gene)
         self.x = self.request.GET.get('x')
 
     @view_config(route_name="mistic.json.gene", request_method="GET", renderer="json")

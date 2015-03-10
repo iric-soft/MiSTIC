@@ -1,4 +1,3 @@
-# -*- coding: utf-8 -*-
 import sys
 import os
 import math
@@ -8,7 +7,7 @@ import itertools
 import exceptions
 import csv
 import pandas
-import traceback
+
 
 
 class AnscombeTransform(object):
@@ -24,7 +23,7 @@ class LogTransform(object):
     self.params = (scale, bias, base)
 
   def __call__(self, matrix):
-    
+
     scale, bias, base = self.params
     if base == 2:
       return numpy.log2(matrix * scale + bias)
@@ -34,7 +33,7 @@ class LogTransform(object):
       return numpy.log(matrix * scale + bias)
     else:
       return numpy.log(matrix * scale + bias) / numpy.log(base)
-   
+
 
 
 class RankTransform(object):
@@ -74,18 +73,18 @@ class RankTransform(object):
     else:
       for i in range(len(d)):
         self.rankRow(d[i])
-        
+
     if hasattr(r, 'values'):
-        if isinstance(r, pandas.DataFrame) : 
+        if isinstance(r, pandas.DataFrame) :
           d = pandas.DataFrame(d, index=matrix.index, columns=matrix.columns, dtype=float)
-         
-        elif isinstance(r, pandas.Series) : 
+
+        elif isinstance(r, pandas.Series) :
           d = pandas.Series(d, index=matrix.index, dtype=float)
-         
-        else: 
+
+        else:
           print 'matrix is %s ' % r.__class__
     return d
-    
+
 
 class DataSet(object):
   @property
@@ -95,23 +94,6 @@ class DataSet(object):
   @property
   def colnames(self):
     return list(self.df.columns)
-
-  @property
-  def nrows(self):
-    return self.df.shape[0]
-
-  @property
-  def ncols(self):
-    return self.df.shape[1]
-
-  @property
-  def row_medians(self):
-    return numpy.median(self.df, axis=1)
-
-  @property
-  def col_medians(self):
-    return numpy.median(self.df, axis=0)
-
 
   def __init__(self, df):
     self.df = df
@@ -134,18 +116,18 @@ class DataSet(object):
     row = self.df.iloc[rownum]
 
     if transform is not None: row = transform(row)
-    
+
     out = []
-    
+
     for i, r in enumerate(self.df.index):
       row2 = self.df.iloc[i]
 
       if transform is not None: row2 = transform(row2)
-      
+
       c = row.corr(row2)
-      if numpy.isnan(c) : 
+      if numpy.isnan(c) :
         c = 0.0
-        
+
       out.append((i, r, c))
     return out
 
@@ -156,22 +138,22 @@ class DataSet(object):
     row = numpy.ma.masked_array(row, numpy.isnan(row))
 
     out = []
-    
+
     for i, r in enumerate(self.df.index):
       row2 = self.df.values[i,:]
 
       if transform is not None: row2 = transform(row2)
       row2 = numpy.ma.masked_array(row2, numpy.isnan(row2))
-      
-     
+
+
       z = numpy.ma.corrcoef(row, row2)
-     
+
       if z.mask[0,1] or numpy.isnan(z[0,1]):
         c = 0.0
       else:
         c = z[0,1]
 
-        
+
       out.append((i, r, c))
     return out
 
@@ -218,7 +200,7 @@ class DataSet(object):
   def r(self, rowname):
     try:
       r = self.df.index.get_loc(rowname)
-      if isinstance(r, numpy.ndarray): 
+      if isinstance(r, numpy.ndarray):
         r = list(self.df.reset_index()[r].index)
       return r
     except KeyError:

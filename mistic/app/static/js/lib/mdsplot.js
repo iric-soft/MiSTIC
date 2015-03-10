@@ -11,7 +11,7 @@
         pt_size: 4,
         xlab_offset: -50,
         ylab_offset: 40,
-        xform: '', 
+        xform: '',
 
         base_attrs: {
             _shape:  'circle',
@@ -31,7 +31,7 @@
         if (options !== undefined) {
             _.extend(this.options, options);
         }
-        this.options.base_attrs = _.clone(this.options.base_attrs)
+        this.options.base_attrs = _.clone(this.options.base_attrs);
 
 
         this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -76,7 +76,7 @@
                 .attr("width", width)
                 .attr("height", height);
             this.reloadSelection();
-            
+
         }
     };
 
@@ -144,7 +144,7 @@
 
     mdsplot.prototype.pointIDs = function() {
 //         console.log("in point ID")
-        
+
         var ids = {};
         for (var i in this.data) {
             var d = this.data[i].data;
@@ -163,20 +163,20 @@
         }
         return genes;
     };
-    
+
     mdsplot.prototype.showLabels = function() {
        var pt_size = this.options.pt_size;
        var font_size = pt_size + 8;
-      
+
        l = d3.selectAll('.circlelabel')[0].length;
-       
+
        if ( l == 0) {
           d3.selectAll('.node')
                 .append("text")
-                .text(function(d) { return _.isUndefined(d) ? '' : d.k })
+                .text(function(d) { return _.isUndefined(d) ? '' : d.k; })
                 .attr('style', 'font-size:'+ font_size+"px;")
                 .classed('circlelabel' , true);
-       } 
+       }
     };
 
     mdsplot.prototype.setBaseAttrs = function(cls) {
@@ -185,21 +185,21 @@
 
         this.updatePoints();
     };
-    
+
     mdsplot.prototype.updateData = function(data) {
 //         console.log("in updateData")
-               
+
         var idxs = [];
         for (idx = 0; idx < this.data.length; ++idx) {
             if (data.gene == this.data[idx].gene) idxs.push(idx);
         }
-       
+
         for (j=0; j< idxs.length; j++){
             var idx = idxs[j];
             if (idx == this.data.length) {
                 return;
             }
-        
+
             this.data[idx] = data;
             var i;
         }
@@ -217,19 +217,19 @@
             xy.push({
                 k:   k,
                 x:   this.xdata[k],
-                y:   this.ydata[k] 
+                y:   this.ydata[k]
             });
         }
 
         return xy;
     };
-   
 
-// ##########################################################################################################################   
-// ##########################################################################################################################  
-// function : on selection 
-// ##########################################################################################################################   
-// ##########################################################################################################################  
+
+// ##########################################################################################################################
+// ##########################################################################################################################
+// function : on selection
+// ##########################################################################################################################
+// ##########################################################################################################################
 
 
     mdsplot.prototype.getSelection = function() {
@@ -253,12 +253,12 @@
 
     mdsplot.prototype.notifySelectionChange = function(quiet) {
         var selection = this.getSelection();
-        
+
         if (!_.isEqual(this.current_selection, selection)) {
             this.current_selection = selection;
             if (!quiet) $(this.svg).trigger('updateselection', [this.current_selection]);
         }
-     
+
     };
 
     mdsplot.prototype.reloadSelection = function(){
@@ -268,11 +268,11 @@
         this.setSelection(my_selection, true);
     };
 
-// ##########################################################################################################################   
-// ##########################################################################################################################  
+// ##########################################################################################################################
+// ##########################################################################################################################
 // function : brush
-// ##########################################################################################################################   
-// ##########################################################################################################################  
+// ##########################################################################################################################
+// ##########################################################################################################################
 
     mdsplot.prototype.clearBrush = function() {
         this.brush.clear();
@@ -285,7 +285,7 @@
         $(this.svg).trigger('brushstart', [this]);
         var b = d3.select(this.svg).select('.brush');
         b.append('text');
-        
+
     };
 
     mdsplot.prototype.brushed = function() {
@@ -297,17 +297,17 @@
         var ntotal  = circles[0].length;
         circles = circles.filter(function(d) {
                 var t = self.transformScale(d);
-                return e[0][0] <= t.x && t.x <= e[1][0] && e[0][1] <= t.y && t.y <= e[1][1]
+                return e[0][0] <= t.x && t.x <= e[1][0] && e[0][1] <= t.y && t.y <= e[1][1];
             });
         var selected = _.map(circles.data(), function(d) { return d.k; });
         this.setSelection(selected);
         nselected = selected.length;
-        
+
         var p = nselected/ntotal*100;
-        var r = d3.select(this.svg).select('rect.extent')
+        var r = d3.select(this.svg).select('rect.extent');
         var b = d3.select(this.svg).select('.brush').select('text');
         if (nselected > 0) {
-          
+
             b.attr('x', r.attr('x'))
              .attr('y', r.attr('y'))
              .attr('text-anchor', 'right')
@@ -322,11 +322,11 @@
     };
 
 
-// ##########################################################################################################################   
-// ##########################################################################################################################  
+// ##########################################################################################################################
+// ##########################################################################################################################
 // function : point group
-// ##########################################################################################################################   
-// ##########################################################################################################################  
+// ##########################################################################################################################
+// ##########################################################################################################################
 
     mdsplot.prototype.legendSymbol = function(node, pg) {
         var attrs = {};
@@ -350,9 +350,9 @@
 
 
     // Info : add style of point groups in the graph (ie: color of each group)
-    // comment : 
+    // comment :
     //  - i is not use
-    mdsplot.prototype.pointAttrs = function(d, i) { 
+    mdsplot.prototype.pointAttrs = function(d, i) {
         var self = this;
         var result = {};
 
@@ -370,7 +370,7 @@
     };
 
     // Info : reset add new point group to the graph
-    // comment : 
+    // comment :
     mdsplot.prototype.setPointGroups = function(pgs) {
         if (this.point_groups !== null) {
             this.point_groups.off(null, null, this);
@@ -386,15 +386,15 @@
 
 
 
-// ##########################################################################################################################   
-// ##########################################################################################################################  
+// ##########################################################################################################################
+// ##########################################################################################################################
 // function : display all the graphe
-// ##########################################################################################################################   
-// ##########################################################################################################################  
+// ##########################################################################################################################
+// ##########################################################################################################################
 
-    
+
     mdsplot.prototype.clearLabels = function() {
-       d3.selectAll('.circlelabel').remove();  
+       d3.selectAll('.circlelabel').remove();
     };
 
     mdsplot.prototype.toggleSelected = function(d, i) {
@@ -439,11 +439,11 @@
 
         xAxis
             .scale(xScale)
-            .orient('bottom')
+            .orient('bottom');
 
         yAxis
             .scale(yScale)
-            .orient('left')
+            .orient('left');
 
         axes.append('g')
             .attr('class', 'axis axis-x')
@@ -489,7 +489,7 @@
     };
 
     mdsplot.prototype.updatePoints = function(xy) {
-        
+
         var self = this;
         if (xy === undefined) xy = this.getXYData();
 
@@ -513,7 +513,7 @@
 
         g.append('path')
             .on('click', _.bind(this.toggleSelected, this));
-        
+
         g.append('title');
 
         var transition = this.nodes.transition();
@@ -552,14 +552,14 @@
           .exit()
             .transition()
             .remove();
-            
+
     };
 
     mdsplot.prototype.draw = function() {
 //         console.log("draw");
 
-// reset svg        
-        var svg = d3.select(this.svg)
+// reset svg
+        var svg = d3.select(this.svg);
         svg.selectAll('*').remove();
 
 // Check data
@@ -569,11 +569,11 @@
         if (this.xdata === undefined || this.ydata === undefined) {
             return;
         }
-        
+
         if (this.data.length == 0) return;
         if (this.xdata.length == 0 || this.ydata.length == 0) return;
 
-        xy = this.getXYData()
+        xy = this.getXYData();
 
 
 // init the scale
@@ -602,13 +602,13 @@
             .attr('stroke-width', '1')
             .attr('shape-rendering', 'crispEdges');
 
-        svg.append('g').attr('class', 'axes')
+        svg.append('g').attr('class', 'axes');
         this.makeAxes();
 
 
-// init brush 
+// init brush
 
-        
+
         // background rectangle
         var bkgx = this.options.padding[3] - this.options.inner;
         var bkgy = this.options.padding[0] - this.options.inner;
@@ -646,8 +646,8 @@
     mdsplot.prototype.loader = function (config) {
 //         console.log("draw");
 
-// reset svg        
-        var svg = d3.select(this.svg)
+// reset svg
+        var svg = d3.select(this.svg);
         svg.selectAll('*').remove();
         var width = this.width / 8;
         var height = this.height / 8;
@@ -665,13 +665,13 @@
             .attr("width", width)
             .attr("height", height)
           .append("g")
-            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")")
+            .attr("transform", "translate(" + width / 2 + "," + height / 2 + ")");
 
         var background = svg.append("path")
                 .datum({endAngle: 0.33*tau})
                 .style("fill", "#4D4D4D")
                 .attr("d", arc)
-                .call(spin, 1200)
+                .call(spin, 1200);
 
         function spin(selection, duration) {
             selection.transition()
@@ -690,7 +690,7 @@
                 .attrTween("stroke-dasharray", tweenDash)
                 .each("end", function() { d3.select(this).call(transition); });
         }
-    }
+    };
 
 
 
