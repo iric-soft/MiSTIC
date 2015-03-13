@@ -1,4 +1,3 @@
-
 (function() {
 
     var _interp = function(ramp, w, j) {
@@ -9,12 +8,12 @@
             return ramp[i].toString();
        if (i==j) {
             console.debug('split palette');
-            return d3.hsl(ramp[i].toString()).brighter(0.5).toString(); 
-         }   
-         
+            return d3.hsl(ramp[i].toString()).brighter(0.5).toString();
+         }
+
         return d3.interpolateHsl(ramp[i], ramp[i+1])(w);
     };
-    
+
    var _ylgnbl =_.map(
         [
             // "#FFFFD9",
@@ -27,7 +26,7 @@
             "#253494",
             "#081D58",
             "#08306b" // last of the blues
-           
+
         ],
         function(c) { return d3.rgb(c); });
 
@@ -38,14 +37,11 @@
         ],
         function(c) { return d3.rgb(c); });
 
- 
-    var _pal= _.map( 
-    [ "#a35918", 
-      "#9ecae1","#6baed6","#4292c6","#2171b5","#08519c","#08306b"  ]
-        ,
-        function(c) { return d3.rgb(c); });
-    
-    
+
+    var _pal= _.map(["#a35918", "#9ecae1", "#6baed6", "#4292c6", "#2171b5", "#08519c", "#08306b"],
+                    function(c) { return d3.rgb(c); });
+
+
 
     YlGnBl = function(w) { return _interp(_ylgnbl, w, -1); };
     Pal = function(w) { return _interp(_pal, w, 0); };

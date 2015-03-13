@@ -74,7 +74,7 @@
                     top: pos.top + pos.height + 5,
                     left: pos.left,
                     margin: 0
-                })
+                });
             } else {
                 this.$el.css({
                     width: 'auto',
