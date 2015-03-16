@@ -46,35 +46,6 @@ import pickle
       </div>
     </div>
 
-    <div class="accordion-group">
-       <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#extract_peak">Extract peaks </a></h4>
-       </div>
-
-       <div id="extract_peak" class="accordion-body collapse in">
-          <div class="accordion-inner">
-              <form class="form-horizontal">
-                  <div class="control-group">
-                      <label class="control-label" for="inputEmail">Number of elements in a peak:</label>
-                      <div class="controls">
-                          <input class="input-mini" type="text" id="min_elt" value="5">
-                          <input class="input-mini" type="text" id="max_elt" value="300">
-                      </div>
-                  </div>
-                  <div class="control-group">
-                      <label class="control-label" for="inputEmail">Height of a peak: </label>
-                      <div class="controls">
-                          <input class="input-mini" type="text" id="min_h" value="0.01">
-                          <input class="input-mini" type="text" id="max_h" value="1">
-                          <button class="btn" type="button" id="extract_view_btn">View</button>
-                          <button class="btn" type="button" id="extract_save_btn">Save</button>
-                      </div>
-                  </div>
-              </form>
-          </div>
-      </div>
-    </div>
-
 
 
     <div class="accordion-group">
@@ -108,6 +79,35 @@ import pickle
 
 
          </div>
+      </div>
+    </div>
+
+    <div class="accordion-group">
+       <div class="accordion-heading"><h4 class="accordion-title">
+         <a class="accordion-toggle" data-toggle="collapse"  href="#extract_peak">Extract peaks </a></h4>
+       </div>
+
+       <div id="extract_peak" class="accordion-body collapse">
+          <div class="accordion-inner">
+              <form class="form-horizontal">
+                  <div class="control-group">
+                      <label class="control-label" for="inputEmail">Number of elements in a peak:</label>
+                      <div class="controls">
+                          <input class="input-mini" type="text" id="min_elt" value="5">
+                          <input class="input-mini" type="text" id="max_elt" value="300">
+                      </div>
+                  </div>
+                  <div class="control-group">
+                      <label class="control-label" for="inputEmail">Height of a peak: </label>
+                      <div class="controls">
+                          <input class="input-mini" type="text" id="min_h" value="0">
+                          <input class="input-mini" type="text" id="max_h" value="1">
+                          <button class="btn" type="button" id="extract_view_btn">View</button>
+                          <button class="btn" type="button" id="extract_save_btn">Save</button>
+                      </div>
+                  </div>
+              </form>
+          </div>
       </div>
     </div>
 

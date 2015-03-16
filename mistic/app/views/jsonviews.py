@@ -8,6 +8,8 @@ from mistic.app import data
 from mistic.util import gorilla
 from mistic.data.dataset import *
 
+from tempfile import NamedTemporaryFile
+
 import numpy
 import math
 import scipy.stats
@@ -492,6 +494,35 @@ class Dataset(object):
 
         mds_matrix, eigenvalues = self.dataset.calcMDS(genes, xform)
         return dict(id_samples = list(self.dataset.data.colnames), dimensions = map(list, mds_matrix), eigenvalues = list(eigenvalues))
+
+
+    @view_config(route_name="mistic.json.dataset.extract", request_method="GET", renderer="json")
+    def extract_view_peaks(self):
+
+        min_w = int(self.request.GET.get('w'))
+        max_w = int(self.request.GET.get('W'))
+        min_h = float(self.request.GET.get('h'))
+        max_h = float(self.request.GET.get('H'))
+
+        peaks_str = self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h)
+
+        return dict(peaks=peaks_str)
+
+    @view_config(route_name="mistic.json.dataset.extractSave", request_method="GET")
+    def extract_save_peaks(self):
+
+        min_w = int(self.request.GET.get('w'))
+        max_w = int(self.request.GET.get('W'))
+        min_h = float(self.request.GET.get('h'))
+        max_h = float(self.request.GET.get('H'))
+
+        response = Response(content_type='application/csv', content_disposition='filename=peak.txt')
+
+        with NamedTemporaryFile(delete=True) as file_tmp:
+            self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h, file_tmp)
+            file_tmp.flush()
+            response.app_iter = open(file_tmp.name ,'rb')
+            return response
 
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")
     def mst(self):
