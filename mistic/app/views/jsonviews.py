@@ -18,7 +18,6 @@ import pickle
 import os
 import logging
 
-from tempfile import NamedTemporaryFile
 from beaker.cache import *
 from mistic.app.cache_helpers import *
 from mistic.app.tables import *
@@ -172,6 +171,7 @@ class Annotation(object):
     def genes(self):
         result = self.annotation.get_gene_ids(self.request.GET.getall('filter_gsid'))
         return [ self.gene_record(gene, set(self.request.GET.getall('gs'))) for gene in result ]
+
 
     def _query_to_regex (self, query):
       if query:
@@ -467,17 +467,17 @@ class Dataset(object):
 
         out = [
             dict(id = i,
-                 symbol = self.dataset.annotation.get_symbol(i),
-                 name = self.dataset.annotation.get_name(i))
+                 symbol = self.dataset.annotation.get_symbol(i) if (self.dataset.annotation.get_symbol(i)!= None) else unicode(i),
+                 name = self.dataset.annotation.get_name(i) if (self.dataset.annotation.get_name(i)!= None) else unicode(i))
             for i in out_ids ]
+        out.sort(key = lambda r: r['symbol'])
 
         additional = [
             dict(id = i,
-                 symbol = self.dataset.annotation.get_symbol(i),
-                 name = self.dataset.annotation.get_name(i))
+                 symbol = self.dataset.annotation.get_symbol(i) if (self.dataset.annotation.get_symbol(i)!= None) else unicode(i),
+                 name = self.dataset.annotation.get_name(i) if (self.dataset.annotation.get_name(i)!= None) else unicode(i))
             for i in additional_ids ]
 
-        out.sort(key = lambda r: r['symbol'])
         additional.sort(key = lambda r: r['symbol'])
 
         return (out + additional)[:limit]
@@ -492,37 +492,6 @@ class Dataset(object):
 
         mds_matrix, eigenvalues = self.dataset.calcMDS(genes, xform)
         return dict(id_samples = list(self.dataset.data.colnames), dimensions = map(list, mds_matrix), eigenvalues = list(eigenvalues))
-
-    @view_config(route_name="mistic.json.dataset.extract", request_method="GET", renderer="json")
-    def extract_view_peaks(self):
-
-        min_w = int(self.request.GET.get('w'))
-        max_w = int(self.request.GET.get('W'))
-        min_h = float(self.request.GET.get('h'))
-        max_h = float(self.request.GET.get('H'))
-
-        peaks_str = self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h)
-        return dict(peaks=peaks_str)
-
-    @view_config(route_name="mistic.json.dataset.extractSave", request_method="GET")
-    def extract_save_peaks(self):
-
-        min_w = int(self.request.GET.get('w'))
-        max_w = int(self.request.GET.get('W'))
-        min_h = float(self.request.GET.get('h'))
-        max_h = float(self.request.GET.get('H'))
-
-        response = Response(content_type='application/csv', content_disposition='filename=peak.txt')
-        with NamedTemporaryFile(delete=True) as file_tmp:
-
-            self.dataset.extract_peaks(self.request.matchdict['xform'], min_w, max_w, min_h, max_h, file_tmp)
-            file_tmp.flush()
-            response.app_iter = open(file_tmp.name ,'rb')
-
-            return response
-
-
-
 
     @view_config(route_name="mistic.json.dataset.mst", request_method="GET", renderer="json")
     def mst(self):
