@@ -37,7 +37,7 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.root")
   def root(self):
-   
+
     args = self.args
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
@@ -46,14 +46,14 @@ class Graph(object):
     args = self.args
     return render_to_response('mistic:app/templates/corrgraph.mako', args, request = self.request)
 
- 
+
 
   @view_config(route_name="mistic.template.scatterplot")
   def scatterplot(self):
     args = self.args
     return render_to_response('mistic:app/templates/scatterplot.mako', args, request = self.request)
 
-  
+
 
   @view_config(route_name="mistic.template.pairplot")
   def pairplot(self):
@@ -108,13 +108,14 @@ class Graph(object):
       xform = self.request.matchdict['xform'],
       nodes = mst[0],
       edges = mst[1],
-      pos = mst[2]
+# Not need any more      pos = mst[2]
     )
     args.update(self.args)
     return render_to_response('mistic:app/templates/clustering.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.mstplot", request_method="POST")
   def mstplot_post(self):
+    print ("##### template.py -> mstplot_post")
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
 
@@ -172,7 +173,7 @@ class Graph(object):
       pos = mst[2]
     )
     args.update(self.args)
-    
+
     if len(mst[0]) < 200:
       return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
     else:

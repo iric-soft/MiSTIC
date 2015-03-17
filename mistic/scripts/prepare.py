@@ -49,11 +49,11 @@ class Task(object):
 
     # check if already up to date
     if not self.needsToRun():
-      print "NO NEED TO RUN : %s for %s " % (self.cmd[0], os.path.basename(self.cmd[-1]).replace("g.input.dot", "")) 
+      print "NO NEED TO RUN : %s for %s " % (self.cmd[0], os.path.basename(self.cmd[-1]).replace("g.input.dot", ""))
       return 0
 
     try:
-      
+
       print '[' + self.id + ']', 'RUN', ' '.join(self.cmd)
       return subprocess.call(self.cmd)
     except OSError:
@@ -140,13 +140,13 @@ class TaskRunner(object):
     completion_queue.put((task.id, task.run()))
 
   def executeTask(self, task):
-   
+
     self.updateState(task, self.READY, self.RUNNING)
     p = multiprocessing.Process(target = self._execute, args = (task, self.completion_queue))
     task.id = p.name
     self.current_processes[p.name] = p
     p.start()
-    
+
   def printState(self):
     print 'WAIT:', len(self.task_state[self.WAITING]),
     print 'READY:', len(self.task_state[self.READY]),
@@ -191,10 +191,10 @@ class TaskRunner(object):
     while self.tasksRemain():
       while len(self.task_state[self.RUNNING]) >= self.n_parallel_jobs:
         self.finalizeOneTask()
-      
+
       task = self.selectTask()
       t1 = time.time()
-      
+
       while task is None:
         if len(self.task_state[self.RUNNING]) == 0:
           break
@@ -211,11 +211,11 @@ class TaskRunner(object):
       else:
         self.executeTask(task)
       print "time : ", task.cmd[0], task.cmd[-1].split('transformed/')[1].split('/')[0], time.time()-t1
-      
+
     self.finalizeAllTasks()
 
     sys.stdout.write('\n')
-   
+
     print 'completed tasks:' , len(self.task_state[self.COMPLETED])
     print '   failed tasks:' , len(self.task_state[self.FAILED])
     print'time elapsed: ' , time.time()-t0
@@ -286,15 +286,15 @@ def run(args):
           (graph,),
           (dot_input,)))
 
-      task_list.append(Task(
-          LAYOUT + ('-v', '-Tdot', '-o' + dot_output, dot_input),
-          (dot_input,),
-          (dot_output,)))
+#       task_list.append(Task(
+#           LAYOUT + ('-v', '-Tdot', '-o' + dot_output, dot_input),
+#           (dot_input,),
+#           (dot_output,)))
 
   runner = TaskRunner(task_list, n_parallel = args.jobs)
   runner.run()
-  
-  
+
+
   for failed in runner.task_state[TaskRunner.FAILED]:
     print 'FAILED : ', ' '.join(failed.cmd)
 

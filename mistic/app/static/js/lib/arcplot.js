@@ -432,7 +432,6 @@
         var num_found = 0;
         var content = [];
         var id_extract = _.keys(clusters);
-        console.log(id_extract);
 
         var num_extact = 0;
         for (var p = new PostorderTraversal(this.root); (n = p.next()) !== null; ) {
@@ -605,6 +604,11 @@
 
         this.graph_info = graph_info;
     };
+
+    arcplot.prototype.setClusterMinSize = function(size) {
+        this.options.cluster_minsize = size;
+    };
+
 
     arcplot.prototype.setData = function(roots) {
         var self = this;

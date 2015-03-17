@@ -91,17 +91,17 @@ import pickle
           <div class="accordion-inner">
               <form class="form-horizontal">
                   <div class="control-group">
-                      <label class="control-label" for="inputEmail">Number of elements in a peak:</label>
+                      <label class="control-label" for="inputEmail">Number of genes in a peak:</label>
                       <div class="controls">
-                          <input class="input-mini" type="text" id="min_elt" value="5">
-                          <input class="input-mini" type="text" id="max_elt" value="300">
+                          Min: <input class="input-mini" type="text" id="min_elt" value="5">
+                          Max: <input class="input-mini" type="text" id="max_elt" value="200">
                       </div>
                   </div>
                   <div class="control-group">
                       <label class="control-label" for="inputEmail">Height of a peak: </label>
                       <div class="controls">
-                          <input class="input-mini" type="text" id="min_h" value="0">
-                          <input class="input-mini" type="text" id="max_h" value="1">
+                          Min: <input class="input-mini" type="text" id="min_h" value="0">
+                          Max: <input class="input-mini" type="text" id="max_h" value="1">
                           <button class="btn" type="button" id="extract_view_btn">View</button>
                           <button class="btn" type="button" id="extract_save_btn">Save</button>
                       </div>
@@ -124,6 +124,12 @@ import pickle
            <ul id="options" class="nav nav-list">
             <li><a id='clear_plot' href="#">Clear plot</a></li>
 
+            <li class="divider"></li>
+            <div>
+              <label for="filter_genes">Minimum genes to start a peak: </label>
+              <input class="input-mini" id="filter_genes" value='5' type='text' style='width:30px;height:10px'></input>
+              <button class="btn" type="button" id="reload_btn">Reload</button>
+            </div>
             <li class="divider"></li>
 
             <div>
@@ -158,6 +164,7 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/arcplot.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
+
 $(document).ready(function() {
 <%
   ds = data.datasets.get(dataset)
@@ -180,15 +187,30 @@ $(document).ready(function() {
 
   cluster_roots = Node.fromMST(nodes, edges);
 
-  current_graph = new arcplot($('#graph'), {
-    cluster_minsize: ${int(ds.config.get('icicle.cluster_minsize', '5'))}
-  });
+  var current_graph;
 
-  console.log("cluster_roots")
-  console.log(cluster_roots)
+  if (nodes.length < 25000) {
+    $("#filter_genes").val(5);
+    current_graph = new arcplot($('#graph'), {
+      cluster_minsize: ${int(ds.config.get('icicle.cluster_minsize', 5))}
+    });
+  } else {
+    if (nodes.length > 100000) {
+      $("#filter_genes").val(15);
+      current_graph = new arcplot($('#graph'), {
+        cluster_minsize: ${int(ds.config.get('icicle.cluster_minsize', 15))}
+      });
+    } else {
+      $("#filter_genes").val(10);
+      current_graph = new arcplot($('#graph'), {
+        cluster_minsize: ${int(ds.config.get('icicle.cluster_minsize', 10))}
+      });
+    }
+  }
+
 
   current_graph.setData(cluster_roots);
-  current_graph.setGraphInfo(["Dataset: ${dataset}",  "Transform: ${xf}"]);
+  current_graph.setGraphInfo(["Minimum genes to create a peak: ".concat($("#filter_genes").val()), "Dataset: ${dataset}",  "Transform: ${xf}"]);
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
 
@@ -256,14 +278,9 @@ $(document).ready(function() {
         data: { filter_gsid: item.id },
         dataype: 'json',
         success: function(data) {
-          console.log("data");
-          console.log(data);
           $("#dataset_cmp").val($("#dataset_cmp option:first").val());
           var gene_set = {};
           for (var i = 0; i < data.length; ++i) { gene_set[data[i]] = true; }
-          console.log("gene_set");
-          console.log(gene_set);
-          console.log([ gene_set, current_graph.root.getContent() ]);
           current_graph.colourByClusterMatch(
             [ gene_set, current_graph.root.getContent() ],
             function (a,b,c,d) {
@@ -291,8 +308,6 @@ $(document).ready(function() {
         url: "${request.route_url('mistic.json.dataset.mapped_mst', dataset='_dataset_', xform=xform, tgt_annotation=my_annotation)}".replace('_dataset_', val),
         dataype: 'json',
         success: function(data) {
-          console.log("data")
-          console.log(data)
 
           $('#goterm').val('');
             var node_content = [];
@@ -305,8 +320,6 @@ $(document).ready(function() {
             }
           });
 
-          console.log("node_content")
-          console.log(node_content)
           current_graph.colourByClusterMatch(
             node_content,
             // function (a, b, c, d, cur_max) {
@@ -371,7 +384,6 @@ $(document).ready(function() {
   };
 
   gene_entry.on('change', function(item) {
-    console.log("gene_entry")
     if (item !== null) {
       exit_var = current_graph.zoomTo(item.id);
       console.debug(exit_var);
@@ -405,10 +417,10 @@ $(document).ready(function() {
 
   var getParmExtract = function() {
       return {
-          w: document.getElementById("min_elt").value,
-          W: document.getElementById("max_elt").value,
-          h: document.getElementById("min_h").value,
-          H: document.getElementById("max_h").value
+          w: $("#min_elt").val(),
+          W: $("#max_elt").val(),
+          h: $("#min_h").val(),
+          H: $("#max_h").val()
       };
   };
 
@@ -442,14 +454,24 @@ $(document).ready(function() {
 
   $('#extract_save_btn').click(function(event){
       var param = "?"
-      param = param.concat("w=".concat(document.getElementById("min_elt").value));
-      param = param.concat("&W=".concat(document.getElementById("max_elt").value));
-      param = param.concat("&h=".concat(document.getElementById("min_h").value));
-      param = param.concat("&H=".concat(document.getElementById("max_h").value));
+      param = param.concat("w=".concat($("#min_elt").val()));
+      param = param.concat("&W=".concat($("#max_elt").val()));
+      param = param.concat("&h=".concat($("#min_h").val()));
+      param = param.concat("&H=".concat($("#max_h").val()));
       var url = "${request.route_url('mistic.json.dataset.extractSave', dataset=dataset, xform=xform)}";
       url = url.concat(param);
       window.open(url)
 
+  });
+
+  $('#reload_btn').click(function(event){
+      console.log("Start Reload")
+      current_graph.setClusterMinSize($("#filter_genes").val());
+      current_graph.setGraphInfo(["Minimum genes to create a peak: ".concat($("#filter_genes").val()), "Dataset: ${dataset}",  "Transform: ${xf}"]);
+      current_graph.setData(cluster_roots);
+      current_graph.draw();
+      resizeGraph();
+      console.log("End Reload")
   });
 
 
