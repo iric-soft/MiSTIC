@@ -302,7 +302,7 @@ class DatasetAnnotation(Annotation):
     return dict(id = self.id,
                 name = self.name,
                 desc = self.description)
-  
+
 
 
 class GeneAnnotation(Annotation):
@@ -582,7 +582,7 @@ class DataSet(object):
     else:
       self.catchMappedSampleIDs()
       self.checkAllSamplesHaveAnnotations()
-     
+
     self.transforms  = []
 
     for x in self.config.get('xfrm', ['none']):
@@ -593,8 +593,8 @@ class DataSet(object):
     sample_set = set(self.samples)
     cann_set = set(self.cannotation.data.index)
     samples_without_annotation = sorted(sample_set - cann_set)
-   
-    if len(samples_without_annotation):      
+
+    if len(samples_without_annotation):
       logging.warn('no sample annotation for samples [{0}] in dataset {1} (sample annotation {2})'.format(
         ', '.join(samples_without_annotation),
         self.id,
@@ -613,19 +613,19 @@ class DataSet(object):
     for mapper in (prefix_map, rev_prefix_map):
       tmp = mapper(cann_set, sample_set)
       cann_map,ambiguous = tmp
-     
+
       if cann_map is not None:
         #logging.warn('mapping found: {0}'.format(mapper.__name__))
         self.cannotation = copy.copy(self.cannotation)
         self.cannotation.data = self.cannotation.data.copy()
         self.cannotation.data.index = self.cannotation.data.index.map(cann_map.get)
         self.cannotation.data = self.cannotation.data.drop([None], axis=0)
-       
-        if len(ambiguous): 
+
+        if len(ambiguous):
           n = len(self.data.df.columns)
           self.data.df = self.data.df.drop(ambiguous, axis=1)
           logging.warn('%s samples in dataset.  Removed duplicates: %s.  Now %s samples in dataset', n,  str(ambiguous), len(self.data.df.columns))
-        
+
         break
     else:
       logging.warn('no mapping found, no annotation information will be available.')
@@ -654,13 +654,13 @@ class DataSet(object):
   @property
   def samples(self):
     return self.data.colnames
-  
-  
-  
+
+
+
   @property
   def numberSamples(self):
     return len(self.data.colnames)
-        
+
   def _makeTransform(self, xform):
     return dict(
       log =      mistic.data.dataset.LogTransform,
@@ -671,16 +671,16 @@ class DataSet(object):
   @key_cache_region('mistic', 'genecorr', lambda args: (args[0].id,) + args[1:])
   def _genecorr(self, gene, xform, absthresh, thresh):
     row = self.data.r(gene)
-    
-    if not isinstance(row, list) : 
+
+    if not isinstance(row, list) :
       row = [row]
-      
+
     result = [self.data.rowcorr(row[i], transform = self._makeTransform(xform)) for i in range(len(row))]
-    
+
     if absthresh is not None:
       absthresh = float(absthresh)
       result = [[r for r in res if abs(r[2]) >= absthresh] for res in result]
-   
+
     if thresh is not None:
       thresh = float(thresh)
       result = [[r for r in res if abs(r[2]) >= thresh] for res in result]
@@ -701,7 +701,7 @@ class DataSet(object):
             corr=c,
             row=str(row[i])
             ) for a,b,c in result[i]] for i in range(len(result)) ]))
-           
+
   def genecorr(self, gene, xform = None, absthresh = None, thresh = None):
     return self._genecorr(gene, xform, absthresh, thresh)
 
@@ -772,7 +772,7 @@ class DataSet(object):
       if l[0] == 'n':
         l = l.split()
         nodes[int(l[1])-1] = l[2].replace('id=', '').split(':')[0]
-    
+
     def E(l):
       l = l.split()
       e1 = int(l[1]) - 1
@@ -786,6 +786,8 @@ class DataSet(object):
 
 
   def mst_subset(self, xform, geneset):
+    print ("data.py -> mst_subset")
+
     mst = self.mst(xform)
     if mst is None:
       return None
@@ -793,6 +795,12 @@ class DataSet(object):
     nodes, edges, pos = mst
 
     geneset = sorted(set(geneset) & set(nodes))
+
+
+    print("### geneset")
+    print(geneset)
+    print("### pos")
+    print(pos)
 
     dataset_idx = dict([ (j, i) for i, j in enumerate(geneset) ])
 
@@ -818,14 +826,14 @@ class DataSet(object):
 
   def expndata(self, gene, xform = None):
     expn = self.data.row(self.data.r(gene), transform = self._makeTransform(xform))
-   
-    if len(expn.shape) == 1 : 
+
+    if len(expn.shape) == 1 :
       expn.shape = (1,expn.shape[0])
-    
-    
+
+
     row = self.data.r(gene)
     if isinstance(row, int) : row = [row]
-    
+
     return dict(
       gene = gene,
       symbol = self.annotation.get_symbol(gene, ''),
@@ -838,7 +846,7 @@ class DataSet(object):
 
   def getSamplesByCharacteristic (self, ki, vi):
     return [k for k,v in d.items() if v[ki]==vi]
-    
+
 
 
 

@@ -61,6 +61,12 @@ class Extract_peak():
     def len_peak(self):
         return len(self.genes)
 
+    def add_corr(self, corr):
+        if corr < self.min_corr:
+            self.min_corr = corr
+        if corr > self.max_corr:
+            self.max_corr = corr
+
     def delta_peaks(self, peak):
         c_max = max(self.max_corr, peak.max_corr)
         c_min = min(self.min_corr, peak.min_corr)
@@ -127,6 +133,7 @@ def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr,
 
     if node1.peak_id == "0":
         peak = get_peak(peaks, node2.peak_id)
+        peak.add_corr(corr)
 
         stay_valid = peak.valid_peak
         stay_valid = stay_valid and (len(peak.genes)+1 <= max_gene)
@@ -143,6 +150,7 @@ def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr,
     else:
         if node2.peak_id == "0":
             peak = get_peak(peaks, node1.peak_id)
+            peak.add_corr(corr)
 
             stay_valid = peak.valid_peak
             stay_valid = stay_valid and (len(peak.genes)+1 <= max_gene)
@@ -160,6 +168,8 @@ def merge_peak(node1, node2, corr, min_gene, max_gene, min_diff_corr,
 
             peak1 = get_peak(peaks, node1.peak_id)
             peak2 = get_peak(peaks, node2.peak_id)
+            peak1.add_corr(corr)
+            peak2.add_corr(corr)
 
             both_valid = (peak1.valid_peak and peak2.valid_peak)
             if both_valid:
