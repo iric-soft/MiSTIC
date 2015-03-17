@@ -115,7 +115,6 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.mstplot", request_method="POST")
   def mstplot_post(self):
-    print ("##### template.py -> mstplot_post")
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
 

@@ -796,12 +796,6 @@ class DataSet(object):
 
     geneset = sorted(set(geneset) & set(nodes))
 
-
-    print("### geneset")
-    print(geneset)
-    print("### pos")
-    print(pos)
-
     dataset_idx = dict([ (j, i) for i, j in enumerate(geneset) ])
 
     new_nodes = geneset
