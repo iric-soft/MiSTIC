@@ -57,7 +57,7 @@ class GO(object):
     def search(self):
         query = self.request.GET.getall('q')
         query = sum([ q.split() for q in query ], [])
-        query = [ re.compile(re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q), re.I) for q in query if q != '' ]
+        query = [ re.compile(re.sub(r'([-\[\]{}()*+?.,\\^$|#])', r'\\\1', q), re.I) for q in query if q != '' ]
 
         if query == []:
             return []
@@ -177,7 +177,7 @@ class Annotation(object):
 
     def _query_to_regex (self, query):
       if query:
-        query = [ re.sub(r'([-[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
+        query = [ re.sub(r'([-\[\]{}()*+?.,\\^$|#])', r'\\\1', q) for q in query if q != '']
         query = [ re.compile(q, re.I) for q in query ]
       return query
 
