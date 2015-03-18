@@ -65,15 +65,6 @@ mistic = {  url: "${request.host}"};
                   <li><a href="${request.route_url('mistic.template.corrgraph')}">Single gene correlation</a></li>
               %endif
 
-
-              %if request.matched_route.name == 'mistic.template.corrgraph_static':
-                  <li class="active"><a href="#">&#x25b6; [static plot]</a></li>
-              %endif
-
-              %if request.matched_route.name == 'mistic.template.scatterplot_static':
-                    <li class="active"><a href="#">&#x25b6; [static plot]</a></li>
-              %endif
-
               %if request.matched_route.name == 'mistic.template.pairplot':
                     <li class="active">
               %else: 
