@@ -117,7 +117,7 @@ class Graph(object):
   def mstplot_post(self):
     dataset = self.request.matchdict['dataset']
     xform = self.request.matchdict['xform']
-
+    max_genes = 200
     geneset = set(json.loads(self.request.POST['geneset']))
 
     _dataset = data.datasets.get(dataset)
@@ -136,8 +136,9 @@ class Graph(object):
       edges = mst[1],
       pos = mst[2]
     )
+     
     args.update(self.args)
-    if len(mst[0]) < 200:
+    if len(mst[0]) < max_genes:
 
       if _dataset.experiment=="ngs":
         return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
@@ -147,6 +148,7 @@ class Graph(object):
         else:
           return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
     else:
+      args.update ({'max_genes':max_genes})
       return render_to_response('mistic:app/templates/mstplot.mako', args, request = self.request)
 
 

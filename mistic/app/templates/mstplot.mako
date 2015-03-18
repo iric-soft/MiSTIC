@@ -3,26 +3,36 @@ import json
 %>
 <%inherit file="mistic:app/templates/base.mako"/>
 <%block name="pagetitle">MST</%block>
-<%block name="actions">
-  ${parent.actions()}
-</%block>
-<%block name="controls">
-  <form class="form-inline">
-    <div class="accordion-group">
-       <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#extract_peak">WARNNING</a></h4>
-       </div>
+<%block name="actions"> ${parent.actions()}</%block>
 
-       <div id="extract_peak" class="accordion-body collapse in">
-          <div class="accordion-inner">
-              <form class="form-horizontal">
-                Sorry, this graph have too many genes (>200), we can't display it.
-                We suggest to you use extract peaks, with max number of genes = 200, to see all peaks we can display.
-              </form>
-          </div>
-      </div>
-    </div>
-  </form>
+<%block name="controls"></%block>
+<%block name="pagecontent">
+ <div class='container'> <h2>WARNNING</h2> 
+<div id="extract_peak" >
+    <h4>Sorry, this graph have too many genes (> ${max_genes}). We can't display it!
+    <br/>
+
+    We suggest that you use the extract peaks function on the icicle page to see the peaks that can be displayed.
+    
+    
+    <p>
+    <br>
+    <ol>
+    <li> Go back to the Icicle plot </li>
+    <li> Open the "Extract peaks" Menu </li>
+    <li> Set the maximum number of genes in a peak to ${max_genes} </li>
+    <li> Click view </li>   
+    <li> Click on the colored peaks to further investigate them </li>   
+    </ol>
+    
+    
+    <br> 
+    For bigger peaks, consider using the Extract peaks tool to save them in a file 
+    
+    </h4>
+     <div>       
+   
+    </div>          
 </%block>
 <%block name="pagetail">
 ${parent.pagetail()}
