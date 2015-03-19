@@ -533,11 +533,11 @@ class Dataset(object):
         mst = self.dataset.mst(self.request.matchdict['xform'])
         if mst is None:
             return None
-        nodes, edges, pos = mst
+        nodes, edges = mst
         mapped_nodes = data.orthology.map_ids(nodes, self.dataset.annotation.id, self.request.matchdict['tgt_annotation'])
         mapped_nodes = [ list(x)[0] if len(x) == 1 else None for x in mapped_nodes ]
 
-        return mapped_nodes, edges, pos
+        return mapped_nodes, edges
 
     @view_config(route_name="mistic.json.dataset.geneset.enrich", request_method="POST", renderer="json")
     def genesets_enrichment (self):

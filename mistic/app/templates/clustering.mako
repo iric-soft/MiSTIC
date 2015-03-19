@@ -127,14 +127,14 @@ import pickle
             <li class="divider"></li>
             <div>
               <label for="filter_genes">Minimum genes to start a peak: </label>
-              <input class="input-mini" id="filter_genes" value='5' type='text' style='width:30px;height:17px'></input>
+              <input class="input-mini" id="filter_genes" value='5' type='text' style='width:30px;height:20px'></input>
               <button class="btn" type="button" id="reload_btn">Reload</button>
             </div>
             <li class="divider"></li>
 
             <div>
               <label for="odds">Set odds ratio: </label>
-              <input id="odds" value='2' size=3 disabled type='text' style='width:10px;height:17px'></input>
+              <input id="odds" value='2' size=3 disabled type='text' style='width:10px;height:20px'></input>
             </div>
            </ul>
          </div>
