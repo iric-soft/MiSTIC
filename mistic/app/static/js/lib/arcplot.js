@@ -383,7 +383,7 @@
                         n.__pn[x[j]]--;
                     }
                 } else {
-                    console.log('missed ids: ', id);
+                    //console.log('missed ids: ', id);
                     n_missed++;
                 }
             }
@@ -587,7 +587,7 @@
             .selectAll('path.arc')
             .attr('fill', function(d) { return d.__x_max_i == -1 ? "#bdbdbd" : ramp(d.__x_max); })
             .append('title')
-            .text(function(d) {return statsName;})
+            .text(function(d) {return statsName + " :" + d.__x_max.toFixed(3);})
             ;
     };
 
