@@ -575,7 +575,7 @@
             .selectAll('path.arc')
             .attr('fill', function(d) { return d.__x_max_i == -1 ? "#bdbdbd" : "#181CF6"; })
             .append('title')
-            .text(function(d) {return statsName + " :" + d.__x_max.toFixed(3);})
+            .text(function(d) {return statsName;})
             ;
     };
 
