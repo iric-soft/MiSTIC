@@ -177,8 +177,11 @@ $(document).ready(function() {
 %>
 
   resizeGraph = function() {
-    current_graph.elem.height($(window).height()-100);
-    current_graph.resize();
+    $('div#graph').height($(window).height() - 124);
+
+    current_graph.resize(
+      $('div#graph').width(),
+      $('div#graph').height());
   };
 
 
@@ -189,7 +192,7 @@ $(document).ready(function() {
 
   var current_graph;
 
-  if (nodes.length < 25000) {
+  if (nodes.length < 35000) {
     $("#filter_genes").val(5);
     current_graph = new arcplot($('#graph'), {
       cluster_minsize: ${int(ds.config.get('icicle.cluster_minsize', 5))}
@@ -207,7 +210,6 @@ $(document).ready(function() {
       });
     }
   }
-
 
   current_graph.setData(cluster_roots);
   current_graph.setGraphInfo(["Minimum genes to create a peak: ".concat($("#filter_genes").val()), "Dataset: ${dataset}",  "Transform: ${xf}"]);

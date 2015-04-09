@@ -33,12 +33,27 @@
             plot_dir:        180.0,
             plot_arc:        340.0,
             width:           1000,
-            height:          750,
+            height:          1000,
         };
 
         if (options !== undefined) {
             _.extend(this.options, options);
         }
+
+
+        this.svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
+
+        this.width = this.options.width;
+        this.height = this.options.height;
+
+        d3.select(this.svg)
+            .append('svg')
+            .attr("width", this.width)
+            .attr("height", this.height)
+            .attr('version', '1.1')
+            .attr('baseProfile', 'full')
+            .attr("pointer-events", "all")
+            .attr('xmlns', 'http://www.w3.org/2000/svg');
 
         this.elem = $(elem);
         _.extend(this, Backbone.Events);
@@ -60,8 +75,16 @@
         this.updateLabels();
     };
 
-    arcplot.prototype.resize = function() {
-        setTimeout(_.bind(this._resize, this), 0);
+    arcplot.prototype.resize = function(width, height) {
+        if (this.width != width || this.height != height) {
+            this.width = width;
+            this.height = height;
+
+            d3.select(this.svg)
+                .attr("width", width)
+                .attr("height", height);
+            this.draw();
+        }
     };
 
     arcplot.prototype._resize = function() {
