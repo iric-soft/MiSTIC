@@ -5,6 +5,7 @@ from pyramid.response import Response
 from pyramid.renderers import render_to_response
 from pyramid.security import authenticated_userid
 from mistic.app import data
+from mistic.app.tables import *
 
 import json
 
@@ -33,12 +34,15 @@ class Graph(object):
 
     args = dict(datasets = datasets)
     args.update(self.args)
+    favorite = FavoriteDatasetStore.getall(DBSession(), args['user'])
+    args['favorite'] = favorite
     return render_to_response('mistic:app/templates/fragments/dataset_modal.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.root")
   def root(self):
-
     args = self.args
+    favorite = FavoriteDatasetStore.getall(DBSession(), args['user'])
+    args['favorite'] = favorite
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.corrgraph")

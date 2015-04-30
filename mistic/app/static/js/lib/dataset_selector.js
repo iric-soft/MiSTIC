@@ -51,6 +51,7 @@
                 "bPaginate": true,
                 "bSort":true,
                 "bProcessing": false,
+                "aaSorting": [[0, 'desc']],
                 "sDom": 'Rlfrtip',
                 "bRetrieve":true,
             });

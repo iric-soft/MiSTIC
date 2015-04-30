@@ -242,7 +242,10 @@ def main(global_config, **settings):
 
     config.add_route('mistic.json.attr.set',               '/attr')
     config.add_route('mistic.json.attr.get',               '/attr/{id}')
-    
+
+    config.add_route('mistic.json.dataset.fav.record',     'record_favorite_dataset')
+    config.add_route('mistic.json.dataset.fav.get',        'get_favorite_dataset')
+       
     config.add_route('mistic.json.saveValueInSession',     '/saveInSession')
 
     config.add_route('mistic.template.corrgraph',          '/genecorr')

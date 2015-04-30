@@ -45,7 +45,56 @@ logger = logging.getLogger(__name__)
 
 Base = declarative_base()
 
+class FavoriteDatasetStore(Base) : 
+    ''' This table is used to store the favorite datasets. 
+        Used to order the dataset in the dataset selectors.
+    '''
+    __tablename__ = 'm_favorite_dataset'
+    
+    id =  Column(Integer,     Sequence('m_id_seq'), primary_key=True, autoincrement=True)
+    user = Column(String(256),    nullable=False)
+    dataset = Column(String(256), nullable=False)
+    count = Column(Integer)
+
+    @property
+    def val (self) : 
+        return '{0.dataset}:{0.count}'.format(self)
+        
+    @classmethod
+    def record (cls, session, user, dataset) : 
+        
+        row = session.query(FavoriteDatasetStore).filter(and_(FavoriteDatasetStore.user == user, FavoriteDatasetStore.dataset == dataset)).scalar()
+        
+        if row is None:
+            row = FavoriteDatasetStore(user = user, dataset=dataset, count=1)
+            session.add(row)
+            row = session.merge(row)
+        else :     
+            row.count = row.count +1 
+            session.flush()
+            row = session.merge(row)
+        return None
+        
+
+    @classmethod
+    def get (cls, session, user, dataset):
+        row = session.query(FavoriteDatasetStore).filter(and_(FavoriteDatasetStore.user == user, FavoriteDatasetStore.dataset == dataset)).scalar()
+        if row is not None:
+            return row.count
+        else: 
+            return None
+
+    @classmethod
+    def getall (cls, session, _user):
+        return [r.val for r in session.query(FavoriteDatasetStore).filter(FavoriteDatasetStore.user == _user).all()]
+        
+        
+        
+
+
 class JSONStore(Base):
+    ''' This table is used to store the user custom graph parameters
+    '''
     __tablename__ = 'm_jsonstore'
 
     id =  Column(Integer,     Sequence('m_id_seq'), primary_key=True, autoincrement=True)
@@ -90,6 +139,6 @@ __all__ = [
     'Base',
     'DBSession',
     'create',
-
     'JSONStore',
+    'FavoriteDatasetStore'
 ]

@@ -667,6 +667,26 @@ class DatasetGene(Dataset):
     def expr(self):
         return self.dataset.expndata(self.gene, self.x)
 
+class Favorites(object) : 
+    def __init__(self, request):
+        self.request = request
+
+    @view_config(route_name="mistic.json.dataset.fav.record", request_method="POST", renderer="json")
+    def record(self):
+        user = self.request.POST.get('user')
+        dataset = self.request.POST.get('dataset')
+        return FavoriteDatasetStore.record(DBSession(), user, dataset)
+
+    @view_config(route_name="mistic.json.dataset.fav.get", request_method="POST")
+    def get(self):
+        user = self.request.POST.get('user')
+        dataset = self.request.POST.get('dataset')
+        val = FavoriteDatasetStore.get(DBSession(), user, dataset)
+        return Response(val, content_type='application/json')
+
+
+       
+
 class Attr(object):
     def __init__(self, request):
         self.request = request

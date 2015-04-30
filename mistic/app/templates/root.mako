@@ -1,4 +1,3 @@
-
 <%!
 import json
 import mistic.app.data as data
@@ -14,14 +13,12 @@ for ds in data.datasets.all():
   for t in ds.transforms:
    if t not in transforms:
      transforms.append(t)
-
 %>
 
 <%inherit file="mistic:app/templates/base.mako"/>
 
 
 <%block name="pagetitle">RNA-seq dataset explorer</%block>
-
 <%block name="style">
 ${parent.style()}
 
@@ -41,21 +38,20 @@ td.subgroup {
 }
 
 th { padding:0px;}
-
-
-
 </%block>
-<%block name="actions">
-  <!--<button class="btn" id="csv-button">CSV</button>-->
-</%block>
+
+<%block name="actions"><!--<button class="btn" id="csv-button">CSV</button>--></%block>
 
 
 <%block name="pagecontent">
-
   <div class="container-fluid">
     <div class="row-fluid">
       <div class="span12">
-      
+
+
+<% ff = dict([(f.split(':')[0], int(f.split(':')[1])) for f in favorite]) %>
+
+
 <div style="text-align: center">
 <div class="well" style="display: inline-block;">
 <h2>Datasets</h2>
@@ -79,7 +75,8 @@ th { padding:0px;}
 
 <tbody>
   %for ds in data.datasets.all() :
-  <tr>
+  
+  <tr id="${ds.id}">
     <td>${ds.name}<a style='float:right;' class="unicode-icon description" title='Click here to know more about the dataset' data-id=${ds.id}>&#8230</a></td>
 %for term in terms:
     <td>${ds.tags.get(term, '')}</td>
@@ -95,8 +92,12 @@ th { padding:0px;}
 %endfor
     </td>
     <td class='td_add_favorite'>
-      <a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'>
-      <span class="dummy" id="dummy" style="display:none">a</span>&#x2736</a>
+      <!--<a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'>-->
+      <span class="dummy" id="dummy" style="display:none">${ff.get(ds.id, 0)}</span>
+      %if ff.get(ds.id, 0)>0 : 
+        &#x2736
+      %endif
+      <!--</a>--> 
     </td>
   </tr>
   %endfor
@@ -160,7 +161,7 @@ function initTable() {
     "bSort":true,
     "bProcessing": false,
     "bRetrieve":true,
-    "aaSorting": [[n, 'asc']],
+    "aaSorting": [[n, 'desc']],
     "sDom": '<toolbar>T<"clear">Rfrtip' ,
     "oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
   });
@@ -215,16 +216,43 @@ $('#csv-button').on('click', function(event){
       
 $('#datasets-table tbody td ').on('click', function(event){
     
-    if ($(this).find('a#icicle-link').length>=1) return;
-    if ($(this).hasClass('td_add_favorite')) return;
+    
     
     var tr = $(this).parents('tr');
     var link = $(tr).find('span > a')[0];
+    var id = $(tr)[0].id;
+    console.debug(id);
+    $.ajax({
+      url: "${request.route_url('mistic.json.dataset.fav.record')}",
+      dataType: 'json',
+      type: 'POST',
+      data: {user:"${user}", dataset:id},
+      error: function(req, status, error) {
+        console.log('failed to construct a URL');
+      },
+      success: function(data) {
+       console.debug(data);
+      }});
+
+    if ($(this).find('a#icicle-link').length>=1) return;
+    //if ($(this).hasClass('td_add_favorite')) return;
+   
     window.open ($(link).attr("href"));
   
 });
 
-var favorites = getCookie('favorite_datasets');
+ $('.description' ).on('click', function(event) {
+    
+    event.stopPropagation();
+    event.preventDefault();
+    d = _.where(dat, {'id': $(this).data('id')})[0];
+    $('#description-modal-title > h4').html(d.name);
+    $('#description-modal-body').html(d.description);
+    $('#description-modal').modal('show')
+        
+ });
+
+/**var favorites = getCookie('favorite_datasets');
 
 $('.td_add_favorite' ).on('click', function(event) {
     
@@ -243,18 +271,6 @@ $('.td_add_favorite' ).on('click', function(event) {
     setCookie('favorite_datasets', favorites);
         
  });
- 
- $('.description' ).on('click', function(event) {
-    
-    event.stopPropagation();
-    event.preventDefault();
-    d = _.where(dat, {'id': $(this).data('id')})[0];
-    $('#description-modal-title > h4').html(d.name);
-    $('#description-modal-body').html(d.description);
-    $('#description-modal').modal('show')
-        
- });
-
 
 var manageFavorites = function () {
    
@@ -288,7 +304,7 @@ var manageFavorites = function () {
 };
 
 manageFavorites();
-
+ */
 
 </script>
 
