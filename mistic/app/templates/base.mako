@@ -30,7 +30,7 @@ if 'mistic_forward_host' in request.registry.settings.keys() and environ.get('HT
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/spectrum.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic.css')}" type="text/css" media="screen" charset="utf-8">
     <link rel="stylesheet" href="${request.static_url('mistic:app/static/css/mistic_svg.css')}" type="text/css" media="screen" charset="utf-8">
-
+    <link rel="icon" href="${request.static_url('mistic:app/static/favicon.ico')}">
 
 
 <script type="text/javascript">
