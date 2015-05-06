@@ -264,6 +264,25 @@ path.axis.selected {
   white-space: nowrap;
 }
 
+
+#datasets-table tbody tr:hover {
+    background-color:#DAD9DB;
+    cursor:pointer;
+}
+
+#datasets-table td.group {
+  background-color: #EAE9E9; 
+  text-align:left;
+}
+#datasets-table td.subgroup {
+  background-color: #EAE9E9; 
+  text-align:left;
+  padding : 10px;
+}
+
+th { padding:0px;}
+
+
 .btn.zeroclipboard-is-active {
     background-color: #e6e6e6;
     background-color: #d9d9d9 \9;
@@ -518,6 +537,9 @@ div#sample_characteristic button {
 .icon-mistic:hover {
     opacity:1;
 }
+
+
+
 
 
 a.no-decoration {

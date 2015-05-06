@@ -19,26 +19,7 @@ for ds in data.datasets.all():
 
 
 <%block name="pagetitle">RNA-seq dataset explorer</%block>
-<%block name="style">
-${parent.style()}
 
-#datasets-table tbody tr:hover {
-background-color:#DAD9DB;
-cursor:pointer;
-}
-
-td.group {
-  background-color: #EAE9E9; 
-  text-align:left;
-}
-td.subgroup {
-  background-color: #EAE9E9; 
-  text-align:left;
-  padding : 10px;
-}
-
-th { padding:0px;}
-</%block>
 
 <%block name="actions"><!--<button class="btn" id="csv-button">CSV</button>--></%block>
 
@@ -161,7 +142,7 @@ function initTable() {
     bsc.push(true);
   }
   aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": true , "sType": "html"}]);
-  bsc = bsc.concat([true, false, false ]);
+  bsc = bsc.concat([true, false, false]);
   var n = bsc.length-1;
   
   
@@ -183,7 +164,7 @@ $('#datasets-table th a ').on('click', function(event) {
     
     event.stopPropagation();
     var cell = this.parentElement;
-    var cellContent = cell.innerHTML;
+    var cellContent = cell.innerText;
     var oTable = initTable();
       
     var alreadyActive = $(this).hasClass('active');
@@ -201,18 +182,19 @@ $('#datasets-table th a ').on('click', function(event) {
     
       var j =-1;
       for (var i=0;i<oTable.fnSettings().aoColumns.length; i++) {
-       if (oTable.fnSettings().aoColumns[i]['sTitle']==cellContent){
+       if (oTable.fnSettings().aoColumns[i]['sTitle'].search(cellContent)!=-1){
          j=i;
        }
      }
      j = j;
     
      $(this).addClass('active');
-    
+     ord = 'asc';
+     if ((cellContent)=='version'){ ord ='desc';}
      oTable = removeColReorder(oTable);  // utils.js
-     
      oTable.rowGrouping({ iGroupingColumnIndex: j,
                           bExpandableGrouping: true, 
+                          sGroupingColumnSortDirection: ord,
                           bHideGroupingColumn: false});
    
       } 
