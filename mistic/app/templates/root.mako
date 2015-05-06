@@ -64,7 +64,13 @@ th { padding:0px;}
 <tr>
   <th>Dataset</th>
 %for term in terms :
-  <th><span><a class="unicode-icon group-data">&#x2630</a>${term}</span></th>
+    
+    <th><span class='btn-group'>
+    %if term!='other':
+        <a class="link-icon group-data"><i  class='icon-align-justify icon-mistic' ></i></a>
+    %endif    
+    ${term}</span></th>
+  <!--<th><span><a class="unicode-icon group-data">&#x2630</a>${term}</span></th>-->
   
 %endfor
 <th>n</th>
@@ -77,7 +83,13 @@ th { padding:0px;}
   %for ds in data.datasets.all() :
   
   <tr id="${ds.id}">
-    <td>${ds.name}<a style='float:right;' class="unicode-icon description" title='Click here to know more about the dataset' data-id=${ds.id}>&#8230</a></td>
+    <td>${ds.name}
+    <a style='float:right;' class="no-decoration description" title='Click here to know more about the dataset' data-id=${ds.id}>
+    [+]
+    </a>
+    <!--<a style='float:right;' class="unicode-icon description" title='Click here to know more about the dataset' data-id=${ds.id}>&#8230</a>-->
+    
+    </td>
 %for term in terms:
     <td>${ds.tags.get(term, '')}</td>
 %endfor
@@ -95,7 +107,7 @@ th { padding:0px;}
       <!--<a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'>-->
       <span class="dummy" id="dummy" style="display:none">${ff.get(ds.id, 0)}</span>
       %if ff.get(ds.id, 0)>0 : 
-        &#x2736
+        <i class='icon-star-small'></i>
       %endif
       <!--</a>--> 
     </td>

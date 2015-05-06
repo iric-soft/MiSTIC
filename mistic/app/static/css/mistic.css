@@ -475,25 +475,18 @@ div#sample_characteristic button {
   border-bottom-color: transparent;
 }
 
-.unicode-icon {
+.unicode-icon, a.link-icon {
     padding: 0px 2px;
     font-weight: bold;
     color: #000;
     text-shadow: 0 1px 0 #fff;
     opacity: .2;
     filter: alpha(opacity=20);
+    display:inline;
+    
 }
 
-.unicode-icon {
-    padding: 0px 2px;
-    font-weight: bold;
-    color: #000;
-    text-shadow: 0 1px 0 #fff;
-    opacity: .2;
-    filter: alpha(opacity=20);
-}
-
-.unicode-icon:hover,.unicode-icon.active {
+.unicode-icon:hover,.unicode-icon.active, a.link-icon:hover, a.link-icon.active {
     color: #000;
     text-decoration: none;
     cursor: pointer;
@@ -501,7 +494,7 @@ div#sample_characteristic button {
     filter: alpha(opacity=40);
 }
 
-.unicode-icon.disabled:hover {
+.unicode-icon.disabled:hover, a.link-icon.disabled:hover {
     color: #000;
     text-decoration: none;
     cursor: default;
@@ -509,8 +502,32 @@ div#sample_characteristic button {
     filter: alpha(opacity=20);
 }
 
+.icon-star-small {
+  background-position: -120px 0; 
+  zoom: 0.75; 
+}
+.icon-align-justify-small {
+  background-position: -336px -48px;
+  zoom:0.75;
+}
+.icon-mistic {
+    display:inline;
+    float:left;
+    opacity:0.8;
+}
+.icon-mistic:hover {
+    opacity:1;
+}
 
 
+a.no-decoration {
+    text-decoration:none;
+    cursor:pointer;
+    color:grey;
+}
+a.no-decoration:hover {
+    color:black;
+}
 
 
 .source-links {
