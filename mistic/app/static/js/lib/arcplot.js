@@ -144,6 +144,42 @@
             });
     };
 
+    // locate genes of a geneset
+     arcplot.prototype.locate_geneset = function(id) {
+
+        var arc = this.body
+            .selectAll('path.arc')
+            .classed('locate_gs', function(d) { return d.content.hasOwnProperty(id); });
+
+        var hl = this.body
+            .selectAll('path.arc.locate_gs');
+        var S, T;
+        if (hl[0].length === 1) {
+
+           var bbox = hl[0][0].getBBox();
+           S = Math.max(1, Math.min(20, 500.0/Math.max(bbox.width, bbox.height)));
+           T = [
+                (-(bbox.x + bbox.width/2) - this.width/2) * S + this.width/2,
+                (-(bbox.y + bbox.height/2) - this.height/2) * S + this.height/2
+            ];
+
+           if (T[0] > 0) T[0] = 0;
+           if (T[1] > 0) T[1] = 0;
+           if (T[0] + S * this.width < this.width) T[0] = this.width - (S * this.width);
+           if (T[1] + S * this.height < this.height) T[1] = this.height - (S * this.height);
+
+           hl.attr('fill', '#FF9900');
+
+        } else {
+            console.log(id+' not found (locate geneset)');
+            return -1;
+
+        }
+        this.xform = { T: T, S: S };
+        //this._zoom();
+        return 0;
+    };
+
     arcplot.prototype.scale = function(weight) {
         return Math.pow((weight - this.options.weight_inner) / (this.options.weight_outer - this.options.weight_inner), this.options.scale_power);
     };

@@ -39,10 +39,15 @@ import pickle
        </div>
 
        <div id="locate_gene" class="accordion-body collapse in">
-          <div class="accordion-inner">
-             <label for="gene1"></label>
-             <input type="text" id="gene">
+        <div class="accordion-inner">
+          <label for="gene1"></label>
+          <div class="controls">
+            <input type="text" id="gene" placeholder='Locate a gene'>
           </div>
+          <div class="controls">
+            <input type="text" id="locate_geneset" placeholder='Locate a geneset'>
+          </div>
+        </div>
       </div>
     </div>
 
@@ -244,6 +249,9 @@ $(document).ready(function() {
   var level1_entry = newGSDropdown ('level1', '?v=1');
   var level2_entry = newGSDropdown ('level2', '?v=2');
   var level3_entry = newGSDropdown ('level3', '?v=3');
+  var locate_geneset_entry = newGSDropdown ('locate_geneset', '?v=3');
+
+
 
   clickGSDropdown ('level1', level1_entry);
   clickGSDropdown ('level2', level2_entry);
@@ -293,6 +301,27 @@ $(document).ready(function() {
             },
             Red4, 'Fisher exact weight');
           current_graph.dezoom();
+        },
+        error: function() {
+          // inform the user something went wrong.
+        }
+      });
+    }
+  });
+
+  locate_geneset_entry.on('change', function(item) {
+    if (item === null) {
+      current_graph.removeColour();
+    } else {
+      $.ajax({
+        url: "${request.route_url('mistic.json.annotation.gene_ids', annotation=my_annotation)}",
+        data: { filter_gsid: item.id },
+        dataype: 'json',
+        success: function(data) {
+          $("#dataset_cmp").val($("#dataset_cmp option:first").val());
+          var gene_set = {};
+          for (var i = 0; i < data.length; ++i) { gene_set[data[i]] = true; current_graph.locate_geneset(data[i]); }
+          console.log(JSON.stringify(gene_set));
         },
         error: function() {
           // inform the user something went wrong.
