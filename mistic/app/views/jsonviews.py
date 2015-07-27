@@ -411,10 +411,21 @@ class Dataset(object):
     def samples(self):
         filters = self.request.GET.items()
         samples = set(self.dataset.cannotation.data.index) & set(self.dataset.samples)
-
+        
         for k,v in filters:
             if k in self.dataset.cannotation.data.columns:
                 samples = [ s for s in samples if self.dataset.cannotation.data[k][s] == v ]
+            else : 
+                ## When . are found in the value of the annotations, filters are wrongly splitted
+                found = [x for x in self.dataset.cannotation.data.columns if x in k]
+                if len(found) > 0 :
+                    for f in found : 
+                        v = '.'.join([k,v]).replace(f+'.', '')
+                        samples = [ s for s in samples if self.dataset.cannotation.data[f][s] == v ]
+                else : 
+                    samples = []
+
+        
         return sorted(samples)
 
 
