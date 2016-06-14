@@ -398,6 +398,7 @@
             dmx = d3.extent(xy, function(d) { return d.x; });
             this.xScale = d3.scale.linear();
         }
+       
 
         this.xScale.domain(dmx)
             .range([ this.options.padding[3] + this.options.outside_domain_pad[0],

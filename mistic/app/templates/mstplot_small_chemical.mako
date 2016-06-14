@@ -192,7 +192,8 @@ ${parent.pagetail()}
 <%
   ds = data.datasets.get(dataset)
   a = ds.annotation
-    
+  print dir(a)
+  print a.__dict__
   molecules = []
   moleculeNames = []
   names = {}
