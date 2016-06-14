@@ -269,7 +269,8 @@
                 .tickValues(null)
                 .scale(this.xScale)
                 .orient("bottom")
-                .tickFormat(this.xScale.tickFormat(5))
+                //.tickFormat(this.xScale.tickFormat(5))
+                .tickFormat(d3.format(",.1f"))
                 .ticks(5);
         }
 
@@ -278,7 +279,8 @@
                 .tickValues(null)
                 .scale(this.yScale)
                 .orient("left")
-                .tickFormat(this.xScale.tickFormat(5))
+                //.tickFormat(this.xScale.tickFormat(5))
+                .tickFormat(d3.format(",.1f"))
                 .ticks(5);
         }
     };

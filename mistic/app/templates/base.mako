@@ -37,6 +37,9 @@ if 'mistic_forward_host' in request.registry.settings.keys() and environ.get('HT
 mistic = {  url: "${request.host}"};
 </script>
 
+<style type="text/css"> <%block name="style"></%block>  </style>
+
+
 <!--[if lt IE 9]>
     <script src="http://html5shim.googlecode.com/svn/trunk/html5.js"></script>
 <![endif]-->

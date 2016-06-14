@@ -83,7 +83,7 @@ text {
 #go_table {
 overflow-x : auto;
 }
-
+<%block name="style2"/>
 
 </%block>
 

@@ -9,19 +9,17 @@ import pybel
 
 <%block name="controls_buttons">
  ${parent.controls_buttons()}
-
     <a id='tanimoto-button' href="#document-tanimoto" role="button" class="btn">Tanimoto</a>
 </%block>
 
-<%block name="style">
-${parent.style()}
+<%block name="style2">
 
 #tanimoto_table { 
   overflow-y: visible;
   overflow-x: hidden;
   font-family: helvetica; 
   font-size: 11px;    
-  max-height:800px;
+ 
 }
 
 #tanimoto_table  tr.selected {
@@ -31,6 +29,7 @@ ${parent.style()}
 
 #tanimoto_chord {
   overflow: hidden;
+  padding-left:10px;
 }
 
 #tanimoto_table tr:hover {
@@ -53,9 +52,9 @@ ${parent.style()}
   margin: -300px 0 0 -280px;
   overflow: hidden;
   background-color: #ffffff;
-  border: 1px solid #999;
+  border: 1px solid #999999;
   border: 1px solid rgba(0, 0, 0, 0.3);
-  *border: 1px solid #999;
+  *border: 1px solid #999999;
   -webkit-border-radius: 6px;
      -moz-border-radius: 6px;
           border-radius: 6px;
@@ -66,18 +65,13 @@ ${parent.style()}
      -moz-background-clip: padding-box;
           background-clip: padding-box;
 }
-.modal-body {
-  max-height: 600px;
-  padding: 15px;
-  overflow:hidden;
+
+#modal-tanimoto {
+  width:800px;
 }
 
-#document-tanimoto input {
-  width:70px;
-  font-size:10.5px;
-}
-
-#document-tanimoto label {
+#div-tanimoto input {
+  width:100px;
   font-size:10.5px;
 }
 
@@ -89,27 +83,27 @@ ${parent.style()}
 
 <%block name="subcontent">
 
-
- <div class="modal fade hide" id="document-tanimoto">
+ <div class="modal fade hide" id="modal-tanimoto" >
   <div class='modal-body'>
-     <div class="row-fluid" id="document-tanimoto">
-     <div class="span5" id="tanimoto_table" ></div>
-     <div class="span1" id="tanimoto_search" ></div>
-     <form class="form-inline">
-       <label for="search1">Compound1:</label>
-       <input type="text" id="search1" >
-       <label for="search2">Compound2:</label>
-       <input type="text" id="search2" ">
-       <span id="tanimoto-value"></span>
-     </form>
-    <div class="span6" id="tanimoto_chord" ></div>
-   </div>
-   </div>
-  </div>
- </div>
+     <div class="row-fluid" id="div-tanimoto">
+         <div class="span12" id="tanimoto_search" >
+            <form class="form-inline">
+                <input type="text" id="search1" placeholder="Enter Compound #1" >
+                <input type="text" id="search2" placeholder="Enter Compound #2" >
+                Tanimoto value = <span id="tanimoto-value">__</span>
+                
+            </form>
+            
+          </div> 
+      </div>  <!-- close row-fluid -->
 
- </div>
- </div>
+      <div class="row" >
+        <div class="span4" id="tanimoto_table" ></div>
+        <div class="span8" id="tanimoto_chord" ></div>
+      </div> <!--close row-fluid -->
+   </div><!--close modal-body-->
+  </div><!--close modal-->
+
 
 </%block>
 
@@ -192,8 +186,6 @@ ${parent.pagetail()}
 <%
   ds = data.datasets.get(dataset)
   a = ds.annotation
-  print dir(a)
-  print a.__dict__
   molecules = []
   moleculeNames = []
   names = {}
@@ -212,6 +204,7 @@ ${parent.pagetail()}
   d.update({'header': nodes})
   tanimoto_tab = d 
   
+ 
   A = [ dict(
     id    = n,
     name  = a.data.ix[n].get('name', n) or '',
@@ -235,7 +228,7 @@ var range = ["#000000", "#e3dfd3", "#93b8a9", "#4c7869", "#FFDD89", "#ba873f", "
              "#383535", "#d6a446", "#8596ab", "#b54536", "#13213b", "#b53f86", "#4a4948", "#8f332c",
              "#ed7e3d", "#8a728f", "#413f57",  "#e68384", "#e6eda4","#8bb056", "#cc3535", "#4ea7ad",
              "#f2a69e", "#8cc9b3", "#806667", "#3260ba", "#8a7c6e", "#f26671", "#583059", "#59280e",
-             "#a17b55", "#b06e3f", "#558dad", "#e8e099", "#d9b571", "#cc9c82", "#73877b", "#995057",
+             "#a17b55", "#b06e3f", "#558dad", "#e8e099", "#d9b571", "#cc9c82", "#73877b", "#995057"
              ];
 
 </script>
@@ -262,7 +255,7 @@ var valueCell = 1;
 var maxNodes = 40;
 
 var th = thead.selectAll("th")
-    .data([ 'ID', 'Value', 'Formula', 'Mean', 'Name' ])
+    .data([ 'ID', 'Value', 'Mean', 'Name' ])
     .enter()
     .append("th")
     .text(function(d) { return d; });
@@ -319,7 +312,7 @@ var td = tr.selectAll('td')
     .data(function(d) {return [
       [ 'compound_id', ann[d.index].id],
       [ 'value',''],  
-      [ 'formula', ann[d.index].formula ],
+      //[ 'formula', ann[d.index].formula ],
       [ 'mean', ann[d.index].mean.toFixed(2) ],  
       [ 'name', ann[d.index].name.toLowerCase()],
           
@@ -341,6 +334,7 @@ if (title.length < maxNodes) {
   if (title.length>20) {inr=0.21; dnm=3;}
 
   var width = Math.min(200 +20 * title.length, 1050);
+  console.debug(width);
   var height = Math.min(200 +20 * title.length, 850);
   var innerRadius = Math.min(width, height) * inr;
   var outerRadius = innerRadius * 1.1;
@@ -434,7 +428,7 @@ if (title.length < maxNodes) {
       .attr("y1", 0)
       .attr("x2", 5)
       .attr("y2", 0)
-      .style("stroke", "#000");
+      .style("stroke", "#000000");
  
     ticks.append("text")
       .attr("x", 8)
@@ -550,9 +544,10 @@ search2_entry.on('change', function() {
  showSearched (i1,i2)
   
 });
-$("#document-tanimoto").modal({keyboard : true, backdrop: true , show:false});
+$("#modal-tanimoto").modal({keyboard : true, backdrop: true , show:false});
+
 $('#tanimoto-button').on('click', function(){
-    $('#document-tanimoto').modal('toggle')
+    $('#modal-tanimoto').modal('toggle')
 });
 
 </script>
