@@ -31,6 +31,7 @@ from sqlalchemy.util import memoized_property
 
 
 from zope.sqlalchemy import ZopeTransactionExtension
+import transaction
 
 from hashlib import sha256
 
@@ -42,6 +43,9 @@ from beaker import cache
 
 import logging
 logger = logging.getLogger(__name__)
+
+## For debugging 
+#logging.getLogger('sqlalchemy.engine').setLevel(logging.INFO)
 
 Base = declarative_base()
 
@@ -63,16 +67,20 @@ class FavoriteDatasetStore(Base) :
     @classmethod
     def record (cls, session, user, dataset) : 
         
-        row = session.query(FavoriteDatasetStore).filter(and_(FavoriteDatasetStore.user == user, FavoriteDatasetStore.dataset == dataset)).scalar()
-        
+        row = session.query(FavoriteDatasetStore).filter(and_(FavoriteDatasetStore.user == user, 
+              FavoriteDatasetStore.dataset == dataset)).scalar()
+                
         if row is None:
             row = FavoriteDatasetStore(user = user, dataset=dataset, count=1)
             session.add(row)
             row = session.merge(row)
+            
         else :     
             row.count = row.count +1 
             session.flush()
             row = session.merge(row)
+
+        transaction.commit()
         return None
         
 
@@ -88,10 +96,7 @@ class FavoriteDatasetStore(Base) :
     def getall (cls, session, _user):
         return [r.val for r in session.query(FavoriteDatasetStore).filter(FavoriteDatasetStore.user == _user).all()]
         
-        
-        
-
-
+     
 class JSONStore(Base):
     ''' This table is used to store the user custom graph parameters
     '''

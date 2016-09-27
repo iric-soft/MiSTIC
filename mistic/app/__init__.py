@@ -150,6 +150,20 @@ def main(global_config, **settings):
     engine = engine_from_config(settings, 'sqlalchemy.')
     mistic.app.tables.create(engine)
     mistic.app.tables.Base.metadata.create_all(engine)
+    
+    ## - Debugging purpose --
+    #favorite = mistic.app.tables.FavoriteDatasetStore.getall(mistic.app.tables.DBSession(), 'boucherg')
+    #print 'Favorite', favorite
+    
+    ## Adding dummy info in table
+    #mistic.app.tables.FavoriteDatasetStore.record(mistic.app.tables.DBSession(), 'new_user', 'new_dataset')
+
+    #favorite = mistic.app.tables.FavoriteDatasetStore.getall(mistic.app.tables.DBSession(), 'new_user')
+    #print '------------------------------------'
+    #print 'Favorite', favorite
+
+    ## -- End of debugging --
+
 
     if 'mistic.datasets' in settings:
       settings.update(load_datasets_settings (settings['mistic.datasets'], global_config))
