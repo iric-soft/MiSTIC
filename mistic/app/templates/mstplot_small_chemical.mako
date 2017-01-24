@@ -9,7 +9,9 @@ import pybel
 
 <%block name="controls_buttons">
  ${parent.controls_buttons()}
+ <div class='btn-group' style='border:1px solid #B8B8B8 ; border-radius:5px;padding:10px;'>
     <a id='tanimoto-button' href="#document-tanimoto" role="button" class="btn">Tanimoto</a>
+  </div>
 </%block>
 
 <%block name="style2">

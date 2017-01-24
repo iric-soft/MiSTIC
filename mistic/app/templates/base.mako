@@ -62,7 +62,7 @@ mistic = {  url: "${request.host}"};
               %if request.matched_route.name == 'mistic.template.corrgraph':
                   <li class="active"><a href="#">Single gene correlation</a></li>
               %else:
-                  <li><a href="${request.route_url('mistic.template.corrgraph')}">Single gene correlation</a></li>
+                  <li><a id='lk_corrgraph' href="${request.route_url('mistic.template.corrgraph', dataset=None)}">Single gene correlation</a></li>
               %endif
 
               %if request.matched_route.name == 'mistic.template.pairplot':
@@ -70,13 +70,13 @@ mistic = {  url: "${request.host}"};
               %else: 
                     <li>
               %endif
-              <a href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Pairwise correlation scatterplots</a></li>
+              <a id='lk_pairplot' href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Pairwise correlation scatterplots</a></li>
 
         
               %if request.matched_route.name == 'mistic.template.mds':
                   <li class="active"><a href="#">Multidimensional scaling plots</a></li>
               %else:
-                  <li><a href="${request.route_url('mistic.template.mds', dataset=None, genes=[])}">Multidimensional scaling plots</a></li>
+                  <li><a id='lk_mds' href="${request.route_url('mistic.template.mds', dataset=None, genes=[])}">Multidimensional scaling plots</a></li>
               %endif
 
 
@@ -162,6 +162,9 @@ mistic = {  url: "${request.host}"};
     <script src="${request.static_url('mistic:app/static/js/lib/utils.js')}" type="text/javascript"></script>
 
     <script type="text/javascript">
+
+     
+
       (function($) {
         "use strict";
 
@@ -267,9 +270,12 @@ mistic = {  url: "${request.host}"};
         
       $('#logout').click(function ()  {  clearAuthentication("${request.url}"); });
 
+
       
         
       })(jQuery);
+
+
     </script>
   </%block>
 </html>

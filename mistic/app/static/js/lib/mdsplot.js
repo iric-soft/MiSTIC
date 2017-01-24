@@ -693,19 +693,9 @@
     };
 
 
-
-
-
-
     mdsplot.prototype.updateXform = function(xform) {
         this.xform=xform;
     };
-
-
-
-
-
-
 
 
     mdsplot.prototype.addData = function(data) {

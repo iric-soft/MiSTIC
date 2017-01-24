@@ -21,8 +21,14 @@ import json
             <div class="accordion-group">
               <div class="accordion-heading">
                 <h4 class="accordion-title">
-                  <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Datasets <div id="nb_datasets" class='text-info' style='display:inline;'>(0)</div></a>
+                  <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">
+                  Datasets <div id="nb_datasets" class='text-info' style='display:inline;'>(0)</div>
+                   <i style='float:right' class="icon-info-sign"></i>
+                  </a>
+                 
+                  
                 </h4>
+                
               </div>
 
               <div id="dataset_menu" class="accordion-body collapse in">
@@ -37,9 +43,14 @@ import json
           <div class="accordion-group">
             <div class="accordion-heading">
                <h4 class="accordion-title">
-                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Genes <div id="nb_genes" class='text-info' style='display:inline;'>(0)</div></a>
+                  <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">
+                  Genes <div id="nb_genes" class='text-info' style='display:inline;'>(0)</div>
+                  <i style='float:right' class="icon-info-sign"></i>
+                  </a>
                </h4>
             </div>
+
+
 
             <div id="gene_menu" class="accordion-body collapse ">
               <div class="accordion-inner">
@@ -55,7 +66,9 @@ import json
            <div class="accordion-heading">
              <h4 class="accordion-title">
                 <a class="accordion-toggle" data-toggle="collapse"  href="#sample_menu">Samples
-                <div id="nb_samples" class='text-info' style='display:inline;'>(0)</div></a>
+                <div id="nb_samples" class='text-info' style='display:inline;'>(0)</div>
+                 <i style='float:right' class="icon-info-sign"></i>
+                </a>
             </h4>
        </div>
 
@@ -87,7 +100,9 @@ import json
      <div class="accordion-group">
        <div class="accordion-heading">
          <h4 class="accordion-title">
-           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
+           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options
+           <i style='float:right' class="icon-info-sign"></i>
+           </a>
          </h4>
        </div>
 
@@ -111,7 +126,9 @@ import json
      <div class="accordion-group">
        <div class="accordion-heading">
          <h4 class="accordion-title">
-           <a class="accordion-toggle" data-toggle="collapse" href="#sample_enrichment_panel">Sample term enrichment</a>
+           <a class="accordion-toggle" data-toggle="collapse" href="#sample_enrichment_panel">Sample term enrichment
+          <i style='float:right' class="icon-info-sign"></i>
+           </a>
          </h4>
        </div>
 
@@ -149,7 +166,7 @@ import json
     </div>
      </div>
  
-<%include file="mistic:app/templates/fragments/alert_modal.mako"/>
+
 
 </%block>
 
@@ -159,6 +176,7 @@ ${parent.style()}
 
 <%block name="pagetail">
 <%include file="mistic:app/templates/fragments/tmpl_point_group.mako"/>
+<%include file="mistic:app/templates/fragments/alert_modal.mako"/>
 
 ${parent.pagetail()}
 
@@ -218,7 +236,10 @@ $(document).ready(function() {
   newGroup();
 %endif
 
-  
+
+
+
+
 
   $('#new_group').on('click', function(event) { 
       newGroup(); 
@@ -461,7 +482,7 @@ $(document).ready(function() {
       .append("tr")
 
     var th = thr.selectAll('th')
-      .data([ 'P-val', 'Odds', 'Selected', 'Key : Value' ])
+      .data([ 'P-val', 'Q-val', 'Odds', 'Selected', 'Key:Value' ])
       .enter()
       .append('th')
       .text(function(d) { return d; });
@@ -477,6 +498,7 @@ $(document).ready(function() {
        var title = '\t\tIn Selection |  Not in Selection\nIn Category\t\t'+ d.tab[0][0]+' | '+d.tab[1][0]+'\nNot in Category\t'+d.tab[0][1]+' | '+d.tab[1][1];
        return [
         { value: d.p_val.toExponential(1), title:title },
+        { value: d.q_val.toExponential(1), title:title },
         { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) , title:title },
         { value: d.tab[0][0]+'/'+ (parseInt(d.tab[1][0])+ parseInt(d.tab[0][0])), title:title},
         { value: d.key +' : '+d.val, title:title },
@@ -694,6 +716,36 @@ $(document).ready(function() {
   });
 
   $("#transform-buttons").button();
+
+
+
+
+  // Help related 
+ sample_menu = "Use this box to construct groups of samples. You can highlight samples in the graph by entering their ids in the box and clicking the arrow. ";
+ sample_menu = sample_menu + "Or you can select samples from the plot and save them with the + sign.";
+ sample_menu = sample_menu + "The +, - and trash signs allow you to manage your groups.  The small grey arrows allow you to set the order in which they are displayed";
+ sample_menu = sample_menu + "<br> Clicking on the square on the left opens a dialog box where you can customize the aspect of the points."
+ sample_menu = sample_menu + "<br> Moreover, you can highlights patients by selecting a clinical characteristic."
+
+ var helpDoc = {'#dataset_menu' : 'Click on the button "Choose dataset" to select the dataset to work with' ,
+                '#sample_enrichment_panel' : 'This panel presents the result of the enrichment test for the selected group of points',
+                "#options_menu": 'Among the options, you can decide to show or hide the patients labels. <br>You can go from one data transformation (log, none, rank) to another',
+                "#sample_menu" : sample_menu,
+                "#gene_menu" : 'Use the dropdown to choose a gene. Depending on the dataset, symbol or Entrez Gene are available'
+}
+
+$('#info-modal .close').on('click', function(event) { $('#info-modal').hide();});
+ $('.icon-info-sign').on('click', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var who = String($(this).parent().attr('href'));
+      $('#info-modal .alert-modal-body').html(helpDoc[who]);
+      $('#info-modal .alert-modal-title').html('Help');
+      $('#info-modal').show();
+      //$('#info-modal').modal('toggle');
+ });
+// --------------------
+
 });
 </script>
 </%block>

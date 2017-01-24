@@ -367,8 +367,12 @@ class Dataset(object):
 
     @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
     def sample_enrichment(self):
+
+
         if not self.dataset.cannotation:
             return []
+        
+        from mistic.util.geneset import pValAdjust
         anns = self.dataset.cannotation.data
 
         samples = set(json.loads(self.request.POST['samples']))
@@ -403,7 +407,17 @@ class Dataset(object):
                     odds = odds,
                     tab = tab
                 ))
+       
+
+        pvals = [d['p_val'] for d in out]
+        qvals = pValAdjust(pvals, method='fdr')
+  
+        for i,d in enumerate(out) : 
+            d['q_val'] = qvals[i]
+    
+
         out.sort(key = lambda x: x['p_val'])
+  
 
         return out
 
@@ -573,6 +587,7 @@ class Dataset(object):
          else:
            r['gs'], r['cat'] = x, ''
 
+
      return gs_tab
 
 
@@ -625,14 +640,14 @@ class DatasetGene(Dataset):
             # r1 = [ x for x,y in corr_go if g in y ]
             # r2 = [ x for x,y in corr_go if g not in y ]
             # u, prob = scipy.stats.mannwhitneyu(r1, r2)
-            print g, len(r1)
+           
             t = data.ontology.nodes.get(g)
             if t is None:
                 desc = ''
             else:
                 desc = t.desc
             out.append((prob, u, g, desc))
-            print out[-1]
+            #print out[-1]
         out.sort()
         return out
 
@@ -663,7 +678,7 @@ class DatasetGene(Dataset):
             else:
                 desc = t.desc
             out.append((pmin, counts, g, desc))
-            print out[-1]
+           
         out.sort()
         return out
 

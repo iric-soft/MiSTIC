@@ -14,42 +14,71 @@ import scipy.stats
 
 <div class="container-fluid"> 
   <div class="row-fluid">
-    <div class="span12">
+    <div class="span6" >
         
-    <form class="form-inline">
-   
-        <div class="btn-group-pull-right">
+     <div class="span12" >
+     <div class='form-inline'>
+        <div class="btn-toolbar">
+        
             <%block name="controls_buttons">
-               <button class="btn btn-primary" id="select_all">Select all</button>
-               <button class="btn btn-primary" id="clear_selection">Clear selection</button>
-               <button class="btn btn-primary" id="scatterplot">Scatterplot</button>
-               <button class="btn btn-primary" id="mdsplot">MDSplot</button>
-               <button class="btn btn-primary" id="show_labels">Toggle labels</button>
-               
+            
+                
+                  <div class='btn-group' style='background-color:#E0E0E0; border-radius:5px;padding:5px;'>
+                    <center><small> <label for='select_btns'>Nodes selection </label></small><a id='node_selection'><i class="icon-info-sign"></i></a><center>
+            
+            
+                     <div class='btn-group' id='select_btns'>
+                       <button  class="btn btn-default " id="select_all" title='Select all nodes in the graph' >Select all</button>
+                       <button  class="btn btn-default " id="clear_selection" title='Clear the node selection' >Clear</button>
+                       <button  class="btn btn-default " id="copy_selection" title='Copy selection' >Copy</button>
+                     </div>
+
+                    
+
+                      <div class='btn-group' id ='goto_btns'>
+                       <button class="btn btn-default " id="scatterplot" title='Display selected nodes as pairplots' disabled>See as Pairplot</button>
+                       <button class="btn btn-default " id="mdsplot" title='Go to MDS plots' disabled >Go to MDS plot</button>
+                   </div>
+
+                 </div>
+        
+                 <div class='btn-group' style='background-color:#E0E0E0; border-radius:5px;padding:5px;'>
+                   <center><small> <label for='goto_btns'>Options </label></small>
+                   <a id='options'><i class="icon-info-sign"></i></a></center>
+            
+                    <div class='btn-group' id ='toggle_btns'>
+                       <button class="btn btn-default " id="show_labels" title='Click on the button to see identifier or description'>Toggle labels</button>
+                     </div>
+
+
+                  </div>
+         
+  
                
             </%block>  
         </div>
-    </form>
+      </div>
+     
+    </div>  <!-- end form-inline -->
+  
+    
+    <div class="span12" id="graph"></div>
    
 
-    </div>
-  </div>
-    
-  <div class="row-fluid">
-  <div class="span12">
-    <div class="span12 information"> Selection :</div>
-    <div class="span12" id="more-information"> </div>
-    </div></div>
 
- <div class="row-fluid" id="document-graph">
-   <div class="span7" id="graph"></div>
-   <div class="span5" id="graph-right">
-      <div class="span12" id="go_table"></div>
+  </div>  <!-- span6-1 -->
 
+  <div class="span6" style='padding-top:20px;'>
+      
+      <span style='padding:20px;'><center> <h5>GeneSet Enrichment Test Results </h5></center></span>
+      <div class="span12" id="go_table" ></div>
       <div class="span12" id="part2"></div>
-   </div>
- </div>
-  
+    
+
+  </div>  <!-- span6-2 -->
+
+
+
     
 <%block name="subcontent"></%block>
   
@@ -59,13 +88,6 @@ import scipy.stats
 <%block name="style">
 ${parent.style()}
 
-div#more-information, .information{
-   color: #cc7400;
-   font-weight:bold;
-   padding: 10px 0px 0px 0px;
-   float: right;
-   overflow:hidden;
-}
 
 
 th, td {
@@ -89,21 +111,36 @@ overflow-x : auto;
 
 <%block name="pagetail">
 ${parent.pagetail()}
-
+<%include file="mistic:app/templates/fragments/alert_modal.mako"/>
 <script src="${request.static_url('mistic:app/static/js/lib/djset.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/node.js')}" type="text/javascript"></script>
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
 
 <%
+  print data.datasets
   ds = data.datasets.get(dataset)
+
   a = ds.annotation
   
-  E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
-  V = [ dict(
-    id    = n,
-    name  = a.get_symbol(n, n),
-    title = a.get_name(n, ''),
-  ) for n in nodes ]
+  try : 
+    E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
+    V = [ dict(
+      id    = n,
+      name  = a.get_symbol(n, n),
+      title = a.get_name(n, ''),
+    ) for n in nodes ]
+  except :   ## for debug
+
+    E = [{"source":4,"target":0,"weight":0.252386},
+         {"source":2,"target":1,"weight":0.419053},
+         {"source":3,"target":0,"weight":0.425734},
+         {"source":4,"target":1,"weight":0.443259}]
+
+    V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
+         {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
+         {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
+         {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
+
 %>
 
 <script type="text/javascript">
@@ -113,6 +150,11 @@ var json = {
   "links": ${json.dumps(E)|n},
   "gstab": {},
 };
+
+// For debugging purpose
+//var s = JSON.stringify(json); 
+//window.location = 'data:text/plain;charset=utf-8,'+encodeURIComponent(s);
+
 
 
 var updateNodeStatus = function (nodes, selected, clear) {
@@ -126,7 +168,6 @@ var updateNodeStatus = function (nodes, selected, clear) {
     nodes.each(function(d) {info.toggle(d.name);});
    }
 };
-
 
 
 var updateEnrichmentTable = function() {
@@ -149,7 +190,7 @@ var updateEnrichmentTable = function() {
         .append("tr");
 
 
-    var tr_header = [ 'P-value', 'Odds',  'Name', 'Type','Cat', 'ID' ];
+    var tr_header = [ 'P-value', 'Q-value', 'Odds',  'Name', 'Type','Cat', 'ID' ];
     var th = thr.selectAll('th')
         .data(tr_header)
         .enter()
@@ -187,6 +228,7 @@ var updateEnrichmentTable = function() {
     var td = tr.selectAll('td')
         .data(function(d) { return [
         { value: (typeof(d.p_val) === 'string') ? d.p_val : d.p_val.toExponential(2) },
+        { value: (typeof(d.p_val) === 'string') ? d.q_val : d.q_val.toExponential(2) },
         { value: (typeof(d.odds)  === 'string') ? d.odds  : d.odds.toFixed(2) },
         { value: d.name, title: d.desc },
         { value: d.gs },
@@ -202,7 +244,8 @@ var updateEnrichmentTable = function() {
         .attr('classed', function(d) {return d.class; })
         ;
     $('#gotable').dataTable({ "aoColumnDefs": [{ "sType": "scientific", "aTargets": [ 0 ],  'aaSorting':["asc"] },
-                                               { "sType": "numeric", "aTargets": [ 1 ]},
+                                               { "sType": "scientific", "aTargets": [ 1 ],  'aaSorting':["asc"] },
+                                               { "sType": "numeric", "aTargets": [ 2 ]},
                                                ],
                          
                           "bPaginate" : true,
@@ -243,10 +286,19 @@ var svg = d3.select("#graph").append("svg")
     .attr("xmlns:xmlns:xlink", "http://www.w3.org/1999/xlink");
  
 var clickOnNode = function(d) {
- 
+     
       updateNodeStatus(d3.select(this), !d3.select(this).classed('selected'), false);
       d3.selectAll('tr.selected').classed('selected', false);
+
+      if (d3.selectAll('rect.selected')[0].length > 1 ) {
+          $('#scatterplot').prop('disabled', false);
+          $('#mdsplot').prop('disabled', false);
+
+      }
+     
       d3.select(this).classed('selected') ?  getContent(d) : hideMore(); 
+      
+      
       
     }
     
@@ -389,14 +441,14 @@ getContent = function(d) {
   var egLink = 'http://www.ncbi.nlm.nih.gov/gene?cmd=search&term='+d.name+'[sym] AND human[ORGN]';
   var wkLink = 'http://en.wikipedia.org/wiki/'+d.name;
   var urlEnsembl = 'http://rest.ensembl.org/lookup/symbol/homo_sapiens/'+d.name+'?content-type=application/json';
-  var urlNCBI  = 'http://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=_id_&retmode=txt'; 
+  var urlNCBI  = 'https://eutils.ncbi.nlm.nih.gov/entrez/eutils/efetch.fcgi?db=gene&id=_id_&retmode=txt'; 
   var urlEnsemblId = 'http://rest.ensembl.org/xrefs/id/_id_?content-type=application/json';
   
   var links = {'Ensembl':ebLink, 'GeneCards':gcLink, 'EntrezGene': egLink, 'Wikipedia': wkLink};
   var infos = ['Ensembl','EntrezGene']
   
   var part2 = $("#part2");
-  part2.html('').append('<p><div class="accordion" id="info"></div>');
+  part2.html('').append('<p><hr><div class="accordion" id="info"></div>');
   
   h = 'Gene : ' + d.name +' : '+d.title;
   c = '<ul id="links" class="source-links" style="padding:5px;"><li>GO TO : </li></ul>';
@@ -427,7 +479,9 @@ getContent = function(d) {
             
             egid = '';
             $.get(urlEnsemblId.replace('_id_', eid), function(r){
-              egid =  _.where(r, {dbname:"EntrezGene"})[0].primary_id;
+              res = _.where(r, {dbname:"EntrezGene"})[0];
+              if (_.isUndefined(res)) { return; }
+              egid =  res.primary_id;
               
               $.get(urlNCBI.replace('_id_', egid), function(r){
                 $('#aEntrezGene > .accordion-inner').append('<pre>'+r+'</pre>'); 
@@ -499,10 +553,6 @@ getAnnotationContent = function(d) {
 };
 
 
-
-
-
-
 </%block>
 
 hideMore = function() {
@@ -510,21 +560,35 @@ hideMore = function() {
   return false;
 };
 
-$('#select_all').on('click', function(event) {
+$('button#select_all').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
   updateNodeStatus(d3.select('#graph').selectAll('rect'), true, true);
+  $('#scatterplot').prop('disabled', false);
+  $('#mdsplot').prop('disabled', false);
   return false;
 });
 
-$('#clear_selection').on('click', function(event) {
+$('button#clear_selection').on('click', function(event) {
   d3.selectAll('tr.selected').classed('selected', false);
   updateNodeStatus(null, false, true);
+  $('#scatterplot').prop('disabled', true);
+  $('#mdsplot').prop('disabled', true);
   return false;
 });
 
 
+$('button#copy_selection').on('click', function(event) { 
+    var ids = [];
+    d3.select('#graph').selectAll('rect.selected').each(function(d) { ids.push(d.id);  });
+    $('#info-modal .alert-modal-body').html(ids.join(' '));
+    $('#info-modal .alert-modal-title').html('Copy to clipboard');
+    $('#info-modal').show();
+ 
+});
+$('#info-modal .close').on('click', function(event) { $('#info-modal').hide();});
+
 var showName = false;
-$('#show_labels').on("click", function(event){
+$('button#show_labels').on("click", function(event){
    
     showName = !showName; 
     d3.select('#graph').selectAll('text').each(function(d) {showName ? d3.select(this).text(d.title) :d3.select(this).text(d.name) ;});
@@ -540,10 +604,7 @@ $('#show_labels').on("click", function(event){
 
 
 
-
-
-
-$('#scatterplot').on('click', function(event) {
+$('button#scatterplot').on('click', function(event) {
   var ids = [];
   d3.selectAll('tr.selected').classed('selected', false);
   d3.select('#graph').selectAll('rect.selected').each(function(d) {
@@ -560,7 +621,7 @@ $('#scatterplot').on('click', function(event) {
 });
 
 
-$('#mdsplot').on('click', function(event) {
+$('button#mdsplot').on('click', function(event) {
   var ids = [];
   d3.selectAll('tr.selected').classed('selected', false);
   d3.select('#graph').selectAll('rect.selected').each(function(d) {
@@ -606,6 +667,24 @@ $(document).ready(function() {
           
         }
       });
+
+
+    var nodeSelectionDoc = "Use the left buttons to select all nodes or clear your selection. <br> A selection can also be copied to the clipboard.";
+    nodeSelectionDoc += "Button on the right provides a link to the pairplot view, in the top menu refered to as Pairwise correlation scatterplot."
+    var helpDoc = {'node_selection' : nodeSelectionDoc ,
+                   'options' : 'Alternate between gene symbols and descriptions'};
+
+    $('#info-modal .close').on('click', function(event) { $('#info-modal').hide();});
+    $('.icon-info-sign').on('click', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      
+      var who = $($(this).parent()).attr('id');
+      $('#info-modal .alert-modal-body').html(helpDoc[who]);
+      $('#info-modal .alert-modal-title').html('Help');
+      $('#info-modal').show();
+      //$('#info-modal').modal('toggle');
+   });
     
 });    
 

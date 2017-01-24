@@ -9,13 +9,20 @@ import pickle
 <%block name="actions">
   ${parent.actions()}
 </%block>
+
+
+
 <%block name="controls">
   <form class="form-inline">
 
   <div class="accordion" id="accordion">
      <div class="accordion-group">
        <div class="accordion-heading"><h4 class="accordion-title">
-            <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset comparison</a></h4>
+            <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset comparison
+            <i  style='float:right' class="icon-info-sign"></i>
+            </a>
+             
+            </h4>
        </div>
 
        <div id="dataset_menu" class="accordion-body collapse in">
@@ -35,17 +42,22 @@ import pickle
 
     <div class="accordion-group">
        <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  </a></h4>
+         <a class="accordion-toggle" data-toggle="collapse"  href="#locate_gene">Locate  
+           <i  style='float:right' class="icon-info-sign"></i>
+         </a></h4>
        </div>
 
        <div id="locate_gene" class="accordion-body collapse in">
         <div class="accordion-inner">
           <label for="gene1"></label>
           <div class="controls">
-            <input type="text" id="gene" placeholder='Locate a gene'>
+            <input type="text" id="gene" placeholder='Locate a gene '>
           </div>
           <div class="controls">
-            <input type="text" id="locate_geneset" placeholder='Locate a geneset'>
+            <input type="text" id="locate_geneset" placeholder='Locate the gene of a set'>
+            <span class="nav nav-list">
+            <a id='clear_locate' href="#" style='text-decoration:none;'>Clear</a>
+            </span>
           </div>
         </div>
       </div>
@@ -55,32 +67,40 @@ import pickle
 
     <div class="accordion-group">
        <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#gs_dropdown">Geneset enrichment</a></h4>
+         <a class="accordion-toggle" data-toggle="collapse"  href="#gs_dropdown">Geneset enrichment
+
+        <i  style='float:right' class="icon-info-sign"></i>
+         </a></h4>
        </div>
 
        <div id="gs_dropdown" class="accordion-body collapse in">
           <div class="accordion-inner">
              <div class="input-append btn-group"  style='margin-left:0px;'>
-                <input type="text" id="level1" placeholder='Restrict geneset search to this type'>
+                <input type="text" id="level1" placeholder='Restrict set search to this type'>
                 <a id='level1_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
                 <span class="caret"></span>
                 </a>
              </div>
              <div class="input-append btn-group"  style='margin-left:0px;'>
-                 <input type="text" id="level2" placeholder='Restrict geneset search to this category'>
+                 <input type="text" id="level2" placeholder='Restrict set search to this category'>
                 <a id='level2_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
                 <span class="caret"></span>
                 </a>
              </div>
 
              <div class="input-append btn-group" style='margin-left:0px;'>
-                <input type="text" id="level3" placeholder='Search for a geneset'>
+                <input type="text" id="level3" placeholder='Search for a set'>
                 <a id='level3_drop' class="btn btn-default dropdown-toggle" data-toggle="dropdown" style='float:none;margin;0px; left:-4px;'>
                 <span class="caret"></span>
                 </a>
              </div>
-
+             <span class="nav nav-list">
              <a id='clear_input' href="#" style='text-decoration:none;'>Clear all</a>
+             </span>
+
+             <menu type="context" id="arcmenu">
+ <menuitem label="Open link 3 in new tab" onclick="function(e) {alert('hi'); }">
+</menu>
 
 
          </div>
@@ -89,21 +109,23 @@ import pickle
 
     <div class="accordion-group">
        <div class="accordion-heading"><h4 class="accordion-title">
-         <a class="accordion-toggle" data-toggle="collapse"  href="#extract_peak">Extract peaks </a></h4>
+         <a class="accordion-toggle" data-toggle="collapse"  href="#extract_peak">Extract peaks 
+           <i  style='float:right' class="icon-info-sign"></i>
+           </a></h4>
        </div>
 
        <div id="extract_peak" class="accordion-body collapse">
           <div class="accordion-inner">
               <form class="form-horizontal">
                   <div class="control-group">
-                      <label class="control-label" for="inputEmail">Number of genes in a peak:</label>
+                      <label class="control-label" for="inputEmail">Number of nodes in peaks:</label>
                       <div class="controls">
                           Min: <input class="input-mini" type="text" id="min_elt" value="5">
                           Max: <input class="input-mini" type="text" id="max_elt" value="200">
                       </div>
                   </div>
                   <div class="control-group">
-                      <label class="control-label" for="inputEmail">Height of a peak: </label>
+                      <label class="control-label" for="inputEmail">Peak height: </label>
                       <div class="controls">
                           Min: <input class="input-mini" type="text" id="min_h" value="0">
                           Max: <input class="input-mini" type="text" id="max_h" value="1">
@@ -120,18 +142,25 @@ import pickle
     <div class="accordion-group">
        <div class="accordion-heading">
          <h4 class="accordion-title">
-           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options</a>
+           <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options
+             <i  style='float:right' class="icon-info-sign"></i>
+           </a>
          </h4>
        </div>
 
        <div id="options_menu" class="accordion-body collapse ">
          <div class="accordion-inner">
+
            <ul id="options" class="nav nav-list">
-            <li><a id='clear_plot' href="#">Clear plot</a></li>
+            <li>
+             <label class="checkbox"><input type="checkbox" id='enable_labels' checked> Enable labels on icicle when locating a gene set </label>
+            <!-- <a style='display:inline;float:right;text-decoration:none;' id='clear_plot'  href="#">Clear plot</a>-->
+             </li>
+
 
             <li class="divider"></li>
             <div>
-              <label for="filter_genes">Minimum genes to start a peak: </label>
+              <label for="filter_genes">Minimum number of nodes in peaks: </label>
               <input class="input-mini" id="filter_genes" value='5' type='text' style='width:30px;height:20px'></input>
               <button class="btn" type="button" id="reload_btn">Reload</button>
             </div>
@@ -149,15 +178,19 @@ import pickle
 
 
   </form>
+  
+
+
+
 
 </%block>
 <%block name="style">
 ${parent.style()}
-
-
-
 </%block>
+
+
 <%block name="pagetail">
+<%include file="mistic:app/templates/fragments/alert_modal.mako"/>
 <form id="genesetform" target="_blank" method="post" action="${request.route_url('mistic.template.mstplot', dataset=dataset, xform=xform)}">
 <input id="geneset" type="hidden" name="geneset" value=""></input>
 </form>
@@ -181,6 +214,7 @@ $(document).ready(function() {
     xf = xform
 %>
 
+
   resizeGraph = function() {
     $('div#graph').height($(window).height() - 124);
 
@@ -196,7 +230,6 @@ $(document).ready(function() {
   cluster_roots = Node.fromMST(nodes, edges);
 
   var current_graph;
-
   if (nodes.length < 35000) {
     $("#filter_genes").val(5);
     current_graph = new arcplot($('#graph'), {
@@ -217,12 +250,25 @@ $(document).ready(function() {
   }
 
   current_graph.setData(cluster_roots);
-  current_graph.setGraphInfo(["Minimum genes to create a peak: ".concat($("#filter_genes").val()), "Dataset: ${dataset}",  "Transform: ${xf}"]);
-
+  current_graph.setGraphInfo(["Minimum elements in peaks: ".concat($("#filter_genes").val()), "Dataset: ${dataset}",  "Transform: ${xf}"]);
+  
   var gene_entry = new GeneDropdown({ el: $("#gene") });
 
-  //url = "${request.route_url('mistic.json.dataset.search', dataset=dataset)}".replace('${request.host}', mistic.url);
-  //gene_entry.setSearchURL(url);
+  var enable_labels = $('#enable_labels').is(':checked');
+  current_graph.setEnableLabels(enable_labels);
+  
+
+  $('#enable_labels').on('click', function() {  
+      enable_labels = $('#enable_labels').is(':checked'); 
+      current_graph.setEnableLabels(enable_labels);
+   });
+      
+
+  
+  $("#lk_pairplot").attr('href', "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}");
+  $('#lk_mds').attr('href', "${request.route_url('mistic.template.mds', dataset=dataset, genes=[])}");
+  $('#lk_corrgraph').attr('href', "${request.route_url('mistic.template.corrgraph', dataset=dataset)}");
+  
 
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
 
@@ -257,14 +303,6 @@ $(document).ready(function() {
   clickGSDropdown ('level2', level2_entry);
   clickGSDropdown ('level3', level3_entry);
 
-  $('#clear_input').on('click', function() {
-    level1_entry.$el.val('');
-    level2_entry.$el.val('');
-    level3_entry.$el.val('');
-    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;";
-    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;";
-  });
-
   level1_entry.on('change', function() {
     level2_entry.$el.val('');
     level3_entry.$el.val('');
@@ -288,9 +326,11 @@ $(document).ready(function() {
         data: { filter_gsid: item.id },
         dataype: 'json',
         success: function(data) {
+
           $("#dataset_cmp").val($("#dataset_cmp option:first").val());
           var gene_set = {};
           for (var i = 0; i < data.length; ++i) { gene_set[data[i]] = true; }
+
           current_graph.colourByClusterMatch(
             [ gene_set, current_graph.root.getContent() ],
             function (a,b,c,d) {
@@ -301,6 +341,8 @@ $(document).ready(function() {
             },
             Red4, 'Fisher exact weight');
           current_graph.dezoom();
+          
+
         },
         error: function() {
           // inform the user something went wrong.
@@ -308,7 +350,7 @@ $(document).ready(function() {
       });
     }
   });
-
+  
   locate_geneset_entry.on('change', function(item) {
     if (item === null) {
       current_graph.removeColour();
@@ -320,7 +362,12 @@ $(document).ready(function() {
         success: function(data) {
           $("#dataset_cmp").val($("#dataset_cmp option:first").val());
           var gene_set = {};
-          for (var i = 0; i < data.length; ++i) { gene_set[data[i]] = true; current_graph.locate_geneset(data[i]); }
+          for (var i = 0; i < data.length; ++i) { 
+            gene_set[data[i]] = true; 
+            current_graph.locate_geneset(data[i]); 
+            current_graph.dezoom();
+          }
+
           console.log(JSON.stringify(gene_set));
         },
         error: function() {
@@ -371,58 +418,18 @@ $(document).ready(function() {
     }
   });
 
-  var go_colour = function(go_ns) {
-    var req = $.ajax({
-      url: "${request.route_url('mistic.json.annotation.genes', annotation=my_annotation)}",
-      data: { go_ns: go_ns },
-      dataype: 'json',
-      success: function(data) {
-        var go_term_genes = {};
-        for (var i = 0; i < data.length; ++i) {
-          var d = data[i];
-          for (var j = 0; j < d.go.length; ++j) {
-            if (!_.has(go_term_genes, d.go[j])) { go_term_genes[d.go[j]] = {}; }
-            go_term_genes[d.go[j]][d.id] = true;
-          }
-        }
-        var go_ids = _.keys(go_term_genes);
-        var go_clusters = new Array(go_ids.length);
-        var go_info = new Array(go_ids.length);
-        for (var i = 0; i < go_ids.length; ++i) {
-          go_clusters[i] = go_term_genes[go_ids[i]];
-          go_info[i] = { id: go_ids[i] };
-        }
+ 
 
-        go_clusters.push(current_graph.root.getContent());
-        current_graph.colourByClusterNumber(
-                            go_clusters,
-                            function (a,b,c,d) {
-                              if (a < 2 || b < 0 || c < 0 || d < 1) return undefined;
-                              return stats.chi2_yates(a, b, c, d);
-                            },
-                            function (a,b) {
-                              return a > b;
-                            },
-                            go_info, 'Chi2 yates');
-        current_graph.goLabels();
-        $('#all_go').button('compute...');
-      },
-      error: function() {
-        // inform the user something went wrong.
-      }
-    });
-    return req;
-  };
 
   gene_entry.on('change', function(item) {
+    console.debug('here')
     if (item !== null) {
+
       exit_var = current_graph.zoomTo(item.id);
-      console.debug(exit_var);
       if (exit_var == -1 ) {
             s = '<p><div class="alert alert-error"><button type="button" class="close" data-dismiss="alert">&times;</button>';
             s = s + '<strong>Warning!</strong> '+item.id+'is not found in any cluster.</div>'
             $("#locate_gene > .accordion-inner").append(s);
-
       }
 
     } else {
@@ -431,20 +438,70 @@ $(document).ready(function() {
     return false;
   });
 
-  current_graph.on('click:cluster', function(selection) {
+
+  $('path.arc').attr('contextmenu', 'arcmenu');
+
+
+  ///---------------------------------------
+  // $(document).on('contextmenu', function(event) {  // trap right click
+  //   console.debug($(event.target)[0].ownerSVGElement);
+
+  //   if (_.isUndefined($(event.target)[0].ownerSVGElement)) { 
+  //     console.debug('aa');
+  //     return true 
+  //   }
+  //   else { 
+
+  //   if ($(event.target).attr('class') =='arc') {
+  //     var nd = $(event.target)[0].__data__;
+  //     var keys = _.keys(nd.content);
+      
+  //     //$(nd).('<text id="link" x="50%" y="50%" style="text-anchor: middle;display:none;">google</text>');
+  //     //$("#link").trigger('contextmenu');
+
+  //     return false;
+
+      
+  //     }
+  //   } 
+  // }
+  // );
+
+ 
+
+
+
+  current_graph.on('click:cluster', function(selection) {  // go to mstplot
     $('#geneset').val(JSON.stringify(selection));
     $('#genesetform').submit();
 
   });
 
-  $('#clear_plot').on("click", function(event){
+
+  // Clear  --- 
+  $('[id^="clear"]').on("click", function(event){
     current_graph.removeColour();
     current_graph.zoomTo(null);
     current_graph.dezoom();
+    current_graph.clearLabels();
     $('#gene').val('');
     $('#goterm').val('');
+    $('#locate_gene').val('');
+    $('#locate_geneset').val('');
 
   });
+
+   $('#clear_input').on('click', function() {
+    level1_entry.$el.val('');
+    level2_entry.$el.val('');
+    level3_entry.$el.val('');
+    level2_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=2;";
+    level3_entry.url = "${request.route_url('mistic.json.annotation.gs', annotation=my_annotation)}"+"?v=3;";
+  });
+
+
+
+
 
   var getParmExtract = function() {
       return {
@@ -506,8 +563,32 @@ $(document).ready(function() {
   });
 
 
-  $(window).resize(resizeGraph);
+  
+  //$(window).resize(resizeGraph);
   resizeGraph();
+
+
+// Help related 
+ var helpDoc = {'#dataset_menu' : 'Click on the button "Choose dataset" to select an other dataset to compare with' ,
+                '#locate_gene' : 'Enter a gene name or a gene set name to locate it within the icicle plot',
+                "#options_menu": 'Available options :  Allow displaying node labels on the graph when using the Locate search and set the minimum number of nodes required to consider a peak ',
+                "#extract_peak" : "It is possible to download the peaks information to a file.  <br> The View button shows you for which peak the information will be extracted.  <br>The Save button allows you to save the file.",
+                "#gs_dropdown" : 'Use the dropdowns to choose a geneset to see if it is enriched in the icicle peaks. First two boxes are helpful to restrict the third box geneset list  '
+}
+
+ $('#info-modal .close').on('click', function(event) { $('#info-modal').hide();});
+ $('.icon-info-sign').on('click', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var who = String($(this).parent().attr('href'));
+      $('#info-modal .alert-modal-body').html(helpDoc[who]);
+      $('#info-modal .alert-modal-title').html('Help');
+      $('#info-modal').toggle();
+      //$('#info-modal').modal('toggle');
+ });
+// --------------------
+$('.icon-info-sign, .accordion-toggle').on('contextmenu', function(event) { return false });
+
 });
 </script>
 </%block>

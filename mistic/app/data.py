@@ -58,7 +58,11 @@ def read_json_table(path, converters = {}):
   index = []
   col_order = collections.OrderedDict()
   for rownum, row in enumerate(io.open(path, 'rbU')):
-    ident, row = row.split(None, 1)
+    #ident, row = row.split(None, 1)
+    i = row.index('{')
+    ident = row[0:i].strip()
+    row = row[i:]
+    
     try:
       row = json.loads(row, object_pairs_hook=collections.OrderedDict)
       for k in row.keys():
@@ -549,6 +553,10 @@ def make_id_map(x, y, matcher):
 def prefix_map(x, y):
   return make_id_map(x, y, lambda i, j: j.startswith(i))
 
+def prefix_map_identity(x, y):
+  return make_id_map(x, y, lambda i, j: j==i)
+
+
 def rev_prefix_map(x, y):
   return make_id_map(x, y, lambda i, j: i.startswith(j))
 
@@ -566,8 +574,8 @@ class DataSet(object):
     self.type        = self.config.get('type', '')
     self.tags        = self.config.get('tags', '')
     self.experiment  = self.config.get('expt', '')
-    self.annotation  = annotations.get(self.config['annr'])
-    self.cannotation = dataset_annotations.get(self.config['annc'])
+    self.annotation  = annotations.get(self.config['annr']) # row/gene/compounds
+    self.cannotation = dataset_annotations.get(self.config['annc'])  # sample annotation
 
     self.annotation_in_ds = self.annotation.data.index.map(lambda x: x in self.data.df.index)
     annotated_genes = sum(self.annotation_in_ds)

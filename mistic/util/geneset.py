@@ -3,6 +3,7 @@ import scipy.stats
 import math
 from mistic.util.json_helpers import *
 
+
 def chi2_yates(((a,b),(c,d))):
   if any([ x < 0 for x in (a,b,c,d) ]):
     return None
@@ -23,6 +24,41 @@ def chi2_yates(((a,b),(c,d))):
     math.pow(abs(c - ec) - 0.5, 2) / ec +
     math.pow(abs(d - ed) - 0.5, 2) / ed
   )
+
+
+def pValAdjust(pvalues, method): 
+  pvals = numpy.asarray(pvalues)
+  n = pvals.size
+
+  if method not in ['fdr', 'bh', 'bonferroni', 'holm', 'by'] or not n: 
+    return list(pvals)
+  
+  p = None
+  
+  if method=='bonferroni' : 
+    p = numpy.fmin(1, n*pvals)
+  
+  elif method == "holm":
+    i = numpy.arange(n)
+    o = numpy.argsort(pvals)
+    ro = numpy.argsort(o)
+    p = numpy.fmin([1], numpy.maximum.accumulate((n-i)*pvals[o] ))[ro]
+  
+  elif method=='bh' or method=='fdr' : 
+    i = numpy.arange(1,n+1)[::-1]
+    o = numpy.argsort(pvals)[::-1]
+    ro = numpy.argsort(o)
+    p = numpy.fmin([1], numpy.minimum.accumulate((n/i) * pvals[o]))[ro]
+  
+  elif method=='by' : 
+    i = numpy.arange(n+1,1)
+    o = numpy.argsort(pvals)[::-1]
+    ro = numpy.argsort(o)
+    q = numpy.sum(1.0/numpy.arange(1,n+1))
+    p = numpy.fmin([1], numpy.minimum.accumulate(q * n/i * pvals[o]))[ro]
+
+  return p 
+
 
 def genesetOverRepresentation(identifiers, background, geneset_ids):
   """
@@ -74,6 +110,15 @@ def genesetOverRepresentation(identifiers, background, geneset_ids):
       odds = safeFloat(odds),
       genes = sorted(gsid_genes)
     ))
+
+  pvals = [d['p_val'] for d in gs_tab]
+  qvals = pValAdjust(pvals, method='fdr')
+  print 'c(', ','.join([str(x) for x in pvals])
+
+
+  for i,d in enumerate(gs_tab) : 
+    d['q_val'] = qvals[i]
+    print d['id'], d['p_val'], d['q_val']
 
   gs_tab.sort(key = lambda d: d['p_val'])
   return gs_tab

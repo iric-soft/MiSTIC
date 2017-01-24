@@ -107,9 +107,7 @@ for ds in data.datasets.all():
   <div id='description-modal-body' class="modal-body">
     
   </div>
-
 </div>
-
 
   
 </%block>
@@ -118,7 +116,7 @@ ${parent.pagetail()}
 
 <%
 
-dat = [dict([(k, ds.__dict__[k]) for k in ds.__dict__.keys() if isinstance(ds.__dict__[k], str) and '/' not in ds.__dict__[k]]) for ds in data.datasets.all()]
+dat = [dict([(k, ds.__dict__[k]) for k in ds.__dict__.keys() if isinstance(ds.__dict__[k], str) and not ds.__dict__[k].startswith('/') ]) for ds in data.datasets.all()]
 
 %>
 
@@ -127,7 +125,7 @@ dat = [dict([(k, ds.__dict__[k]) for k in ds.__dict__.keys() if isinstance(ds.__
 <input id="csvdata" type="hidden" name="csvdata" value=""></input></form>
  
 <script type="text/javascript" charset="utf-8">
-
+  
  var dat = ${json.dumps(dat)|n};
 
  $(document).ready(function() {

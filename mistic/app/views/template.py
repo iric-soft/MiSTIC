@@ -47,10 +47,10 @@ class Graph(object):
 
   @view_config(route_name="mistic.template.corrgraph")
   def corrgraph(self):
-    args = self.args
+    dataset = self.request.matchdict.get('dataset', None)
+    args = dict(dataset = dataset)
+    args.update(self.args)
     return render_to_response('mistic:app/templates/corrgraph.mako', args, request = self.request)
-
-
 
   @view_config(route_name="mistic.template.scatterplot")
   def scatterplot(self):
@@ -133,14 +133,16 @@ class Graph(object):
     if mst is None:
       raise HTTPNotFound()
 
+    
     args = dict(
-      dataset = self.request.matchdict['dataset'],
-      xform = self.request.matchdict['xform'],
-      nodes = mst[0],
-      edges = mst[1],
-      pos = mst[2]
-    )
+        dataset = self.request.matchdict['dataset'],
+        xform = self.request.matchdict['xform'],
+        nodes = mst[0],
+        edges = mst[1],
+        pos = mst[2]
+      )
      
+    
     args.update(self.args)
     if len(mst[0]) < max_genes:
 
@@ -169,6 +171,12 @@ class Graph(object):
     mst = _dataset.mst(xform)
     if mst is None:
       raise HTTPNotFound()
+      
+    if len(mst) < 3 : 
+      args = dict( dataset = self.request.matchdict['dataset'], xform = self.request.matchdict['xform'])
+      args.update(self.args)
+      print args
+      return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
 
     args = dict(
       dataset = self.request.matchdict['dataset'],

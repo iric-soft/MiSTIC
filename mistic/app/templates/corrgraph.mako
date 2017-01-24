@@ -21,7 +21,8 @@ ${parent.style()}
 <div class="accordion" id="accordion">
   <div class="accordion-group">
     <div class="accordion-heading"><h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset </a></h4>
+        <a class="accordion-toggle" data-toggle="collapse"  href="#dataset_menu">Dataset 
+        <i style='float:right' class="icon-info-sign"></i></a></h4>
     </div>
 
     <div id="dataset_menu" class="accordion-body collapse in">
@@ -35,7 +36,9 @@ ${parent.style()}
 
   <div class="accordion-group">
     <div class="accordion-heading"><h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Gene </a></h4>
+        <a class="accordion-toggle" data-toggle="collapse"  href="#gene_menu">Gene 
+        <i style='float:right' class="icon-info-sign"></i>
+        </a></h4>
     </div>
 
     <div id="gene_menu" class="accordion-body collapse in">
@@ -48,7 +51,8 @@ ${parent.style()}
   
    <div class="accordion-group">
     <div class="accordion-heading"><h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#geneset_menu">Geneset </a></h4>
+        <a class="accordion-toggle" data-toggle="collapse"  href="#geneset_menu">Geneset 
+        <i style='float:right' class="icon-info-sign"></i></a></h4>
     </div>
 
     <div id="geneset_menu" class="accordion-body collapse in">
@@ -66,7 +70,9 @@ ${parent.style()}
 
   <div class="accordion-group">
     <div class="accordion-heading"><h4 class="accordion-title">
-        <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options </a></h4>
+        <a class="accordion-toggle" data-toggle="collapse"  href="#options_menu">More options 
+          <i style='float:right' class="icon-info-sign"></i>
+        </a></h4>
     </div>
     <div id="options_menu" class="accordion-body collapse in ">
       <div class="accordion-inner">
@@ -155,7 +161,7 @@ $(document).ready(function() {
   };
 
   var gene_entry = new GeneDropdown({ el: $("#gene") });
-
+ 
   $('#add_dataset').on('click', function(event) {
     var ds_sel = new DatasetSelector();
     ds_sel.show(event.currentTarget);
@@ -197,6 +203,7 @@ $(document).ready(function() {
   });
 
   var addDataset = function(dataset, sync) {
+
     var disable = function() {
       dataset_info = {};
       gs_entry.setSearchURL(undefined);
@@ -204,6 +211,7 @@ $(document).ready(function() {
       gene_entry.setSearchURL(undefined);
       gene_entry.$el.val('');
       $('ul#current_dataset').html('');
+      alert('Error : ${dataset} : unknown dataset');
     };
 
     var enable = function(data) {
@@ -227,6 +235,7 @@ $(document).ready(function() {
       dataType: 'json',
       async: !sync,
       success: function(data) {
+
         var xf = $('#transform-buttons');
         xf.empty();
         xf.append("Transformation : ");
@@ -247,6 +256,7 @@ $(document).ready(function() {
         });
         enable(data);
       },
+
       error: disable,
     });
   };
@@ -254,6 +264,9 @@ $(document).ready(function() {
   $('#datasets').on('change', function(event) {
     addDataset(event.target.value);
   });
+
+  if ("${dataset}"!="None") { addDataset("${dataset}"); }  // dataset specified in url
+
 
   var plot = function(dataset, gene, name_labels) {
     $('#plot').button('loading');
@@ -310,6 +323,30 @@ $(document).ready(function() {
 
   $(window).resize(resizeGraph);
   resizeGraph();
+
+
+   // Help related 
+
+ var helpDoc = {'#dataset_menu' : 'Click on the button "Choose dataset" to select the dataset to work with' ,
+                '#geneset_menu' : 'Highlight genes of a gene set',
+                "#options_menu": 'Among the options',
+                "#gene_menu" : 'Use the dropdown to choose a gene. Depending on the dataset, symbol or Entrez Gene are available'
+}
+
+$('#info-modal .close').on('click', function(event) { $('#info-modal').hide();});
+ $('.icon-info-sign').on('click', function(event) {
+      event.preventDefault();
+      event.stopPropagation();
+      var who = String($(this).parent().attr('href'));
+      $('#info-modal .alert-modal-body').html(helpDoc[who]);
+      $('#info-modal .alert-modal-title').html('Help');
+      $('#info-modal').show();
+      //$('#info-modal').modal('toggle');
+ });
 });
+
+
+
+
 </script>
 </%block>

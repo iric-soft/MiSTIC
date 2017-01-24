@@ -221,7 +221,7 @@ class DataSet(object):
   @classmethod
   def readTSV(cls, file):
     x = pandas.read_table(file, header=0, converters={ 0: str })
-    y = pandas.DataFrame(x.values[:,1:], columns = x.columns[1:], index = [a.split(":")[0] for a in x[x.columns[0]]], dtype=float)
+    y = pandas.DataFrame(x.values[:,1:], columns = x.columns[1:], index = [str(a).split(":")[0] for a in x[x.columns[0]]], dtype=float)
     return cls(y)
 
   @classmethod

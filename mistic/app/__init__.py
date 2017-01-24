@@ -262,7 +262,7 @@ def main(global_config, **settings):
        
     config.add_route('mistic.json.saveValueInSession',     '/saveInSession')
 
-    config.add_route('mistic.template.corrgraph',          '/genecorr')
+    config.add_route('mistic.template.corrgraph',          '/genecorr/{dataset}')
     config.add_route('mistic.template.scatterplot',        '/scatterplot') 
     config.add_route('mistic.template.pairplot',           '/pairplot/{dataset}*genes')
     config.add_route('mistic.template.mds',                '/mds/{dataset}*genes')

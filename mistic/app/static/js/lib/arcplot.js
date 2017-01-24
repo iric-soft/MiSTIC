@@ -59,6 +59,11 @@
         _.extend(this, Backbone.Events);
     };
 
+    arcplot.prototype.setEnableLabels = function (bool) {
+        this.enableLabels = bool;
+    };
+
+
     arcplot.prototype.zoom = function() {
 
         var S = d3.event.scale;
@@ -71,7 +76,6 @@
 */
         this.xform = { T: [T[0], T[1]], S: S };
         this.body.attr("transform", "translate(" + T + ")" + " scale(" + S + ")");
-
         this.updateLabels();
     };
 
@@ -106,43 +110,59 @@
     };
 
     arcplot.prototype.updateLabels = function() {
-
+        if (!(this.enableLabels)) {
+            return -1;
+        }
         var self = this;
         var l = this.label_g.selectAll('g').data(this.labels);
-
-        var g = l
-          .enter()
-            .append('g');
+        var g = l.enter().append('g');
+       
 
         g.append('circle')
             .attr('cx', 0)
             .attr('cy', 0)
-            .attr('r', 4)
+            .attr('r', 2)
             .attr('stroke', '#eee')
-            .attr('stroke-width', 1)
+            .attr('stroke-width', 0)
             .attr('fill',   '#000');
-        g.append('rect').attr('height', 15).attr('x', 5).attr('y', -6).attr('fill', '#0074cc').attr('stroke', '#000');
-        g.append('text').attr('x', 9).attr('y', 5);
+        //g.append('rect').attr('height', 15).attr('x', 5).attr('y', -6).attr('fill', '#989898').attr('stroke', '#787878');
+        g.append('rect').attr('height', 15).attr('x', 5).attr('y', -6).attr('fill', 'white').attr('stroke', '#787878');
+        g.append('text').attr('x', 9).attr('y', 5).attr('fill', 'black');
 
-        l
-          .exit()
-            .remove();
+        l.exit().remove();
 
-        l   .select('text')
-            .text(function(d) { return _.has(d, 'text') ? d.text : d.id; });
+        l.select('text').text(function(d) { return _.has(d, 'text') ? d.text : d.id; });
 
+        pos = [];
         l.each(function(d) {
             var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
             d3.select(this).select('rect').attr('width', w);
+
+            c = _.countBy(pos, _.identity);
+            if (c[d.pos[0]] > 1) { d3.select(this).select('rect').attr('stroke-width', '2');}
+            pos.push(d.pos[0]);
         });
 
-        l
-            .attr('transform', function(d) {
+
+        l.attr('transform', function(d) { 
                 var _x = self.xform.T[0] + self.xform.S * (d.pos[0] + self.width / 2);
                 var _y = self.xform.T[1] + self.xform.S * (d.pos[1] + self.height / 2);
                 return 'translate(' + String(_x) + ',' + String(_y) + ')';
             });
     };
+
+     arcplot.prototype.add_nodeLabels = function(hl, id) {
+        
+        var nd = hl.data()[0];
+        
+        if (nd !== undefined){
+            var mid = this.nodeMidpoint(nd);
+            this.labels.push({pos:mid, id:id, text:id});
+            this.updateLabels();
+        }
+
+    };
+
 
     // locate genes of a geneset
      arcplot.prototype.locate_geneset = function(id) {
@@ -151,9 +171,11 @@
             .selectAll('path.arc')
             .classed('locate_gs', function(d) { return d.content.hasOwnProperty(id); });
 
-        var hl = this.body
-            .selectAll('path.arc.locate_gs');
+        var hl = this.body.selectAll('path.arc.locate_gs');
+        this.add_nodeLabels(hl, id);
+      
         var S, T;
+
         if (hl[0].length === 1) {
 
            var bbox = hl[0][0].getBBox();
@@ -177,8 +199,15 @@
         }
         this.xform = { T: T, S: S };
         //this._zoom();
+
+
+
         return 0;
     };
+
+
+    
+
 
     arcplot.prototype.scale = function(weight) {
         return Math.pow((weight - this.options.weight_inner) / (this.options.weight_outer - this.options.weight_inner), this.options.scale_power);
@@ -241,8 +270,7 @@
             var p1 = p2c(self.options.plot_dir + 180       + a_start, r);
             var p2 = p2c(self.options.plot_dir + 180 + 360 - a_start, r);
             var alpha = 0.5/t;
-            axes
-                .append('path')
+            axes.append('path')
                 .attr('d',
                       'M' + String(p2[0]) + ',' + String(p2[1]) +
                       'A' + String(r) + ',' + String(r) + ' 0 1,0 ' + String(p1[0]) + ',' + String(p1[1]))
@@ -255,8 +283,7 @@
 
 
             var p1 = p2c(self.options.plot_dir + 180, r);
-            axes
-                .append('text')
+            axes.append('text')
                 .attr('x', p1[0])
                 .attr('y', p1[1])
                 .attr('dy', '.35em')
@@ -296,13 +323,15 @@
 
     arcplot.prototype.zoomTo = function(id) {
 
+
+
         var arc = this.body
             .selectAll('path.arc')
             .classed('highlight', function(d) { return d.content.hasOwnProperty(id); });
 
-
-        var hl = this.body
-            .selectAll('path.arc.highlight');
+        var hl = this.body.selectAll('path.arc.highlight');
+        this.add_nodeLabels(hl, id);
+              
 
         var S, T;
 
@@ -653,8 +682,10 @@
     arcplot.prototype.removeColour = function() {
         var arcs = this.body
             .selectAll('path.arc')
-            .attr('fill', '#000');
+            .attr('fill', '#000')
+            .classed('highlight', false);
         arcs.selectAll('title').remove();
+        
     };
 
     arcplot.prototype.setGraphInfo = function(graph_info) {
@@ -727,7 +758,6 @@
 
     arcplot.prototype.nodePath = function(node) {
         var self = this;
-
         var lev = node.lev;
 
         if (lev.length === 1) {
@@ -772,6 +802,7 @@
         this.trigger('click:cluster', _.keys(node.getContent()));
     };
 
+ 
     arcplot.prototype.draw = function() {
 
         var self = this;
