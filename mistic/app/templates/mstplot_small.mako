@@ -117,7 +117,7 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
 
 <%
-  print data.datasets
+  
   ds = data.datasets.get(dataset)
 
   a = ds.annotation

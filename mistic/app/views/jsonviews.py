@@ -509,18 +509,7 @@ class Dataset(object):
 
         return (out + additional)[:limit]
 
-    @view_config(route_name="mistic.json.dataset.mds", request_method="GET", renderer="json")
-    def mds(self):
-        xform = self.request.GET.get('x')
-        if xform not in self.dataset.transforms:
-            xform = self.dataset.transforms[0]
-
-        genes = json.loads(self.request.GET.get('genes'))
-
-        mds_matrix, eigenvalues = self.dataset.calcMDS(genes, xform)
-        return dict(id_samples = list(self.dataset.data.colnames), dimensions = map(list, mds_matrix), eigenvalues = list(eigenvalues))
-
-
+  
     @view_config(route_name="mistic.json.dataset.extract", request_method="GET", renderer="json")
     def extract_view_peaks(self):
 

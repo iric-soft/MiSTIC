@@ -151,49 +151,35 @@ def main(global_config, **settings):
     mistic.app.tables.create(engine)
     mistic.app.tables.Base.metadata.create_all(engine)
     
-    ## - Debugging purpose --
-    #favorite = mistic.app.tables.FavoriteDatasetStore.getall(mistic.app.tables.DBSession(), 'boucherg')
-    #print 'Favorite', favorite
-    
-    ## Adding dummy info in table
-    #mistic.app.tables.FavoriteDatasetStore.record(mistic.app.tables.DBSession(), 'new_user', 'new_dataset')
-
-    #favorite = mistic.app.tables.FavoriteDatasetStore.getall(mistic.app.tables.DBSession(), 'new_user')
-    #print '------------------------------------'
-    #print 'Favorite', favorite
-
-    ## -- End of debugging --
-
-
     if 'mistic.datasets' in settings:
       settings.update(load_datasets_settings (settings['mistic.datasets'], global_config))
 
     config_args = dict(root_factory=Root,settings=settings,default_permission='view')
 
-    if 'mistic.basic.auth' in settings:
+    # if 'mistic.basic.auth' in settings:
       
-        if '=' not in settings['mistic.basic.auth'] : 
-            authorized_credentials = open(settings['mistic.basic.auth'], 'r').readlines()
-            authorized_credentials = ' '.join([a.strip() for a in authorized_credentials])
+    #     if '=' not in settings['mistic.basic.auth'] : 
+    #         authorized_credentials = open(settings['mistic.basic.auth'], 'r').readlines()
+    #         authorized_credentials = ' '.join([a.strip() for a in authorized_credentials])
             
-            authorized_credentials = authorized_credentials.strip()
-        else : 
-            authorized_credentials = settings['mistic.basic.auth']
+    #         authorized_credentials = authorized_credentials.strip()
+    #     else : 
+    #         authorized_credentials = settings['mistic.basic.auth']
        
-        config_args.update(dict(
-                authentication_policy=BasicAuthenticationPolicy(
-                    http_basic_authenticator(authorized_credentials),
-                    realm=settings.get('mistic.basic.realm', 'mistic')),
-                authorization_policy=ACLAuthorizationPolicy() ))
+    #     config_args.update(dict(
+    #             authentication_policy=BasicAuthenticationPolicy(
+    #                 http_basic_authenticator(authorized_credentials),
+    #                 realm=settings.get('mistic.basic.realm', 'mistic')),
+    #             authorization_policy=ACLAuthorizationPolicy() ))
 
     my_session_factory = UnencryptedCookieSessionFactoryConfig('myouwnsekreetfactory')
     config_args.update(dict(session_factory= my_session_factory))
 
     config = Configurator(**config_args)
 
-    def authorize(request):
-        return HTTPUnauthorized(headers = forget(request)) ## Response(body='hello world!', content_type='text/plain')
-    config.add_view(authorize, context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
+    #def authorize(request):
+    #    return HTTPUnauthorized(headers = forget(request)) ## Response(body='hello world!', content_type='text/plain')
+    #config.add_view(authorize, context=HTTPForbidden, permission=NO_PERMISSION_REQUIRED)
 
     if 'mistic.data' not in settings:
         raise exceptions.RuntimeError('no dataset configuration supplied')
@@ -204,51 +190,39 @@ def main(global_config, **settings):
         mistic.app.views.pdffile.PDFData.rsvg_convert = settings['mistic.rsvg-convert']
     if 'mistic.phantomjs' in settings:
         mistic.app.views.pdffile.PDFData.phantomjs = settings['mistic.phantomjs']
-
     if 'mistic.forward_host' in settings:
       config.registry.settings['mistic_forward_host'] = settings['mistic.forward_host']
 
-
     config.add_route('mistic.template.root',               '/')
-
     config.add_route('mistic.modal.datasets',              '/modal/datasets')
-    # params: go=GO_ID - filter the list of returned genes by GO term.
     config.add_route('mistic.json.annotation.genes',       '/annotations/{annotation}/genes')
     config.add_route('mistic.json.annotation.gene_ids',    '/annotations/{annotation}/gene_ids')
     config.add_route('mistic.json.annotation.gene',        '/annotations/{annotation}/genes/{gene_id}')
     config.add_route('mistic.json.annotation.gene.gs',     '/annotations/{annotation}/genes/{gene_id}/gs*gsid')
     config.add_route('mistic.json.annotation.gene.name',   '/annotations/{annotation}/genes/{gene_id}/name')
     config.add_route('mistic.json.annotation.gene.symbol', '/annotations/{annotation}/genes/{gene_id}/symbol')
-
     config.add_route('mistic.json.annotation.gs',          '/annotations/{annotation}/gs')
-
     config.add_route('mistic.json.cannotation.items',      '/cannotations/datasets/{dataset}')
-
     config.add_route('mistic.json.datasets',               '/datasets')
     config.add_route('mistic.json.dataset',                '/datasets/{dataset}')
     config.add_route('mistic.json.dataset.search',         '/datasets/{dataset}/search')
-
     config.add_route('mistic.json.dataset.sampleinfo',     '/datasets/{dataset}/sampleinfo')
     config.add_route('mistic.json.dataset.samples',        '/datasets/{dataset}/samples')
     config.add_route('mistic.json.dataset.samples.enrich', '/datasets/{dataset}/samples/enrichment')
     config.add_route('mistic.json.dataset.geneset.enrich', '/datasets/{dataset}/geneset/enrichment')
     config.add_route('mistic.json.sample',                 '/datasets/{dataset}/samples/{sample_id}')
-
     config.add_route('mistic.json.dataset.sampleinfo.search',     '/datasets/{dataset}/sampleinfo/search')
-
     config.add_route('mistic.json.dataset.mds',            '/datasets/{dataset}/mds')
     config.add_route('mistic.json.dataset.mst',            '/datasets/{dataset}/mst/{xform}')
     config.add_route('mistic.json.dataset.mapped_mst',     '/datasets/{dataset}/mst/{xform}/{tgt_annotation}')
     config.add_route('mistic.json.dataset.extract',        '/datasets/{dataset}/extract/{xform}')
     config.add_route('mistic.json.dataset.extractSave',    '/datasets/{dataset}/extractSave/{xform}')
-
     config.add_route('mistic.json.dataset.genes',          '/datasets/{dataset}/genes')
     config.add_route('mistic.json.gene',                   '/datasets/{dataset}/genes/{gene_id}')
     config.add_route('mistic.json.gene.corr',              '/datasets/{dataset}/genes/{gene_id}/corr')
     config.add_route('mistic.json.gene.expr',              '/datasets/{dataset}/genes/{gene_id}/expr')
     config.add_route('mistic.json.gene.utest',             '/datasets/{dataset}/genes/{gene_id}/utest')
     config.add_route('mistic.json.gene.gorilla',           '/datasets/{dataset}/genes/{gene_id}/gorilla')
-
     config.add_route('mistic.json.go',                     '/go')
     config.add_route('mistic.json.go.search',              '/go/search')
     config.add_route('mistic.json.go.id',                  '/go/{go_id}')

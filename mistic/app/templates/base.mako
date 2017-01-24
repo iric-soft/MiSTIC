@@ -8,8 +8,6 @@ root_url = request.registry.settings.get('mistic_forward_host', request.url)
 if 'mistic_forward_host' in request.registry.settings.keys() and environ.get('HTTP_X_FORWARDED_HOST', None): 
     request.host = root_url
     request.port = ''
-#print authenticated_userid(request), 'request host:', request.host, request.remote_addr
-
 %>
 
 
@@ -55,7 +53,7 @@ mistic = {  url: "${request.host}"};
         <div class="container-fluid">
         <a href="#" class="btn btn-navbar" data-toggle="collapse" data-target=".nav-collapse">
         <span class="icon-th-list icon-white"></span></a>
-          <a class="brand" href="${request.route_url('mistic.template.root')}">[Datasets and Icicle]</a>
+          <a class="brand" href="${request.route_url('mistic.template.root')}" title='Go back to home page'>[Datasets and Icicle]</a>
           <div class="nav-collapse">
             <ul class="nav">
         
@@ -72,15 +70,6 @@ mistic = {  url: "${request.host}"};
               %endif
               <a id='lk_pairplot' href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Pairwise correlation scatterplots</a></li>
 
-        
-              %if request.matched_route.name == 'mistic.template.mds':
-                  <li class="active"><a href="#">Multidimensional scaling plots</a></li>
-              %else:
-                  <li><a id='lk_mds' href="${request.route_url('mistic.template.mds', dataset=None, genes=[])}">Multidimensional scaling plots</a></li>
-              %endif
-
-
-
             </ul>
           </div>
           <div class="pull-right">
@@ -94,7 +83,7 @@ mistic = {  url: "${request.host}"};
                   <button type="submit" class="btn" id="pdf" href="">PDF</button>
               %endif
               </%block>
-              <a href='/' id='logout' class='pull-right' style='padding-left:10px; vertical-align:middle;' title="${user}"><i class="icon-user icon-white"></i></a>
+             
             </div>
           
           
@@ -265,13 +254,7 @@ mistic = {  url: "${request.host}"};
             return { q: this.$el.val() };
           }
         });
-        
-
-        
-      $('#logout').click(function ()  {  clearAuthentication("${request.url}"); });
-
-
-      
+          
         
       })(jQuery);
 

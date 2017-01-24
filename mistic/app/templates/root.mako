@@ -30,13 +30,10 @@ for ds in data.datasets.all():
       <div class="span12">
 
 
-<% ff = dict([(f.split(':')[0], int(f.split(':')[1])) for f in favorite]) %>
-
-
 <div style="text-align: center">
 <div class="well" style="display: inline-block;">
 <h2>Datasets</h2>
-<h6>Click on a row to select the default log-transformed dataset or click on the desired data transformation</h6>
+<h5>Click on a row to select the default log-transformed dataset or click on the desired data transformation</h5>
 <hr>
 
 
@@ -48,7 +45,7 @@ for ds in data.datasets.all():
     
     <th><span class='btn-group'>
     %if term!='other':
-        <a class="link-icon group-data"><i  class='icon-align-justify icon-mistic' ></i></a>
+        <a class="link-icon group-data" title='Click on this icon to group the data by value'><i  class='icon-align-justify icon-mistic' ></i></a>
     %endif    
     ${term}</span></th>
   <!--<th><span><a class="unicode-icon group-data">&#x2630</a>${term}</span></th>-->
@@ -56,7 +53,7 @@ for ds in data.datasets.all():
 %endfor
 <th>n</th>
 <th>Icicle</th>
-<th></th>
+
 </tr>
 </thead>
 
@@ -84,14 +81,7 @@ for ds in data.datasets.all():
   </span>
 %endfor
     </td>
-    <td class='td_add_favorite'>
-      <!--<a class="unicode-icon add_favorite" title='Click here to select your favorite datasets'>-->
-      <span class="dummy" id="dummy" style="display:none">${ff.get(ds.id, 0)}</span>
-      %if ff.get(ds.id, 0)>0 : 
-        <i class='icon-star-small'></i>
-      %endif
-      <!--</a>--> 
-    </td>
+   
   </tr>
   %endfor
 </tbody>
@@ -139,8 +129,8 @@ function initTable() {
     aoc.push(null);
     bsc.push(true);
   }
-  aoc = aoc.concat([null, { "bSortable": false }, { "bSortable": true , "sType": "html"}]);
-  bsc = bsc.concat([true, false, false]);
+  aoc = aoc.concat([null, { "bSortable": false }]);
+  bsc = bsc.concat([true, false]);
   var n = bsc.length-1;
   
   
@@ -152,7 +142,7 @@ function initTable() {
     "bSort":true,
     "bProcessing": false,
     "bRetrieve":true,
-    "aaSorting": [[n, 'desc']],
+    "aaSorting": [[0, 'desc']],
     "sDom": '<toolbar>T<"clear">Rfrtip' ,
     "oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
   });
