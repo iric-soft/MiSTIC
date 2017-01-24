@@ -203,21 +203,9 @@ $('#datasets-table tbody td ').on('click', function(event){
     var tr = $(this).parents('tr');
     var link = $(tr).find('span > a')[0];
     var id = $(tr)[0].id;
-    console.debug(id);
-    $.ajax({
-      url: "${request.route_url('mistic.json.dataset.fav.record')}",
-      dataType: 'json',
-      type: 'POST',
-      data: {user:"${user}", dataset:id},
-      error: function(req, status, error) {
-        console.log('failed to construct a URL');
-      },
-      success: function(data) {
-       console.debug(data);
-      }});
 
     if ($(this).find('a#icicle-link').length>=1) return;
-    //if ($(this).hasClass('td_add_favorite')) return;
+  
    
     window.open ($(link).attr("href"));
   
@@ -234,59 +222,6 @@ $('#datasets-table tbody td ').on('click', function(event){
         
  });
 
-/**var favorites = getCookie('favorite_datasets');
-
-$('.td_add_favorite' ).on('click', function(event) {
-    
-    event.stopPropagation();
-    event.preventDefault();
-    var favorite_dataset = $(this).parents('tr').find('td')[0].innerText;
-    var ix = favorites.indexOf(favorite_dataset);
- 
-    if (ix ==-1) {
-        favorites.push (favorite_dataset);
-    }
-    else {
-        favorites.splice(ix, 1);
-    }
-    manageFavorites();
-    setCookie('favorite_datasets', favorites);
-        
- });
-
-var manageFavorites = function () {
-   
-    var oTable = initTable();
-  
-   _.each($('.add_favorite'), function(a) { 
-             var tr =  $(a).parents('tr');
-             var td  = tr.find('td')[0]
-             var txt = td.innerText;
-             
-             $(a).removeClass('active');
-             $(a).find('span#dummy').text('');
-             var a_td = $(a).parents('td')[0];
-             var h_td = a_td.innerHTML;
-             pos = oTable.fnGetPosition(a_td);
-             
-             if (favorites.indexOf(txt)!= -1) {
-                
-                $(a).addClass('active');
-                $(a).find('span#dummy').text('a');
-                a_td = $(a).parents('td')[0];
-                h_td = a_td.innerHTML;
- 
-             }
-            oTable.fnUpdate(h_td, pos[0], pos[1], true, false)
-           
-    } ); 
-   
-   
-             
-};
-
-manageFavorites();
- */
 
 </script>
 

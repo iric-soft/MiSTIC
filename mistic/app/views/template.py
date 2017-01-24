@@ -41,8 +41,8 @@ class Graph(object):
   @view_config(route_name="mistic.template.root")
   def root(self):
     args = self.args
-    favorite = FavoriteDatasetStore.getall(DBSession(), args['user'])
-    args['favorite'] = favorite
+    #favorite = FavoriteDatasetStore.getall(DBSession(), args['user'])
+    #args['favorite'] = favorite
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
   @view_config(route_name="mistic.template.corrgraph")
