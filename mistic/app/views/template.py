@@ -151,7 +151,6 @@ class Graph(object):
     if len(mst) < 3 : 
       args = dict( dataset = self.request.matchdict['dataset'], xform = self.request.matchdict['xform'])
       args.update(self.args)
-      print args
       return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
 
     args = dict(
