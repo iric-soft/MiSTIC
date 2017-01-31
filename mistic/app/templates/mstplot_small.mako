@@ -129,17 +129,20 @@ ${parent.pagetail()}
       name  = a.get_symbol(n, n),
       title = a.get_name(n, ''),
     ) for n in nodes ]
-  except :   ## for debug
+  except :   ## for debuging
 
-    E = [{"source":4,"target":0,"weight":0.252386},
-         {"source":2,"target":1,"weight":0.419053},
-         {"source":3,"target":0,"weight":0.425734},
-         {"source":4,"target":1,"weight":0.443259}]
+    #E = [{"source":4,"target":0,"weight":0.252386},
+    #     {"source":2,"target":1,"weight":0.419053},
+    #     {"source":3,"target":0,"weight":0.425734},
+    #     {"source":4,"target":1,"weight":0.443259}]
 
-    V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
-         {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
-         {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
-         {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
+    #V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
+    #     {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
+    #     {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
+    #     {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
+
+    E = []
+    V = []
 
 %>
 
@@ -274,7 +277,7 @@ var updateEnrichmentTable = function() {
     
    
    
-var width =($(document).width()-60)/12*7; //was width:1024
+var width =($(document).width())/2; //was width:1024
 var height =($(document).height()-($(document).height()/5));  //was width:780
 
 var svg = d3.select("#graph").append("svg")
