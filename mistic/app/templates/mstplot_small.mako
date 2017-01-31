@@ -36,8 +36,8 @@ import scipy.stats
                     
 
                       <div class='btn-group' id ='goto_btns'>
-                       <button class="btn btn-default " id="scatterplot" title='Display selected nodes as pairplots' disabled>See as Pairplot</button>
-                       <button class="btn btn-default " id="mdsplot" title='Go to MDS plots' disabled >Go to MDS plot</button>
+                       <button class="btn btn-default " id="scatterplot" title='Plot selected nodes in scatterplot' disabled>Go to Scatterplot</button>
+                       <!--<button class="btn btn-default " id="mdsplot" title='Go to MDS plots' disabled >Go to MDS plot</button>-->
                    </div>
 
                  </div>
