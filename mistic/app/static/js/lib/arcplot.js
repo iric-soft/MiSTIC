@@ -63,6 +63,9 @@
         this.enableLabels = bool;
     };
 
+    arcplot.prototype.setLabels = function(names){
+        this.labelsStr = names;
+    };
 
     arcplot.prototype.zoom = function() {
 
@@ -113,6 +116,7 @@
         if (!(this.enableLabels)) {
             return -1;
         }
+
         var self = this;
         var l = this.label_g.selectAll('g').data(this.labels);
         var g = l.enter().append('g');
@@ -130,23 +134,29 @@
         g.append('text').attr('x', 9).attr('y', 5).attr('fill', 'black');
 
         l.exit().remove();
-
         l.select('text').text(function(d) { return _.has(d, 'text') ? d.text : d.id; });
-
-        pos = [];
+       
         l.each(function(d) {
+           
             var w = d3.select(this).select('text')[0][0].getBBox().width + 8;
             d3.select(this).select('rect').attr('width', w);
 
-            c = _.countBy(pos, _.identity);
-            if (c[d.pos[0]] > 1) { d3.select(this).select('rect').attr('stroke-width', '2');}
-            pos.push(d.pos[0]);
         });
-
-
+        
+        pos = [];
         l.attr('transform', function(d) { 
-                var _x = self.xform.T[0] + self.xform.S * (d.pos[0] + self.width / 2);
-                var _y = self.xform.T[1] + self.xform.S * (d.pos[1] + self.height / 2);
+                c = _.countBy(pos, _.identity);
+                pos.push(d.pos[0]);
+                var yoffset = 0;
+                var xoffset = 0;
+                if (c[d.pos[0]] > 1) { 
+                    yoffset = 1.2*c[d.pos[0]]; 
+                    xoffset = 0.8*c[d.pos[0]]; 
+                    
+                }
+
+                var _x = self.xform.T[0] + self.xform.S * (d.pos[0]+xoffset + self.width / 2);
+                var _y = self.xform.T[1] + self.xform.S * (d.pos[1]+yoffset + self.height / 2);
                 return 'translate(' + String(_x) + ',' + String(_y) + ')';
             });
     };
@@ -157,8 +167,10 @@
         
         if (nd !== undefined){
             var mid = this.nodeMidpoint(nd);
-            this.labels.push({pos:mid, id:id, text:id});
-            this.updateLabels();
+            text = id;
+            if (this.labelsStr!==undefined) { var text =_.where(this.labelsStr, {'id' : id })[0].name; }
+            this.labels.push({pos:mid, id:id, text: text});
+            //this.updateLabels();
         }
 
     };

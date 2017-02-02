@@ -54,7 +54,7 @@ import pickle
             <input type="text" id="gene" placeholder='Locate a gene '>
           </div>
           <div class="controls">
-            <input type="text" id="locate_geneset" placeholder='Locate the gene of a set'>
+            <input type="text" id="locate_geneset" placeholder='Locate the genes of a set'>
             <span class="nav nav-list">
             <a id='clear_locate' href="#" style='text-decoration:none;'>Clear</a>
             </span>
@@ -206,13 +206,22 @@ ${parent.pagetail()}
 $(document).ready(function() {
 <%
   ds = data.datasets.get(dataset)
-  my_annotation = ds.annotation.id
+  a = ds.annotation
+  my_annotation = a.id
+
+  names = [dict(id=n, name=a.get_symbol(n, n)) for n in nodes ]
+  #print names
 
   if xform == 'log':
     xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
   else :
     xf = xform
 %>
+
+  var nodes = ${json.dumps(nodes)|n};
+  var names = ${json.dumps(names)|n};
+  var edges = ${json.dumps(edges)|n};
+
 
 
   resizeGraph = function() {
@@ -224,8 +233,6 @@ $(document).ready(function() {
   };
 
 
-  var nodes = ${json.dumps(nodes)|n};
-  var edges = ${json.dumps(edges)|n};
 
   cluster_roots = Node.fromMST(nodes, edges);
 
@@ -251,7 +258,8 @@ $(document).ready(function() {
 
   current_graph.setData(cluster_roots);
   current_graph.setGraphInfo(["Minimum elements in peaks: ".concat($("#filter_genes").val()), "Dataset: ${dataset}",  "Transform: ${xf}"]);
-  
+  current_graph.setLabels(names);
+
   var gene_entry = new GeneDropdown({ el: $("#gene") });
 
   var enable_labels = $('#enable_labels').is(':checked');
@@ -354,6 +362,7 @@ $(document).ready(function() {
   locate_geneset_entry.on('change', function(item) {
     if (item === null) {
       current_graph.removeColour();
+      current_graph.clearLabels();
     } else {
       $.ajax({
         url: "${request.route_url('mistic.json.annotation.gene_ids', annotation=my_annotation)}",
@@ -361,13 +370,17 @@ $(document).ready(function() {
         dataype: 'json',
         success: function(data) {
           $("#dataset_cmp").val($("#dataset_cmp option:first").val());
+
+          current_graph.clearLabels();
           var gene_set = {};
           for (var i = 0; i < data.length; ++i) { 
+
             gene_set[data[i]] = true; 
             current_graph.locate_geneset(data[i]); 
             current_graph.dezoom();
           }
 
+          current_graph.updateLabels();
           console.log(JSON.stringify(gene_set));
         },
         error: function() {
@@ -422,7 +435,7 @@ $(document).ready(function() {
 
 
   gene_entry.on('change', function(item) {
-    console.debug('here')
+    
     if (item !== null) {
 
       exit_var = current_graph.zoomTo(item.id);
@@ -572,7 +585,7 @@ $(document).ready(function() {
  var helpDoc = {'#dataset_menu' : 'Click on the button "Choose dataset" to select an other dataset to compare with' ,
                 '#locate_gene' : 'Enter a gene name or a gene set name to locate it within the icicle plot',
                 "#options_menu": 'Available options :  Allow displaying node labels on the graph when using the Locate search and set the minimum number of nodes required to consider a peak ',
-                "#extract_peak" : "It is possible to download the peaks information to a file.  <br> The View button shows you for which peak the information will be extracted.  <br>The Save button allows you to save the file.",
+                "#extract_peak" : "It is possible to download the peaks information to a file.  <br> The View button shows you for which peaks the information will be extracted.  <br>The Save button allows you to save the file.",
                 "#gs_dropdown" : 'Use the dropdowns to choose a geneset to see if it is enriched in the icicle peaks. First two boxes are helpful to restrict the third box geneset list  '
 }
 

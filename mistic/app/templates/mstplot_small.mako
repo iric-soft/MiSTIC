@@ -37,7 +37,7 @@ import scipy.stats
 
                       <div class='btn-group' id ='goto_btns'>
                        <button class="btn btn-default " id="scatterplot" title='Plot selected nodes in scatterplot' disabled>Go to Scatterplot</button>
-                       <!--<button class="btn btn-default " id="mdsplot" title='Go to MDS plots' disabled >Go to MDS plot</button>-->
+                      
                    </div>
 
                  </div>
@@ -47,7 +47,9 @@ import scipy.stats
                    <a id='options'><i class="icon-info-sign"></i></a></center>
             
                     <div class='btn-group' id ='toggle_btns'>
-                       <button class="btn btn-default " id="show_labels" title='Click on the button to see identifier or description'>Toggle labels</button>
+                       <button class="btn btn-default " id="switch_labels" title='Click on the button to see identifier or description'>Change labels</button>
+                       <button class="btn btn-default " id="toggle_labels" title='Click on the button to hide the labels'>Toggle labels</button>
+                      
                      </div>
 
 
@@ -119,11 +121,11 @@ ${parent.pagetail()}
 <%
   
   ds = data.datasets.get(dataset)
-
   a = ds.annotation
   
   try : 
     E = [ dict(source=e[0][0], target=e[0][1], weight=e[1]) for e in edges ]
+    
     V = [ dict(
       id    = n,
       name  = a.get_symbol(n, n),
@@ -131,18 +133,18 @@ ${parent.pagetail()}
     ) for n in nodes ]
   except :   ## for debuging
 
-    #E = [{"source":4,"target":0,"weight":0.252386},
-    #     {"source":2,"target":1,"weight":0.419053},
-    #     {"source":3,"target":0,"weight":0.425734},
-    #     {"source":4,"target":1,"weight":0.443259}]
+    E = [{"source":4,"target":0,"weight":0.252386},
+         {"source":2,"target":1,"weight":0.419053},
+         {"source":3,"target":0,"weight":0.425734},
+         {"source":4,"target":1,"weight":0.443259}]
 
-    #V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
-    #     {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
-    #     {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
-    #     {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
+    V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
+         {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
+         {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
+         {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
 
-    E = []
-    V = []
+    #E = []
+    #V = []
 
 %>
 
@@ -180,9 +182,7 @@ var updateEnrichmentTable = function() {
     var table = d3.select('#go_table')
                 .insert('table', ':first-child')
                 .attr('id', 'gotable');
-               
-              
-                
+                 
     var thead = table.append('thead');
     var tbody = table.append('tbody');
     var tfoot = table.append('tfoot');
@@ -223,9 +223,10 @@ var updateEnrichmentTable = function() {
          
             selected_nodes = d3.select('#graph').selectAll('rect').filter(function (d,i ) {return sel[d.id]});
             updateNodeStatus(selected_nodes, true, true);
-           
-            
-       
+            if (d3.selectAll('rect.selected')[0].length > 1 ) {
+                  $('#scatterplot').prop('disabled', false);
+            }
+
     });
 
     var td = tr.selectAll('td')
@@ -295,14 +296,10 @@ var clickOnNode = function(d) {
 
       if (d3.selectAll('rect.selected')[0].length > 1 ) {
           $('#scatterplot').prop('disabled', false);
-          $('#mdsplot').prop('disabled', false);
-
       }
      
       d3.select(this).classed('selected') ?  getContent(d) : hideMore(); 
-      
-      
-      
+
     }
     
 var clickOnLink = function(d) {
@@ -581,18 +578,20 @@ $('button#clear_selection').on('click', function(event) {
 
 
 $('button#copy_selection').on('click', function(event) { 
-    var ids = [];
-    d3.select('#graph').selectAll('rect.selected').each(function(d) { ids.push(d.id);  });
-    $('#info-modal .alert-modal-body').html(ids.join(' '));
+    var names = [];
+    d3.select('#graph').selectAll('rect.selected').each(function(d) { console.debug(d); names.push(d.name);  });
+    $('#info-modal .alert-modal-body').html(names.join(' '));
     $('#info-modal .alert-modal-title').html('Copy to clipboard');
     $('#info-modal').show();
  
 });
+
+
 $('#info-modal .close').on('click', function(event) { $('#info-modal').hide();});
 
 var showName = false;
-$('button#show_labels').on("click", function(event){
-   
+$('button#switch_labels').on("click", function(event){
+    
     showName = !showName; 
     d3.select('#graph').selectAll('text').each(function(d) {showName ? d3.select(this).text(d.title) :d3.select(this).text(d.name) ;});
    
@@ -605,6 +604,13 @@ $('button#show_labels').on("click", function(event){
     
   });
 
+$('button#toggle_labels').on("click", function(event){
+   
+    $('.node > rect, .node > text').toggle();
+
+    return false;
+    
+  });
 
 
 $('button#scatterplot').on('click', function(event) {
@@ -624,21 +630,7 @@ $('button#scatterplot').on('click', function(event) {
 });
 
 
-$('button#mdsplot').on('click', function(event) {
-  var ids = [];
-  d3.selectAll('tr.selected').classed('selected', false);
-  d3.select('#graph').selectAll('rect.selected').each(function(d) {
-    ids.push(d.id);
-  });
-  if (ids.length > 1) {
-    var url = "${request.route_url('mistic.template.mds', dataset=dataset, genes=[])}";
-    for (var i = 0; i < ids.length; ++i) {
-      url += '/' + ids[i];
-    }
-    window.open(url);
-  }
-  return false;
-});
+
 
 
 $(document).keyup(function(e) {

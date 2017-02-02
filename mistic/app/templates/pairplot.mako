@@ -190,6 +190,8 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/ZeroClipboard.min.js')}" type="text/javascript"></script>
 
 <script type="text/javascript">
+
+
 $(document).ready(function() {
   var clip = new ZeroClipboard($("#copy-to-clipboard"), {
     moviePath: "${request.static_url('mistic:app/static/swf/ZeroClipboard.swf')}"
@@ -402,7 +404,6 @@ $(document).ready(function() {
        });
         
         
-        
         updateInfo();
       },
       error: function() {
@@ -412,6 +413,7 @@ $(document).ready(function() {
   };
 
   var addGene = function(gene_id, gene_symbol, sync) {
+   
    
     $.ajax({
       url: "${request.route_url('mistic.json.gene.expr', dataset='_dataset_', gene_id='_gene_id_')}".replace('_dataset_', current_datasets[0]).replace('_gene_id_', gene_id),
@@ -428,9 +430,12 @@ $(document).ready(function() {
             $('.alert-modal-body').html(row.length + ' entries found for ' + data.gene);
             $('.alert-modal').modal('toggle');
         }
+
        _.each(row, function(e,i) {
-            
+              
                dat = data.data[i];
+                
+               
                obj = {data:dat, 
                        row:e, 
                        symbol: (row.length > 1 ? data.symbol+'_'+i  : data.symbol),
@@ -443,15 +448,18 @@ $(document).ready(function() {
                 current_graph.addData(obj);       
                 
                  var label = $('<span>')
-          .addClass('badge')
-          .css({ 'margin': '0px 5px' })
-          .attr({ 'data-idx': current_graph.data.length - 1 })
-          .html(gene_symbol ? gene_symbol : gene_id);
+                      .addClass('badge')
+                      .css({ 'margin': '0px 5px' })
+                      .attr({ 'data-idx': current_graph.data.length - 1 })
+                      .html(obj.symbol ? obj.symbol : gene_id);
+        
         label.append($('<i>')
           .addClass('icon-white icon-remove-sign')
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
         $('#genelist').append(label);       
-            });
+        
+
+        });
             
        
 
@@ -725,7 +733,7 @@ $(document).ready(function() {
  sample_menu = sample_menu + "Or you can select samples from the plot and save them with the + sign.";
  sample_menu = sample_menu + "The +, - and trash signs allow you to manage your groups.  The small grey arrows allow you to set the order in which they are displayed";
  sample_menu = sample_menu + "<br> Clicking on the square on the left opens a dialog box where you can customize the aspect of the points."
- sample_menu = sample_menu + "<br> Moreover, you can highlights patients by selecting a clinical characteristic."
+ sample_menu = sample_menu + "<br> Moreover, you can highlights patients by selecting a clinical characteristic from the dropdown list."
 
  var helpDoc = {'#dataset_menu' : 'Click on the button "Choose dataset" to select the dataset to work with' ,
                 '#sample_enrichment_panel' : 'This panel presents the result of the enrichment test for the selected group of points',
