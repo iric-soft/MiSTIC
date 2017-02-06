@@ -133,18 +133,18 @@ ${parent.pagetail()}
     ) for n in nodes ]
   except :   ## for debuging
 
-    E = [{"source":4,"target":0,"weight":0.252386},
-         {"source":2,"target":1,"weight":0.419053},
-         {"source":3,"target":0,"weight":0.425734},
-         {"source":4,"target":1,"weight":0.443259}]
+    #E = [{"source":4,"target":0,"weight":0.252386},
+    #     {"source":2,"target":1,"weight":0.419053},
+    #     {"source":3,"target":0,"weight":0.425734},
+    #     {"source":4,"target":1,"weight":0.443259}]
 
-    V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
-         {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
-         {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
-         {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
+    #V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
+    #     {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
+    #     {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
+    #     {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
 
-    #E = []
-    #V = []
+    E = []
+    V = []
 
 %>
 
@@ -579,7 +579,8 @@ $('button#clear_selection').on('click', function(event) {
 
 $('button#copy_selection').on('click', function(event) { 
     var names = [];
-    d3.select('#graph').selectAll('rect.selected').each(function(d) { console.debug(d); names.push(d.name);  });
+    d3.select('#graph').selectAll('rect.selected').each(function(d) {names.push(d.name);  });
+    names = names.sort();
     $('#info-modal .alert-modal-body').html(names.join(' '));
     $('#info-modal .alert-modal-title').html('Copy to clipboard');
     $('#info-modal').show();
