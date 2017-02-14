@@ -231,16 +231,15 @@ def main(global_config, **settings):
     config.add_route('mistic.json.attr.set',               '/attr')
     config.add_route('mistic.json.attr.get',               '/attr/{id}')
 
-    config.add_route('mistic.json.dataset.fav.record',     'record_favorite_dataset')
     config.add_route('mistic.json.dataset.fav.get',        'get_favorite_dataset')
        
     config.add_route('mistic.json.saveValueInSession',     '/saveInSession')
 
+    config.add_route('mistic.template.help',               '/help')
     config.add_route('mistic.template.corrgraph',          '/genecorr/{dataset}')
     config.add_route('mistic.template.scatterplot',        '/scatterplot') 
     config.add_route('mistic.template.pairplot',           '/pairplot/{dataset}*genes')
-    config.add_route('mistic.template.mds',                '/mds/{dataset}*genes')
-
+   
     config.add_route('mistic.csv.root',                    '/csv/root')
     config.add_route('mistic.pdf.fromsvg',                 '/pdf')
     config.add_route('mistic.csv.corr',                    '/csv/genecorr/{dataset}/{gene}')
@@ -252,6 +251,7 @@ def main(global_config, **settings):
 
     config.add_static_view('static', 'mistic:app/static', cache_max_age=3600)
     config.add_static_view('images', 'mistic:resources/images', cache_max_age=3600)
+    config.add_static_view('video', 'mistic:resources/video', cache_max_age=3600)
 
 
     config.scan()

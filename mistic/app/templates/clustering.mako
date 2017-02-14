@@ -274,9 +274,10 @@ $(document).ready(function() {
 
   
   $("#lk_pairplot").attr('href', "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}");
-  $('#lk_mds').attr('href', "${request.route_url('mistic.template.mds', dataset=dataset, genes=[])}");
+  
   $('#lk_corrgraph').attr('href', "${request.route_url('mistic.template.corrgraph', dataset=dataset)}");
   
+ $('#lk_help').attr('href', "${request.route_url('mistic.template.help')}");
 
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
 

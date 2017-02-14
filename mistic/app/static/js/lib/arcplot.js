@@ -682,6 +682,7 @@
 
     arcplot.prototype.colourByClusterMatch = function(clusters, statistic, comparator, ramp, statsName) {
         this.findBestMatches(clusters, statistic, comparator);
+        
         this.body.selectAll('path.arc').selectAll('title').remove();
         this.body
             .selectAll('path.arc')

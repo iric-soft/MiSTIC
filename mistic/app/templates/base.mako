@@ -70,6 +70,13 @@ mistic = {  url: "${request.host}"};
               %endif
               <a id='lk_pairplot' href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Pairwise correlation scatterplots</a></li>
 
+               %if request.matched_route.name == 'mistic.template.help':
+                    <li class="active">
+              %else: 
+                    <li>
+              %endif
+              <a id='lk_help' href="${request.route_url('mistic.template.help')}">Help</a></li>
+
             </ul>
           </div>
           <div class="pull-right">

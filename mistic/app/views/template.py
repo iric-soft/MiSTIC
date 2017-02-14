@@ -45,6 +45,11 @@ class Graph(object):
     #args['favorite'] = favorite
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
+  @view_config(route_name="mistic.template.help")
+  def help(self):
+    args = self.args
+    return render_to_response('mistic:app/templates/help.mako', args, request = self.request)
+
   @view_config(route_name="mistic.template.corrgraph")
   def corrgraph(self):
     dataset = self.request.matchdict.get('dataset', None)
