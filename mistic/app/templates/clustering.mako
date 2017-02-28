@@ -11,8 +11,14 @@ import pickle
 </%block>
 
 
-
 <%block name="controls">
+
+<%
+
+  dataset_cmp = [d for d in data.datasets.all() if xform in d.transforms]
+
+%>
+
   <form class="form-inline">
 
   <div class="accordion" id="accordion">
@@ -30,7 +36,7 @@ import pickle
 
                <select id="dataset_cmp">
                     <option value="">Choose a dataset for comparison </option>
-            %for d in data.datasets.all():
+            %for d in dataset_cmp:
                     <option value="${d.id}">${d.name}</option>
             %endfor
             </select>
@@ -400,7 +406,7 @@ $(document).ready(function() {
         url: "${request.route_url('mistic.json.dataset.mapped_mst', dataset='_dataset_', xform=xform, tgt_annotation=my_annotation)}".replace('_dataset_', val),
         dataype: 'json',
         success: function(data) {
-
+          console.debug(data);
           $('#goterm').val('');
             var node_content = [];
           _.each(Node.fromMST(data[0], data[1]), function(root) {
