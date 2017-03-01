@@ -287,7 +287,7 @@ $(document).ready(function() {
   %>
 
   var setCurrentTransform = function(xfrm) {
-     
+    
      if (current_transform !== xfrm) {
       var avail_xfrms = dataset_info[0]['xfrm']
       if (_.contains(avail_xfrms, xfrm)) {
@@ -303,6 +303,7 @@ $(document).ready(function() {
      $('#transform-buttons button:contains("'+xfrm+'")').toggleClass('active', current_transform == xfrm);
     }
     var xform_text = current_transform;
+
     if (current_transform==='log') { xform_text = "${xf['log']}"; }
     if (current_transform==='none') { xform_text = "${xf['none']}"; }
     current_graph.updateXform(xform_text);
@@ -339,7 +340,9 @@ $(document).ready(function() {
         setCurrentTransform(data['xfrm'][0]);
         current_datasets = [dataset];
         dataset_info = [data];
-      
+
+        if (data.name=='CCLE' ){   current_graph.updateXform('log');}
+
         
         gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]));
         sample_annotation_entry.setSearchURL("${request.route_url('mistic.json.dataset.sampleinfo.search', dataset='_dataset_')}".replace('_dataset_', dataset));
