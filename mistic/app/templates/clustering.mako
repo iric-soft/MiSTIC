@@ -17,6 +17,7 @@ import pickle
 
   dataset_cmp = [d for d in data.datasets.all() if xform in d.transforms]
 
+
 %>
 
   <form class="form-inline">
@@ -218,7 +219,7 @@ $(document).ready(function() {
   names = [dict(id=n, name=a.get_symbol(n, n)) for n in nodes ]
   #print names
 
-  if xform == 'log':
+  if xform == 'log' and ds.id != 'CCLE': // quick fix. would need to be address - CCLE was logged before, not transformed by us
     xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
   else :
     xf = xform
