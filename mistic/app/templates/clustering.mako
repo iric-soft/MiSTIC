@@ -219,7 +219,7 @@ $(document).ready(function() {
   names = [dict(id=n, name=a.get_symbol(n, n)) for n in nodes ]
   #print names
 
-  if xform == 'log' and ds.id != 'CCLE': // quick fix. would need to be address - CCLE was logged before, not transformed by us
+  if xform == 'log' and ds.id != 'CCLE': 
     xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
   else :
     xf = xform
