@@ -113,7 +113,6 @@ class JSONStore(Base):
     @classmethod
     def store(cls, session, _val):
         row = session.query(JSONStore).filter(JSONStore.val == _val).scalar()
-        
         if row is None:
             row = JSONStore(val = _val)
             session.add(row)
