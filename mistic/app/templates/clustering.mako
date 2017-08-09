@@ -10,9 +10,15 @@ import pickle
   ${parent.actions()}
 </%block>
 
-
-
 <%block name="controls">
+
+<%
+
+  dataset_cmp = [d for d in data.datasets.all() if xform in d.transforms]
+
+%>
+
+
   <form class="form-inline">
 
   <div class="accordion" id="accordion">
@@ -30,7 +36,7 @@ import pickle
 
                <select id="dataset_cmp">
                     <option value="">Choose a dataset for comparison </option>
-            %for d in data.datasets.all():
+            %for d in dataset_cmp:
                     <option value="${d.id}">${d.name}</option>
             %endfor
             </select>
@@ -208,7 +214,7 @@ $(document).ready(function() {
   ds = data.datasets.get(dataset)
   my_annotation = ds.annotation.id
 
-  if xform == 'log':
+  if xform == 'log' and ds.id != 'CCLE': // quick fix. would need to be address - CCLE was logged before, not transformed by us
     xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
   else :
     xf = xform
@@ -268,7 +274,7 @@ $(document).ready(function() {
   $("#lk_pairplot").attr('href', "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}");
   $('#lk_mds').attr('href', "${request.route_url('mistic.template.mds', dataset=dataset, genes=[])}");
   $('#lk_corrgraph').attr('href', "${request.route_url('mistic.template.corrgraph', dataset=dataset)}");
-  
+  $('#lk_help').attr('href', "${request.route_url('mistic.template.help')}");
 
   gene_entry.setSearchURL("${request.route_url('mistic.json.dataset.search', dataset=dataset)}");
 
@@ -422,7 +428,7 @@ $(document).ready(function() {
 
 
   gene_entry.on('change', function(item) {
-    console.debug('here')
+   
     if (item !== null) {
 
       exit_var = current_graph.zoomTo(item.id);
