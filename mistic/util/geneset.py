@@ -113,13 +113,10 @@ def genesetOverRepresentation(identifiers, background, geneset_ids):
 
   pvals = [d['p_val'] for d in gs_tab]
   qvals = pValAdjust(pvals, method='fdr')
-  print 'c(', ','.join([str(x) for x in pvals])
-
-
+  
   for i,d in enumerate(gs_tab) : 
     d['q_val'] = qvals[i]
-    print d['id'], d['p_val'], d['q_val']
-
+  
   gs_tab.sort(key = lambda d: d['p_val'])
   return gs_tab
 

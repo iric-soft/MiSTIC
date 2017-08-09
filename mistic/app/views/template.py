@@ -45,6 +45,12 @@ class Graph(object):
     args['favorite'] = favorite
     return render_to_response('mistic:app/templates/root.mako', args, request = self.request)
 
+  @view_config(route_name="mistic.template.help")
+  def help(self):
+    args = self.args
+    return render_to_response('mistic:app/templates/help.mako', args, request = self.request)
+
+
   @view_config(route_name="mistic.template.corrgraph")
   def corrgraph(self):
     dataset = self.request.matchdict.get('dataset', None)
@@ -56,7 +62,6 @@ class Graph(object):
   def scatterplot(self):
     args = self.args
     return render_to_response('mistic:app/templates/scatterplot.mako', args, request = self.request)
-
 
 
   @view_config(route_name="mistic.template.pairplot")
@@ -175,7 +180,6 @@ class Graph(object):
     if len(mst) < 3 : 
       args = dict( dataset = self.request.matchdict['dataset'], xform = self.request.matchdict['xform'])
       args.update(self.args)
-      print args
       return render_to_response('mistic:app/templates/mstplot_small.mako', args, request = self.request)
 
     args = dict(

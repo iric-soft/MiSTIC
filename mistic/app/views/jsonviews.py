@@ -647,7 +647,6 @@ class DatasetGene(Dataset):
             else:
                 desc = t.desc
             out.append((prob, u, g, desc))
-            #print out[-1]
         out.sort()
         return out
 

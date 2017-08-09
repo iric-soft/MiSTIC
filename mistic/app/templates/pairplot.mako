@@ -446,7 +446,7 @@ $(document).ready(function() {
           .addClass('badge')
           .css({ 'margin': '0px 5px' })
           .attr({ 'data-idx': current_graph.data.length - 1 })
-          .html(gene_symbol ? gene_symbol : gene_id);
+          .html(obj.symbol ? obj.symbol : gene_id);
         label.append($('<i>')
           .addClass('icon-white icon-remove-sign')
           .css({ 'cursor': 'pointer', 'margin-right': -8, 'margin-left': 4 }));
@@ -725,7 +725,7 @@ $(document).ready(function() {
  sample_menu = sample_menu + "Or you can select samples from the plot and save them with the + sign.";
  sample_menu = sample_menu + "The +, - and trash signs allow you to manage your groups.  The small grey arrows allow you to set the order in which they are displayed";
  sample_menu = sample_menu + "<br> Clicking on the square on the left opens a dialog box where you can customize the aspect of the points."
- sample_menu = sample_menu + "<br> Moreover, you can highlights patients by selecting a clinical characteristic."
+ sample_menu = sample_menu + "<br> Moreover, you can highlights patients by selecting a clinical characteristic from the dropdown list."
 
  var helpDoc = {'#dataset_menu' : 'Click on the button "Choose dataset" to select the dataset to work with' ,
                 '#sample_enrichment_panel' : 'This panel presents the result of the enrichment test for the selected group of points',

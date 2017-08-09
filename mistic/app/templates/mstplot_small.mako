@@ -36,8 +36,8 @@ import scipy.stats
                     
 
                       <div class='btn-group' id ='goto_btns'>
-                       <button class="btn btn-default " id="scatterplot" title='Display selected nodes as pairplots' disabled>See as Pairplot</button>
-                       <button class="btn btn-default " id="mdsplot" title='Go to MDS plots' disabled >Go to MDS plot</button>
+                       <button class="btn btn-default " id="scatterplot" title='Plot selected nodes in scatterplot' disabled>Go to Scatterplot</button>
+                       <button class="btn btn-default " id="mdsplot" title='Use selected nodes for MDS plot' disabled >Go to MDS plot</button>
                    </div>
 
                  </div>
@@ -47,7 +47,9 @@ import scipy.stats
                    <a id='options'><i class="icon-info-sign"></i></a></center>
             
                     <div class='btn-group' id ='toggle_btns'>
-                       <button class="btn btn-default " id="show_labels" title='Click on the button to see identifier or description'>Toggle labels</button>
+                       <button class="btn btn-default " id="switch_labels" title='Click on the button to see identifier or description'>Change labels</button>
+                       <button class="btn btn-default " id="toggle_labels" title='Click on the button to hide the labels'>Toggle labels</button>
+                       
                      </div>
 
 
@@ -117,9 +119,8 @@ ${parent.pagetail()}
 <script src="${request.static_url('mistic:app/static/js/lib/mstplot.js')}" type="text/javascript"></script>
 
 <%
-  print data.datasets
+  
   ds = data.datasets.get(dataset)
-
   a = ds.annotation
   
   try : 
@@ -131,15 +132,18 @@ ${parent.pagetail()}
     ) for n in nodes ]
   except :   ## for debug
 
-    E = [{"source":4,"target":0,"weight":0.252386},
-         {"source":2,"target":1,"weight":0.419053},
-         {"source":3,"target":0,"weight":0.425734},
-         {"source":4,"target":1,"weight":0.443259}]
+    #E = [{"source":4,"target":0,"weight":0.252386},
+    #     {"source":2,"target":1,"weight":0.419053},
+    #     {"source":3,"target":0,"weight":0.425734},
+    #     {"source":4,"target":1,"weight":0.443259}]
 
-    V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
-         {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
-         {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
-         {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
+    #V = [{"title":"ANKRD62P1-PARP4P3 readthrough, transcribed pseudogene","id":"ANKRD62P1-PARP4P3","name":"ANKRD62P1-PARP4P3"},
+    #     {"title":"purine-rich element binding protein G","id":"PURG","name":"PURG"},{"title":"testis expressed 15","id":"TEX15","name":"TEX15"},
+    #     {"title":"transmembrane phosphatase with tensin homology","id":"TPTE","name":"TPTE"},
+    #     {"title":"transmembrane phosphatase with tensin homology pseudogene 1","id":"TPTEP1","name":"TPTEP1"}]
+
+    E = []
+    V = []
 
 %>
 
@@ -220,7 +224,9 @@ var updateEnrichmentTable = function() {
          
             selected_nodes = d3.select('#graph').selectAll('rect').filter(function (d,i ) {return sel[d.id]});
             updateNodeStatus(selected_nodes, true, true);
-           
+            if (d3.selectAll('rect.selected')[0].length > 1 ) {
+                  $('#scatterplot').prop('disabled', false);
+            }
             
        
     });
@@ -274,7 +280,8 @@ var updateEnrichmentTable = function() {
     
    
    
-var width =($(document).width()-60)/12*7; //was width:1024
+//var width =($(document).width()-60)/12*7; //was width:1024
+var width =($(document).width())/2; //was width:1024
 var height =($(document).height()-($(document).height()/5));  //was width:780
 
 var svg = d3.select("#graph").append("svg")
@@ -578,9 +585,11 @@ $('button#clear_selection').on('click', function(event) {
 
 
 $('button#copy_selection').on('click', function(event) { 
-    var ids = [];
-    d3.select('#graph').selectAll('rect.selected').each(function(d) { ids.push(d.id);  });
-    $('#info-modal .alert-modal-body').html(ids.join(' '));
+    // displaying gene symbols instead of gene ids
+    // to display ids, d.id instead of d.name
+    var tags = [];
+    d3.select('#graph').selectAll('rect.selected').each(function(d) { tags.push(d.name);  });
+    $('#info-modal .alert-modal-body').html(tags.join(' '));
     $('#info-modal .alert-modal-title').html('Copy to clipboard');
     $('#info-modal').show();
  
@@ -588,7 +597,7 @@ $('button#copy_selection').on('click', function(event) {
 $('#info-modal .close').on('click', function(event) { $('#info-modal').hide();});
 
 var showName = false;
-$('button#show_labels').on("click", function(event){
+$('button#switch_labels').on("click", function(event){
    
     showName = !showName; 
     d3.select('#graph').selectAll('text').each(function(d) {showName ? d3.select(this).text(d.title) :d3.select(this).text(d.name) ;});
@@ -602,7 +611,11 @@ $('button#show_labels').on("click", function(event){
     
   });
 
-
+$('button#toggle_labels').on("click", function(event){
+    $('.node > rect, .node > text').toggle();
+    return false;
+    
+  });
 
 $('button#scatterplot').on('click', function(event) {
   var ids = [];

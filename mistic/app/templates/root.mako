@@ -36,7 +36,7 @@ for ds in data.datasets.all():
 <div style="text-align: center">
 <div class="well" style="display: inline-block;">
 <h2>Datasets</h2>
-<h6>Click on a row to select the default log-transformed dataset or click on the desired data transformation</h6>
+<h5>Click on a row to select the default log-transformed dataset or click on the desired data transformation</h5>
 <hr>
 
 
@@ -48,7 +48,7 @@ for ds in data.datasets.all():
     
     <th><span class='btn-group'>
     %if term!='other':
-        <a class="link-icon group-data"><i  class='icon-align-justify icon-mistic' ></i></a>
+        <a class="link-icon group-data"  title='Click on this icon to group the data by value'><i  class='icon-align-justify icon-mistic' ></i></a>
     %endif    
     ${term}</span></th>
   <!--<th><span><a class="unicode-icon group-data">&#x2630</a>${term}</span></th>-->
@@ -213,7 +213,7 @@ $('#datasets-table tbody td ').on('click', function(event){
     var tr = $(this).parents('tr');
     var link = $(tr).find('span > a')[0];
     var id = $(tr)[0].id;
-    console.debug(id);
+    console.log(id);
     $.ajax({
       url: "${request.route_url('mistic.json.dataset.fav.record')}",
       dataType: 'json',
@@ -223,7 +223,7 @@ $('#datasets-table tbody td ').on('click', function(event){
         console.log('failed to construct a URL');
       },
       success: function(data) {
-       console.debug(data);
+       console.log(data);
       }});
 
     if ($(this).find('a#icicle-link').length>=1) return;
