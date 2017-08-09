@@ -473,6 +473,7 @@ $(document).ready(function() {
       .select('#sample_enrichment')
       .insert('table', ':first-child');
 
+    table.attr('id', 'smp_table');
     var thead = table.append('thead');
     var tbody = table.append('tbody');
 
@@ -482,7 +483,7 @@ $(document).ready(function() {
       .append("tr")
 
     var th = thr.selectAll('th')
-      .data([ 'P-val', 'Q-val', 'Odds', 'Selected', 'Key:Value' ])
+      .data([ 'Key:Value', 'P-val', 'Q-val', 'Odds', 'Selected' ])
       .enter()
       .append('th')
       .text(function(d) { return d; });
@@ -497,12 +498,12 @@ $(document).ready(function() {
       .data(function(d) { 
        var title = '\t\tIn Selection |  Not in Selection\nIn Category\t\t'+ d.tab[0][0]+' | '+d.tab[1][0]+'\nNot in Category\t'+d.tab[0][1]+' | '+d.tab[1][1];
        return [
+        { value: d.key +' : '+d.val, title:title },
         { value: d.p_val.toExponential(1), title:title },
         { value: d.q_val.toExponential(1), title:title },
         { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) , title:title },
         { value: d.tab[0][0]+'/'+ (parseInt(d.tab[1][0])+ parseInt(d.tab[0][0])), title:title},
-        { value: d.key +' : '+d.val, title:title },
-       
+        
       ];})
       ;
 
@@ -512,6 +513,7 @@ $(document).ready(function() {
       .attr('title',   function(d) {return d.title; })
       .attr('classed', function(d) {return d.class; });
 
+
     $('#sample_enrichment table')
       .dataTable({
         "aoColumnDefs": [
@@ -519,7 +521,7 @@ $(document).ready(function() {
           { "sType": "numeric", "aTargets": [ 1 ]}
         ],
         "bPaginate" : false,
-        "iDisplayLength": 10,
+        "iDisplayLength": 15,
         "sPaginationType": "full_numbers",
         "bLengthChange": false,
         "bFilter": false,
@@ -527,10 +529,9 @@ $(document).ready(function() {
         "bInfo": false,
         "sDom": '<toolbar>T<"clear">frtip' ,
         "oTableTools": defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_sample_enrichment'),
-       
-       
-      
     });
+      $('#smp_table').addClass('table-striped');
+
   }
 
   var _selection = { active: false, pending: undefined };

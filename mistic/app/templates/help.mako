@@ -14,13 +14,13 @@
       <h3>This short video will give you an idea of how you can use MiSTIC </h3>
 
 
-      <video width="960" height="720" controls>
+     <!-- <video width="960" height="720" controls>
            <source src="${request.static_url('mistic:resources/video/MiSTIC.20170207.mp4')}" type="video/mp4">
             Your browser does not support the video tag.
-      </video>
+      </video>-->
 
 
-      <iframe width="480" height="320" src='https://www.youtube.com/embed/FjtzdKNpJ7I'></iframe>
+      <iframe width="800" height="600" src='https://www.youtube.com/embed/FjtzdKNpJ7I'></iframe>
 
 
           </div>

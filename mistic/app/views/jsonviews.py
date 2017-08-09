@@ -368,7 +368,6 @@ class Dataset(object):
     @view_config(route_name="mistic.json.dataset.samples.enrich", request_method="POST", renderer="json")
     def sample_enrichment(self):
 
-
         if not self.dataset.cannotation:
             return []
         
@@ -401,7 +400,7 @@ class Dataset(object):
                     continue
                 if math.isnan(odds) or math.isinf(odds): odds = str(odds)
                 out.append(dict(
-                    key = col,
+                    key = col.replace('.', ' '),
                     val = val,
                     p_val = p_val,
                     odds = odds,

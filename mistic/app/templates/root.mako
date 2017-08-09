@@ -145,7 +145,8 @@ function initTable() {
   
   
   exportedCol = _.range(n-1);
-  return $('#datasets-table').dataTable({
+  
+  return $('#datasets-table').DataTable({
     "aoColumns": aoc,
     "bSearch": bsc,
     "bPaginate": false, 
@@ -153,9 +154,12 @@ function initTable() {
     "bProcessing": false,
     "bRetrieve":true,
     "aaSorting": [[n, 'desc']],
-    "sDom": '<toolbar>T<"clear">Rfrtip' ,
-    "oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
+    "sDom": '<toolbar>T<"clear">Rfrtip' , 
+    "oTableTools": { "aButtons": ["csv" ] }
+    //"oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
   });
+ 
+  
 }
 
 $('#datasets-table th a ').on('click', function(event) { 

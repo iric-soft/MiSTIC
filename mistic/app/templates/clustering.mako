@@ -14,7 +14,8 @@ import pickle
 
 <%
 
-  dataset_cmp = [d for d in data.datasets.all() if xform in d.transforms]
+dataset_cmp = [d for d in data.datasets.all() if xform in d.transforms and d.id!=dataset]
+
 
 %>
 
@@ -211,13 +212,13 @@ ${parent.pagetail()}
 
 $(document).ready(function() {
 <%
-  ds = data.datasets.get(dataset)
-  my_annotation = ds.annotation.id
+ds = data.datasets.get(dataset)
+my_annotation = ds.annotation.id
 
-  if xform == 'log' and ds.id != 'CCLE': // quick fix. would need to be address - CCLE was logged before, not transformed by us
-    xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
-  else :
-    xf = xform
+if xform == 'log' and ds.id != 'CCLE': #quick fix. would need to be address - CCLE was logged before, not transformed by us
+  xf = 'log%(base)s(%(scale)s * RPKM + %(biais)s)' % dict(zip(['scale','biais','base'],ds._makeTransform(xform).params))
+else :
+  xf = xform
 %>
 
 

@@ -255,7 +255,7 @@ var updateEnrichmentTable = function() {
                                                ],
                          
                           "bPaginate" : true,
-                          "iDisplayLength": 10,
+                          "iDisplayLength": 6,
                           "sPaginationType": "full_numbers",
                           "bLengthChange": false,
                           "bFilter": true,

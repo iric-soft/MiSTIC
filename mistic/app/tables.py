@@ -113,15 +113,15 @@ class JSONStore(Base):
     @classmethod
     def store(cls, session, _val):
         row = session.query(JSONStore).filter(JSONStore.val == _val).scalar()
-        client_id = None	
+        client_id = None
         if row is None:
             row = JSONStore(val = _val)
             session.add(row)
             row = session.merge(row)
-	       client_id = row.client_id
-	       transaction.commit()
+            client_id = row.client_id
+            transaction.commit()
         else:
-	       client_id = row.client_id
+            client_id = row.client_id
         return client_id
 
     @classmethod

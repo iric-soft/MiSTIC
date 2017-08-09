@@ -72,19 +72,19 @@ mistic = {  url: "${request.host}"};
               %endif
               <a id='lk_pairplot' href="${request.route_url('mistic.template.pairplot', dataset=None, genes=[])}">Pairwise correlation scatterplots</a></li>
 
+              %if request.matched_route.name == 'mistic.template.mds':
+                  <li class="active"><a href="#">Multidimensional scaling plots</a></li>
+              %else:
+                  <li><a id='lk_mds' href="${request.route_url('mistic.template.mds', dataset=None, genes=[])}">Multidimensional scaling plots</a></li>
+              %endif
+
+
               %if request.matched_route.name == 'mistic.template.help':
                     <li class="active">
               %else: 
                     <li>
               %endif
               <a id='lk_help' href="${request.route_url('mistic.template.help')}">Help</a></li>
-
-        
-              %if request.matched_route.name == 'mistic.template.mds':
-                  <li class="active"><a href="#">Multidimensional scaling plots</a></li>
-              %else:
-                  <li><a id='lk_mds' href="${request.route_url('mistic.template.mds', dataset=None, genes=[])}">Multidimensional scaling plots</a></li>
-              %endif
 
 
 
@@ -143,21 +143,30 @@ mistic = {  url: "${request.host}"};
     <script src="${request.static_url('mistic:app/static/js/lib/jquery.min.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/underscore-min.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/backbone-min.js')}" type="text/javascript"></script>
+
+    <!- Bootstrap --> 
     <script src="${request.static_url('mistic:app/static/js/lib/bootstrap.min.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/bootstrap-select.min.js')}" type="text/javascript"></script>
-
     <script src="${request.static_url('mistic:app/static/js/lib/bootstrap-modal.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/bootstrap-modalmanager.js')}" type="text/javascript"></script> 
 
+
+    <!- D3 v2 --> 
     <script src="${request.static_url('mistic:app/static/js/lib/d3.v2.min.js')}" type="text/javascript"></script>
+
+    <!- Datatable 1.9.4--> 
+    
     <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.min.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.colReorderWithResize.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.rowGrouping.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.scientific-sorting.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.columnFilter.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/jquery.dataTables.TableTools.min.js')}" type="text/javascript"></script>
-    <script src="${request.static_url('mistic:app/static/js/lib/spectrum.js')}" type="text/javascript"></script>
+    
 
+
+    <!- Others --> 
+    <script src="${request.static_url('mistic:app/static/js/lib/spectrum.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/colour.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/math.js')}" type="text/javascript"></script>
     <script src="${request.static_url('mistic:app/static/js/lib/fisher.js')}" type="text/javascript"></script>
