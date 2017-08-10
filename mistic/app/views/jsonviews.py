@@ -400,7 +400,7 @@ class Dataset(object):
                     continue
                 if math.isnan(odds) or math.isinf(odds): odds = str(odds)
                 out.append(dict(
-                    key = col.replace('.', ' '),
+                    key = col.replace('mutation.mutation', 'mutation').replace('.', ' '),
                     val = val,
                     p_val = p_val,
                     odds = odds,

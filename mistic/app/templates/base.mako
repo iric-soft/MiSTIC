@@ -123,11 +123,12 @@ mistic = {  url: "${request.host}"};
             <div class="span9">
               <div id="graph">
               </div>
+              <div id ="more-information"></div>
             </div>
         
         
             <div class="row-fluid">
-              <div class="span12" id ="more-information"></div>
+              <div class="span12" id ="even_more-information"></div>
             </div>
           </%block>
         </div>  

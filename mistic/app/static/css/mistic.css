@@ -196,11 +196,10 @@ table#gotable td {
   
 }
 
-
-
 div#sample_enrichment {
   font-size: 80%;
-  max-height: 200px;
+  max-height: 400px;
+  min-height: 200px;
   overflow-y: auto;
 }
 div#sample_enrichment > table{

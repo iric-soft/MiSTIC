@@ -132,7 +132,7 @@ import json
          </h4>
        </div>
 
-       <div id="sample_enrichment_panel" class="accordion-body collapse">
+       <div id="sample_enrichment_panel" class="accordion-body collapse" >
          <div class="accordion-inner">
            <div id="sample_enrichment"></div>
          </div>
@@ -345,6 +345,12 @@ $(document).ready(function() {
         $("#sample_annotation_drop").attr('disabled', false);
         $("#gene").attr('disabled', false);
         $("input").attr('disabled', false);
+
+
+        $("#lk_pairplot").attr('href', "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}".replace('_dataset_', current_datasets[0]));
+        $('#lk_mds').attr('href', "${request.route_url('mistic.template.mds', dataset='_dataset_', genes=[])}".replace('_dataset_', current_datasets[0]));
+        $('#lk_corrgraph').attr('href', "${request.route_url('mistic.template.corrgraph', dataset='_dataset_')}".replace('_dataset_', current_datasets[0]));
+
         
       },
       error: function() {
@@ -483,7 +489,7 @@ $(document).ready(function() {
       .append("tr")
 
     var th = thr.selectAll('th')
-      .data([ 'Key:Value', 'P-val', 'Q-val', 'Odds', 'Selected' ])
+      .data([ 'Key','Value', 'P-val', 'Q-val', 'Odds', 'Selected' ])
       .enter()
       .append('th')
       .text(function(d) { return d; });
@@ -496,9 +502,11 @@ $(document).ready(function() {
 
     var td = tr.selectAll('td')
       .data(function(d) { 
-       var title = '\t\tIn Selection |  Not in Selection\nIn Category\t\t'+ d.tab[0][0]+' | '+d.tab[1][0]+'\nNot in Category\t'+d.tab[0][1]+' | '+d.tab[1][1];
+       var title = '>                In Selection |  Not in Selection\nIn Category              '+ d.tab[0][0]+' | '+d.tab[1][0]+'\nNot in Category      '+d.tab[0][1]+' | '+d.tab[1][1];
        return [
-        { value: d.key +' : '+d.val, title:title },
+        //{ value: d.key +' : '+d.val, title:title },
+        { value: d.key, title:title },
+        { value: d.val, title:title },
         { value: d.p_val.toExponential(1), title:title },
         { value: d.q_val.toExponential(1), title:title },
         { value: typeof(d.odds) === "string" ? d.odds : d.odds.toFixed(1) , title:title },
@@ -641,6 +649,7 @@ $(document).ready(function() {
     _.each(selection, info.add);
     selectionSearch(selection);
     $('#sample_enrichment_panel').collapse('show');
+    $('#more-information').prepend('Sample selection : ');
   });
 
   resizeGraph = function() {
@@ -748,5 +757,7 @@ $('#info-modal .close').on('click', function(event) { $('#info-modal').hide();})
 // --------------------
 
 });
+
+
 </script>
 </%block>

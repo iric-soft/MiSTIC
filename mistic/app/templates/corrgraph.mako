@@ -255,6 +255,11 @@ $(document).ready(function() {
           xf.append(btn);
         });
         enable(data);
+
+        $("#lk_pairplot").attr('href', "${request.route_url('mistic.template.pairplot', dataset='_dataset_', genes=[])}".replace('_dataset_', current_dataset));
+        $('#lk_mds').attr('href', "${request.route_url('mistic.template.mds', dataset='_dataset_', genes=[])}".replace('_dataset_', current_dataset));
+        $('#lk_corrgraph').attr('href', "${request.route_url('mistic.template.corrgraph', dataset='_dataset_')}".replace('_dataset_', current_dataset));
+
       },
 
       error: disable,
@@ -346,6 +351,10 @@ $('#info-modal .close').on('click', function(event) { $('#info-modal').hide();})
 });
 
 
+$("#lk_pairplot").attr('href', "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}");
+$('#lk_mds').attr('href', "${request.route_url('mistic.template.mds', dataset=dataset, genes=[])}");
+$('#lk_corrgraph').attr('href', "${request.route_url('mistic.template.corrgraph', dataset=dataset)}");
+$('#lk_help').attr('href', "${request.route_url('mistic.template.help')}");
 
 
 </script>

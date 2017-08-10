@@ -155,8 +155,8 @@ function initTable() {
     "bRetrieve":true,
     "aaSorting": [[n, 'desc']],
     "sDom": '<toolbar>T<"clear">Rfrtip' , 
-    "oTableTools": { "aButtons": ["csv" ] }
-    //"oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
+    //"oTableTools": { "aButtons": ["csv" ] }
+    "oTableTools":defineStandardTableTools ("${request.static_url('mistic:app/static/swf/copy_csv_xls.swf')}", 'mistic_datasets', exportedCol) 
   });
  
   

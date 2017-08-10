@@ -590,7 +590,7 @@ $('button#copy_selection').on('click', function(event) {
     var tags = [];
     d3.select('#graph').selectAll('rect.selected').each(function(d) { tags.push(d.name);  });
     $('#info-modal .alert-modal-body').html(tags.join(' '));
-    $('#info-modal .alert-modal-title').html('Copy to clipboard');
+    $('#info-modal .alert-modal-title').html('Copy selection');
     $('#info-modal').show();
  
 });
@@ -703,7 +703,10 @@ $(document).ready(function() {
 
 
 
-
+  $("#lk_pairplot").attr('href', "${request.route_url('mistic.template.pairplot', dataset=dataset, genes=[])}");
+  $('#lk_mds').attr('href', "${request.route_url('mistic.template.mds', dataset=dataset, genes=[])}");
+  $('#lk_corrgraph').attr('href', "${request.route_url('mistic.template.corrgraph', dataset=dataset)}");
+  $('#lk_help').attr('href', "${request.route_url('mistic.template.help')}");
 
 
 
