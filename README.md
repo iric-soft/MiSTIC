@@ -83,15 +83,13 @@ http://www.boost.org/users/download/
 -------------------------------------
 ### a. MiSTIC application
 
-Download mistic source tar.gz [here](leucegene.iric.ca/MiSTIC-dist/mistic-1.0.tar.gz) and data [here](http://leucegene.iric.ca/MiSTIC-dist/data-1.0.tar.gz)
-```
-wget http://leucegene.iric.ca/MiSTIC-dist/mistic-1.0.tar.gz  # to download the source code
-tar -xzvf mistic-1.0.tar.gz 
-cd mistic-1.0
+Clone this master branch (development) or the freeze-paper branch to get the code.
+Data can be found in the freeze-paper branch.
 
-wget http://leucegene.iric.ca/MiSTIC-dist/data-1.0.tar.gz  # to download the data
-tar -xzvf data-1.0.tar.gz 
 ```
+git clone https://github.com/iric-soft/MiSTIC.git
+```
+
 
 In the mistic directory with the virtual environment activated, do
 
