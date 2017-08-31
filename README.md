@@ -83,11 +83,11 @@ http://www.boost.org/users/download/
 -------------------------------------
 ### a. MiSTIC application
 
-Clone this master branch (development) or the freeze-paper branch to get the code.
-Data can be found in the freeze-paper branch.
+Clone this master branch (development) or the freeze-paper-2017 branch to get the code.
+Data can be found in the freeze-paper-2017 branch.
 
 ```
-git clone https://github.com/iric-soft/MiSTIC.git
+git clone -b freeze-paper-2017 https://github.com/iric-soft/MiSTIC.git
 ```
 
 
