@@ -9,3 +9,4 @@ SQLAlchemy==0.8.3
 zope.sqlalchemy==0.7.3
 pyramid-tm==0.7
 lxml==3.2.5
+transaction==2.1.2
