@@ -1,5 +1,9 @@
 MiSTIC
 ==========
+MiSTIC, an integrated platform for the analysis of heterogeneity in large tumour transcriptome datasets.
+Lemieux S, et al.  Nucleic Acids Res. 2017,  doi: 10.1093/nar/gkx338, PMID: 28472340
+
+
 MiSTIC is built on the python framework [Pyramid] (http://www.pylonsproject.org/). 
 
 
